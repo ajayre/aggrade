@@ -30,7 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IndicatorButton));
             IndicatorPanel = new Panel();
-            button1 = new Button();
+            Btn = new Button();
             SuspendLayout();
             // 
             // IndicatorPanel
@@ -42,21 +42,21 @@
             IndicatorPanel.Size = new Size(60, 10);
             IndicatorPanel.TabIndex = 0;
             // 
-            // button1
+            // Btn
             // 
-            button1.Dock = DockStyle.Fill;
-            button1.Image = (Image)resources.GetObject("button1.Image");
-            button1.Location = new Point(0, 0);
-            button1.Name = "button1";
-            button1.Size = new Size(60, 50);
-            button1.TabIndex = 1;
-            button1.UseVisualStyleBackColor = true;
+            Btn.Dock = DockStyle.Fill;
+            Btn.Image = (Image)resources.GetObject("Btn.Image");
+            Btn.Location = new Point(0, 0);
+            Btn.Name = "Btn";
+            Btn.Size = new Size(60, 50);
+            Btn.TabIndex = 1;
+            Btn.UseVisualStyleBackColor = true;
             // 
             // IndicatorButton
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(button1);
+            Controls.Add(Btn);
             Controls.Add(IndicatorPanel);
             Name = "IndicatorButton";
             Size = new Size(60, 60);
@@ -66,6 +66,6 @@
         #endregion
 
         private Panel IndicatorPanel;
-        private Button button1;
+        private Button Btn;
     }
 }

@@ -20,6 +20,19 @@ namespace AgGrade.Controls
             Off
         }
 
+        public Image? Image
+        {
+            get
+            {
+                return Btn.Image;
+            }
+
+            set
+            {
+                Btn.Image = value;
+            }
+        }
+
         public IndicatorColor Indicator
         {
             get

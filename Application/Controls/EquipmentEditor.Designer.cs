@@ -28,64 +28,78 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
-            button2 = new Button();
-            button3 = new Button();
+            VehicleBtn = new Button();
+            FrontPanBtn = new Button();
+            RearPanBtn = new Button();
+            ContentPanel = new Panel();
             SuspendLayout();
             // 
-            // button1
+            // VehicleBtn
             // 
-            button1.BackColor = Color.Green;
-            button1.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            button1.ForeColor = SystemColors.Control;
-            button1.Location = new Point(3, 3);
-            button1.Name = "button1";
-            button1.Size = new Size(150, 45);
-            button1.TabIndex = 0;
-            button1.Text = "VEHICLE";
-            button1.UseVisualStyleBackColor = false;
+            VehicleBtn.BackColor = Color.Green;
+            VehicleBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            VehicleBtn.ForeColor = SystemColors.Control;
+            VehicleBtn.Location = new Point(3, 3);
+            VehicleBtn.Name = "VehicleBtn";
+            VehicleBtn.Size = new Size(150, 45);
+            VehicleBtn.TabIndex = 0;
+            VehicleBtn.Text = "VEHICLE";
+            VehicleBtn.UseVisualStyleBackColor = false;
+            VehicleBtn.Click += SectionBtn_Click;
             // 
-            // button2
+            // FrontPanBtn
             // 
-            button2.BackColor = Color.Green;
-            button2.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            button2.ForeColor = SystemColors.Control;
-            button2.Location = new Point(159, 3);
-            button2.Name = "button2";
-            button2.Size = new Size(150, 45);
-            button2.TabIndex = 1;
-            button2.Text = "FRONT PAN";
-            button2.UseVisualStyleBackColor = false;
+            FrontPanBtn.BackColor = Color.Green;
+            FrontPanBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            FrontPanBtn.ForeColor = SystemColors.Control;
+            FrontPanBtn.Location = new Point(159, 3);
+            FrontPanBtn.Name = "FrontPanBtn";
+            FrontPanBtn.Size = new Size(150, 45);
+            FrontPanBtn.TabIndex = 1;
+            FrontPanBtn.Text = "FRONT PAN";
+            FrontPanBtn.UseVisualStyleBackColor = false;
+            FrontPanBtn.Click += SectionBtn_Click;
             // 
-            // button3
+            // RearPanBtn
             // 
-            button3.BackColor = Color.Green;
-            button3.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            button3.ForeColor = SystemColors.Control;
-            button3.Location = new Point(315, 3);
-            button3.Name = "button3";
-            button3.Size = new Size(150, 45);
-            button3.TabIndex = 2;
-            button3.Text = "REAR PAN";
-            button3.UseVisualStyleBackColor = false;
+            RearPanBtn.BackColor = Color.Green;
+            RearPanBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            RearPanBtn.ForeColor = SystemColors.Control;
+            RearPanBtn.Location = new Point(315, 3);
+            RearPanBtn.Name = "RearPanBtn";
+            RearPanBtn.Size = new Size(150, 45);
+            RearPanBtn.TabIndex = 2;
+            RearPanBtn.Text = "REAR PAN";
+            RearPanBtn.UseVisualStyleBackColor = false;
+            RearPanBtn.Click += SectionBtn_Click;
+            // 
+            // ContentPanel
+            // 
+            ContentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ContentPanel.Location = new Point(0, 54);
+            ContentPanel.Name = "ContentPanel";
+            ContentPanel.Size = new Size(794, 421);
+            ContentPanel.TabIndex = 3;
             // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(224, 224, 224);
-            Controls.Add(button3);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            Controls.Add(ContentPanel);
+            Controls.Add(RearPanBtn);
+            Controls.Add(FrontPanBtn);
+            Controls.Add(VehicleBtn);
             Name = "EquipmentEditor";
-            Size = new Size(744, 459);
+            Size = new Size(794, 475);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Button button1;
-        private Button button2;
-        private Button button3;
+        private Button VehicleBtn;
+        private Button FrontPanBtn;
+        private Button RearPanBtn;
+        private Panel ContentPanel;
     }
 }

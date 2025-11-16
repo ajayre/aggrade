@@ -1,14 +1,26 @@
-using AgGrade.Controls;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace AgGrade
 {
-    public partial class MainForm : Form
+    public partial class SplashForm : Form
     {
-        public MainForm
+        private bool FullScreen;
+
+        public SplashForm
             (
             bool FullScreen
             )
         {
+            this.FullScreen = FullScreen;
+
             InitializeComponent();
 
             if (FullScreen)
@@ -24,27 +36,12 @@ namespace AgGrade
             }
         }
 
-        /// <summary>
-        /// Called when user taps on the edit equipment button
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void EditEquipmentBtn_Click(object sender, EventArgs e)
+        private void SplashForm_Shown(object sender, EventArgs e)
         {
-            ShowEditEquipment();
         }
 
-        /// <summary>
-        /// Shows the UI for editing the equipment
-        /// </summary>
-        private void ShowEditEquipment
-            (
-            )
+        private void SplashForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            EquipmentEditor equipmentEditor = new EquipmentEditor();
-            equipmentEditor.Parent = ContentPanel;
-            equipmentEditor.Dock = DockStyle.Fill;
-            equipmentEditor.Show();
         }
     }
 }
