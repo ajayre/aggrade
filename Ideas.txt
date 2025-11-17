@@ -1,0 +1,45 @@
+1. Close button that closes the app and shuts down the tablet
+
+2. Key press that closes app
+
+3. Show keyboard button - osk.exe?
+
+4. Show status button: shows GPS/RTK/IMU values for all three items of equipment
+
+5. Survey button: shows settings panel, enter field name, start, then shows map, with button to end boundary and end survey. Allow benchmarks to be recorded
+
+6. Grading button - choose field
+
+7. Calibration button - set blade zero heights
+
+8. Settings screen:
+  - COM ports
+  - difference between true and magnetic north
+
+9. When cutting show yellow strip on map indicating cutting length and width. Support turns during cutting
+
+10. Map view options:
+
+  - toggle cuts and fills on and off
+  - existing topo and cut/fill map
+  - original topo and cut/fill map
+  - cut/fill map shows work that has been completed
+  - toggle tractor path trail on/off
+  - toggle turn guidance from current point on/off
+  - toggle edge buffer/clearance on/off
+  - toggle flashing/indication of highest areas and lowest areas on/off
+
+11. Turn guidance - at current point for tractor show how a turn could be completed to double-back on a parallel path, e.g. omega. Continually update this until edge of field reached at which point it turns red for last chance turn, then turns into a turn to travel down edge of field
+
+12. Equipment settings:
+  - tractor/pan widths
+  - turning circle
+  - enable/disable pans - disable when doing survey work without them - changes map edge buffer/clearance if a pan is wider that the tractor
+
+13. Map edge buffer/clearance - using equipment width show closest centerline to edges of field
+
+14. Blades profile/cross section screen
+  - show current height
+  - show final height
+  - show max blade cut depth
+  - show current blade depth
