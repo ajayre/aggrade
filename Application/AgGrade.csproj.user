@@ -1,13 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Compile Update="Controls\AppSettingsEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\CalibrationPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\COMPortSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\EquipmentEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Controls\IndicatorButton.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\Map.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\NumericInput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\SectionTitle.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\SurveyPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Controls\VehicleSettingsEditor.cs">

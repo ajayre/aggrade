@@ -32,6 +32,7 @@
             FrontPanBtn = new Button();
             RearPanBtn = new Button();
             ContentPanel = new Panel();
+            sectionTitle1 = new SectionTitle();
             SuspendLayout();
             // 
             // VehicleBtn
@@ -39,7 +40,7 @@
             VehicleBtn.BackColor = Color.Green;
             VehicleBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             VehicleBtn.ForeColor = SystemColors.Control;
-            VehicleBtn.Location = new Point(3, 3);
+            VehicleBtn.Location = new Point(3, 54);
             VehicleBtn.Name = "VehicleBtn";
             VehicleBtn.Size = new Size(150, 45);
             VehicleBtn.TabIndex = 0;
@@ -52,7 +53,7 @@
             FrontPanBtn.BackColor = Color.Green;
             FrontPanBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             FrontPanBtn.ForeColor = SystemColors.Control;
-            FrontPanBtn.Location = new Point(159, 3);
+            FrontPanBtn.Location = new Point(159, 54);
             FrontPanBtn.Name = "FrontPanBtn";
             FrontPanBtn.Size = new Size(150, 45);
             FrontPanBtn.TabIndex = 1;
@@ -65,7 +66,7 @@
             RearPanBtn.BackColor = Color.Green;
             RearPanBtn.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             RearPanBtn.ForeColor = SystemColors.Control;
-            RearPanBtn.Location = new Point(315, 3);
+            RearPanBtn.Location = new Point(315, 54);
             RearPanBtn.Name = "RearPanBtn";
             RearPanBtn.Size = new Size(150, 45);
             RearPanBtn.TabIndex = 2;
@@ -76,22 +77,33 @@
             // ContentPanel
             // 
             ContentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            ContentPanel.Location = new Point(0, 54);
+            ContentPanel.Location = new Point(0, 105);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(794, 421);
+            ContentPanel.Size = new Size(794, 370);
             ContentPanel.TabIndex = 3;
+            // 
+            // sectionTitle1
+            // 
+            sectionTitle1.Dock = DockStyle.Top;
+            sectionTitle1.Location = new Point(0, 0);
+            sectionTitle1.Name = "sectionTitle1";
+            sectionTitle1.Size = new Size(794, 48);
+            sectionTitle1.TabIndex = 4;
+            sectionTitle1.TitleText = "Equipment Settings";
             // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(224, 224, 224);
+            Controls.Add(sectionTitle1);
             Controls.Add(ContentPanel);
             Controls.Add(RearPanBtn);
             Controls.Add(FrontPanBtn);
             Controls.Add(VehicleBtn);
             Name = "EquipmentEditor";
             Size = new Size(794, 475);
+            Load += EquipmentEditor_Load;
             ResumeLayout(false);
         }
 
@@ -101,5 +113,6 @@
         private Button FrontPanBtn;
         private Button RearPanBtn;
         private Panel ContentPanel;
+        private SectionTitle sectionTitle1;
     }
 }

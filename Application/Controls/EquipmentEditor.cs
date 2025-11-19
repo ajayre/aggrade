@@ -103,5 +103,10 @@ namespace AgGrade.Controls
             Btn.BackColor = Color.Green;
             Btn.ForeColor = SystemColors.Control;
         }
+
+        private void EquipmentEditor_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

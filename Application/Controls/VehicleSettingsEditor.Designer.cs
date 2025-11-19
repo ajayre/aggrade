@@ -43,7 +43,7 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 14F);
-            label1.Location = new Point(79, 9);
+            label1.Location = new Point(80, 21);
             label1.Name = "label1";
             label1.Size = new Size(148, 25);
             label1.TabIndex = 0;
@@ -51,7 +51,7 @@
             // 
             // numericInput1
             // 
-            numericInput1.Location = new Point(233, 0);
+            numericInput1.Location = new Point(234, 12);
             numericInput1.Name = "numericInput1";
             numericInput1.Size = new Size(167, 43);
             numericInput1.TabIndex = 3;
@@ -60,7 +60,7 @@
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 14F);
-            label3.Location = new Point(406, 9);
+            label3.Location = new Point(407, 21);
             label3.Name = "label3";
             label3.Size = new Size(37, 25);
             label3.TabIndex = 4;
@@ -70,7 +70,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 14F);
-            label2.Location = new Point(406, 56);
+            label2.Location = new Point(407, 68);
             label2.Name = "label2";
             label2.Size = new Size(37, 25);
             label2.TabIndex = 7;
@@ -78,7 +78,7 @@
             // 
             // numericInput2
             // 
-            numericInput2.Location = new Point(233, 47);
+            numericInput2.Location = new Point(234, 59);
             numericInput2.Name = "numericInput2";
             numericInput2.Size = new Size(167, 41);
             numericInput2.TabIndex = 6;
@@ -87,7 +87,7 @@
             // 
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 14F);
-            label4.Location = new Point(21, 56);
+            label4.Location = new Point(22, 68);
             label4.Name = "label4";
             label4.Size = new Size(206, 25);
             label4.TabIndex = 5;
@@ -97,7 +97,7 @@
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI", 14F);
-            label5.Location = new Point(406, 103);
+            label5.Location = new Point(407, 115);
             label5.Name = "label5";
             label5.Size = new Size(37, 25);
             label5.TabIndex = 10;
@@ -105,7 +105,7 @@
             // 
             // numericInput3
             // 
-            numericInput3.Location = new Point(233, 94);
+            numericInput3.Location = new Point(234, 106);
             numericInput3.Name = "numericInput3";
             numericInput3.Size = new Size(167, 41);
             numericInput3.TabIndex = 9;
@@ -114,7 +114,7 @@
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 14F);
-            label6.Location = new Point(3, 103);
+            label6.Location = new Point(4, 115);
             label6.Name = "label6";
             label6.Size = new Size(224, 25);
             label6.TabIndex = 8;

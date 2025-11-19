@@ -33,11 +33,15 @@
             indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             indicatorButton1 = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
-            PowerBtn = new Button();
+            MapBtn = new Button();
+            SurveyBtn = new Button();
+            CalibrationBtn = new Button();
             EditSettingsBtn = new Button();
             EditEquipmentBtn = new Button();
             ContentPanel = new Panel();
             StatusPanel = new Panel();
+            ZoomOutBtn = new Button();
+            ZoomInBtn = new Button();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
             ContentPanel.SuspendLayout();
@@ -45,6 +49,8 @@
             // 
             // panel3
             // 
+            panel3.Controls.Add(ZoomInBtn);
+            panel3.Controls.Add(ZoomOutBtn);
             panel3.Controls.Add(indicatorButton2);
             panel3.Controls.Add(indicatorButton1);
             panel3.Dock = DockStyle.Left;
@@ -73,7 +79,9 @@
             // 
             // panel1
             // 
-            panel1.Controls.Add(PowerBtn);
+            panel1.Controls.Add(MapBtn);
+            panel1.Controls.Add(SurveyBtn);
+            panel1.Controls.Add(CalibrationBtn);
             panel1.Controls.Add(EditSettingsBtn);
             panel1.Controls.Add(EditEquipmentBtn);
             panel1.Dock = DockStyle.Right;
@@ -82,15 +90,38 @@
             panel1.Size = new Size(76, 495);
             panel1.TabIndex = 3;
             // 
-            // PowerBtn
+            // MapBtn
             // 
-            PowerBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            PowerBtn.Location = new Point(45, 6);
-            PowerBtn.Name = "PowerBtn";
-            PowerBtn.Size = new Size(24, 24);
-            PowerBtn.TabIndex = 2;
-            PowerBtn.UseVisualStyleBackColor = true;
-            PowerBtn.Click += PowerBtn_Click;
+            MapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            MapBtn.Image = (Image)resources.GetObject("MapBtn.Image");
+            MapBtn.Location = new Point(8, 72);
+            MapBtn.Name = "MapBtn";
+            MapBtn.Size = new Size(60, 60);
+            MapBtn.TabIndex = 5;
+            MapBtn.UseVisualStyleBackColor = true;
+            MapBtn.Click += MapBtn_Click;
+            // 
+            // SurveyBtn
+            // 
+            SurveyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            SurveyBtn.Image = (Image)resources.GetObject("SurveyBtn.Image");
+            SurveyBtn.Location = new Point(8, 6);
+            SurveyBtn.Name = "SurveyBtn";
+            SurveyBtn.Size = new Size(60, 60);
+            SurveyBtn.TabIndex = 4;
+            SurveyBtn.UseVisualStyleBackColor = true;
+            SurveyBtn.Click += SurveyBtn_Click;
+            // 
+            // CalibrationBtn
+            // 
+            CalibrationBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            CalibrationBtn.Image = (Image)resources.GetObject("CalibrationBtn.Image");
+            CalibrationBtn.Location = new Point(8, 297);
+            CalibrationBtn.Name = "CalibrationBtn";
+            CalibrationBtn.Size = new Size(60, 60);
+            CalibrationBtn.TabIndex = 3;
+            CalibrationBtn.UseVisualStyleBackColor = true;
+            CalibrationBtn.Click += CalibrationBtn_Click;
             // 
             // EditSettingsBtn
             // 
@@ -101,6 +132,7 @@
             EditSettingsBtn.Size = new Size(60, 60);
             EditSettingsBtn.TabIndex = 1;
             EditSettingsBtn.UseVisualStyleBackColor = true;
+            EditSettingsBtn.Click += EditSettingsBtn_Click;
             // 
             // EditEquipmentBtn
             // 
@@ -115,7 +147,7 @@
             // 
             // ContentPanel
             // 
-            ContentPanel.BackColor = SystemColors.ControlDark;
+            ContentPanel.BackColor = SystemColors.Control;
             ContentPanel.Controls.Add(StatusPanel);
             ContentPanel.Dock = DockStyle.Fill;
             ContentPanel.Location = new Point(76, 0);
@@ -131,6 +163,26 @@
             StatusPanel.Size = new Size(593, 32);
             StatusPanel.TabIndex = 0;
             // 
+            // ZoomOutBtn
+            // 
+            ZoomOutBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ZoomOutBtn.Image = (Image)resources.GetObject("ZoomOutBtn.Image");
+            ZoomOutBtn.Location = new Point(8, 429);
+            ZoomOutBtn.Name = "ZoomOutBtn";
+            ZoomOutBtn.Size = new Size(60, 60);
+            ZoomOutBtn.TabIndex = 6;
+            ZoomOutBtn.UseVisualStyleBackColor = true;
+            // 
+            // ZoomInBtn
+            // 
+            ZoomInBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ZoomInBtn.Image = (Image)resources.GetObject("ZoomInBtn.Image");
+            ZoomInBtn.Location = new Point(8, 363);
+            ZoomInBtn.Name = "ZoomInBtn";
+            ZoomInBtn.Size = new Size(60, 60);
+            ZoomInBtn.TabIndex = 7;
+            ZoomInBtn.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -140,6 +192,7 @@
             Controls.Add(ContentPanel);
             Controls.Add(panel1);
             Controls.Add(panel3);
+            DoubleBuffered = true;
             Name = "MainForm";
             Text = "AgGrade";
             panel3.ResumeLayout(false);
@@ -158,6 +211,10 @@
         private Button EditSettingsBtn;
         private Controls.IndicatorButton indicatorButton1;
         private Controls.IndicatorButton indicatorButton2;
-        private Button PowerBtn;
+        private Button CalibrationBtn;
+        private Button SurveyBtn;
+        private Button MapBtn;
+        private Button ZoomInBtn;
+        private Button ZoomOutBtn;
     }
 }
