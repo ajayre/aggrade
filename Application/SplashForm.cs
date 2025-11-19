@@ -12,18 +12,18 @@ namespace AgGrade
 {
     public partial class SplashForm : Form
     {
-        private bool FullScreen;
+        private bool Windowed;
 
         public SplashForm
             (
-            bool FullScreen
+            bool Windowed
             )
         {
-            this.FullScreen = FullScreen;
+            this.Windowed = Windowed;
 
             InitializeComponent();
 
-            if (FullScreen)
+            if (!Windowed)
             {
                 // Set the form to not have a border, allowing it to cover the entire screen
                 this.FormBorderStyle = FormBorderStyle.None;

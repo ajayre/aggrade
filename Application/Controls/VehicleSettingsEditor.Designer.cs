@@ -53,7 +53,7 @@
             // 
             numericInput1.Location = new Point(233, 0);
             numericInput1.Name = "numericInput1";
-            numericInput1.Size = new Size(167, 41);
+            numericInput1.Size = new Size(167, 43);
             numericInput1.TabIndex = 3;
             // 
             // label3
@@ -134,7 +134,7 @@
             Controls.Add(numericInput1);
             Controls.Add(label1);
             Name = "VehicleSettingsEditor";
-            Size = new Size(758, 358);
+            Size = new Size(757, 358);
             ResumeLayout(false);
             PerformLayout();
         }

@@ -30,52 +30,49 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NumericInput));
             textBox1 = new TextBox();
-            button1 = new Button();
-            button2 = new Button();
+            UpBtn = new Button();
+            DownBtn = new Button();
             SuspendLayout();
             // 
             // textBox1
             // 
             textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             textBox1.Font = new Font("Segoe UI", 14F);
-            textBox1.Location = new Point(3, 2);
-            textBox1.Multiline = true;
+            textBox1.Location = new Point(3, 4);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(290, 38);
+            textBox1.Size = new Size(146, 32);
             textBox1.TabIndex = 0;
             textBox1.Text = "123";
             textBox1.TextAlign = HorizontalAlignment.Right;
             // 
-            // button1
+            // UpBtn
             // 
-            button1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            button1.Image = (Image)resources.GetObject("button1.Image");
-            button1.Location = new Point(296, 1);
-            button1.Name = "button1";
-            button1.Size = new Size(41, 39);
-            button1.TabIndex = 1;
-            button1.UseVisualStyleBackColor = true;
+            UpBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            UpBtn.Image = (Image)resources.GetObject("UpBtn.Image");
+            UpBtn.Location = new Point(155, 1);
+            UpBtn.Name = "UpBtn";
+            UpBtn.Size = new Size(41, 39);
+            UpBtn.TabIndex = 1;
+            UpBtn.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // DownBtn
             // 
-            button2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            button2.Image = (Image)resources.GetObject("button2.Image");
-            button2.Location = new Point(339, 1);
-            button2.Name = "button2";
-            button2.Size = new Size(41, 39);
-            button2.TabIndex = 2;
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            DownBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            DownBtn.Image = (Image)resources.GetObject("DownBtn.Image");
+            DownBtn.Location = new Point(198, 1);
+            DownBtn.Name = "DownBtn";
+            DownBtn.Size = new Size(41, 39);
+            DownBtn.TabIndex = 2;
+            DownBtn.UseVisualStyleBackColor = true;
             // 
             // NumericInput
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(button2);
-            Controls.Add(button1);
+            AutoScaleMode = AutoScaleMode.Inherit;
             Controls.Add(textBox1);
+            Controls.Add(DownBtn);
+            Controls.Add(UpBtn);
             Name = "NumericInput";
-            Size = new Size(381, 41);
+            Size = new Size(240, 41);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -83,7 +80,7 @@
         #endregion
 
         private TextBox textBox1;
-        private Button button1;
-        private Button button2;
+        private Button UpBtn;
+        private Button DownBtn;
     }
 }

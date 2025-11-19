@@ -30,6 +30,7 @@ namespace AgGrade.Controls
             set
             {
                 Btn.Image = value;
+                ScaleImage();
             }
         }
 
@@ -55,6 +56,22 @@ namespace AgGrade.Controls
         public IndicatorButton()
         {
             InitializeComponent();
+        }
+
+        /// <summary>
+        /// Scales the image to match the display DPI
+        /// </summary>
+        private void ScaleImage
+            (
+            )
+        {
+            double ScalingFactor = this.DeviceDpi / 96.0;
+
+            if (Btn.Image != null)
+            {
+                Bitmap scaledImage = new Bitmap(Btn.Image!, new Size((int)(Btn.Image!.Width * ScalingFactor), (int)(Btn.Image!.Height * ScalingFactor)));
+                Btn.Image = scaledImage;
+            }
         }
     }
 }

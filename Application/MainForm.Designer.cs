@@ -30,13 +30,14 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             panel3 = new Panel();
+            indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             indicatorButton1 = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
+            PowerBtn = new Button();
             EditSettingsBtn = new Button();
             EditEquipmentBtn = new Button();
             ContentPanel = new Panel();
             StatusPanel = new Panel();
-            indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
             ContentPanel.SuspendLayout();
@@ -52,6 +53,15 @@
             panel3.Size = new Size(76, 495);
             panel3.TabIndex = 2;
             // 
+            // indicatorButton2
+            // 
+            indicatorButton2.Image = (Image)resources.GetObject("indicatorButton2.Image");
+            indicatorButton2.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
+            indicatorButton2.Location = new Point(8, 90);
+            indicatorButton2.Name = "indicatorButton2";
+            indicatorButton2.Size = new Size(60, 78);
+            indicatorButton2.TabIndex = 1;
+            // 
             // indicatorButton1
             // 
             indicatorButton1.Image = (Image)resources.GetObject("indicatorButton1.Image");
@@ -63,6 +73,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(PowerBtn);
             panel1.Controls.Add(EditSettingsBtn);
             panel1.Controls.Add(EditEquipmentBtn);
             panel1.Dock = DockStyle.Right;
@@ -70,6 +81,16 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(76, 495);
             panel1.TabIndex = 3;
+            // 
+            // PowerBtn
+            // 
+            PowerBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            PowerBtn.Location = new Point(45, 6);
+            PowerBtn.Name = "PowerBtn";
+            PowerBtn.Size = new Size(24, 24);
+            PowerBtn.TabIndex = 2;
+            PowerBtn.UseVisualStyleBackColor = true;
+            PowerBtn.Click += PowerBtn_Click;
             // 
             // EditSettingsBtn
             // 
@@ -110,15 +131,6 @@
             StatusPanel.Size = new Size(593, 32);
             StatusPanel.TabIndex = 0;
             // 
-            // indicatorButton2
-            // 
-            indicatorButton2.Image = (Image)resources.GetObject("indicatorButton2.Image");
-            indicatorButton2.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
-            indicatorButton2.Location = new Point(8, 90);
-            indicatorButton2.Name = "indicatorButton2";
-            indicatorButton2.Size = new Size(60, 78);
-            indicatorButton2.TabIndex = 1;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -146,5 +158,6 @@
         private Button EditSettingsBtn;
         private Controls.IndicatorButton indicatorButton1;
         private Controls.IndicatorButton indicatorButton2;
+        private Button PowerBtn;
     }
 }

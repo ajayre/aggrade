@@ -8,29 +8,33 @@ namespace AgGrade
         [STAThread]
         static void Main(string[] args)
         {
-            bool FullScreen = false;
+            bool Windowed = false;
+            bool NoSplash = false;
 
-            if (args.Length > 0)
-            {
-                if (args[0].Trim().ToUpper() == @"/FULLSCREEN") FullScreen = true;
-            }
+            if (args.Contains("/WINDOWED")) Windowed = true;
+            if (args.Contains("/NOSPLASH")) NoSplash = true;
 
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            /*var splash = new SplashForm(FullScreen);
-            splash.Show();
+            SplashForm? splash = null;
+            if (!NoSplash)
+            {
+                splash = new SplashForm(Windowed);
+                splash.Show();
 
-            // I call DoEvents here to make sure that the splash-screen is properly shown.
-            Application.DoEvents();
+                // I call DoEvents here to make sure that the splash-screen is properly shown.
+                Application.DoEvents();
 
-            // Just a sleep to mimick your load or init procedure
-            Thread.Sleep(2000);
+                // Just a sleep to mimick your load or init procedure
+                Thread.Sleep(2000);
+            }
 
-            splash.Close();*/
+            MainForm Main = new MainForm(Windowed);
+            Main.Shown += (sender, e) => { splash?.Close(); };
 
-            Application.Run(new MainForm(FullScreen));
+            Application.Run(new MainForm(Windowed));
         }
     }
 }

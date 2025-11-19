@@ -1,4 +1,5 @@
 using AgGrade.Controls;
+using System.Runtime;
 
 namespace AgGrade
 {
@@ -6,12 +7,12 @@ namespace AgGrade
     {
         public MainForm
             (
-            bool FullScreen
+            bool Windowed
             )
         {
             InitializeComponent();
 
-            if (FullScreen)
+            if (!Windowed)
             {
                 // Set the form to not have a border, allowing it to cover the entire screen
                 this.FormBorderStyle = FormBorderStyle.None;
@@ -22,6 +23,14 @@ namespace AgGrade
                 // Set the form's size to the full resolution of the primary screen
                 this.Size = Screen.PrimaryScreen.Bounds.Size;
             }
+
+            double ScalingFactor = this.DeviceDpi / 96.0;
+
+            Bitmap scaledImage = new Bitmap(EditEquipmentBtn.Image!, new Size((int)(EditEquipmentBtn.Image!.Width * ScalingFactor), (int)(EditEquipmentBtn.Image!.Height * ScalingFactor)));
+            EditEquipmentBtn.Image = scaledImage;
+
+            scaledImage = new Bitmap(EditSettingsBtn.Image!, new Size((int)(EditSettingsBtn.Image!.Width * ScalingFactor), (int)(EditSettingsBtn.Image!.Height * ScalingFactor)));
+            EditSettingsBtn.Image = scaledImage;
         }
 
         /// <summary>
@@ -45,6 +54,17 @@ namespace AgGrade
             equipmentEditor.Parent = ContentPanel;
             equipmentEditor.Dock = DockStyle.Fill;
             equipmentEditor.Show();
+        }
+
+        /// <summary>
+        /// Called when user taps the close button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PowerBtn_Click(object sender, EventArgs e)
+        {
+            // fixme - change into shutting down windows
+            Close();
         }
     }
 }

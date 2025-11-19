@@ -15,11 +15,13 @@ namespace AgGrade.Controls
         public NumericInput()
         {
             InitializeComponent();
-        }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
+            double ScalingFactor = this.DeviceDpi / 96.0;
 
+            Bitmap scaledImage = new Bitmap(UpBtn.Image!, new Size((int)(UpBtn.Image!.Width * ScalingFactor), (int)(UpBtn.Image!.Height * ScalingFactor)));
+            UpBtn.Image = scaledImage;
+            scaledImage = new Bitmap(DownBtn.Image!, new Size((int)(DownBtn.Image!.Width * ScalingFactor), (int)(DownBtn.Image!.Height * ScalingFactor)));
+            DownBtn.Image = scaledImage;
         }
     }
 }
