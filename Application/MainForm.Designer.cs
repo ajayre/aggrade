@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             panel3 = new Panel();
+            ZoomInBtn = new Button();
+            ZoomOutBtn = new Button();
             indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             indicatorButton1 = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
@@ -40,11 +42,10 @@
             EditEquipmentBtn = new Button();
             ContentPanel = new Panel();
             StatusPanel = new Panel();
-            ZoomOutBtn = new Button();
-            ZoomInBtn = new Button();
+            statusBar1 = new AgGrade.Controls.StatusBar();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
-            ContentPanel.SuspendLayout();
+            StatusPanel.SuspendLayout();
             SuspendLayout();
             // 
             // panel3
@@ -58,6 +59,26 @@
             panel3.Name = "panel3";
             panel3.Size = new Size(76, 495);
             panel3.TabIndex = 2;
+            // 
+            // ZoomInBtn
+            // 
+            ZoomInBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ZoomInBtn.Image = (Image)resources.GetObject("ZoomInBtn.Image");
+            ZoomInBtn.Location = new Point(8, 363);
+            ZoomInBtn.Name = "ZoomInBtn";
+            ZoomInBtn.Size = new Size(60, 60);
+            ZoomInBtn.TabIndex = 7;
+            ZoomInBtn.UseVisualStyleBackColor = true;
+            // 
+            // ZoomOutBtn
+            // 
+            ZoomOutBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ZoomOutBtn.Image = (Image)resources.GetObject("ZoomOutBtn.Image");
+            ZoomOutBtn.Location = new Point(8, 429);
+            ZoomOutBtn.Name = "ZoomOutBtn";
+            ZoomOutBtn.Size = new Size(60, 60);
+            ZoomOutBtn.TabIndex = 6;
+            ZoomOutBtn.UseVisualStyleBackColor = true;
             // 
             // indicatorButton2
             // 
@@ -148,40 +169,29 @@
             // ContentPanel
             // 
             ContentPanel.BackColor = SystemColors.Control;
-            ContentPanel.Controls.Add(StatusPanel);
             ContentPanel.Dock = DockStyle.Fill;
             ContentPanel.Location = new Point(76, 0);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(593, 495);
+            ContentPanel.Size = new Size(593, 469);
             ContentPanel.TabIndex = 4;
             // 
             // StatusPanel
             // 
+            StatusPanel.BackColor = SystemColors.Control;
+            StatusPanel.Controls.Add(statusBar1);
             StatusPanel.Dock = DockStyle.Bottom;
-            StatusPanel.Location = new Point(0, 463);
+            StatusPanel.Location = new Point(76, 469);
             StatusPanel.Name = "StatusPanel";
-            StatusPanel.Size = new Size(593, 32);
+            StatusPanel.Size = new Size(593, 26);
             StatusPanel.TabIndex = 0;
             // 
-            // ZoomOutBtn
+            // statusBar1
             // 
-            ZoomOutBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            ZoomOutBtn.Image = (Image)resources.GetObject("ZoomOutBtn.Image");
-            ZoomOutBtn.Location = new Point(8, 429);
-            ZoomOutBtn.Name = "ZoomOutBtn";
-            ZoomOutBtn.Size = new Size(60, 60);
-            ZoomOutBtn.TabIndex = 6;
-            ZoomOutBtn.UseVisualStyleBackColor = true;
-            // 
-            // ZoomInBtn
-            // 
-            ZoomInBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            ZoomInBtn.Image = (Image)resources.GetObject("ZoomInBtn.Image");
-            ZoomInBtn.Location = new Point(8, 363);
-            ZoomInBtn.Name = "ZoomInBtn";
-            ZoomInBtn.Size = new Size(60, 60);
-            ZoomInBtn.TabIndex = 7;
-            ZoomInBtn.UseVisualStyleBackColor = true;
+            statusBar1.Dock = DockStyle.Fill;
+            statusBar1.Location = new Point(0, 0);
+            statusBar1.Name = "statusBar1";
+            statusBar1.Size = new Size(593, 26);
+            statusBar1.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -190,6 +200,7 @@
             BackColor = Color.Green;
             ClientSize = new Size(745, 495);
             Controls.Add(ContentPanel);
+            Controls.Add(StatusPanel);
             Controls.Add(panel1);
             Controls.Add(panel3);
             DoubleBuffered = true;
@@ -197,7 +208,7 @@
             Text = "AgGrade";
             panel3.ResumeLayout(false);
             panel1.ResumeLayout(false);
-            ContentPanel.ResumeLayout(false);
+            StatusPanel.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -216,5 +227,6 @@
         private Button MapBtn;
         private Button ZoomInBtn;
         private Button ZoomOutBtn;
+        private Controls.StatusBar statusBar1;
     }
 }

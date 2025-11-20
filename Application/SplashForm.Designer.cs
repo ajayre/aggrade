@@ -33,12 +33,12 @@
             // 
             // label1
             // 
-            label1.Dock = DockStyle.Fill;
+            label1.Dock = DockStyle.Top;
             label1.Font = new Font("Segoe UI", 80F);
             label1.ForeColor = SystemColors.Control;
             label1.Location = new Point(0, 0);
             label1.Name = "label1";
-            label1.Size = new Size(872, 467);
+            label1.Size = new Size(872, 468);
             label1.TabIndex = 0;
             label1.Text = "AgGrade";
             label1.TextAlign = ContentAlignment.MiddleCenter;

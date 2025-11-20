@@ -10,7 +10,7 @@
 
 6. Grading button - choose field
 
-7. Calibration button - set blade zero heights
+7. Calibration button - set blade zero heights, set GNSS antenna location from driving?
 
 8. Settings screen:
   - COM ports
@@ -31,6 +31,7 @@
   - toggle flashing/indication of highest areas and lowest areas on/off
   - north up, tractor up
   - toggle guidance line to nearest lowest area
+  - toggle tractor in center or bottom center
 
 11. Turn guidance - at current point for tractor show how a turn could be completed to double-back on a parallel path, e.g. omega. Continually update this until edge of field reached at which point it turns red for last chance turn, then turns into a turn to travel down edge of field
 
@@ -54,6 +55,7 @@
   - speed
   - heading
   - IMU quality
+  - status bar has LEDs: OOO RTK OOO IMU OO HEIGHT - LEDs flash red when data not available and solid green when available. Greyed out if front or rear scraper is disabled (e.g. survey mode)
 
 16. Data logging - create csv file with date/time stamp as filename. Record speed, direction, location, blade status, blade height
 
