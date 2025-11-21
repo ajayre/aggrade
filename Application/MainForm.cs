@@ -46,6 +46,10 @@ namespace AgGrade
 
             scaledImage = new Bitmap(ZoomOutBtn.Image!, new Size((int)(ZoomOutBtn.Image!.Width * ScalingFactor), (int)(ZoomOutBtn.Image!.Height * ScalingFactor)));
             ZoomOutBtn.Image = scaledImage;
+
+            // fixme - remove
+            //StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
+            //StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
         }
 
         /// <summary>

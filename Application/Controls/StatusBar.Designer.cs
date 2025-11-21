@@ -29,98 +29,98 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(StatusBar));
-            pictureBox1 = new PictureBox();
-            pictureBox2 = new PictureBox();
-            pictureBox3 = new PictureBox();
-            pictureBox4 = new PictureBox();
-            pictureBox5 = new PictureBox();
-            pictureBox6 = new PictureBox();
-            pictureBox7 = new PictureBox();
-            pictureBox8 = new PictureBox();
+            TractorRTKLed = new PictureBox();
+            FrontRTKLed = new PictureBox();
+            RearRTKLed = new PictureBox();
+            TractorIMULed = new PictureBox();
+            FrontIMULed = new PictureBox();
+            RearIMULed = new PictureBox();
+            FrontHeightLed = new PictureBox();
+            RearHeightLed = new PictureBox();
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox5).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox6).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox7).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox8).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)TractorRTKLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)FrontRTKLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)RearRTKLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)TractorIMULed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)FrontIMULed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)RearIMULed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)FrontHeightLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)RearHeightLed).BeginInit();
             SuspendLayout();
             // 
-            // pictureBox1
+            // TractorRTKLed
             // 
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
-            pictureBox1.Location = new Point(43, 0);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(24, 24);
-            pictureBox1.TabIndex = 0;
-            pictureBox1.TabStop = false;
+            TractorRTKLed.Image = (Image)resources.GetObject("TractorRTKLed.Image");
+            TractorRTKLed.Location = new Point(43, 0);
+            TractorRTKLed.Name = "TractorRTKLed";
+            TractorRTKLed.Size = new Size(24, 24);
+            TractorRTKLed.TabIndex = 0;
+            TractorRTKLed.TabStop = false;
             // 
-            // pictureBox2
+            // FrontRTKLed
             // 
-            pictureBox2.Image = (Image)resources.GetObject("pictureBox2.Image");
-            pictureBox2.Location = new Point(70, 0);
-            pictureBox2.Name = "pictureBox2";
-            pictureBox2.Size = new Size(24, 24);
-            pictureBox2.TabIndex = 1;
-            pictureBox2.TabStop = false;
+            FrontRTKLed.Image = (Image)resources.GetObject("FrontRTKLed.Image");
+            FrontRTKLed.Location = new Point(70, 0);
+            FrontRTKLed.Name = "FrontRTKLed";
+            FrontRTKLed.Size = new Size(24, 24);
+            FrontRTKLed.TabIndex = 1;
+            FrontRTKLed.TabStop = false;
             // 
-            // pictureBox3
+            // RearRTKLed
             // 
-            pictureBox3.Image = (Image)resources.GetObject("pictureBox3.Image");
-            pictureBox3.Location = new Point(97, 0);
-            pictureBox3.Name = "pictureBox3";
-            pictureBox3.Size = new Size(24, 24);
-            pictureBox3.TabIndex = 2;
-            pictureBox3.TabStop = false;
+            RearRTKLed.Image = (Image)resources.GetObject("RearRTKLed.Image");
+            RearRTKLed.Location = new Point(97, 0);
+            RearRTKLed.Name = "RearRTKLed";
+            RearRTKLed.Size = new Size(24, 24);
+            RearRTKLed.TabIndex = 2;
+            RearRTKLed.TabStop = false;
             // 
-            // pictureBox4
+            // TractorIMULed
             // 
-            pictureBox4.Image = (Image)resources.GetObject("pictureBox4.Image");
-            pictureBox4.Location = new Point(170, 0);
-            pictureBox4.Name = "pictureBox4";
-            pictureBox4.Size = new Size(24, 24);
-            pictureBox4.TabIndex = 3;
-            pictureBox4.TabStop = false;
+            TractorIMULed.Image = (Image)resources.GetObject("TractorIMULed.Image");
+            TractorIMULed.Location = new Point(170, 0);
+            TractorIMULed.Name = "TractorIMULed";
+            TractorIMULed.Size = new Size(24, 24);
+            TractorIMULed.TabIndex = 3;
+            TractorIMULed.TabStop = false;
             // 
-            // pictureBox5
+            // FrontIMULed
             // 
-            pictureBox5.Image = (Image)resources.GetObject("pictureBox5.Image");
-            pictureBox5.Location = new Point(197, 0);
-            pictureBox5.Name = "pictureBox5";
-            pictureBox5.Size = new Size(24, 24);
-            pictureBox5.TabIndex = 4;
-            pictureBox5.TabStop = false;
+            FrontIMULed.Image = (Image)resources.GetObject("FrontIMULed.Image");
+            FrontIMULed.Location = new Point(197, 0);
+            FrontIMULed.Name = "FrontIMULed";
+            FrontIMULed.Size = new Size(24, 24);
+            FrontIMULed.TabIndex = 4;
+            FrontIMULed.TabStop = false;
             // 
-            // pictureBox6
+            // RearIMULed
             // 
-            pictureBox6.Image = (Image)resources.GetObject("pictureBox6.Image");
-            pictureBox6.Location = new Point(224, 0);
-            pictureBox6.Name = "pictureBox6";
-            pictureBox6.Size = new Size(24, 24);
-            pictureBox6.TabIndex = 5;
-            pictureBox6.TabStop = false;
+            RearIMULed.Image = (Image)resources.GetObject("RearIMULed.Image");
+            RearIMULed.Location = new Point(224, 0);
+            RearIMULed.Name = "RearIMULed";
+            RearIMULed.Size = new Size(24, 24);
+            RearIMULed.TabIndex = 5;
+            RearIMULed.TabStop = false;
             // 
-            // pictureBox7
+            // FrontHeightLed
             // 
-            pictureBox7.Image = (Image)resources.GetObject("pictureBox7.Image");
-            pictureBox7.Location = new Point(321, 0);
-            pictureBox7.Name = "pictureBox7";
-            pictureBox7.Size = new Size(24, 24);
-            pictureBox7.TabIndex = 6;
-            pictureBox7.TabStop = false;
+            FrontHeightLed.Image = (Image)resources.GetObject("FrontHeightLed.Image");
+            FrontHeightLed.Location = new Point(321, 0);
+            FrontHeightLed.Name = "FrontHeightLed";
+            FrontHeightLed.Size = new Size(24, 24);
+            FrontHeightLed.TabIndex = 6;
+            FrontHeightLed.TabStop = false;
             // 
-            // pictureBox8
+            // RearHeightLed
             // 
-            pictureBox8.Image = (Image)resources.GetObject("pictureBox8.Image");
-            pictureBox8.Location = new Point(348, 0);
-            pictureBox8.Name = "pictureBox8";
-            pictureBox8.Size = new Size(24, 24);
-            pictureBox8.TabIndex = 7;
-            pictureBox8.TabStop = false;
+            RearHeightLed.Image = (Image)resources.GetObject("RearHeightLed.Image");
+            RearHeightLed.Location = new Point(348, 0);
+            RearHeightLed.Name = "RearHeightLed";
+            RearHeightLed.Size = new Size(24, 24);
+            RearHeightLed.TabIndex = 7;
+            RearHeightLed.TabStop = false;
             // 
             // label1
             // 
@@ -159,38 +159,38 @@
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
-            Controls.Add(pictureBox8);
-            Controls.Add(pictureBox7);
-            Controls.Add(pictureBox6);
-            Controls.Add(pictureBox5);
-            Controls.Add(pictureBox4);
-            Controls.Add(pictureBox3);
-            Controls.Add(pictureBox2);
-            Controls.Add(pictureBox1);
+            Controls.Add(RearHeightLed);
+            Controls.Add(FrontHeightLed);
+            Controls.Add(RearIMULed);
+            Controls.Add(FrontIMULed);
+            Controls.Add(TractorIMULed);
+            Controls.Add(RearRTKLed);
+            Controls.Add(FrontRTKLed);
+            Controls.Add(TractorRTKLed);
             Name = "StatusBar";
             Size = new Size(469, 24);
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox3).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox4).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox5).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox6).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox7).EndInit();
-            ((System.ComponentModel.ISupportInitialize)pictureBox8).EndInit();
+            ((System.ComponentModel.ISupportInitialize)TractorRTKLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)FrontRTKLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)RearRTKLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)TractorIMULed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)FrontIMULed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)RearIMULed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)FrontHeightLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)RearHeightLed).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
 
         #endregion
 
-        private PictureBox pictureBox1;
-        private PictureBox pictureBox2;
-        private PictureBox pictureBox3;
-        private PictureBox pictureBox4;
-        private PictureBox pictureBox5;
-        private PictureBox pictureBox6;
-        private PictureBox pictureBox7;
-        private PictureBox pictureBox8;
+        private PictureBox TractorRTKLed;
+        private PictureBox FrontRTKLed;
+        private PictureBox RearRTKLed;
+        private PictureBox TractorIMULed;
+        private PictureBox FrontIMULed;
+        private PictureBox RearIMULed;
+        private PictureBox FrontHeightLed;
+        private PictureBox RearHeightLed;
         private Label label1;
         private Label label2;
         private Label label3;

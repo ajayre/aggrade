@@ -34,6 +34,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.SeaShell;
             Name = "Map";
             Size = new Size(574, 356);
             ResumeLayout(false);

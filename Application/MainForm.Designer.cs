@@ -35,6 +35,7 @@
             indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             indicatorButton1 = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
+            button1 = new Button();
             MapBtn = new Button();
             SurveyBtn = new Button();
             CalibrationBtn = new Button();
@@ -42,7 +43,7 @@
             EditEquipmentBtn = new Button();
             ContentPanel = new Panel();
             StatusPanel = new Panel();
-            statusBar1 = new AgGrade.Controls.StatusBar();
+            StatusBar = new AgGrade.Controls.StatusBar();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
             StatusPanel.SuspendLayout();
@@ -100,6 +101,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(button1);
             panel1.Controls.Add(MapBtn);
             panel1.Controls.Add(SurveyBtn);
             panel1.Controls.Add(CalibrationBtn);
@@ -110,6 +112,16 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(76, 495);
             panel1.TabIndex = 3;
+            // 
+            // button1
+            // 
+            button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            button1.Image = (Image)resources.GetObject("button1.Image");
+            button1.Location = new Point(8, 231);
+            button1.Name = "button1";
+            button1.Size = new Size(60, 60);
+            button1.TabIndex = 6;
+            button1.UseVisualStyleBackColor = true;
             // 
             // MapBtn
             // 
@@ -178,20 +190,20 @@
             // StatusPanel
             // 
             StatusPanel.BackColor = SystemColors.Control;
-            StatusPanel.Controls.Add(statusBar1);
+            StatusPanel.Controls.Add(StatusBar);
             StatusPanel.Dock = DockStyle.Bottom;
             StatusPanel.Location = new Point(76, 469);
             StatusPanel.Name = "StatusPanel";
             StatusPanel.Size = new Size(593, 26);
             StatusPanel.TabIndex = 0;
             // 
-            // statusBar1
+            // StatusBar
             // 
-            statusBar1.Dock = DockStyle.Fill;
-            statusBar1.Location = new Point(0, 0);
-            statusBar1.Name = "statusBar1";
-            statusBar1.Size = new Size(593, 26);
-            statusBar1.TabIndex = 0;
+            StatusBar.Dock = DockStyle.Fill;
+            StatusBar.Location = new Point(0, 0);
+            StatusBar.Name = "StatusBar";
+            StatusBar.Size = new Size(593, 26);
+            StatusBar.TabIndex = 0;
             // 
             // MainForm
             // 
@@ -227,6 +239,7 @@
         private Button MapBtn;
         private Button ZoomInBtn;
         private Button ZoomOutBtn;
-        private Controls.StatusBar statusBar1;
+        private Controls.StatusBar StatusBar;
+        private Button button1;
     }
 }

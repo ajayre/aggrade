@@ -4,7 +4,7 @@
 
 3. Show keyboard button - osk.exe?
 
-4. Show status button: shows GPS/RTK/IMU values for all three items of equipment
+4. Show status button: shows GPS/RTK/IMU values for all three items of equipment.
 
 5. Survey button: shows settings panel, enter field name, start, then shows map, with button to end boundary and end survey. Allow benchmarks to be recorded
 
@@ -32,6 +32,7 @@
   - north up, tractor up
   - toggle guidance line to nearest lowest area
   - toggle tractor in center or bottom center
+  - areas where the topo won't change much (locations for top soil)
 
 11. Turn guidance - at current point for tractor show how a turn could be completed to double-back on a parallel path, e.g. omega. Continually update this until edge of field reached at which point it turns red for last chance turn, then turns into a turn to travel down edge of field
 
@@ -56,6 +57,7 @@
   - heading
   - IMU quality
   - status bar has LEDs: OOO RTK OOO IMU OO HEIGHT - LEDs flash red when data not available and solid green when available. Greyed out if front or rear scraper is disabled (e.g. survey mode)
+  - beep if green LED turns red
 
 16. Data logging - create csv file with date/time stamp as filename. Record speed, direction, location, blade status, blade height
 
