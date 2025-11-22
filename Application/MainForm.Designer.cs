@@ -218,6 +218,7 @@
             DoubleBuffered = true;
             Name = "MainForm";
             Text = "AgGrade";
+            FormClosing += MainForm_FormClosing;
             panel3.ResumeLayout(false);
             panel1.ResumeLayout(false);
             StatusPanel.ResumeLayout(false);

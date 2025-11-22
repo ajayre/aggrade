@@ -34,30 +34,30 @@
             label5 = new Label();
             label6 = new Label();
             label7 = new Label();
-            textBox5 = new TextBox();
-            textBox6 = new TextBox();
-            textBox7 = new TextBox();
-            textBox8 = new TextBox();
+            ControllerIPAddrNum2 = new TextBox();
+            ControllerIPAddrNum3 = new TextBox();
+            ControllerIPAddrNum4 = new TextBox();
+            ControllerIPAddrNum1 = new TextBox();
             label8 = new Label();
             label9 = new Label();
             label10 = new Label();
             label11 = new Label();
-            textBox9 = new TextBox();
-            textBox10 = new TextBox();
-            textBox11 = new TextBox();
-            textBox12 = new TextBox();
+            SubnetMaskNum2 = new TextBox();
+            SubnetMaskNum3 = new TextBox();
+            SubnetMaskNum4 = new TextBox();
+            SubnetMaskNum1 = new TextBox();
             label12 = new Label();
-            textBox14 = new TextBox();
+            ControllerPortNum = new TextBox();
             label14 = new Label();
-            comboBox1 = new ComboBox();
+            SecondaryTabletSelector = new ComboBox();
             label15 = new Label();
-            textBox15 = new TextBox();
+            MagDeclinationDeg = new TextBox();
             label16 = new Label();
             label17 = new Label();
             label18 = new Label();
-            textBox16 = new TextBox();
+            MagDeclinationMin = new TextBox();
             label19 = new Label();
-            comboBox2 = new ComboBox();
+            LogDataSelector = new ComboBox();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -111,41 +111,41 @@
             label7.TabIndex = 17;
             label7.Text = ".";
             // 
-            // textBox5
+            // ControllerIPAddrNum2
             // 
-            textBox5.Font = new Font("Segoe UI", 14F);
-            textBox5.Location = new Point(270, 54);
-            textBox5.Name = "textBox5";
-            textBox5.PlaceholderText = "000";
-            textBox5.Size = new Size(40, 32);
-            textBox5.TabIndex = 13;
+            ControllerIPAddrNum2.Font = new Font("Segoe UI", 14F);
+            ControllerIPAddrNum2.Location = new Point(270, 54);
+            ControllerIPAddrNum2.Name = "ControllerIPAddrNum2";
+            ControllerIPAddrNum2.PlaceholderText = "000";
+            ControllerIPAddrNum2.Size = new Size(40, 32);
+            ControllerIPAddrNum2.TabIndex = 13;
             // 
-            // textBox6
+            // ControllerIPAddrNum3
             // 
-            textBox6.Font = new Font("Segoe UI", 14F);
-            textBox6.Location = new Point(324, 54);
-            textBox6.Name = "textBox6";
-            textBox6.PlaceholderText = "000";
-            textBox6.Size = new Size(40, 32);
-            textBox6.TabIndex = 15;
+            ControllerIPAddrNum3.Font = new Font("Segoe UI", 14F);
+            ControllerIPAddrNum3.Location = new Point(324, 54);
+            ControllerIPAddrNum3.Name = "ControllerIPAddrNum3";
+            ControllerIPAddrNum3.PlaceholderText = "000";
+            ControllerIPAddrNum3.Size = new Size(40, 32);
+            ControllerIPAddrNum3.TabIndex = 15;
             // 
-            // textBox7
+            // ControllerIPAddrNum4
             // 
-            textBox7.Font = new Font("Segoe UI", 14F);
-            textBox7.Location = new Point(378, 54);
-            textBox7.Name = "textBox7";
-            textBox7.PlaceholderText = "000";
-            textBox7.Size = new Size(40, 32);
-            textBox7.TabIndex = 16;
+            ControllerIPAddrNum4.Font = new Font("Segoe UI", 14F);
+            ControllerIPAddrNum4.Location = new Point(378, 54);
+            ControllerIPAddrNum4.Name = "ControllerIPAddrNum4";
+            ControllerIPAddrNum4.PlaceholderText = "000";
+            ControllerIPAddrNum4.Size = new Size(40, 32);
+            ControllerIPAddrNum4.TabIndex = 16;
             // 
-            // textBox8
+            // ControllerIPAddrNum1
             // 
-            textBox8.Font = new Font("Segoe UI", 14F);
-            textBox8.Location = new Point(216, 54);
-            textBox8.Name = "textBox8";
-            textBox8.PlaceholderText = "000";
-            textBox8.Size = new Size(40, 32);
-            textBox8.TabIndex = 12;
+            ControllerIPAddrNum1.Font = new Font("Segoe UI", 14F);
+            ControllerIPAddrNum1.Location = new Point(216, 54);
+            ControllerIPAddrNum1.Name = "ControllerIPAddrNum1";
+            ControllerIPAddrNum1.PlaceholderText = "000";
+            ControllerIPAddrNum1.Size = new Size(40, 32);
+            ControllerIPAddrNum1.TabIndex = 12;
             // 
             // label8
             // 
@@ -187,41 +187,41 @@
             label11.TabIndex = 25;
             label11.Text = ".";
             // 
-            // textBox9
+            // SubnetMaskNum2
             // 
-            textBox9.Font = new Font("Segoe UI", 14F);
-            textBox9.Location = new Point(270, 92);
-            textBox9.Name = "textBox9";
-            textBox9.PlaceholderText = "000";
-            textBox9.Size = new Size(40, 32);
-            textBox9.TabIndex = 21;
+            SubnetMaskNum2.Font = new Font("Segoe UI", 14F);
+            SubnetMaskNum2.Location = new Point(270, 92);
+            SubnetMaskNum2.Name = "SubnetMaskNum2";
+            SubnetMaskNum2.PlaceholderText = "000";
+            SubnetMaskNum2.Size = new Size(40, 32);
+            SubnetMaskNum2.TabIndex = 21;
             // 
-            // textBox10
+            // SubnetMaskNum3
             // 
-            textBox10.Font = new Font("Segoe UI", 14F);
-            textBox10.Location = new Point(324, 92);
-            textBox10.Name = "textBox10";
-            textBox10.PlaceholderText = "000";
-            textBox10.Size = new Size(40, 32);
-            textBox10.TabIndex = 23;
+            SubnetMaskNum3.Font = new Font("Segoe UI", 14F);
+            SubnetMaskNum3.Location = new Point(324, 92);
+            SubnetMaskNum3.Name = "SubnetMaskNum3";
+            SubnetMaskNum3.PlaceholderText = "000";
+            SubnetMaskNum3.Size = new Size(40, 32);
+            SubnetMaskNum3.TabIndex = 23;
             // 
-            // textBox11
+            // SubnetMaskNum4
             // 
-            textBox11.Font = new Font("Segoe UI", 14F);
-            textBox11.Location = new Point(378, 92);
-            textBox11.Name = "textBox11";
-            textBox11.PlaceholderText = "000";
-            textBox11.Size = new Size(40, 32);
-            textBox11.TabIndex = 24;
+            SubnetMaskNum4.Font = new Font("Segoe UI", 14F);
+            SubnetMaskNum4.Location = new Point(378, 92);
+            SubnetMaskNum4.Name = "SubnetMaskNum4";
+            SubnetMaskNum4.PlaceholderText = "000";
+            SubnetMaskNum4.Size = new Size(40, 32);
+            SubnetMaskNum4.TabIndex = 24;
             // 
-            // textBox12
+            // SubnetMaskNum1
             // 
-            textBox12.Font = new Font("Segoe UI", 14F);
-            textBox12.Location = new Point(216, 92);
-            textBox12.Name = "textBox12";
-            textBox12.PlaceholderText = "000";
-            textBox12.Size = new Size(40, 32);
-            textBox12.TabIndex = 20;
+            SubnetMaskNum1.Font = new Font("Segoe UI", 14F);
+            SubnetMaskNum1.Location = new Point(216, 92);
+            SubnetMaskNum1.Name = "SubnetMaskNum1";
+            SubnetMaskNum1.PlaceholderText = "000";
+            SubnetMaskNum1.Size = new Size(40, 32);
+            SubnetMaskNum1.TabIndex = 20;
             // 
             // label12
             // 
@@ -233,14 +233,14 @@
             label12.TabIndex = 22;
             label12.Text = "Subnet Mask:";
             // 
-            // textBox14
+            // ControllerPortNum
             // 
-            textBox14.Font = new Font("Segoe UI", 14F);
-            textBox14.Location = new Point(490, 54);
-            textBox14.Name = "textBox14";
-            textBox14.PlaceholderText = "00000";
-            textBox14.Size = new Size(61, 32);
-            textBox14.TabIndex = 30;
+            ControllerPortNum.Font = new Font("Segoe UI", 14F);
+            ControllerPortNum.Location = new Point(490, 54);
+            ControllerPortNum.Name = "ControllerPortNum";
+            ControllerPortNum.PlaceholderText = "00000";
+            ControllerPortNum.Size = new Size(61, 32);
+            ControllerPortNum.TabIndex = 30;
             // 
             // label14
             // 
@@ -252,16 +252,16 @@
             label14.TabIndex = 31;
             label14.Text = "Port:";
             // 
-            // comboBox1
+            // SecondaryTabletSelector
             // 
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox1.Font = new Font("Segoe UI", 14F);
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "No", "Yes" });
-            comboBox1.Location = new Point(216, 130);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(94, 33);
-            comboBox1.TabIndex = 32;
+            SecondaryTabletSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            SecondaryTabletSelector.Font = new Font("Segoe UI", 14F);
+            SecondaryTabletSelector.FormattingEnabled = true;
+            SecondaryTabletSelector.Items.AddRange(new object[] { "No", "Yes" });
+            SecondaryTabletSelector.Location = new Point(216, 130);
+            SecondaryTabletSelector.Name = "SecondaryTabletSelector";
+            SecondaryTabletSelector.Size = new Size(94, 33);
+            SecondaryTabletSelector.TabIndex = 32;
             // 
             // label15
             // 
@@ -273,14 +273,14 @@
             label15.TabIndex = 33;
             label15.Text = "Use Secondary Tablet:";
             // 
-            // textBox15
+            // MagDeclinationDeg
             // 
-            textBox15.Font = new Font("Segoe UI", 14F);
-            textBox15.Location = new Point(216, 169);
-            textBox15.Name = "textBox15";
-            textBox15.PlaceholderText = "+-0";
-            textBox15.Size = new Size(70, 32);
-            textBox15.TabIndex = 34;
+            MagDeclinationDeg.Font = new Font("Segoe UI", 14F);
+            MagDeclinationDeg.Location = new Point(216, 169);
+            MagDeclinationDeg.Name = "MagDeclinationDeg";
+            MagDeclinationDeg.PlaceholderText = "+-0";
+            MagDeclinationDeg.Size = new Size(70, 32);
+            MagDeclinationDeg.TabIndex = 34;
             // 
             // label16
             // 
@@ -312,14 +312,14 @@
             label18.TabIndex = 38;
             label18.Text = "minutes";
             // 
-            // textBox16
+            // MagDeclinationMin
             // 
-            textBox16.Font = new Font("Segoe UI", 14F);
-            textBox16.Location = new Point(378, 169);
-            textBox16.Name = "textBox16";
-            textBox16.PlaceholderText = "0";
-            textBox16.Size = new Size(70, 32);
-            textBox16.TabIndex = 37;
+            MagDeclinationMin.Font = new Font("Segoe UI", 14F);
+            MagDeclinationMin.Location = new Point(378, 169);
+            MagDeclinationMin.Name = "MagDeclinationMin";
+            MagDeclinationMin.PlaceholderText = "0";
+            MagDeclinationMin.Size = new Size(70, 32);
+            MagDeclinationMin.TabIndex = 37;
             // 
             // label19
             // 
@@ -331,16 +331,16 @@
             label19.TabIndex = 40;
             label19.Text = "Log Data:";
             // 
-            // comboBox2
+            // LogDataSelector
             // 
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.Font = new Font("Segoe UI", 14F);
-            comboBox2.FormattingEnabled = true;
-            comboBox2.Items.AddRange(new object[] { "No", "Yes" });
-            comboBox2.Location = new Point(216, 207);
-            comboBox2.Name = "comboBox2";
-            comboBox2.Size = new Size(94, 33);
-            comboBox2.TabIndex = 39;
+            LogDataSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            LogDataSelector.Font = new Font("Segoe UI", 14F);
+            LogDataSelector.FormattingEnabled = true;
+            LogDataSelector.Items.AddRange(new object[] { "No", "Yes" });
+            LogDataSelector.Location = new Point(216, 207);
+            LogDataSelector.Name = "LogDataSelector";
+            LogDataSelector.Size = new Size(94, 33);
+            LogDataSelector.TabIndex = 39;
             // 
             // AppSettingsEditor
             // 
@@ -348,31 +348,31 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
             Controls.Add(label19);
-            Controls.Add(comboBox2);
+            Controls.Add(LogDataSelector);
             Controls.Add(label18);
-            Controls.Add(textBox16);
+            Controls.Add(MagDeclinationMin);
             Controls.Add(label17);
-            Controls.Add(textBox15);
+            Controls.Add(MagDeclinationDeg);
             Controls.Add(label16);
             Controls.Add(label15);
-            Controls.Add(comboBox1);
-            Controls.Add(textBox14);
+            Controls.Add(SecondaryTabletSelector);
+            Controls.Add(ControllerPortNum);
             Controls.Add(label14);
             Controls.Add(label9);
             Controls.Add(label10);
             Controls.Add(label11);
-            Controls.Add(textBox9);
-            Controls.Add(textBox10);
-            Controls.Add(textBox11);
-            Controls.Add(textBox12);
+            Controls.Add(SubnetMaskNum2);
+            Controls.Add(SubnetMaskNum3);
+            Controls.Add(SubnetMaskNum4);
+            Controls.Add(SubnetMaskNum1);
             Controls.Add(label12);
             Controls.Add(label5);
             Controls.Add(label6);
             Controls.Add(label7);
-            Controls.Add(textBox5);
-            Controls.Add(textBox6);
-            Controls.Add(textBox7);
-            Controls.Add(textBox8);
+            Controls.Add(ControllerIPAddrNum2);
+            Controls.Add(ControllerIPAddrNum3);
+            Controls.Add(ControllerIPAddrNum4);
+            Controls.Add(ControllerIPAddrNum1);
             Controls.Add(label8);
             Controls.Add(PowerBtn);
             Controls.Add(sectionTitle1);
@@ -388,29 +388,29 @@
         private Label label5;
         private Label label6;
         private Label label7;
-        private TextBox textBox5;
-        private TextBox textBox6;
-        private TextBox textBox7;
-        private TextBox textBox8;
+        private TextBox ControllerIPAddrNum2;
+        private TextBox ControllerIPAddrNum3;
+        private TextBox ControllerIPAddrNum4;
+        private TextBox ControllerIPAddrNum1;
         private Label label8;
         private Label label9;
         private Label label10;
         private Label label11;
-        private TextBox textBox9;
-        private TextBox textBox10;
-        private TextBox textBox11;
-        private TextBox textBox12;
+        private TextBox SubnetMaskNum2;
+        private TextBox SubnetMaskNum3;
+        private TextBox SubnetMaskNum4;
+        private TextBox SubnetMaskNum1;
         private Label label12;
-        private TextBox textBox14;
+        private TextBox ControllerPortNum;
         private Label label14;
-        private ComboBox comboBox1;
+        private ComboBox SecondaryTabletSelector;
         private Label label15;
-        private TextBox textBox15;
+        private TextBox MagDeclinationDeg;
         private Label label16;
         private Label label17;
         private Label label18;
-        private TextBox textBox16;
+        private TextBox MagDeclinationMin;
         private Label label19;
-        private ComboBox comboBox2;
+        private ComboBox LogDataSelector;
     }
 }

@@ -1,4 +1,5 @@
 using System.Runtime;
+using System.Windows.Forms;
 using AgGrade.Controls;
 using AgGrade.Data;
 
@@ -6,6 +7,8 @@ namespace AgGrade
 {
     public partial class MainForm : Form
     {
+        private AppSettings CurrentAppSettings;
+
         public MainForm
             (
             bool Windowed
@@ -47,6 +50,9 @@ namespace AgGrade
 
             scaledImage = new Bitmap(ZoomOutBtn.Image!, new Size((int)(ZoomOutBtn.Image!.Width * ScalingFactor), (int)(ZoomOutBtn.Image!.Height * ScalingFactor)));
             ZoomOutBtn.Image = scaledImage;
+
+            CurrentAppSettings = new AppSettings();
+            CurrentAppSettings.Load();
 
             // fixme - remove
             //StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
@@ -91,6 +97,10 @@ namespace AgGrade
             settingsEditor.Parent = ContentPanel;
             settingsEditor.Dock = DockStyle.Fill;
             settingsEditor.OnPowerOff += () => { Close(); };
+
+            // Load and display settings
+            settingsEditor.ShowSettings(CurrentAppSettings);
+
             settingsEditor.Show();
         }
 
@@ -142,7 +152,8 @@ namespace AgGrade
         /// <summary>
         /// Closes the current page
         /// </summary>
-        private void ClosePage
+        /// <returns>true if page was closed</returns>
+        private bool ClosePage
             (
             )
         {
@@ -151,8 +162,17 @@ namespace AgGrade
                 Control Ctrl = (Control)ContentPanel.Controls[0];
                 if (Ctrl is AppSettingsEditor)
                 {
-                    AppSettings Settings = (Ctrl as AppSettingsEditor)!.GetSettings();
-                    Settings.Save();
+                    try
+                    {
+                        AppSettings AppSettings = (Ctrl as AppSettingsEditor)!.GetSettings();
+                        AppSettings.Save();
+                        CurrentAppSettings = AppSettings;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        MessageBox.Show($"Validation error: {ex.Message}", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
                 }
                 else if (Ctrl is EquipmentEditor)
                 {
@@ -161,6 +181,8 @@ namespace AgGrade
             }
 
             ContentPanel.Controls.Clear();
+
+            return true;
         }
 
         /// <summary>
@@ -218,6 +240,17 @@ namespace AgGrade
         private void MapBtn_Click(object sender, EventArgs e)
         {
             ShowMap();
+        }
+
+        /// <summary>
+        /// Called when application is closing
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // make sure we save the settings
+            CurrentAppSettings.Save();
         }
     }
 }
