@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Net;
+using AgGrade.Data;
 
 namespace AgGrade.Controls
 {
@@ -34,6 +35,21 @@ namespace AgGrade.Controls
         private void PowerBtn_Click(object sender, EventArgs e)
         {
             OnPowerOff?.Invoke();
+        }
+
+        /// <summary>
+        /// Gets the current settings
+        /// </summary>
+        /// <returns>Current settings</returns>
+        public AppSettings GetSettings
+            (
+            )
+        {
+            AppSettings Settings = new AppSettings();
+
+            // fixme - to do - read UI
+
+            return Settings;
         }
     }
 }

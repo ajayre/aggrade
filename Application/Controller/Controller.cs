@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Net;
 
 namespace Controller
 {
@@ -159,41 +160,29 @@ namespace Controller
         // maximum time to wait for a ping before determining controller has stopped working
         private const int PING_TIMEOUT_PERIOD_MS = 3000;
 
-        // speed of communication with controller
-        private const int BAUDRATE = 38400;
-
-        private SerialTransfer ControllerChannel;
+        private UDPTransfer ControllerChannel;
         private IMUValue TractorIMU = new IMUValue();
         private IMUValue FrontScraperIMU = new IMUValue();
         private IMUValue RearScraperIMU = new IMUValue();
 
         private DateTime LastRxPingTime;
         private bool ControllerFound;
-        private SerialPort Port;
         private BackgroundWorker WorkThread = null;
         private DateTime PingTime;
 
         /// <summary>
         /// Connect to controller
         /// </summary>
-        /// <param name="SerialPort">COM port to use e.g. "COM1"</param>
+        /// <param name="Address">IP address of controller</param>
+        /// <param name="Port">Port number that controller is listening on</param>
         public void Connect
             (
-            string SerialPort
+            IPAddress Address,
+            int Port
             )
         {
-            // Create and configure SerialPort
-            Port = new SerialPort
-            {
-                PortName = SerialPort,
-                BaudRate = BAUDRATE,
-                DataBits = 8,
-                Parity = Parity.None,
-                StopBits = StopBits.One
-            };
-
-            ControllerChannel = new SerialTransfer();
-            ControllerChannel.Begin(Port);
+            ControllerChannel = new UDPTransfer();
+            ControllerChannel.Begin(Address, Port);
 
             // tell controller we are now running
             SendControllerCommand(PGNValues.PGN_OG3D_STARTED, 0);

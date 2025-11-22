@@ -4,7 +4,6 @@ using System.Threading;
 
 namespace Controller
 {
-
     /// <summary>
     /// C# port of SerialTransfer class for packet-based serial communication
     /// using the standard System.IO.Ports.SerialPort class

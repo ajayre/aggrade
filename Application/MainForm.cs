@@ -1,5 +1,6 @@
-using AgGrade.Controls;
 using System.Runtime;
+using AgGrade.Controls;
+using AgGrade.Data;
 
 namespace AgGrade
 {
@@ -69,7 +70,7 @@ namespace AgGrade
             (
             )
         {
-            ContentPanel.Controls.Clear();
+            ClosePage();
 
             EquipmentEditor equipmentEditor = new EquipmentEditor();
             equipmentEditor.Parent = ContentPanel;
@@ -84,7 +85,7 @@ namespace AgGrade
             (
             )
         {
-            ContentPanel.Controls.Clear();
+            ClosePage();
 
             AppSettingsEditor settingsEditor = new AppSettingsEditor();
             settingsEditor.Parent = ContentPanel;
@@ -100,7 +101,7 @@ namespace AgGrade
             (
             )
         {
-            ContentPanel.Controls.Clear();
+            ClosePage();
 
             CalibrationPage calibrationPage = new CalibrationPage();
             calibrationPage.Parent = ContentPanel;
@@ -115,7 +116,7 @@ namespace AgGrade
             (
             )
         {
-            ContentPanel.Controls.Clear();
+            ClosePage();
 
             SurveyPage surveyPage = new SurveyPage();
             surveyPage.Parent = ContentPanel;
@@ -130,12 +131,36 @@ namespace AgGrade
             (
             )
         {
-            ContentPanel.Controls.Clear();
+            ClosePage();
 
             Map map = new Map();
             map.Parent = ContentPanel;
             map.Dock = DockStyle.Fill;
             map.Show();
+        }
+
+        /// <summary>
+        /// Closes the current page
+        /// </summary>
+        private void ClosePage
+            (
+            )
+        {
+            if (ContentPanel.Controls.Count == 1)
+            {
+                Control Ctrl = (Control)ContentPanel.Controls[0];
+                if (Ctrl is AppSettingsEditor)
+                {
+                    AppSettings Settings = (Ctrl as AppSettingsEditor)!.GetSettings();
+                    Settings.Save();
+                }
+                else if (Ctrl is EquipmentEditor)
+                {
+                    // fixme - to do - save equipment settings
+                }
+            }
+
+            ContentPanel.Controls.Clear();
         }
 
         /// <summary>
@@ -145,6 +170,8 @@ namespace AgGrade
         /// <param name="e"></param>
         private void PowerBtn_Click(object sender, EventArgs e)
         {
+            ClosePage();
+
             // fixme - change into shutting down windows
             Close();
         }
