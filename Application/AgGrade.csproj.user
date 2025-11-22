@@ -31,9 +31,6 @@
     <Compile Update="Controls\SurveyPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Controls\VehicleSettingsEditor.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
