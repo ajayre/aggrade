@@ -87,7 +87,16 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void UpBtn_Click(object sender, EventArgs e)
         {
-            ShowValue(GetValue() + 1);
+            int Val = GetValue();
+
+            if (Unsigned && Val < 0)
+            {
+                Value = 1;
+            }
+            else
+            {
+                ShowValue(Val + 1);
+            }
         }
 
         /// <summary>
@@ -98,7 +107,13 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void DownBtn_Click(object sender, EventArgs e)
         {
-            ShowValue(GetValue() - 1);
+            int Val = GetValue();
+            if (Unsigned && Val <= 0)
+            {
+                Val = 1;
+            }
+
+            ShowValue(Val - 1);
         }
 
         /// <summary>
@@ -110,7 +125,14 @@ namespace AgGrade.Controls
         {
             if (int.TryParse(ValueInput.Text, out int NewValue))
             {
-                ValueInput.BackColor = Color.White;
+                if (Unsigned && NewValue < 0)
+                {
+                    ValueInput.BackColor = Color.Pink;
+                }
+                else
+                {
+                    ValueInput.BackColor = Color.White;
+                }
             }
             else
             {
