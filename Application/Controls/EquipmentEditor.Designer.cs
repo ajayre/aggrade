@@ -33,46 +33,46 @@
             label16 = new Label();
             label15 = new Label();
             label13 = new Label();
-            numericInput7 = new NumericInput();
+            TractorWidth = new NumericInput();
             label14 = new Label();
             label11 = new Label();
-            numericInput6 = new NumericInput();
+            TractorTurningCircle = new NumericInput();
             label12 = new Label();
             label5 = new Label();
-            numericInput3 = new NumericInput();
+            TractorAntennaForwardOffset = new NumericInput();
             label6 = new Label();
             label2 = new Label();
-            numericInput2 = new NumericInput();
+            TractorAntennaLeftOffset = new NumericInput();
             label4 = new Label();
             label3 = new Label();
-            numericInput1 = new NumericInput();
+            TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             groupBox2 = new GroupBox();
-            label25 = new Label();
-            comboBox3 = new ComboBox();
-            label18 = new Label();
-            numericInput8 = new NumericInput();
-            comboBox1 = new ComboBox();
-            label17 = new Label();
-            label9 = new Label();
-            numericInput5 = new NumericInput();
-            label10 = new Label();
-            label7 = new Label();
-            numericInput4 = new NumericInput();
-            label8 = new Label();
+            FrontPanEquippedLabel = new Label();
+            FrontPanEquipped = new ComboBox();
+            FrontPanRaiseUnitsLabel = new Label();
+            FrontPanRaiseHeight = new NumericInput();
+            FrontPanEndofCutting = new ComboBox();
+            FrontPanEndofCuttingLabel = new Label();
+            FrontPanWidthUnitsLabel = new Label();
+            FrontPanWidth = new NumericInput();
+            FrontPanWidthLabel = new Label();
+            FrontPanAntennaHeightUnitsLabel = new Label();
+            FrontPanAntennaHeight = new NumericInput();
+            FrontPanAntennaHeightLabel = new Label();
             groupBox3 = new GroupBox();
-            label19 = new Label();
-            comboBox2 = new ComboBox();
-            label20 = new Label();
-            numericInput9 = new NumericInput();
-            comboBox4 = new ComboBox();
-            label21 = new Label();
-            label22 = new Label();
-            numericInput10 = new NumericInput();
-            label23 = new Label();
-            label24 = new Label();
-            numericInput11 = new NumericInput();
-            label26 = new Label();
+            RearPanEquippedLabel = new Label();
+            RearPanEquipped = new ComboBox();
+            RearPanRaiseUnitsLabel = new Label();
+            RearPanRaiseHeight = new NumericInput();
+            RearPanEndofCutting = new ComboBox();
+            RearPanEndofCuttingLabel = new Label();
+            RearPanWidthUnitsLabel = new Label();
+            RearPanWidth = new NumericInput();
+            RearPanWidthLabel = new Label();
+            RearPanAntennaHeightUnitsLabel = new Label();
+            RearPanAntennaHeight = new NumericInput();
+            RearPanAntennaHeightLabel = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -93,19 +93,19 @@
             groupBox1.Controls.Add(label16);
             groupBox1.Controls.Add(label15);
             groupBox1.Controls.Add(label13);
-            groupBox1.Controls.Add(numericInput7);
+            groupBox1.Controls.Add(TractorWidth);
             groupBox1.Controls.Add(label14);
             groupBox1.Controls.Add(label11);
-            groupBox1.Controls.Add(numericInput6);
+            groupBox1.Controls.Add(TractorTurningCircle);
             groupBox1.Controls.Add(label12);
             groupBox1.Controls.Add(label5);
-            groupBox1.Controls.Add(numericInput3);
+            groupBox1.Controls.Add(TractorAntennaForwardOffset);
             groupBox1.Controls.Add(label6);
             groupBox1.Controls.Add(label2);
-            groupBox1.Controls.Add(numericInput2);
+            groupBox1.Controls.Add(TractorAntennaLeftOffset);
             groupBox1.Controls.Add(label4);
             groupBox1.Controls.Add(label3);
-            groupBox1.Controls.Add(numericInput1);
+            groupBox1.Controls.Add(TractorAntennaHeight);
             groupBox1.Controls.Add(label1);
             groupBox1.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             groupBox1.Location = new Point(3, 54);
@@ -145,12 +145,14 @@
             label13.TabIndex = 34;
             label13.Text = "cm";
             // 
-            // numericInput7
+            // TractorWidth
             // 
-            numericInput7.Location = new Point(622, 78);
-            numericInput7.Name = "numericInput7";
-            numericInput7.Size = new Size(167, 41);
-            numericInput7.TabIndex = 33;
+            TractorWidth.Location = new Point(622, 78);
+            TractorWidth.Name = "TractorWidth";
+            TractorWidth.Size = new Size(167, 41);
+            TractorWidth.TabIndex = 33;
+            TractorWidth.Unsigned = true;
+            TractorWidth.Value = 0;
             // 
             // label14
             // 
@@ -172,12 +174,14 @@
             label11.TabIndex = 31;
             label11.Text = "ft";
             // 
-            // numericInput6
+            // TractorTurningCircle
             // 
-            numericInput6.Location = new Point(622, 31);
-            numericInput6.Name = "numericInput6";
-            numericInput6.Size = new Size(167, 41);
-            numericInput6.TabIndex = 30;
+            TractorTurningCircle.Location = new Point(622, 31);
+            TractorTurningCircle.Name = "TractorTurningCircle";
+            TractorTurningCircle.Size = new Size(167, 41);
+            TractorTurningCircle.TabIndex = 30;
+            TractorTurningCircle.Unsigned = true;
+            TractorTurningCircle.Value = 0;
             // 
             // label12
             // 
@@ -199,12 +203,14 @@
             label5.TabIndex = 28;
             label5.Text = "cm";
             // 
-            // numericInput3
+            // TractorAntennaForwardOffset
             // 
-            numericInput3.Location = new Point(250, 144);
-            numericInput3.Name = "numericInput3";
-            numericInput3.Size = new Size(167, 41);
-            numericInput3.TabIndex = 27;
+            TractorAntennaForwardOffset.Location = new Point(250, 144);
+            TractorAntennaForwardOffset.Name = "TractorAntennaForwardOffset";
+            TractorAntennaForwardOffset.Size = new Size(167, 41);
+            TractorAntennaForwardOffset.TabIndex = 27;
+            TractorAntennaForwardOffset.Unsigned = false;
+            TractorAntennaForwardOffset.Value = 0;
             // 
             // label6
             // 
@@ -226,12 +232,14 @@
             label2.TabIndex = 25;
             label2.Text = "cm";
             // 
-            // numericInput2
+            // TractorAntennaLeftOffset
             // 
-            numericInput2.Location = new Point(250, 78);
-            numericInput2.Name = "numericInput2";
-            numericInput2.Size = new Size(167, 41);
-            numericInput2.TabIndex = 24;
+            TractorAntennaLeftOffset.Location = new Point(250, 78);
+            TractorAntennaLeftOffset.Name = "TractorAntennaLeftOffset";
+            TractorAntennaLeftOffset.Size = new Size(167, 41);
+            TractorAntennaLeftOffset.TabIndex = 24;
+            TractorAntennaLeftOffset.Unsigned = false;
+            TractorAntennaLeftOffset.Value = 0;
             // 
             // label4
             // 
@@ -253,12 +261,14 @@
             label3.TabIndex = 22;
             label3.Text = "cm";
             // 
-            // numericInput1
+            // TractorAntennaHeight
             // 
-            numericInput1.Location = new Point(250, 31);
-            numericInput1.Name = "numericInput1";
-            numericInput1.Size = new Size(167, 43);
-            numericInput1.TabIndex = 21;
+            TractorAntennaHeight.Location = new Point(250, 31);
+            TractorAntennaHeight.Name = "TractorAntennaHeight";
+            TractorAntennaHeight.Size = new Size(167, 43);
+            TractorAntennaHeight.TabIndex = 21;
+            TractorAntennaHeight.Unsigned = true;
+            TractorAntennaHeight.Value = 0;
             // 
             // label1
             // 
@@ -273,18 +283,18 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox2.Controls.Add(label25);
-            groupBox2.Controls.Add(comboBox3);
-            groupBox2.Controls.Add(label18);
-            groupBox2.Controls.Add(numericInput8);
-            groupBox2.Controls.Add(comboBox1);
-            groupBox2.Controls.Add(label17);
-            groupBox2.Controls.Add(label9);
-            groupBox2.Controls.Add(numericInput5);
-            groupBox2.Controls.Add(label10);
-            groupBox2.Controls.Add(label7);
-            groupBox2.Controls.Add(numericInput4);
-            groupBox2.Controls.Add(label8);
+            groupBox2.Controls.Add(FrontPanEquippedLabel);
+            groupBox2.Controls.Add(FrontPanEquipped);
+            groupBox2.Controls.Add(FrontPanRaiseUnitsLabel);
+            groupBox2.Controls.Add(FrontPanRaiseHeight);
+            groupBox2.Controls.Add(FrontPanEndofCutting);
+            groupBox2.Controls.Add(FrontPanEndofCuttingLabel);
+            groupBox2.Controls.Add(FrontPanWidthUnitsLabel);
+            groupBox2.Controls.Add(FrontPanWidth);
+            groupBox2.Controls.Add(FrontPanWidthLabel);
+            groupBox2.Controls.Add(FrontPanAntennaHeightUnitsLabel);
+            groupBox2.Controls.Add(FrontPanAntennaHeight);
+            groupBox2.Controls.Add(FrontPanAntennaHeightLabel);
             groupBox2.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             groupBox2.Location = new Point(3, 276);
             groupBox2.Name = "groupBox2";
@@ -293,134 +303,140 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "Front Pan";
             // 
-            // label25
+            // FrontPanEquippedLabel
             // 
-            label25.AutoSize = true;
-            label25.Font = new Font("Segoe UI", 14F);
-            label25.Location = new Point(148, 34);
-            label25.Name = "label25";
-            label25.Size = new Size(96, 25);
-            label25.TabIndex = 35;
-            label25.Text = "Equipped:";
+            FrontPanEquippedLabel.AutoSize = true;
+            FrontPanEquippedLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanEquippedLabel.Location = new Point(148, 34);
+            FrontPanEquippedLabel.Name = "FrontPanEquippedLabel";
+            FrontPanEquippedLabel.Size = new Size(96, 25);
+            FrontPanEquippedLabel.TabIndex = 35;
+            FrontPanEquippedLabel.Text = "Equipped:";
             // 
-            // comboBox3
+            // FrontPanEquipped
             // 
-            comboBox3.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox3.Font = new Font("Segoe UI", 14F);
-            comboBox3.FormattingEnabled = true;
-            comboBox3.Items.AddRange(new object[] { "No", "Yes" });
-            comboBox3.Location = new Point(250, 31);
-            comboBox3.Name = "comboBox3";
-            comboBox3.Size = new Size(74, 33);
-            comboBox3.TabIndex = 34;
+            FrontPanEquipped.DropDownStyle = ComboBoxStyle.DropDownList;
+            FrontPanEquipped.Font = new Font("Segoe UI", 14F);
+            FrontPanEquipped.FormattingEnabled = true;
+            FrontPanEquipped.Items.AddRange(new object[] { "No", "Yes" });
+            FrontPanEquipped.Location = new Point(250, 31);
+            FrontPanEquipped.Name = "FrontPanEquipped";
+            FrontPanEquipped.Size = new Size(74, 33);
+            FrontPanEquipped.TabIndex = 34;
             // 
-            // label18
+            // FrontPanRaiseUnitsLabel
             // 
-            label18.AutoSize = true;
-            label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(795, 124);
-            label18.Name = "label18";
-            label18.Size = new Size(44, 25);
-            label18.TabIndex = 33;
-            label18.Text = "mm";
+            FrontPanRaiseUnitsLabel.AutoSize = true;
+            FrontPanRaiseUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanRaiseUnitsLabel.Location = new Point(795, 124);
+            FrontPanRaiseUnitsLabel.Name = "FrontPanRaiseUnitsLabel";
+            FrontPanRaiseUnitsLabel.Size = new Size(44, 25);
+            FrontPanRaiseUnitsLabel.TabIndex = 33;
+            FrontPanRaiseUnitsLabel.Text = "mm";
             // 
-            // numericInput8
+            // FrontPanRaiseHeight
             // 
-            numericInput8.Location = new Point(622, 115);
-            numericInput8.Name = "numericInput8";
-            numericInput8.Size = new Size(167, 43);
-            numericInput8.TabIndex = 32;
+            FrontPanRaiseHeight.Location = new Point(622, 115);
+            FrontPanRaiseHeight.Name = "FrontPanRaiseHeight";
+            FrontPanRaiseHeight.Size = new Size(167, 43);
+            FrontPanRaiseHeight.TabIndex = 32;
+            FrontPanRaiseHeight.Unsigned = true;
+            FrontPanRaiseHeight.Value = 0;
             // 
-            // comboBox1
+            // FrontPanEndofCutting
             // 
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox1.Font = new Font("Segoe UI", 14F);
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
-            comboBox1.Location = new Point(250, 119);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(366, 33);
-            comboBox1.TabIndex = 31;
+            FrontPanEndofCutting.DropDownStyle = ComboBoxStyle.DropDownList;
+            FrontPanEndofCutting.Font = new Font("Segoe UI", 14F);
+            FrontPanEndofCutting.FormattingEnabled = true;
+            FrontPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
+            FrontPanEndofCutting.Location = new Point(250, 119);
+            FrontPanEndofCutting.Name = "FrontPanEndofCutting";
+            FrontPanEndofCutting.Size = new Size(366, 33);
+            FrontPanEndofCutting.TabIndex = 31;
             // 
-            // label17
+            // FrontPanEndofCuttingLabel
             // 
-            label17.AutoSize = true;
-            label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(107, 123);
-            label17.Name = "label17";
-            label17.Size = new Size(137, 25);
-            label17.TabIndex = 30;
-            label17.Text = "End of Cutting:";
+            FrontPanEndofCuttingLabel.AutoSize = true;
+            FrontPanEndofCuttingLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanEndofCuttingLabel.Location = new Point(107, 123);
+            FrontPanEndofCuttingLabel.Name = "FrontPanEndofCuttingLabel";
+            FrontPanEndofCuttingLabel.Size = new Size(137, 25);
+            FrontPanEndofCuttingLabel.TabIndex = 30;
+            FrontPanEndofCuttingLabel.Text = "End of Cutting:";
             // 
-            // label9
+            // FrontPanWidthUnitsLabel
             // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(795, 79);
-            label9.Name = "label9";
-            label9.Size = new Size(37, 25);
-            label9.TabIndex = 28;
-            label9.Text = "cm";
+            FrontPanWidthUnitsLabel.AutoSize = true;
+            FrontPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanWidthUnitsLabel.Location = new Point(795, 79);
+            FrontPanWidthUnitsLabel.Name = "FrontPanWidthUnitsLabel";
+            FrontPanWidthUnitsLabel.Size = new Size(37, 25);
+            FrontPanWidthUnitsLabel.TabIndex = 28;
+            FrontPanWidthUnitsLabel.Text = "cm";
             // 
-            // numericInput5
+            // FrontPanWidth
             // 
-            numericInput5.Location = new Point(622, 70);
-            numericInput5.Name = "numericInput5";
-            numericInput5.Size = new Size(167, 43);
-            numericInput5.TabIndex = 27;
+            FrontPanWidth.Location = new Point(622, 70);
+            FrontPanWidth.Name = "FrontPanWidth";
+            FrontPanWidth.Size = new Size(167, 43);
+            FrontPanWidth.TabIndex = 27;
+            FrontPanWidth.Unsigned = true;
+            FrontPanWidth.Value = 0;
             // 
-            // label10
+            // FrontPanWidthLabel
             // 
-            label10.AutoSize = true;
-            label10.Font = new Font("Segoe UI", 14F);
-            label10.Location = new Point(549, 79);
-            label10.Name = "label10";
-            label10.Size = new Size(67, 25);
-            label10.TabIndex = 26;
-            label10.Text = "Width:";
+            FrontPanWidthLabel.AutoSize = true;
+            FrontPanWidthLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanWidthLabel.Location = new Point(549, 79);
+            FrontPanWidthLabel.Name = "FrontPanWidthLabel";
+            FrontPanWidthLabel.Size = new Size(67, 25);
+            FrontPanWidthLabel.TabIndex = 26;
+            FrontPanWidthLabel.Text = "Width:";
             // 
-            // label7
+            // FrontPanAntennaHeightUnitsLabel
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Segoe UI", 14F);
-            label7.Location = new Point(423, 79);
-            label7.Name = "label7";
-            label7.Size = new Size(37, 25);
-            label7.TabIndex = 25;
-            label7.Text = "cm";
+            FrontPanAntennaHeightUnitsLabel.AutoSize = true;
+            FrontPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanAntennaHeightUnitsLabel.Location = new Point(423, 79);
+            FrontPanAntennaHeightUnitsLabel.Name = "FrontPanAntennaHeightUnitsLabel";
+            FrontPanAntennaHeightUnitsLabel.Size = new Size(37, 25);
+            FrontPanAntennaHeightUnitsLabel.TabIndex = 25;
+            FrontPanAntennaHeightUnitsLabel.Text = "cm";
             // 
-            // numericInput4
+            // FrontPanAntennaHeight
             // 
-            numericInput4.Location = new Point(248, 70);
-            numericInput4.Name = "numericInput4";
-            numericInput4.Size = new Size(167, 43);
-            numericInput4.TabIndex = 24;
+            FrontPanAntennaHeight.Location = new Point(248, 70);
+            FrontPanAntennaHeight.Name = "FrontPanAntennaHeight";
+            FrontPanAntennaHeight.Size = new Size(167, 43);
+            FrontPanAntennaHeight.TabIndex = 24;
+            FrontPanAntennaHeight.Unsigned = true;
+            FrontPanAntennaHeight.Value = 0;
             // 
-            // label8
+            // FrontPanAntennaHeightLabel
             // 
-            label8.AutoSize = true;
-            label8.Font = new Font("Segoe UI", 14F);
-            label8.Location = new Point(20, 79);
-            label8.Name = "label8";
-            label8.Size = new Size(222, 25);
-            label8.TabIndex = 23;
-            label8.Text = "Antenna Height to Blade:";
+            FrontPanAntennaHeightLabel.AutoSize = true;
+            FrontPanAntennaHeightLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanAntennaHeightLabel.Location = new Point(20, 79);
+            FrontPanAntennaHeightLabel.Name = "FrontPanAntennaHeightLabel";
+            FrontPanAntennaHeightLabel.Size = new Size(222, 25);
+            FrontPanAntennaHeightLabel.TabIndex = 23;
+            FrontPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
             // groupBox3
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox3.Controls.Add(label19);
-            groupBox3.Controls.Add(comboBox2);
-            groupBox3.Controls.Add(label20);
-            groupBox3.Controls.Add(numericInput9);
-            groupBox3.Controls.Add(comboBox4);
-            groupBox3.Controls.Add(label21);
-            groupBox3.Controls.Add(label22);
-            groupBox3.Controls.Add(numericInput10);
-            groupBox3.Controls.Add(label23);
-            groupBox3.Controls.Add(label24);
-            groupBox3.Controls.Add(numericInput11);
-            groupBox3.Controls.Add(label26);
+            groupBox3.Controls.Add(RearPanEquippedLabel);
+            groupBox3.Controls.Add(RearPanEquipped);
+            groupBox3.Controls.Add(RearPanRaiseUnitsLabel);
+            groupBox3.Controls.Add(RearPanRaiseHeight);
+            groupBox3.Controls.Add(RearPanEndofCutting);
+            groupBox3.Controls.Add(RearPanEndofCuttingLabel);
+            groupBox3.Controls.Add(RearPanWidthUnitsLabel);
+            groupBox3.Controls.Add(RearPanWidth);
+            groupBox3.Controls.Add(RearPanWidthLabel);
+            groupBox3.Controls.Add(RearPanAntennaHeightUnitsLabel);
+            groupBox3.Controls.Add(RearPanAntennaHeight);
+            groupBox3.Controls.Add(RearPanAntennaHeightLabel);
             groupBox3.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             groupBox3.Location = new Point(6, 444);
             groupBox3.Name = "groupBox3";
@@ -429,118 +445,124 @@
             groupBox3.TabStop = false;
             groupBox3.Text = "Rear Pan";
             // 
-            // label19
+            // RearPanEquippedLabel
             // 
-            label19.AutoSize = true;
-            label19.Font = new Font("Segoe UI", 14F);
-            label19.Location = new Point(148, 34);
-            label19.Name = "label19";
-            label19.Size = new Size(96, 25);
-            label19.TabIndex = 35;
-            label19.Text = "Equipped:";
+            RearPanEquippedLabel.AutoSize = true;
+            RearPanEquippedLabel.Font = new Font("Segoe UI", 14F);
+            RearPanEquippedLabel.Location = new Point(148, 34);
+            RearPanEquippedLabel.Name = "RearPanEquippedLabel";
+            RearPanEquippedLabel.Size = new Size(96, 25);
+            RearPanEquippedLabel.TabIndex = 35;
+            RearPanEquippedLabel.Text = "Equipped:";
             // 
-            // comboBox2
+            // RearPanEquipped
             // 
-            comboBox2.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox2.Font = new Font("Segoe UI", 14F);
-            comboBox2.FormattingEnabled = true;
-            comboBox2.Items.AddRange(new object[] { "No", "Yes" });
-            comboBox2.Location = new Point(250, 31);
-            comboBox2.Name = "comboBox2";
-            comboBox2.Size = new Size(74, 33);
-            comboBox2.TabIndex = 34;
+            RearPanEquipped.DropDownStyle = ComboBoxStyle.DropDownList;
+            RearPanEquipped.Font = new Font("Segoe UI", 14F);
+            RearPanEquipped.FormattingEnabled = true;
+            RearPanEquipped.Items.AddRange(new object[] { "No", "Yes" });
+            RearPanEquipped.Location = new Point(250, 31);
+            RearPanEquipped.Name = "RearPanEquipped";
+            RearPanEquipped.Size = new Size(74, 33);
+            RearPanEquipped.TabIndex = 34;
             // 
-            // label20
+            // RearPanRaiseUnitsLabel
             // 
-            label20.AutoSize = true;
-            label20.Font = new Font("Segoe UI", 14F);
-            label20.Location = new Point(795, 124);
-            label20.Name = "label20";
-            label20.Size = new Size(44, 25);
-            label20.TabIndex = 33;
-            label20.Text = "mm";
+            RearPanRaiseUnitsLabel.AutoSize = true;
+            RearPanRaiseUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanRaiseUnitsLabel.Location = new Point(795, 124);
+            RearPanRaiseUnitsLabel.Name = "RearPanRaiseUnitsLabel";
+            RearPanRaiseUnitsLabel.Size = new Size(44, 25);
+            RearPanRaiseUnitsLabel.TabIndex = 33;
+            RearPanRaiseUnitsLabel.Text = "mm";
             // 
-            // numericInput9
+            // RearPanRaiseHeight
             // 
-            numericInput9.Location = new Point(622, 115);
-            numericInput9.Name = "numericInput9";
-            numericInput9.Size = new Size(167, 43);
-            numericInput9.TabIndex = 32;
+            RearPanRaiseHeight.Location = new Point(622, 115);
+            RearPanRaiseHeight.Name = "RearPanRaiseHeight";
+            RearPanRaiseHeight.Size = new Size(167, 43);
+            RearPanRaiseHeight.TabIndex = 32;
+            RearPanRaiseHeight.Unsigned = true;
+            RearPanRaiseHeight.Value = 0;
             // 
-            // comboBox4
+            // RearPanEndofCutting
             // 
-            comboBox4.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox4.Font = new Font("Segoe UI", 14F);
-            comboBox4.FormattingEnabled = true;
-            comboBox4.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
-            comboBox4.Location = new Point(250, 119);
-            comboBox4.Name = "comboBox4";
-            comboBox4.Size = new Size(366, 33);
-            comboBox4.TabIndex = 31;
+            RearPanEndofCutting.DropDownStyle = ComboBoxStyle.DropDownList;
+            RearPanEndofCutting.Font = new Font("Segoe UI", 14F);
+            RearPanEndofCutting.FormattingEnabled = true;
+            RearPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
+            RearPanEndofCutting.Location = new Point(250, 119);
+            RearPanEndofCutting.Name = "RearPanEndofCutting";
+            RearPanEndofCutting.Size = new Size(366, 33);
+            RearPanEndofCutting.TabIndex = 31;
             // 
-            // label21
+            // RearPanEndofCuttingLabel
             // 
-            label21.AutoSize = true;
-            label21.Font = new Font("Segoe UI", 14F);
-            label21.Location = new Point(107, 123);
-            label21.Name = "label21";
-            label21.Size = new Size(137, 25);
-            label21.TabIndex = 30;
-            label21.Text = "End of Cutting:";
+            RearPanEndofCuttingLabel.AutoSize = true;
+            RearPanEndofCuttingLabel.Font = new Font("Segoe UI", 14F);
+            RearPanEndofCuttingLabel.Location = new Point(107, 123);
+            RearPanEndofCuttingLabel.Name = "RearPanEndofCuttingLabel";
+            RearPanEndofCuttingLabel.Size = new Size(137, 25);
+            RearPanEndofCuttingLabel.TabIndex = 30;
+            RearPanEndofCuttingLabel.Text = "End of Cutting:";
             // 
-            // label22
+            // RearPanWidthUnitsLabel
             // 
-            label22.AutoSize = true;
-            label22.Font = new Font("Segoe UI", 14F);
-            label22.Location = new Point(795, 79);
-            label22.Name = "label22";
-            label22.Size = new Size(37, 25);
-            label22.TabIndex = 28;
-            label22.Text = "cm";
+            RearPanWidthUnitsLabel.AutoSize = true;
+            RearPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanWidthUnitsLabel.Location = new Point(795, 79);
+            RearPanWidthUnitsLabel.Name = "RearPanWidthUnitsLabel";
+            RearPanWidthUnitsLabel.Size = new Size(37, 25);
+            RearPanWidthUnitsLabel.TabIndex = 28;
+            RearPanWidthUnitsLabel.Text = "cm";
             // 
-            // numericInput10
+            // RearPanWidth
             // 
-            numericInput10.Location = new Point(622, 70);
-            numericInput10.Name = "numericInput10";
-            numericInput10.Size = new Size(167, 43);
-            numericInput10.TabIndex = 27;
+            RearPanWidth.Location = new Point(622, 70);
+            RearPanWidth.Name = "RearPanWidth";
+            RearPanWidth.Size = new Size(167, 43);
+            RearPanWidth.TabIndex = 27;
+            RearPanWidth.Unsigned = true;
+            RearPanWidth.Value = 0;
             // 
-            // label23
+            // RearPanWidthLabel
             // 
-            label23.AutoSize = true;
-            label23.Font = new Font("Segoe UI", 14F);
-            label23.Location = new Point(549, 79);
-            label23.Name = "label23";
-            label23.Size = new Size(67, 25);
-            label23.TabIndex = 26;
-            label23.Text = "Width:";
+            RearPanWidthLabel.AutoSize = true;
+            RearPanWidthLabel.Font = new Font("Segoe UI", 14F);
+            RearPanWidthLabel.Location = new Point(549, 79);
+            RearPanWidthLabel.Name = "RearPanWidthLabel";
+            RearPanWidthLabel.Size = new Size(67, 25);
+            RearPanWidthLabel.TabIndex = 26;
+            RearPanWidthLabel.Text = "Width:";
             // 
-            // label24
+            // RearPanAntennaHeightUnitsLabel
             // 
-            label24.AutoSize = true;
-            label24.Font = new Font("Segoe UI", 14F);
-            label24.Location = new Point(423, 79);
-            label24.Name = "label24";
-            label24.Size = new Size(37, 25);
-            label24.TabIndex = 25;
-            label24.Text = "cm";
+            RearPanAntennaHeightUnitsLabel.AutoSize = true;
+            RearPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanAntennaHeightUnitsLabel.Location = new Point(423, 79);
+            RearPanAntennaHeightUnitsLabel.Name = "RearPanAntennaHeightUnitsLabel";
+            RearPanAntennaHeightUnitsLabel.Size = new Size(37, 25);
+            RearPanAntennaHeightUnitsLabel.TabIndex = 25;
+            RearPanAntennaHeightUnitsLabel.Text = "cm";
             // 
-            // numericInput11
+            // RearPanAntennaHeight
             // 
-            numericInput11.Location = new Point(248, 70);
-            numericInput11.Name = "numericInput11";
-            numericInput11.Size = new Size(167, 43);
-            numericInput11.TabIndex = 24;
+            RearPanAntennaHeight.Location = new Point(248, 70);
+            RearPanAntennaHeight.Name = "RearPanAntennaHeight";
+            RearPanAntennaHeight.Size = new Size(167, 43);
+            RearPanAntennaHeight.TabIndex = 24;
+            RearPanAntennaHeight.Unsigned = true;
+            RearPanAntennaHeight.Value = 0;
             // 
-            // label26
+            // RearPanAntennaHeightLabel
             // 
-            label26.AutoSize = true;
-            label26.Font = new Font("Segoe UI", 14F);
-            label26.Location = new Point(20, 79);
-            label26.Name = "label26";
-            label26.Size = new Size(222, 25);
-            label26.TabIndex = 23;
-            label26.Text = "Antenna Height to Blade:";
+            RearPanAntennaHeightLabel.AutoSize = true;
+            RearPanAntennaHeightLabel.Font = new Font("Segoe UI", 14F);
+            RearPanAntennaHeightLabel.Location = new Point(20, 79);
+            RearPanAntennaHeightLabel.Name = "RearPanAntennaHeightLabel";
+            RearPanAntennaHeightLabel.Size = new Size(222, 25);
+            RearPanAntennaHeightLabel.TabIndex = 23;
+            RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
             // EquipmentEditor
             // 
@@ -567,47 +589,47 @@
         private SectionTitle sectionTitle1;
         private GroupBox groupBox1;
         private Label label5;
-        private NumericInput numericInput3;
+        private NumericInput TractorAntennaForwardOffset;
         private Label label6;
         private Label label2;
-        private NumericInput numericInput2;
+        private NumericInput TractorAntennaLeftOffset;
         private Label label4;
         private Label label3;
-        private NumericInput numericInput1;
+        private NumericInput TractorAntennaHeight;
         private Label label1;
         private GroupBox groupBox2;
-        private Label label7;
-        private NumericInput numericInput4;
-        private Label label8;
+        private Label FrontPanAntennaHeightUnitsLabel;
+        private NumericInput FrontPanAntennaHeight;
+        private Label FrontPanAntennaHeightLabel;
         private Label label11;
-        private NumericInput numericInput6;
+        private NumericInput TractorTurningCircle;
         private Label label12;
-        private Label label9;
-        private NumericInput numericInput5;
-        private Label label10;
+        private Label FrontPanWidthUnitsLabel;
+        private NumericInput FrontPanWidth;
+        private Label FrontPanWidthLabel;
         private Label label13;
-        private NumericInput numericInput7;
+        private NumericInput TractorWidth;
         private Label label14;
         private Label label16;
         private Label label15;
-        private Label label18;
-        private NumericInput numericInput8;
-        private ComboBox comboBox1;
-        private Label label17;
-        private Label label25;
-        private ComboBox comboBox3;
+        private Label FrontPanRaiseUnitsLabel;
+        private NumericInput FrontPanRaiseHeight;
+        private ComboBox FrontPanEndofCutting;
+        private Label FrontPanEndofCuttingLabel;
+        private Label FrontPanEquippedLabel;
+        private ComboBox FrontPanEquipped;
         private GroupBox groupBox3;
-        private Label label19;
-        private ComboBox comboBox2;
-        private Label label20;
-        private NumericInput numericInput9;
-        private ComboBox comboBox4;
-        private Label label21;
-        private Label label22;
-        private NumericInput numericInput10;
-        private Label label23;
-        private Label label24;
-        private NumericInput numericInput11;
-        private Label label26;
+        private Label RearPanEquippedLabel;
+        private ComboBox RearPanEquipped;
+        private Label RearPanRaiseUnitsLabel;
+        private NumericInput RearPanRaiseHeight;
+        private ComboBox RearPanEndofCutting;
+        private Label RearPanEndofCuttingLabel;
+        private Label RearPanWidthUnitsLabel;
+        private NumericInput RearPanWidth;
+        private Label RearPanWidthLabel;
+        private Label RearPanAntennaHeightUnitsLabel;
+        private NumericInput RearPanAntennaHeight;
+        private Label RearPanAntennaHeightLabel;
     }
 }

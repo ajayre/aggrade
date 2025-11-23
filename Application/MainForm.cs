@@ -8,6 +8,7 @@ namespace AgGrade
     public partial class MainForm : Form
     {
         private AppSettings CurrentAppSettings;
+        private EquipmentSettings CurrentEquipmentSettings;
 
         public MainForm
             (
@@ -54,6 +55,9 @@ namespace AgGrade
             CurrentAppSettings = new AppSettings();
             CurrentAppSettings.Load();
 
+            CurrentEquipmentSettings = new EquipmentSettings();
+            CurrentEquipmentSettings.Load();
+
             // fixme - remove
             //StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
             //StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
@@ -81,6 +85,10 @@ namespace AgGrade
             EquipmentEditor equipmentEditor = new EquipmentEditor();
             equipmentEditor.Parent = ContentPanel;
             equipmentEditor.Dock = DockStyle.Fill;
+            
+            // Load and display settings
+            equipmentEditor.ShowSettings(CurrentEquipmentSettings);
+            
             equipmentEditor.Show();
         }
 
@@ -176,7 +184,17 @@ namespace AgGrade
                 }
                 else if (Ctrl is EquipmentEditor)
                 {
-                    // fixme - to do - save equipment settings
+                    try
+                    {
+                        EquipmentSettings EquipmentSettings = (Ctrl as EquipmentEditor)!.GetSettings();
+                        EquipmentSettings.Save();
+                        CurrentEquipmentSettings = EquipmentSettings;
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        MessageBox.Show($"Validation error: {ex.Message}", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return false;
+                    }
                 }
             }
 
@@ -251,6 +269,7 @@ namespace AgGrade
         {
             // make sure we save the settings
             CurrentAppSettings.Save();
+            CurrentEquipmentSettings.Save();
         }
     }
 }

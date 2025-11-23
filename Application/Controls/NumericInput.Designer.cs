@@ -29,21 +29,22 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NumericInput));
-            textBox1 = new TextBox();
+            ValueInput = new TextBox();
             UpBtn = new Button();
             DownBtn = new Button();
             SuspendLayout();
             // 
-            // textBox1
+            // ValueInput
             // 
-            textBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textBox1.Font = new Font("Segoe UI", 14F);
-            textBox1.Location = new Point(3, 4);
-            textBox1.Name = "textBox1";
-            textBox1.PlaceholderText = "0";
-            textBox1.Size = new Size(146, 32);
-            textBox1.TabIndex = 0;
-            textBox1.TextAlign = HorizontalAlignment.Right;
+            ValueInput.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            ValueInput.Font = new Font("Segoe UI", 14F);
+            ValueInput.Location = new Point(3, 4);
+            ValueInput.Name = "ValueInput";
+            ValueInput.PlaceholderText = "0";
+            ValueInput.Size = new Size(146, 32);
+            ValueInput.TabIndex = 0;
+            ValueInput.TextAlign = HorizontalAlignment.Right;
+            ValueInput.TextChanged += ValueInput_TextChanged;
             // 
             // UpBtn
             // 
@@ -54,6 +55,7 @@
             UpBtn.Size = new Size(41, 39);
             UpBtn.TabIndex = 1;
             UpBtn.UseVisualStyleBackColor = true;
+            UpBtn.Click += UpBtn_Click;
             // 
             // DownBtn
             // 
@@ -64,11 +66,12 @@
             DownBtn.Size = new Size(41, 39);
             DownBtn.TabIndex = 2;
             DownBtn.UseVisualStyleBackColor = true;
+            DownBtn.Click += DownBtn_Click;
             // 
             // NumericInput
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
-            Controls.Add(textBox1);
+            Controls.Add(ValueInput);
             Controls.Add(DownBtn);
             Controls.Add(UpBtn);
             Name = "NumericInput";
@@ -79,7 +82,7 @@
 
         #endregion
 
-        private TextBox textBox1;
+        private TextBox ValueInput;
         private Button UpBtn;
         private Button DownBtn;
     }
