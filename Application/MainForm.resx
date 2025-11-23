@@ -256,7 +256,7 @@
         scT6FXDhAAAAAElFTkSuQmCC
 </value>
   </data>
-  <data name="button1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="StatusBtn.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAADAAAAAwCAYAAABXAvmHAAABgGlDQ1BzUkdCIElFQzYxOTY2LTIuMQAA
         KM+VkbtLA0EQhz+j4isSxQgWFkHUSiVGCNpYJPgCtUgi+GqSy0vI47hLELEVbAMKoo2vQv8CbQVrQVAU
@@ -265,7 +265,7 @@
         XYkKjlSwktTSwvJyutOpvPJTj/kSeywzFxTfJasTnQAT+HAxxRh+vAwyItZLPx4GZMcf8e5S/CxZiVXE
         qqyhsUKCJDn6RM1L9pj4uOgxmSnWzP7/7qseH/JY2e0+qH0yjLceqNuCYsEwPg8No3gE1Y9wkSnHZw9g
         +F30Qlnr3gfHBpxdlrXIDpxvQseDGtbCJalali0eh9cTaF6AtmtoXLJ69nPO8T2E1uWrrmB3D3rlvmP5
-        G0a4Z9f6VMJ9AAAACXBIWXMAAAsQAAALEAGtI711AAADiklEQVRoQ+2ZWwhPWRTGf+6XMeNSMnIbPCgp
+        G0a4Z9f6VMJ9AAAACXBIWXMAAAsNAAALDQHtB8AsAAADiklEQVRoQ+2ZWwhPWRTGf+6XMeNSMnIbPCgp
         SkiKolE88Uge8KAmmkkuIUVKUpR70ZghM4OMSxTlxSMlD9IUzZiMUlOTXAaTu77aW7vVOre/o2Pq/9X3
         tr51/t//nL33WmtDG58e+gFzgXkOZwNdrKAiBgFzgFXAZmATsAyYAXxug1vBGeBtDg9aQQl0Cj/8Z+Cl
         kzPyEbAO6AV0sEnK4oGTOOUfQDcryoH+1W3hx9lcWfwdWNKqicdOwpS3gR5WlIEBwE0nR1nub+WTrcuA

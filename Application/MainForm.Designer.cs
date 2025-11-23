@@ -35,7 +35,7 @@
             indicatorButton2 = new AgGrade.Controls.IndicatorButton();
             indicatorButton1 = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
-            button1 = new Button();
+            StatusBtn = new Button();
             MapBtn = new Button();
             SurveyBtn = new Button();
             CalibrationBtn = new Button();
@@ -58,14 +58,14 @@
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 0);
             panel3.Name = "panel3";
-            panel3.Size = new Size(76, 495);
+            panel3.Size = new Size(76, 698);
             panel3.TabIndex = 2;
             // 
             // ZoomInBtn
             // 
             ZoomInBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ZoomInBtn.Image = (Image)resources.GetObject("ZoomInBtn.Image");
-            ZoomInBtn.Location = new Point(8, 363);
+            ZoomInBtn.Location = new Point(8, 566);
             ZoomInBtn.Name = "ZoomInBtn";
             ZoomInBtn.Size = new Size(60, 60);
             ZoomInBtn.TabIndex = 7;
@@ -75,7 +75,7 @@
             // 
             ZoomOutBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ZoomOutBtn.Image = (Image)resources.GetObject("ZoomOutBtn.Image");
-            ZoomOutBtn.Location = new Point(8, 429);
+            ZoomOutBtn.Location = new Point(8, 632);
             ZoomOutBtn.Name = "ZoomOutBtn";
             ZoomOutBtn.Size = new Size(60, 60);
             ZoomOutBtn.TabIndex = 6;
@@ -101,27 +101,28 @@
             // 
             // panel1
             // 
-            panel1.Controls.Add(button1);
+            panel1.Controls.Add(StatusBtn);
             panel1.Controls.Add(MapBtn);
             panel1.Controls.Add(SurveyBtn);
             panel1.Controls.Add(CalibrationBtn);
             panel1.Controls.Add(EditSettingsBtn);
             panel1.Controls.Add(EditEquipmentBtn);
             panel1.Dock = DockStyle.Right;
-            panel1.Location = new Point(669, 0);
+            panel1.Location = new Point(969, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(76, 495);
+            panel1.Size = new Size(76, 698);
             panel1.TabIndex = 3;
             // 
-            // button1
+            // StatusBtn
             // 
-            button1.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            button1.Image = (Image)resources.GetObject("button1.Image");
-            button1.Location = new Point(8, 231);
-            button1.Name = "button1";
-            button1.Size = new Size(60, 60);
-            button1.TabIndex = 6;
-            button1.UseVisualStyleBackColor = true;
+            StatusBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            StatusBtn.Image = (Image)resources.GetObject("StatusBtn.Image");
+            StatusBtn.Location = new Point(8, 434);
+            StatusBtn.Name = "StatusBtn";
+            StatusBtn.Size = new Size(60, 60);
+            StatusBtn.TabIndex = 6;
+            StatusBtn.UseVisualStyleBackColor = true;
+            StatusBtn.Click += StatusBtn_Click;
             // 
             // MapBtn
             // 
@@ -149,7 +150,7 @@
             // 
             CalibrationBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             CalibrationBtn.Image = (Image)resources.GetObject("CalibrationBtn.Image");
-            CalibrationBtn.Location = new Point(8, 297);
+            CalibrationBtn.Location = new Point(8, 500);
             CalibrationBtn.Name = "CalibrationBtn";
             CalibrationBtn.Size = new Size(60, 60);
             CalibrationBtn.TabIndex = 3;
@@ -160,7 +161,7 @@
             // 
             EditSettingsBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             EditSettingsBtn.Image = (Image)resources.GetObject("EditSettingsBtn.Image");
-            EditSettingsBtn.Location = new Point(8, 363);
+            EditSettingsBtn.Location = new Point(8, 566);
             EditSettingsBtn.Name = "EditSettingsBtn";
             EditSettingsBtn.Size = new Size(60, 60);
             EditSettingsBtn.TabIndex = 1;
@@ -171,7 +172,7 @@
             // 
             EditEquipmentBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             EditEquipmentBtn.Image = (Image)resources.GetObject("EditEquipmentBtn.Image");
-            EditEquipmentBtn.Location = new Point(8, 429);
+            EditEquipmentBtn.Location = new Point(8, 632);
             EditEquipmentBtn.Name = "EditEquipmentBtn";
             EditEquipmentBtn.Size = new Size(60, 60);
             EditEquipmentBtn.TabIndex = 0;
@@ -184,7 +185,7 @@
             ContentPanel.Dock = DockStyle.Fill;
             ContentPanel.Location = new Point(76, 0);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(593, 469);
+            ContentPanel.Size = new Size(893, 672);
             ContentPanel.TabIndex = 4;
             // 
             // StatusPanel
@@ -192,9 +193,9 @@
             StatusPanel.BackColor = SystemColors.Control;
             StatusPanel.Controls.Add(StatusBar);
             StatusPanel.Dock = DockStyle.Bottom;
-            StatusPanel.Location = new Point(76, 469);
+            StatusPanel.Location = new Point(76, 672);
             StatusPanel.Name = "StatusPanel";
-            StatusPanel.Size = new Size(593, 26);
+            StatusPanel.Size = new Size(893, 26);
             StatusPanel.TabIndex = 0;
             // 
             // StatusBar
@@ -202,7 +203,7 @@
             StatusBar.Dock = DockStyle.Fill;
             StatusBar.Location = new Point(0, 0);
             StatusBar.Name = "StatusBar";
-            StatusBar.Size = new Size(593, 26);
+            StatusBar.Size = new Size(893, 26);
             StatusBar.TabIndex = 0;
             // 
             // MainForm
@@ -210,7 +211,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Green;
-            ClientSize = new Size(745, 495);
+            ClientSize = new Size(1045, 698);
             Controls.Add(ContentPanel);
             Controls.Add(StatusPanel);
             Controls.Add(panel1);
@@ -241,6 +242,6 @@
         private Button ZoomInBtn;
         private Button ZoomOutBtn;
         private Controls.StatusBar StatusBar;
-        private Button button1;
+        private Button StatusBtn;
     }
 }

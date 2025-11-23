@@ -2,6 +2,7 @@ using System.Runtime;
 using System.Windows.Forms;
 using AgGrade.Controls;
 using AgGrade.Data;
+using Controller;
 
 namespace AgGrade
 {
@@ -9,6 +10,7 @@ namespace AgGrade
     {
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
+        private OGController controller;
 
         public MainForm
             (
@@ -58,6 +60,12 @@ namespace AgGrade
             CurrentEquipmentSettings = new EquipmentSettings();
             CurrentEquipmentSettings.Load();
 
+            // connect to controller
+            controller = new OGController();
+            controller.Connect(CurrentAppSettings.ControllerAddress, CurrentAppSettings.ControllerPort, CurrentAppSettings.SubnetMask);
+
+            ShowMap();
+
             // fixme - remove
             //StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
             //StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
@@ -85,10 +93,10 @@ namespace AgGrade
             EquipmentEditor equipmentEditor = new EquipmentEditor();
             equipmentEditor.Parent = ContentPanel;
             equipmentEditor.Dock = DockStyle.Fill;
-            
+
             // Load and display settings
             equipmentEditor.ShowSettings(CurrentEquipmentSettings);
-            
+
             equipmentEditor.Show();
         }
 
@@ -155,6 +163,24 @@ namespace AgGrade
             map.Parent = ContentPanel;
             map.Dock = DockStyle.Fill;
             map.Show();
+
+            ZoomInBtn.Enabled = true;
+            ZoomOutBtn.Enabled = true;
+        }
+
+        /// <summary>
+        /// Shows the status page
+        /// </summary>
+        private void ShowStatusPage
+            (
+            )
+        {
+            ClosePage();
+
+            StatusPage statusPage = new StatusPage();
+            statusPage.Parent = ContentPanel;
+            statusPage.Dock = DockStyle.Fill;
+            statusPage.Show();
         }
 
         /// <summary>
@@ -199,6 +225,10 @@ namespace AgGrade
             }
 
             ContentPanel.Controls.Clear();
+
+            // disable controls specific to the map            
+            ZoomInBtn.Enabled = false;
+            ZoomOutBtn.Enabled = false;
 
             return true;
         }
@@ -258,6 +288,11 @@ namespace AgGrade
         private void MapBtn_Click(object sender, EventArgs e)
         {
             ShowMap();
+        }
+
+        private void StatusBtn_Click(object sender, EventArgs e)
+        {
+            ShowStatusPage();
         }
 
         /// <summary>

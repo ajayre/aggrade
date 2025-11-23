@@ -53,6 +53,7 @@ namespace Controller
         /// </summary>
         /// <param name="remoteAddress">Remote IP address to send to</param>
         /// <param name="remotePort">Remote port number</param>
+        /// <param name="subnetMask">IP for subnet mask</param>
         /// <param name="localPort">Local port to bind to (0 for auto-assign)</param>
         /// <param name="debug">Whether to print debug messages</param>
         /// <param name="debugPort">Stream for debug output</param>
@@ -60,6 +61,7 @@ namespace Controller
         public void Begin(
             IPAddress remoteAddress,
             int remotePort,
+            IPAddress subnetMask,
             int localPort = 0,
             bool debug = true,
             System.IO.Stream debugPort = null,

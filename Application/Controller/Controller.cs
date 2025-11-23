@@ -174,15 +174,17 @@ namespace Controller
         /// Connect to controller
         /// </summary>
         /// <param name="Address">IP address of controller</param>
+        /// <param name="SubnetMask">IP Subnet mask</param>
         /// <param name="Port">Port number that controller is listening on</param>
         public void Connect
             (
             IPAddress Address,
-            int Port
+            int Port,
+            IPAddress SubnetMask
             )
         {
             ControllerChannel = new UDPTransfer();
-            ControllerChannel.Begin(Address, Port);
+            ControllerChannel.Begin(Address, Port, SubnetMask);
 
             // tell controller we are now running
             SendControllerCommand(PGNValues.PGN_OG3D_STARTED, 0);
