@@ -157,7 +157,7 @@ namespace AgGrade.Controls
             Settings.SubnetMask = new IPAddress(new byte[] { subnetOctet1, subnetOctet2, subnetOctet3, subnetOctet4 });
 
             // Validate and parse port number
-            Settings.ControllerPort = ValidatePort(ControllerPortNum.Text);
+            Settings.Port = ValidatePort(PortNum.Text);
 
             // Parse secondary tablet selector (ComboBox: 0 = "No", 1 = "Yes")
             Settings.UseSecondaryTablet = SecondaryTabletSelector.SelectedIndex == 1;
@@ -238,7 +238,7 @@ namespace AgGrade.Controls
             }
 
             // Display port number
-            ControllerPortNum.Text = Settings.ControllerPort.ToString();
+            PortNum.Text = Settings.Port.ToString();
 
             // Display secondary tablet selector
             SecondaryTabletSelector.SelectedIndex = Settings.UseSecondaryTablet ? 1 : 0;

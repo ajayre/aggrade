@@ -14,7 +14,7 @@ namespace AgGrade.Data
     {
         [XmlIgnore]
         public IPAddress ControllerAddress;
-        public int ControllerPort;
+        public int Port;
         [XmlIgnore]
         public IPAddress SubnetMask;
         public bool UseSecondaryTablet;
@@ -62,8 +62,8 @@ namespace AgGrade.Data
             (
             )
         {
-            ControllerAddress = new IPAddress(0);
-            ControllerPort = 0;
+            ControllerAddress = new IPAddress(new byte[] { 192, 168, 1, 1 });
+            Port = 5000;
             SubnetMask = new IPAddress(new byte[] { 255, 255, 255, 0 });
             UseSecondaryTablet = false;
             MagneticDeclinationDegrees = 0;
@@ -137,7 +137,7 @@ namespace AgGrade.Data
                     if (loadedSettings != null)
                     {
                         ControllerAddress = loadedSettings.ControllerAddress;
-                        ControllerPort = loadedSettings.ControllerPort;
+                        Port = loadedSettings.Port;
                         SubnetMask = loadedSettings.SubnetMask;
                         UseSecondaryTablet = loadedSettings.UseSecondaryTablet;
                         MagneticDeclinationDegrees = loadedSettings.MagneticDeclinationDegrees;

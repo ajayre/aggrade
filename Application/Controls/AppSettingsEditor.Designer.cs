@@ -47,7 +47,7 @@
             SubnetMaskNum4 = new TextBox();
             SubnetMaskNum1 = new TextBox();
             label12 = new Label();
-            ControllerPortNum = new TextBox();
+            PortNum = new TextBox();
             label14 = new Label();
             SecondaryTabletSelector = new ComboBox();
             label15 = new Label();
@@ -161,7 +161,7 @@
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(309, 95);
+            label9.Location = new Point(309, 133);
             label9.Name = "label9";
             label9.Size = new Size(16, 25);
             label9.TabIndex = 27;
@@ -171,7 +171,7 @@
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI", 14F);
-            label10.Location = new Point(363, 95);
+            label10.Location = new Point(363, 133);
             label10.Name = "label10";
             label10.Size = new Size(16, 25);
             label10.TabIndex = 26;
@@ -181,7 +181,7 @@
             // 
             label11.AutoSize = true;
             label11.Font = new Font("Segoe UI", 14F);
-            label11.Location = new Point(255, 95);
+            label11.Location = new Point(255, 133);
             label11.Name = "label11";
             label11.Size = new Size(16, 25);
             label11.TabIndex = 25;
@@ -190,7 +190,7 @@
             // SubnetMaskNum2
             // 
             SubnetMaskNum2.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum2.Location = new Point(270, 92);
+            SubnetMaskNum2.Location = new Point(270, 130);
             SubnetMaskNum2.Name = "SubnetMaskNum2";
             SubnetMaskNum2.PlaceholderText = "000";
             SubnetMaskNum2.Size = new Size(40, 32);
@@ -199,7 +199,7 @@
             // SubnetMaskNum3
             // 
             SubnetMaskNum3.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum3.Location = new Point(324, 92);
+            SubnetMaskNum3.Location = new Point(324, 130);
             SubnetMaskNum3.Name = "SubnetMaskNum3";
             SubnetMaskNum3.PlaceholderText = "000";
             SubnetMaskNum3.Size = new Size(40, 32);
@@ -208,7 +208,7 @@
             // SubnetMaskNum4
             // 
             SubnetMaskNum4.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum4.Location = new Point(378, 92);
+            SubnetMaskNum4.Location = new Point(378, 130);
             SubnetMaskNum4.Name = "SubnetMaskNum4";
             SubnetMaskNum4.PlaceholderText = "000";
             SubnetMaskNum4.Size = new Size(40, 32);
@@ -217,7 +217,7 @@
             // SubnetMaskNum1
             // 
             SubnetMaskNum1.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum1.Location = new Point(216, 92);
+            SubnetMaskNum1.Location = new Point(216, 130);
             SubnetMaskNum1.Name = "SubnetMaskNum1";
             SubnetMaskNum1.PlaceholderText = "000";
             SubnetMaskNum1.Size = new Size(40, 32);
@@ -227,26 +227,26 @@
             // 
             label12.AutoSize = true;
             label12.Font = new Font("Segoe UI", 14F);
-            label12.Location = new Point(86, 95);
+            label12.Location = new Point(86, 133);
             label12.Name = "label12";
             label12.Size = new Size(124, 25);
             label12.TabIndex = 22;
             label12.Text = "Subnet Mask:";
             // 
-            // ControllerPortNum
+            // PortNum
             // 
-            ControllerPortNum.Font = new Font("Segoe UI", 14F);
-            ControllerPortNum.Location = new Point(490, 54);
-            ControllerPortNum.Name = "ControllerPortNum";
-            ControllerPortNum.PlaceholderText = "00000";
-            ControllerPortNum.Size = new Size(61, 32);
-            ControllerPortNum.TabIndex = 30;
+            PortNum.Font = new Font("Segoe UI", 14F);
+            PortNum.Location = new Point(216, 92);
+            PortNum.Name = "PortNum";
+            PortNum.PlaceholderText = "00000";
+            PortNum.Size = new Size(61, 32);
+            PortNum.TabIndex = 30;
             // 
             // label14
             // 
             label14.AutoSize = true;
             label14.Font = new Font("Segoe UI", 14F);
-            label14.Location = new Point(434, 57);
+            label14.Location = new Point(160, 95);
             label14.Name = "label14";
             label14.Size = new Size(50, 25);
             label14.TabIndex = 31;
@@ -258,7 +258,7 @@
             SecondaryTabletSelector.Font = new Font("Segoe UI", 14F);
             SecondaryTabletSelector.FormattingEnabled = true;
             SecondaryTabletSelector.Items.AddRange(new object[] { "No", "Yes" });
-            SecondaryTabletSelector.Location = new Point(216, 130);
+            SecondaryTabletSelector.Location = new Point(216, 168);
             SecondaryTabletSelector.Name = "SecondaryTabletSelector";
             SecondaryTabletSelector.Size = new Size(94, 33);
             SecondaryTabletSelector.TabIndex = 32;
@@ -267,7 +267,7 @@
             // 
             label15.AutoSize = true;
             label15.Font = new Font("Segoe UI", 14F);
-            label15.Location = new Point(15, 133);
+            label15.Location = new Point(15, 171);
             label15.Name = "label15";
             label15.Size = new Size(195, 25);
             label15.TabIndex = 33;
@@ -276,7 +276,7 @@
             // MagDeclinationDeg
             // 
             MagDeclinationDeg.Font = new Font("Segoe UI", 14F);
-            MagDeclinationDeg.Location = new Point(216, 169);
+            MagDeclinationDeg.Location = new Point(216, 207);
             MagDeclinationDeg.Name = "MagDeclinationDeg";
             MagDeclinationDeg.PlaceholderText = "+-0";
             MagDeclinationDeg.Size = new Size(70, 32);
@@ -286,7 +286,7 @@
             // 
             label16.AutoSize = true;
             label16.Font = new Font("Segoe UI", 14F);
-            label16.Location = new Point(14, 172);
+            label16.Location = new Point(14, 210);
             label16.Name = "label16";
             label16.Size = new Size(196, 25);
             label16.TabIndex = 35;
@@ -296,7 +296,7 @@
             // 
             label17.AutoSize = true;
             label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(292, 172);
+            label17.Location = new Point(292, 210);
             label17.Name = "label17";
             label17.Size = new Size(79, 25);
             label17.TabIndex = 36;
@@ -306,7 +306,7 @@
             // 
             label18.AutoSize = true;
             label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(454, 172);
+            label18.Location = new Point(454, 210);
             label18.Name = "label18";
             label18.Size = new Size(79, 25);
             label18.TabIndex = 38;
@@ -315,7 +315,7 @@
             // MagDeclinationMin
             // 
             MagDeclinationMin.Font = new Font("Segoe UI", 14F);
-            MagDeclinationMin.Location = new Point(378, 169);
+            MagDeclinationMin.Location = new Point(378, 207);
             MagDeclinationMin.Name = "MagDeclinationMin";
             MagDeclinationMin.PlaceholderText = "0";
             MagDeclinationMin.Size = new Size(70, 32);
@@ -325,7 +325,7 @@
             // 
             label19.AutoSize = true;
             label19.Font = new Font("Segoe UI", 14F);
-            label19.Location = new Point(119, 210);
+            label19.Location = new Point(119, 248);
             label19.Name = "label19";
             label19.Size = new Size(91, 25);
             label19.TabIndex = 40;
@@ -337,7 +337,7 @@
             LogDataSelector.Font = new Font("Segoe UI", 14F);
             LogDataSelector.FormattingEnabled = true;
             LogDataSelector.Items.AddRange(new object[] { "No", "Yes" });
-            LogDataSelector.Location = new Point(216, 207);
+            LogDataSelector.Location = new Point(216, 245);
             LogDataSelector.Name = "LogDataSelector";
             LogDataSelector.Size = new Size(94, 33);
             LogDataSelector.TabIndex = 39;
@@ -356,7 +356,7 @@
             Controls.Add(label16);
             Controls.Add(label15);
             Controls.Add(SecondaryTabletSelector);
-            Controls.Add(ControllerPortNum);
+            Controls.Add(PortNum);
             Controls.Add(label14);
             Controls.Add(label9);
             Controls.Add(label10);
@@ -401,7 +401,7 @@
         private TextBox SubnetMaskNum4;
         private TextBox SubnetMaskNum1;
         private Label label12;
-        private TextBox ControllerPortNum;
+        private TextBox PortNum;
         private Label label14;
         private ComboBox SecondaryTabletSelector;
         private Label label15;

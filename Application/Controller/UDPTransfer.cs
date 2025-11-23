@@ -68,7 +68,7 @@ namespace Controller
             uint? timeout = null)
         {
             _remoteEndPoint = new IPEndPoint(remoteAddress, remotePort);
-            _localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
+            _localEndPoint = new IPEndPoint(remoteAddress, localPort);
             
             _udpClient = new UdpClient(_localEndPoint);
             _timeout = timeout ?? 50; // Default 50ms timeout

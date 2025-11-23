@@ -62,7 +62,7 @@ namespace AgGrade
 
             // connect to controller
             controller = new OGController();
-            controller.Connect(CurrentAppSettings.ControllerAddress, CurrentAppSettings.ControllerPort, CurrentAppSettings.SubnetMask);
+            controller.Connect(CurrentAppSettings.ControllerAddress, CurrentAppSettings.Port, CurrentAppSettings.SubnetMask);
 
             ShowMap();
 

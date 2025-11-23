@@ -1,3 +1,4 @@
+
 namespace HardwareSim
 {
     public partial class MainForm : Form
@@ -5,6 +6,9 @@ namespace HardwareSim
         public MainForm()
         {
             InitializeComponent();
+
+            UDPServer uDPServer = new UDPServer();
+            uDPServer.StartListener();
         }
     }
 }
