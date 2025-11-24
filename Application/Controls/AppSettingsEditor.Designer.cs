@@ -47,7 +47,7 @@
             SubnetMaskNum4 = new TextBox();
             SubnetMaskNum1 = new TextBox();
             label12 = new Label();
-            PortNum = new TextBox();
+            RemotePortNum = new TextBox();
             label14 = new Label();
             SecondaryTabletSelector = new ComboBox();
             label15 = new Label();
@@ -58,6 +58,8 @@
             MagDeclinationMin = new TextBox();
             label19 = new Label();
             LogDataSelector = new ComboBox();
+            LocalPortNum = new TextBox();
+            label1 = new Label();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -233,20 +235,20 @@
             label12.TabIndex = 22;
             label12.Text = "Subnet Mask:";
             // 
-            // PortNum
+            // RemotePortNum
             // 
-            PortNum.Font = new Font("Segoe UI", 14F);
-            PortNum.Location = new Point(216, 92);
-            PortNum.Name = "PortNum";
-            PortNum.PlaceholderText = "00000";
-            PortNum.Size = new Size(61, 32);
-            PortNum.TabIndex = 30;
+            RemotePortNum.Font = new Font("Segoe UI", 14F);
+            RemotePortNum.Location = new Point(480, 54);
+            RemotePortNum.Name = "RemotePortNum";
+            RemotePortNum.PlaceholderText = "00000";
+            RemotePortNum.Size = new Size(61, 32);
+            RemotePortNum.TabIndex = 30;
             // 
             // label14
             // 
             label14.AutoSize = true;
             label14.Font = new Font("Segoe UI", 14F);
-            label14.Location = new Point(160, 95);
+            label14.Location = new Point(424, 57);
             label14.Name = "label14";
             label14.Size = new Size(50, 25);
             label14.TabIndex = 31;
@@ -342,11 +344,32 @@
             LogDataSelector.Size = new Size(94, 33);
             LogDataSelector.TabIndex = 39;
             // 
+            // LocalPortNum
+            // 
+            LocalPortNum.Font = new Font("Segoe UI", 14F);
+            LocalPortNum.Location = new Point(216, 92);
+            LocalPortNum.Name = "LocalPortNum";
+            LocalPortNum.PlaceholderText = "00000";
+            LocalPortNum.Size = new Size(61, 32);
+            LocalPortNum.TabIndex = 41;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 14F);
+            label1.Location = new Point(111, 95);
+            label1.Name = "label1";
+            label1.Size = new Size(99, 25);
+            label1.TabIndex = 42;
+            label1.Text = "Local Port:";
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(LocalPortNum);
+            Controls.Add(label1);
             Controls.Add(label19);
             Controls.Add(LogDataSelector);
             Controls.Add(label18);
@@ -356,7 +379,7 @@
             Controls.Add(label16);
             Controls.Add(label15);
             Controls.Add(SecondaryTabletSelector);
-            Controls.Add(PortNum);
+            Controls.Add(RemotePortNum);
             Controls.Add(label14);
             Controls.Add(label9);
             Controls.Add(label10);
@@ -401,7 +424,7 @@
         private TextBox SubnetMaskNum4;
         private TextBox SubnetMaskNum1;
         private Label label12;
-        private TextBox PortNum;
+        private TextBox RemotePortNum;
         private Label label14;
         private ComboBox SecondaryTabletSelector;
         private Label label15;
@@ -412,5 +435,7 @@
         private TextBox MagDeclinationMin;
         private Label label19;
         private ComboBox LogDataSelector;
+        private TextBox LocalPortNum;
+        private Label label1;
     }
 }

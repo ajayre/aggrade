@@ -99,5 +99,14 @@ namespace AgGrade.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream mixkit_street_public_alarm_997 {
+            get {
+                return ResourceManager.GetStream("mixkit-street-public-alarm-997", resourceCulture);
+            }
+        }
     }
 }

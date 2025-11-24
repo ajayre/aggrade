@@ -1,7 +1,9 @@
 using System.Runtime;
 using System.Windows.Forms;
+using System.Media;
 using AgGrade.Controls;
 using AgGrade.Data;
+using AgGrade.Properties;
 using Controller;
 
 namespace AgGrade
@@ -10,7 +12,7 @@ namespace AgGrade
     {
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
-        private OGController controller;
+        private OGController Controller;
 
         public MainForm
             (
@@ -60,15 +62,49 @@ namespace AgGrade
             CurrentEquipmentSettings = new EquipmentSettings();
             CurrentEquipmentSettings.Load();
 
-            // connect to controller
-            controller = new OGController();
-            controller.Connect(CurrentAppSettings.ControllerAddress, CurrentAppSettings.Port, CurrentAppSettings.SubnetMask);
-
             ShowMap();
+        }
 
-            // fixme - remove
-            //StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
-            //StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
+        private void Controller_OnControllerFound()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnControllerFound);
+                return;
+            }
+
+            StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.OK);
+        }
+
+        private void Controller_OnControllerLost()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnControllerLost);
+                return;
+            }
+
+            StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
+
+            SoundPlayer player = new SoundPlayer(Resources.mixkit_street_public_alarm_997);
+            player.Play();
+        }
+
+        private void Controller_OnEmergencyStop()
+        {
+        }
+
+        /// <summary>
+        /// Connects to the controller using the current settings
+        /// </summary>
+        private void ConnectToController
+            (
+            )
+        {
+            Controller.Disconnect();
+
+            // connect to controller
+            Controller.Connect(CurrentAppSettings.ControllerAddress, CurrentAppSettings.ControllerPort, CurrentAppSettings.SubnetMask, CurrentAppSettings.LocalPort);
         }
 
         /// <summary>
@@ -201,6 +237,7 @@ namespace AgGrade
                         AppSettings AppSettings = (Ctrl as AppSettingsEditor)!.GetSettings();
                         AppSettings.Save();
                         CurrentAppSettings = AppSettings;
+                        ConnectToController();
                     }
                     catch (ArgumentException ex)
                     {
@@ -215,6 +252,7 @@ namespace AgGrade
                         EquipmentSettings EquipmentSettings = (Ctrl as EquipmentEditor)!.GetSettings();
                         EquipmentSettings.Save();
                         CurrentEquipmentSettings = EquipmentSettings;
+                        UpdateEnabledLeds();
                     }
                     catch (ArgumentException ex)
                     {
@@ -305,6 +343,67 @@ namespace AgGrade
             // make sure we save the settings
             CurrentAppSettings.Save();
             CurrentEquipmentSettings.Save();
+
+            Controller.Disconnect();
+        }
+
+        /// <summary>
+        /// This code has to execute in the load event instead of the constructor
+        /// otherwise the controller events cannot update the UI
+        /// see: https://stackoverflow.com/questions/17603339/invoke-or-begininvoke-cannot-be-called-on-a-control-until-the-window-handle-has
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            Controller = new OGController();
+            Controller.OnEmergencyStop += Controller_OnEmergencyStop;
+            Controller.OnControllerLost += Controller_OnControllerLost;
+            Controller.OnControllerFound += Controller_OnControllerFound;
+
+            // initally we don't know if there is a controller or not
+            // and we don't know status of tractor RTK and IMU
+            StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
+            StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Error);
+            StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
+
+            ConnectToController();
+
+            UpdateEnabledLeds();
+        }
+
+        /// <summary>
+        /// Updates which LEDs are enabled based on the current equipment settings
+        /// </summary>
+        private void UpdateEnabledLeds
+            (
+            )
+        {
+            if (CurrentEquipmentSettings.FrontPanSettings.Equipped)
+            {
+                StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Error);
+                StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Error);
+                StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.Error);
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.Disabled);
+            }
+
+            if (CurrentEquipmentSettings.RearPanSettings.Equipped)
+            {
+                StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Error);
+                StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Error);
+                StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.Error);
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.Disabled);
+            }
         }
     }
 }

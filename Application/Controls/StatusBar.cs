@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using System.Threading;
 
 using Timer = System.Timers.Timer;
 
@@ -25,6 +26,7 @@ namespace AgGrade.Controls
 
         public enum Leds
         {
+            Controller,
             TractorRTK,
             FrontRTK,
             RearRTK,
@@ -63,33 +65,44 @@ namespace AgGrade.Controls
                 (
                 )
             {
+                if (UI == null) return;
+
+                Image newImage = null;
                 switch (State)
                 {
                     case LedState.Disabled:
-                        UI.Image = Resources.led_grey_24px;
+                        newImage = Resources.led_grey_24px;
                         break;
 
                     case LedState.Error:
                         if (On)
                         {
-                            UI.Image = Resources.led_red_24px;
+                            newImage = Resources.led_red_24px;
                         }
                         else
                         {
-                            UI.Image = Resources.led_off_24px;
+                            newImage = Resources.led_off_24px;
                         }
                         break;
 
                     case LedState.OK:
-                        UI.Image = Resources.led_green_24px;
+                        newImage = Resources.led_green_24px;
                         break;
                 }
+
+                // Always set the image (even if it's the same) to ensure the UI updates
+                UI.Image = newImage;
+                // Force immediate repaint
+                UI.Invalidate();
+                UI.Refresh();
+                UI.Update();
             }
         }
 
         private const int ERROR_FLASH_PERIOD_MS = 600;
 
         private Timer FlashTimer = new Timer();
+        private Led Controller;
         private Led TractorRTK;
         private Led FrontRTK;
         private Led RearRTK;
@@ -104,6 +117,7 @@ namespace AgGrade.Controls
         {
             InitializeComponent();
 
+            Controller = new Led(Leds.Controller, ControllerLed, LedState.Disabled);
             TractorRTK = new Led(Leds.TractorRTK, TractorRTKLed, LedState.Disabled);
             FrontRTK = new Led(Leds.FrontRTK, FrontRTKLed, LedState.Disabled);
             RearRTK = new Led(Leds.RearRTK, RearRTKLed, LedState.Disabled);
@@ -114,6 +128,7 @@ namespace AgGrade.Controls
             RearHeight = new Led(Leds.RearHeight, RearHeightLed, LedState.Disabled);
 
             SupportedLeds = new List<Led>();
+            SupportedLeds.Add(Controller);
             SupportedLeds.Add(TractorRTK);
             SupportedLeds.Add(FrontRTK);
             SupportedLeds.Add(RearRTK);
@@ -139,6 +154,16 @@ namespace AgGrade.Controls
             LedState NewState
             )
         {
+            // Ensure UI updates happen on the UI thread
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => SetLedState(led, NewState)));
+                return;
+            }
+
+            // Double-check we're on the UI thread and control is ready
+            if (SupportedLeds == null) return;
+
             foreach (Led l in SupportedLeds)
             {
                 if (l.led == led)
@@ -157,6 +182,13 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void FlashTimer_Elapsed(object? sender, ElapsedEventArgs e)
         {
+            // Ensure UI updates happen on the UI thread
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(() => FlashTimer_Elapsed(sender, e)));
+                return;
+            }
+
             foreach (Led l in SupportedLeds)
             {
                 if (l.State == LedState.Error)

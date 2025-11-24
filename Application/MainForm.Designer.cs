@@ -220,6 +220,7 @@
             Name = "MainForm";
             Text = "AgGrade";
             FormClosing += MainForm_FormClosing;
+            Load += MainForm_Load;
             panel3.ResumeLayout(false);
             panel1.ResumeLayout(false);
             StatusPanel.ResumeLayout(false);

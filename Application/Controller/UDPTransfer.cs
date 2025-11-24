@@ -36,10 +36,34 @@ namespace Controller
         /// <param name="configs">Configuration struct</param>
         public void Begin(IPAddress remoteAddress, int remotePort, int localPort, ConfigST configs)
         {
+            // Close any existing UDP client before creating a new one
+            if (_udpClient != null)
+            {
+                try
+                {
+                    _isOpen = false;
+                    _udpClient.Close();
+                    _udpClient.Dispose();
+                }
+                catch (Exception)
+                {
+                    // Ignore errors during close
+                }
+                _udpClient = null;
+            }
+
             _remoteEndPoint = new IPEndPoint(remoteAddress, remotePort);
             _localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
             
-            _udpClient = new UdpClient(_localEndPoint);
+            // Create UdpClient without binding first
+            _udpClient = new UdpClient(AddressFamily.InterNetwork);
+            
+            // Set SO_REUSEADDR before binding (required on Windows to avoid port conflicts)
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            
+            // Now bind to the local endpoint
+            _udpClient.Client.Bind(_localEndPoint);
+            
             _udpClient.Client.ReceiveTimeout = (int)configs.Timeout;
             _udpClient.Client.SendTimeout = (int)configs.Timeout;
             
@@ -67,10 +91,34 @@ namespace Controller
             System.IO.Stream debugPort = null,
             uint? timeout = null)
         {
+            // Close any existing UDP client before creating a new one
+            if (_udpClient != null)
+            {
+                try
+                {
+                    _isOpen = false;
+                    _udpClient.Close();
+                    _udpClient.Dispose();
+                }
+                catch (Exception)
+                {
+                    // Ignore errors during close
+                }
+                _udpClient = null;
+            }
+
             _remoteEndPoint = new IPEndPoint(remoteAddress, remotePort);
-            _localEndPoint = new IPEndPoint(remoteAddress, localPort);
+            _localEndPoint = new IPEndPoint(IPAddress.Any, localPort);
             
-            _udpClient = new UdpClient(_localEndPoint);
+            // Create UdpClient without binding first
+            _udpClient = new UdpClient(AddressFamily.InterNetwork);
+            
+            // Set SO_REUSEADDR before binding (required on Windows to avoid port conflicts)
+            _udpClient.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            
+            // Now bind to the local endpoint
+            _udpClient.Client.Bind(_localEndPoint);
+            
             _timeout = timeout ?? 50; // Default 50ms timeout
             
             // Configure timeouts

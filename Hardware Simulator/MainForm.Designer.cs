@@ -28,18 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            EStopBtn = new Button();
             SuspendLayout();
+            // 
+            // EStopBtn
+            // 
+            EStopBtn.Location = new Point(12, 12);
+            EStopBtn.Name = "EStopBtn";
+            EStopBtn.Size = new Size(75, 23);
+            EStopBtn.TabIndex = 0;
+            EStopBtn.Text = "ESTOP";
+            EStopBtn.UseVisualStyleBackColor = true;
+            EStopBtn.Click += EStopBtn_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(EStopBtn);
             Name = "MainForm";
             Text = "Hardware Simulator";
             ResumeLayout(false);
         }
 
         #endregion
+
+        private Button EStopBtn;
     }
 }

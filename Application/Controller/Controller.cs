@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Net;
 
@@ -39,6 +38,9 @@ namespace Controller
 
         public delegate void ControllerLost();
         public event ControllerLost OnControllerLost = null;
+
+        public delegate void ControllerFound();
+        public event ControllerFound OnControllerFound = null;
 
         public delegate void EmergencyStop();
         public event EmergencyStop OnEmergencyStop = null;
@@ -166,8 +168,9 @@ namespace Controller
         private IMUValue RearScraperIMU = new IMUValue();
 
         private DateTime LastRxPingTime;
-        private bool ControllerFound;
-        private BackgroundWorker WorkThread = null;
+        private bool IsControllerFound;
+        private Thread WorkThread = null;
+        private volatile bool WorkThreadCancellationRequested = false;
         private DateTime PingTime;
 
         /// <summary>
@@ -175,16 +178,24 @@ namespace Controller
         /// </summary>
         /// <param name="Address">IP address of controller</param>
         /// <param name="SubnetMask">IP Subnet mask</param>
-        /// <param name="Port">Port number that controller is listening on</param>
+        /// <param name="RemotePort">Port number that controller is listening on</param>
+        /// <param name="LocalPort">Port number that AgGrade will listen on</param>
         public void Connect
             (
             IPAddress Address,
-            int Port,
-            IPAddress SubnetMask
+            int RemotePort,
+            IPAddress SubnetMask,
+            int LocalPort
             )
         {
+            // Close any existing connection before creating a new one
+            if (ControllerChannel != null)
+            {
+                ControllerChannel.Close();
+            }
+            
             ControllerChannel = new UDPTransfer();
-            ControllerChannel.Begin(Address, Port, SubnetMask);
+            ControllerChannel.Begin(Address, RemotePort, SubnetMask, LocalPort);
 
             // tell controller we are now running
             SendControllerCommand(PGNValues.PGN_OG3D_STARTED, 0);
@@ -192,12 +203,11 @@ namespace Controller
             PingTime = DateTime.Now.AddMilliseconds(PING_PERIOD_MS);
 
             LastRxPingTime = DateTime.Now;
-            ControllerFound = true;
+            IsControllerFound = false;
 
-            WorkThread = new BackgroundWorker();
-            WorkThread.DoWork += WorkThread_DoWork;
-            WorkThread.WorkerSupportsCancellation = true;
-            WorkThread.RunWorkerAsync();
+            WorkThreadCancellationRequested = false;
+            WorkThread = new Thread(WorkThread_DoWork);
+            WorkThread.Start();
         }
 
         public void Disconnect
@@ -206,9 +216,20 @@ namespace Controller
         {
             if (WorkThread != null)
             {
-                WorkThread.CancelAsync();
+                WorkThreadCancellationRequested = true;
+                if (WorkThread.IsAlive)
+                {
+                    WorkThread.Join(1000); // Wait up to 1 second for thread to finish
+                }
+                WorkThread = null;
             }
-            WorkThread = null;
+            
+            // Close the UDP connection
+            if (ControllerChannel != null)
+            {
+                ControllerChannel.Close();
+                ControllerChannel = null;
+            }
         }
 
         /// <summary>
@@ -274,13 +295,9 @@ namespace Controller
         /// <summary>
         /// Communicates with the controller
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void WorkThread_DoWork(object sender, DoWorkEventArgs e)
+        private void WorkThread_DoWork()
         {
-            BackgroundWorker WorkThread = sender as BackgroundWorker;
-
-            while (!WorkThread.CancellationPending)
+            while (!WorkThreadCancellationRequested)
             {
                 // send ping to controller to tell it we are alive
                 if (PingTime < DateTime.Now)
@@ -288,14 +305,6 @@ namespace Controller
                     PingTime = DateTime.Now.AddMilliseconds(PING_PERIOD_MS);
 
                     SendControllerCommand(PGNValues.PGN_PING, 0);
-                }
-
-                // controller has disappeared
-                if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && ControllerFound)
-                {
-                    ControllerFound = false;
-
-                    OnControllerLost?.Invoke();
                 }
 
                 // message waiting from controller
@@ -311,6 +320,11 @@ namespace Controller
 
                         case PGNValues.PGN_PING:
                             LastRxPingTime = DateTime.Now;
+                            if (!IsControllerFound)
+                            {
+                                IsControllerFound = true;
+                                OnControllerFound?.Invoke();
+                            }
                             break;
 
                         // slave offsets
@@ -417,6 +431,14 @@ namespace Controller
                             OnRearBladeDirectionChanged?.Invoke(Up);
                             break;
                     }
+                }
+
+                // controller has disappeared (check after processing messages to avoid race condition)
+                if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && IsControllerFound)
+                {
+                    IsControllerFound = false;
+
+                    OnControllerLost?.Invoke();
                 }
 
                 Thread.Sleep(1);
