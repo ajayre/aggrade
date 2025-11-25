@@ -129,6 +129,7 @@ namespace AgGrade
             EquipmentEditor equipmentEditor = new EquipmentEditor();
             equipmentEditor.Parent = ContentPanel;
             equipmentEditor.Dock = DockStyle.Fill;
+            equipmentEditor.OnApplySettings += () => { ApplyEquipmentSettings(equipmentEditor); };
 
             // Load and display settings
             equipmentEditor.ShowSettings(CurrentEquipmentSettings);
@@ -149,6 +150,7 @@ namespace AgGrade
             settingsEditor.Parent = ContentPanel;
             settingsEditor.Dock = DockStyle.Fill;
             settingsEditor.OnPowerOff += () => { Close(); };
+            settingsEditor.OnApplySettings += () => { ApplyAppSettings(settingsEditor); };
 
             // Load and display settings
             settingsEditor.ShowSettings(CurrentAppSettings);
@@ -220,6 +222,36 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Gets and applies the current application settings
+        /// </summary>
+        /// <param name="Editor">The app settings editor</param>
+        private void ApplyAppSettings
+            (
+            AppSettingsEditor Editor
+            )
+        {
+            AppSettings AppSettings = Editor!.GetSettings();
+            AppSettings.Save();
+            CurrentAppSettings = AppSettings;
+            ConnectToController();
+        }
+
+        /// <summary>
+        /// Gets and applies the current equipment settings
+        /// </summary>
+        /// <param name="Editor">The equipment settings editor</param>
+        private void ApplyEquipmentSettings
+            (
+            EquipmentEditor Editor
+            )
+        {
+            EquipmentSettings EquipmentSettings = Editor!.GetSettings();
+            EquipmentSettings.Save();
+            CurrentEquipmentSettings = EquipmentSettings;
+            UpdateEnabledLeds();
+        }
+
+        /// <summary>
         /// Closes the current page
         /// </summary>
         /// <returns>true if page was closed</returns>
@@ -234,10 +266,7 @@ namespace AgGrade
                 {
                     try
                     {
-                        AppSettings AppSettings = (Ctrl as AppSettingsEditor)!.GetSettings();
-                        AppSettings.Save();
-                        CurrentAppSettings = AppSettings;
-                        ConnectToController();
+                        ApplyAppSettings((AppSettingsEditor)Ctrl);
                     }
                     catch (ArgumentException ex)
                     {
@@ -249,10 +278,7 @@ namespace AgGrade
                 {
                     try
                     {
-                        EquipmentSettings EquipmentSettings = (Ctrl as EquipmentEditor)!.GetSettings();
-                        EquipmentSettings.Save();
-                        CurrentEquipmentSettings = EquipmentSettings;
-                        UpdateEnabledLeds();
+                        ApplyEquipmentSettings((EquipmentEditor)Ctrl);
                     }
                     catch (ArgumentException ex)
                     {
@@ -379,7 +405,7 @@ namespace AgGrade
             (
             )
         {
-            if (CurrentEquipmentSettings.FrontPanSettings.Equipped)
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
                 StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Error);
                 StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Error);
@@ -392,7 +418,7 @@ namespace AgGrade
                 StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.Disabled);
             }
 
-            if (CurrentEquipmentSettings.RearPanSettings.Equipped)
+            if (CurrentEquipmentSettings.RearPan.Equipped)
             {
                 StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Error);
                 StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Error);

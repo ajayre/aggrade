@@ -58,14 +58,14 @@
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 0);
             panel3.Name = "panel3";
-            panel3.Size = new Size(76, 698);
+            panel3.Size = new Size(76, 740);
             panel3.TabIndex = 2;
             // 
             // ZoomInBtn
             // 
             ZoomInBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ZoomInBtn.Image = (Image)resources.GetObject("ZoomInBtn.Image");
-            ZoomInBtn.Location = new Point(8, 566);
+            ZoomInBtn.Location = new Point(8, 608);
             ZoomInBtn.Name = "ZoomInBtn";
             ZoomInBtn.Size = new Size(60, 60);
             ZoomInBtn.TabIndex = 7;
@@ -75,7 +75,7 @@
             // 
             ZoomOutBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             ZoomOutBtn.Image = (Image)resources.GetObject("ZoomOutBtn.Image");
-            ZoomOutBtn.Location = new Point(8, 632);
+            ZoomOutBtn.Location = new Point(8, 674);
             ZoomOutBtn.Name = "ZoomOutBtn";
             ZoomOutBtn.Size = new Size(60, 60);
             ZoomOutBtn.TabIndex = 6;
@@ -110,14 +110,14 @@
             panel1.Dock = DockStyle.Right;
             panel1.Location = new Point(969, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(76, 698);
+            panel1.Size = new Size(76, 740);
             panel1.TabIndex = 3;
             // 
             // StatusBtn
             // 
             StatusBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             StatusBtn.Image = (Image)resources.GetObject("StatusBtn.Image");
-            StatusBtn.Location = new Point(8, 434);
+            StatusBtn.Location = new Point(8, 476);
             StatusBtn.Name = "StatusBtn";
             StatusBtn.Size = new Size(60, 60);
             StatusBtn.TabIndex = 6;
@@ -150,7 +150,7 @@
             // 
             CalibrationBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             CalibrationBtn.Image = (Image)resources.GetObject("CalibrationBtn.Image");
-            CalibrationBtn.Location = new Point(8, 500);
+            CalibrationBtn.Location = new Point(8, 542);
             CalibrationBtn.Name = "CalibrationBtn";
             CalibrationBtn.Size = new Size(60, 60);
             CalibrationBtn.TabIndex = 3;
@@ -161,7 +161,7 @@
             // 
             EditSettingsBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             EditSettingsBtn.Image = (Image)resources.GetObject("EditSettingsBtn.Image");
-            EditSettingsBtn.Location = new Point(8, 566);
+            EditSettingsBtn.Location = new Point(8, 608);
             EditSettingsBtn.Name = "EditSettingsBtn";
             EditSettingsBtn.Size = new Size(60, 60);
             EditSettingsBtn.TabIndex = 1;
@@ -172,7 +172,7 @@
             // 
             EditEquipmentBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             EditEquipmentBtn.Image = (Image)resources.GetObject("EditEquipmentBtn.Image");
-            EditEquipmentBtn.Location = new Point(8, 632);
+            EditEquipmentBtn.Location = new Point(8, 674);
             EditEquipmentBtn.Name = "EditEquipmentBtn";
             EditEquipmentBtn.Size = new Size(60, 60);
             EditEquipmentBtn.TabIndex = 0;
@@ -185,7 +185,7 @@
             ContentPanel.Dock = DockStyle.Fill;
             ContentPanel.Location = new Point(76, 0);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(893, 672);
+            ContentPanel.Size = new Size(893, 714);
             ContentPanel.TabIndex = 4;
             // 
             // StatusPanel
@@ -193,7 +193,7 @@
             StatusPanel.BackColor = SystemColors.Control;
             StatusPanel.Controls.Add(StatusBar);
             StatusPanel.Dock = DockStyle.Bottom;
-            StatusPanel.Location = new Point(76, 672);
+            StatusPanel.Location = new Point(76, 714);
             StatusPanel.Name = "StatusPanel";
             StatusPanel.Size = new Size(893, 26);
             StatusPanel.TabIndex = 0;
@@ -211,7 +211,7 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Green;
-            ClientSize = new Size(1045, 698);
+            ClientSize = new Size(1045, 740);
             Controls.Add(ContentPanel);
             Controls.Add(StatusPanel);
             Controls.Add(panel1);

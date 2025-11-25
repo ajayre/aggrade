@@ -17,6 +17,8 @@ namespace AgGrade.Controls
         public delegate void PowerOff();
         public event PowerOff OnPowerOff;
 
+        public event Action OnApplySettings = null;
+
         public AppSettingsEditor()
         {
             InitializeComponent();
@@ -254,6 +256,16 @@ namespace AgGrade.Controls
 
             // Display log data selector
             LogDataSelector.SelectedIndex = Settings.LogData ? 1 : 0;
+        }
+
+        /// <summary>
+        /// Called when user taps on the apply button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ApplyBtn_Click(object sender, EventArgs e)
+        {
+            OnApplySettings?.Invoke();
         }
     }
 }

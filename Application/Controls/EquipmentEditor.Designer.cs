@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(EquipmentEditor));
             sectionTitle1 = new SectionTitle();
             groupBox1 = new GroupBox();
             label16 = new Label();
@@ -48,6 +49,9 @@
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             groupBox2 = new GroupBox();
+            label7 = new Label();
+            FrontPanMaxCutDepth = new NumericInput();
+            FrontPanMaxCutDepthLabel = new Label();
             FrontPanEquippedLabel = new Label();
             FrontPanEquipped = new ComboBox();
             FrontPanRaiseUnitsLabel = new Label();
@@ -61,7 +65,10 @@
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             groupBox3 = new GroupBox();
+            label9 = new Label();
             RearPanEquippedLabel = new Label();
+            RearPanMaxCutDepth = new NumericInput();
+            RearPanMaxCutDepthLabel = new Label();
             RearPanEquipped = new ComboBox();
             RearPanRaiseUnitsLabel = new Label();
             RearPanRaiseHeight = new NumericInput();
@@ -73,6 +80,7 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
+            ApplyBtn = new Button();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -283,6 +291,9 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(label7);
+            groupBox2.Controls.Add(FrontPanMaxCutDepth);
+            groupBox2.Controls.Add(FrontPanMaxCutDepthLabel);
             groupBox2.Controls.Add(FrontPanEquippedLabel);
             groupBox2.Controls.Add(FrontPanEquipped);
             groupBox2.Controls.Add(FrontPanRaiseUnitsLabel);
@@ -298,10 +309,39 @@
             groupBox2.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             groupBox2.Location = new Point(3, 276);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(984, 162);
+            groupBox2.Size = new Size(984, 205);
             groupBox2.TabIndex = 21;
             groupBox2.TabStop = false;
             groupBox2.Text = "Front Pan";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 14F);
+            label7.Location = new Point(425, 167);
+            label7.Name = "label7";
+            label7.Size = new Size(37, 25);
+            label7.TabIndex = 38;
+            label7.Text = "cm";
+            // 
+            // FrontPanMaxCutDepth
+            // 
+            FrontPanMaxCutDepth.Location = new Point(250, 158);
+            FrontPanMaxCutDepth.Name = "FrontPanMaxCutDepth";
+            FrontPanMaxCutDepth.Size = new Size(167, 43);
+            FrontPanMaxCutDepth.TabIndex = 37;
+            FrontPanMaxCutDepth.Unsigned = true;
+            FrontPanMaxCutDepth.Value = 0;
+            // 
+            // FrontPanMaxCutDepthLabel
+            // 
+            FrontPanMaxCutDepthLabel.AutoSize = true;
+            FrontPanMaxCutDepthLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxCutDepthLabel.Location = new Point(102, 167);
+            FrontPanMaxCutDepthLabel.Name = "FrontPanMaxCutDepthLabel";
+            FrontPanMaxCutDepthLabel.Size = new Size(142, 25);
+            FrontPanMaxCutDepthLabel.TabIndex = 36;
+            FrontPanMaxCutDepthLabel.Text = "Max Cut Depth:";
             // 
             // FrontPanEquippedLabel
             // 
@@ -425,7 +465,10 @@
             // groupBox3
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Controls.Add(label9);
             groupBox3.Controls.Add(RearPanEquippedLabel);
+            groupBox3.Controls.Add(RearPanMaxCutDepth);
+            groupBox3.Controls.Add(RearPanMaxCutDepthLabel);
             groupBox3.Controls.Add(RearPanEquipped);
             groupBox3.Controls.Add(RearPanRaiseUnitsLabel);
             groupBox3.Controls.Add(RearPanRaiseHeight);
@@ -438,12 +481,22 @@
             groupBox3.Controls.Add(RearPanAntennaHeight);
             groupBox3.Controls.Add(RearPanAntennaHeightLabel);
             groupBox3.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            groupBox3.Location = new Point(6, 444);
+            groupBox3.Location = new Point(3, 487);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(984, 216);
+            groupBox3.Size = new Size(984, 210);
             groupBox3.TabIndex = 36;
             groupBox3.TabStop = false;
             groupBox3.Text = "Rear Pan";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 14F);
+            label9.Location = new Point(425, 167);
+            label9.Name = "label9";
+            label9.Size = new Size(37, 25);
+            label9.TabIndex = 41;
+            label9.Text = "cm";
             // 
             // RearPanEquippedLabel
             // 
@@ -454,6 +507,25 @@
             RearPanEquippedLabel.Size = new Size(96, 25);
             RearPanEquippedLabel.TabIndex = 35;
             RearPanEquippedLabel.Text = "Equipped:";
+            // 
+            // RearPanMaxCutDepth
+            // 
+            RearPanMaxCutDepth.Location = new Point(250, 158);
+            RearPanMaxCutDepth.Name = "RearPanMaxCutDepth";
+            RearPanMaxCutDepth.Size = new Size(167, 43);
+            RearPanMaxCutDepth.TabIndex = 40;
+            RearPanMaxCutDepth.Unsigned = true;
+            RearPanMaxCutDepth.Value = 0;
+            // 
+            // RearPanMaxCutDepthLabel
+            // 
+            RearPanMaxCutDepthLabel.AutoSize = true;
+            RearPanMaxCutDepthLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxCutDepthLabel.Location = new Point(102, 167);
+            RearPanMaxCutDepthLabel.Name = "RearPanMaxCutDepthLabel";
+            RearPanMaxCutDepthLabel.Size = new Size(142, 25);
+            RearPanMaxCutDepthLabel.TabIndex = 39;
+            RearPanMaxCutDepthLabel.Text = "Max Cut Depth:";
             // 
             // RearPanEquipped
             // 
@@ -564,17 +636,28 @@
             RearPanAntennaHeightLabel.TabIndex = 23;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
+            // ApplyBtn
+            // 
+            ApplyBtn.Image = (Image)resources.GetObject("ApplyBtn.Image");
+            ApplyBtn.Location = new Point(246, 7);
+            ApplyBtn.Name = "ApplyBtn";
+            ApplyBtn.Size = new Size(32, 32);
+            ApplyBtn.TabIndex = 37;
+            ApplyBtn.UseVisualStyleBackColor = true;
+            ApplyBtn.Click += ApplyBtn_Click;
+            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(224, 224, 224);
+            Controls.Add(ApplyBtn);
             Controls.Add(groupBox3);
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(sectionTitle1);
             Name = "EquipmentEditor";
-            Size = new Size(990, 663);
+            Size = new Size(990, 700);
             Load += EquipmentEditor_Load;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
@@ -631,5 +714,12 @@
         private Label RearPanAntennaHeightUnitsLabel;
         private NumericInput RearPanAntennaHeight;
         private Label RearPanAntennaHeightLabel;
+        private Label label7;
+        private NumericInput FrontPanMaxCutDepth;
+        private Label FrontPanMaxCutDepthLabel;
+        private Label label9;
+        private NumericInput RearPanMaxCutDepth;
+        private Label RearPanMaxCutDepthLabel;
+        private Button ApplyBtn;
     }
 }

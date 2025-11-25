@@ -22,6 +22,7 @@ namespace AgGrade.Data
         public uint WidthCm;
         public EndOfCuttingOptions EndofCutting;
         public uint RaiseHeightMm;
+        public uint MaxCutDepthCm;
 
         public PanSettings
             (
@@ -32,6 +33,7 @@ namespace AgGrade.Data
             WidthCm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
             RaiseHeightMm = 0;
+            MaxCutDepthCm = 6;
         }
 
         public XElement ToXml
@@ -43,7 +45,8 @@ namespace AgGrade.Data
                 new XElement("AntennaHeightCm", AntennaHeightCm),
                 new XElement("WidthCm", WidthCm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
-                new XElement("RaiseHeightMm", RaiseHeightMm)
+                new XElement("RaiseHeightMm", RaiseHeightMm),
+                new XElement("MaxCutDepthCm", MaxCutDepthCm)
             );
         }
 
@@ -94,6 +97,13 @@ namespace AgGrade.Data
             {
                 RaiseHeightMm = raiseHeight;
             }
+
+            // Parse MaxCutDepthCm
+            XElement? maxCutDepthElement = xml.Element("MaxCutDepthCm");
+            if (maxCutDepthElement != null && uint.TryParse(maxCutDepthElement.Value, out uint maxCutDepth))
+            {
+                MaxCutDepthCm = maxCutDepth;
+            }
         }
     }
 
@@ -104,8 +114,8 @@ namespace AgGrade.Data
         public int TractorAntennaForwardOffsetCm;
         public uint TractorTurningCircleFt;
         public uint TractorWidthCm;
-        public PanSettings FrontPanSettings;
-        public PanSettings RearPanSettings;
+        public PanSettings FrontPan;
+        public PanSettings RearPan;
 
         public EquipmentSettings
             (
@@ -117,8 +127,8 @@ namespace AgGrade.Data
             TractorTurningCircleFt = 0;
             TractorWidthCm = 0;
 
-            FrontPanSettings = new PanSettings();
-            RearPanSettings = new PanSettings();
+            FrontPan = new PanSettings();
+            RearPan = new PanSettings();
         }
 
         /// <summary>
@@ -156,8 +166,8 @@ namespace AgGrade.Data
                         new XElement("TractorAntennaForwardOffsetCm", TractorAntennaForwardOffsetCm),
                         new XElement("TractorTurningCircleFt", TractorTurningCircleFt),
                         new XElement("TractorWidthCm", TractorWidthCm),
-                        new XElement("FrontPanSettings", FrontPanSettings.ToXml().Elements()),
-                        new XElement("RearPanSettings", RearPanSettings.ToXml().Elements())
+                        new XElement("FrontPanSettings", FrontPan.ToXml().Elements()),
+                        new XElement("RearPanSettings", RearPan.ToXml().Elements())
                     )
                 );
                 
@@ -235,7 +245,7 @@ namespace AgGrade.Data
                 {
                     // Create a wrapper XElement with "PanSettings" as the name for FromXml
                     XElement frontPanXml = new XElement("PanSettings", frontPanSettingsElement.Elements());
-                    FrontPanSettings.FromXml(frontPanXml);
+                    FrontPan.FromXml(frontPanXml);
                 }
                 
                 // Parse RearPanSettings
@@ -244,7 +254,7 @@ namespace AgGrade.Data
                 {
                     // Create a wrapper XElement with "PanSettings" as the name for FromXml
                     XElement rearPanXml = new XElement("PanSettings", rearPanSettingsElement.Elements());
-                    RearPanSettings.FromXml(rearPanXml);
+                    RearPan.FromXml(rearPanXml);
                 }
             }
             catch (Exception ex)

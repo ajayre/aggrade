@@ -60,6 +60,7 @@
             LogDataSelector = new ComboBox();
             LocalPortNum = new TextBox();
             label1 = new Label();
+            ApplyBtn = new Button();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -74,7 +75,7 @@
             // PowerBtn
             // 
             PowerBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            PowerBtn.BackColor = SystemColors.Control;
+            PowerBtn.BackColor = Color.White;
             PowerBtn.Image = (Image)resources.GetObject("PowerBtn.Image");
             PowerBtn.Location = new Point(772, 9);
             PowerBtn.Name = "PowerBtn";
@@ -363,11 +364,22 @@
             label1.TabIndex = 42;
             label1.Text = "Local Port:";
             // 
+            // ApplyBtn
+            // 
+            ApplyBtn.Image = (Image)resources.GetObject("ApplyBtn.Image");
+            ApplyBtn.Location = new Point(255, 7);
+            ApplyBtn.Name = "ApplyBtn";
+            ApplyBtn.Size = new Size(32, 32);
+            ApplyBtn.TabIndex = 43;
+            ApplyBtn.UseVisualStyleBackColor = true;
+            ApplyBtn.Click += ApplyBtn_Click;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(ApplyBtn);
             Controls.Add(LocalPortNum);
             Controls.Add(label1);
             Controls.Add(label19);
@@ -437,5 +449,6 @@
         private ComboBox LogDataSelector;
         private TextBox LocalPortNum;
         private Label label1;
+        private Button ApplyBtn;
     }
 }

@@ -13,10 +13,12 @@ namespace AgGrade.Controls
 {
     public partial class EquipmentEditor : UserControl
     {
+        public event Action OnApplySettings = null;
+
         public EquipmentEditor()
         {
             InitializeComponent();
-            
+
             // Wire up event handlers
             FrontPanEquipped.SelectedIndexChanged += FrontPanEquipped_SelectedIndexChanged;
             FrontPanEndofCutting.SelectedIndexChanged += FrontPanEndofCutting_SelectedIndexChanged;
@@ -67,22 +69,24 @@ namespace AgGrade.Controls
             Settings.TractorWidthCm = ValidateUInt(TractorWidth.Value, "Tractor Width");
 
             // Parse Front Pan Settings
-            Settings.FrontPanSettings.Equipped = FrontPanEquipped.SelectedIndex == 1;
-            Settings.FrontPanSettings.AntennaHeightCm = ValidateUInt(FrontPanAntennaHeight.Value, "Front Pan Antenna Height");
-            Settings.FrontPanSettings.WidthCm = ValidateUInt(FrontPanWidth.Value, "Front Pan Width");
-            Settings.FrontPanSettings.EndofCutting = FrontPanEndofCutting.SelectedIndex == 0 
-                ? PanSettings.EndOfCuttingOptions.Float 
+            Settings.FrontPan.Equipped = FrontPanEquipped.SelectedIndex == 1;
+            Settings.FrontPan.AntennaHeightCm = ValidateUInt(FrontPanAntennaHeight.Value, "Front Pan Antenna Height");
+            Settings.FrontPan.WidthCm = ValidateUInt(FrontPanWidth.Value, "Front Pan Width");
+            Settings.FrontPan.EndofCutting = FrontPanEndofCutting.SelectedIndex == 0
+                ? PanSettings.EndOfCuttingOptions.Float
                 : PanSettings.EndOfCuttingOptions.Raise;
-            Settings.FrontPanSettings.RaiseHeightMm = ValidateUInt(FrontPanRaiseHeight.Value, "Front Pan Raise Height");
+            Settings.FrontPan.RaiseHeightMm = ValidateUInt(FrontPanRaiseHeight.Value, "Front Pan Raise Height");
+            Settings.FrontPan.MaxCutDepthCm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
 
             // Parse Rear Pan Settings
-            Settings.RearPanSettings.Equipped = RearPanEquipped.SelectedIndex == 1;
-            Settings.RearPanSettings.AntennaHeightCm = ValidateUInt(RearPanAntennaHeight.Value, "Rear Pan Antenna Height");
-            Settings.RearPanSettings.WidthCm = ValidateUInt(RearPanWidth.Value, "Rear Pan Width");
-            Settings.RearPanSettings.EndofCutting = RearPanEndofCutting.SelectedIndex == 0 
-                ? PanSettings.EndOfCuttingOptions.Float 
+            Settings.RearPan.Equipped = RearPanEquipped.SelectedIndex == 1;
+            Settings.RearPan.AntennaHeightCm = ValidateUInt(RearPanAntennaHeight.Value, "Rear Pan Antenna Height");
+            Settings.RearPan.WidthCm = ValidateUInt(RearPanWidth.Value, "Rear Pan Width");
+            Settings.RearPan.EndofCutting = RearPanEndofCutting.SelectedIndex == 0
+                ? PanSettings.EndOfCuttingOptions.Float
                 : PanSettings.EndOfCuttingOptions.Raise;
-            Settings.RearPanSettings.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
+            Settings.RearPan.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
+            Settings.RearPan.MaxCutDepthCm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
 
             return Settings;
         }
@@ -104,21 +108,23 @@ namespace AgGrade.Controls
             TractorWidth.Value = (int)Settings.TractorWidthCm;
 
             // Display Front Pan Settings
-            FrontPanEquipped.SelectedIndex = Settings.FrontPanSettings.Equipped ? 1 : 0;
-            FrontPanAntennaHeight.Value = (int)Settings.FrontPanSettings.AntennaHeightCm;
-            FrontPanWidth.Value = (int)Settings.FrontPanSettings.WidthCm;
-            FrontPanEndofCutting.SelectedIndex = Settings.FrontPanSettings.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
-            FrontPanRaiseHeight.Value = (int)Settings.FrontPanSettings.RaiseHeightMm;
+            FrontPanEquipped.SelectedIndex = Settings.FrontPan.Equipped ? 1 : 0;
+            FrontPanAntennaHeight.Value = (int)Settings.FrontPan.AntennaHeightCm;
+            FrontPanWidth.Value = (int)Settings.FrontPan.WidthCm;
+            FrontPanEndofCutting.SelectedIndex = Settings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
+            FrontPanRaiseHeight.Value = (int)Settings.FrontPan.RaiseHeightMm;
+            FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthCm;
 
             // Display Rear Pan Settings
             // Enforce constraint: if front pan is not equipped, rear pan must not be equipped
-            bool rearPanEquipped = Settings.RearPanSettings.Equipped && Settings.FrontPanSettings.Equipped;
+            bool rearPanEquipped = Settings.RearPan.Equipped && Settings.FrontPan.Equipped;
             RearPanEquipped.SelectedIndex = rearPanEquipped ? 1 : 0;
-            RearPanAntennaHeight.Value = (int)Settings.RearPanSettings.AntennaHeightCm;
-            RearPanWidth.Value = (int)Settings.RearPanSettings.WidthCm;
-            RearPanEndofCutting.SelectedIndex = Settings.RearPanSettings.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
-            RearPanRaiseHeight.Value = (int)Settings.RearPanSettings.RaiseHeightMm;
-            
+            RearPanAntennaHeight.Value = (int)Settings.RearPan.AntennaHeightCm;
+            RearPanWidth.Value = (int)Settings.RearPan.WidthCm;
+            RearPanEndofCutting.SelectedIndex = Settings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
+            RearPanRaiseHeight.Value = (int)Settings.RearPan.RaiseHeightMm;
+            RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthCm;
+
             // Update UI state after displaying settings
             UpdateFrontPanUI();
             UpdateRearPanUI();
@@ -131,13 +137,14 @@ namespace AgGrade.Controls
         {
             bool isEquipped = FrontPanEquipped.SelectedIndex == 1;
             bool isRaise = FrontPanEndofCutting.SelectedIndex == 1;
-            
+
             // Enable/disable all pan controls based on equipped status
             FrontPanAntennaHeight.Enabled = isEquipped;
             FrontPanWidth.Enabled = isEquipped;
             FrontPanEndofCutting.Enabled = isEquipped;
             FrontPanRaiseHeight.Enabled = isEquipped && isRaise;
-            
+            FrontPanMaxCutDepth.Enabled = isEquipped;
+
             // Enable/disable associated labels
             FrontPanAntennaHeightUnitsLabel.Enabled = isEquipped;
             FrontPanAntennaHeightLabel.Enabled = isEquipped;
@@ -145,6 +152,7 @@ namespace AgGrade.Controls
             FrontPanWidthLabel.Enabled = isEquipped;
             FrontPanEndofCuttingLabel.Enabled = isEquipped;
             FrontPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
+            FrontPanMaxCutDepthLabel.Enabled = isEquipped;
         }
 
         /// <summary>
@@ -155,17 +163,18 @@ namespace AgGrade.Controls
             bool frontPanEquipped = FrontPanEquipped.SelectedIndex == 1;
             bool isEquipped = RearPanEquipped.SelectedIndex == 1;
             bool isRaise = RearPanEndofCutting.SelectedIndex == 1;
-            
+
             // Rear pan can only be equipped if front pan is equipped
             RearPanEquipped.Enabled = frontPanEquipped;
             RearPanEquippedLabel.Enabled = frontPanEquipped;
-            
+
             // Enable/disable all pan controls based on equipped status
             RearPanAntennaHeight.Enabled = isEquipped;
             RearPanWidth.Enabled = isEquipped;
             RearPanEndofCutting.Enabled = isEquipped;
             RearPanRaiseHeight.Enabled = isEquipped && isRaise;
-            
+            RearPanMaxCutDepth.Enabled = isEquipped;
+
             // Enable/disable associated labels
             RearPanAntennaHeightUnitsLabel.Enabled = isEquipped;
             RearPanAntennaHeightLabel.Enabled = isEquipped;
@@ -173,6 +182,7 @@ namespace AgGrade.Controls
             RearPanWidthLabel.Enabled = isEquipped;
             RearPanEndofCuttingLabel.Enabled = isEquipped;
             RearPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
+            RearPanMaxCutDepthLabel.Enabled = isEquipped;
         }
 
         /// <summary>
@@ -188,7 +198,7 @@ namespace AgGrade.Controls
                 RearPanEquipped.SelectedIndex = 0;
                 RearPanEquipped.SelectedIndexChanged += RearPanEquipped_SelectedIndexChanged;
             }
-            
+
             UpdateFrontPanUI();
             UpdateRearPanUI();
         }
@@ -215,6 +225,16 @@ namespace AgGrade.Controls
         private void RearPanEndofCutting_SelectedIndexChanged(object sender, EventArgs e)
         {
             UpdateRearPanUI();
+        }
+
+        /// <summary>
+        /// Called when user taps on the apply button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ApplyBtn_Click(object sender, EventArgs e)
+        {
+            OnApplySettings?.Invoke();
         }
     }
 }
