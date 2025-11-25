@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             EStopBtn = new Button();
+            ClearEStopBtn = new Button();
             SuspendLayout();
             // 
             // EStopBtn
@@ -37,15 +38,26 @@
             EStopBtn.Name = "EStopBtn";
             EStopBtn.Size = new Size(75, 23);
             EStopBtn.TabIndex = 0;
-            EStopBtn.Text = "ESTOP";
+            EStopBtn.Text = "Set ESTOP";
             EStopBtn.UseVisualStyleBackColor = true;
             EStopBtn.Click += EStopBtn_Click;
+            // 
+            // ClearEStopBtn
+            // 
+            ClearEStopBtn.Location = new Point(93, 12);
+            ClearEStopBtn.Name = "ClearEStopBtn";
+            ClearEStopBtn.Size = new Size(92, 23);
+            ClearEStopBtn.TabIndex = 1;
+            ClearEStopBtn.Text = "Clear ESTOP";
+            ClearEStopBtn.UseVisualStyleBackColor = true;
+            ClearEStopBtn.Click += ClearEStopBtn_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(ClearEStopBtn);
             Controls.Add(EStopBtn);
             Name = "MainForm";
             Text = "Hardware Simulator";
@@ -55,5 +67,6 @@
         #endregion
 
         private Button EStopBtn;
+        private Button ClearEStopBtn;
     }
 }

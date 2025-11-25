@@ -45,6 +45,9 @@ namespace Controller
         public delegate void EmergencyStop();
         public event EmergencyStop OnEmergencyStop = null;
 
+        public delegate void EmergencyStopCleared();
+        public event EmergencyStopCleared OnEmergencyStopCleared = null;
+
         public delegate void SlaveOffsetChanged(int Offset);
         public event SlaveOffsetChanged OnFrontSlaveOffsetChanged = null;
         public event SlaveOffsetChanged OnRearSlaveOffsetChanged = null;
@@ -73,6 +76,7 @@ namespace Controller
             PGN_RESET                    = 0x0001,
             PGN_OG3D_STARTED             = 0x0002,
             PGN_PING                     = 0x0003,
+            PGN_CLEAR_ESTOP              = 0x0004,
 
             // blade control
             PGN_FRONT_CUT_VALVE          = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX
@@ -316,6 +320,10 @@ namespace Controller
                         // misc
                         case PGNValues.PGN_ESTOP:
                             OnEmergencyStop?.Invoke();
+                            break;
+
+                        case PGNValues.PGN_CLEAR_ESTOP:
+                            OnEmergencyStopCleared?.Invoke();
                             break;
 
                         case PGNValues.PGN_PING:

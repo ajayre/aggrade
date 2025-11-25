@@ -53,5 +53,14 @@ namespace HardwareSim
 
             await uDPServer.Send(Status);
         }
+
+        private async void ClearEStopBtn_Click(object sender, EventArgs e)
+        {
+            AgGradeStatus Status = new AgGradeStatus();
+            Status.PGN = PGNValues.PGN_CLEAR_ESTOP;
+            Status.Value = 0;
+
+            await uDPServer.Send(Status);
+        }
     }
 }

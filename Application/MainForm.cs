@@ -65,6 +65,17 @@ namespace AgGrade
             ShowMap();
         }
 
+        /// <summary>
+        /// Sounds an alarm to alert the operator
+        /// </summary>
+        private void SoundAlarm
+            (
+            )
+        {
+            SoundPlayer player = new SoundPlayer(Resources.mixkit_street_public_alarm_997);
+            player.Play();
+        }
+
         private void Controller_OnControllerFound()
         {
             if (InvokeRequired)
@@ -86,12 +97,31 @@ namespace AgGrade
 
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
 
-            SoundPlayer player = new SoundPlayer(Resources.mixkit_street_public_alarm_997);
-            player.Play();
+            SoundAlarm();
         }
 
         private void Controller_OnEmergencyStop()
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnEmergencyStop);
+                return;
+            }
+
+            StatusBar.ShowEStop = true;
+
+            SoundAlarm();
+        }
+
+        private void Controller_OnEmergencyStopCleared()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnEmergencyStopCleared);
+                return;
+            }
+
+            StatusBar.ShowEStop = false;
         }
 
         /// <summary>
@@ -384,6 +414,7 @@ namespace AgGrade
         {
             Controller = new OGController();
             Controller.OnEmergencyStop += Controller_OnEmergencyStop;
+            Controller.OnEmergencyStopCleared += Controller_OnEmergencyStopCleared;
             Controller.OnControllerLost += Controller_OnControllerLost;
             Controller.OnControllerFound += Controller_OnControllerFound;
 

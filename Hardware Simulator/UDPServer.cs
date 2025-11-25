@@ -19,6 +19,7 @@ namespace HardwareSim
         PGN_RESET = 0x0001,
         PGN_OG3D_STARTED = 0x0002,
         PGN_PING = 0x0003,
+        PGN_CLEAR_ESTOP = 0x0004,
 
         // blade control
         PGN_FRONT_CUT_VALVE = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX

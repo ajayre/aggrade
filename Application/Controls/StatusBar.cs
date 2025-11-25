@@ -113,6 +113,22 @@ namespace AgGrade.Controls
         private Led RearHeight;
         private List<Led> SupportedLeds;
 
+        /// <summary>
+        /// Show and hide the emergency stop banner
+        /// </summary>
+        public bool ShowEStop
+        {
+            get
+            {
+                return EStopBanner.Visible;
+            }
+
+            set
+            {
+                EStopBanner.Visible = value;
+            }
+        }
+
         public StatusBar()
         {
             InitializeComponent();
@@ -141,6 +157,8 @@ namespace AgGrade.Controls
             FlashTimer.Interval = ERROR_FLASH_PERIOD_MS;
             FlashTimer.Elapsed += FlashTimer_Elapsed;
             FlashTimer.Start();
+
+            EStopBanner.Visible = false;
         }
 
         /// <summary>

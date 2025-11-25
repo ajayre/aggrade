@@ -42,6 +42,8 @@
             label3 = new Label();
             label4 = new Label();
             ControllerLed = new PictureBox();
+            EStopBanner = new Panel();
+            label5 = new Label();
             ((System.ComponentModel.ISupportInitialize)TractorRTKLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)FrontRTKLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)RearRTKLed).BeginInit();
@@ -51,6 +53,7 @@
             ((System.ComponentModel.ISupportInitialize)FrontHeightLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)RearHeightLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ControllerLed).BeginInit();
+            EStopBanner.SuspendLayout();
             SuspendLayout();
             // 
             // TractorRTKLed
@@ -174,10 +177,33 @@
             ControllerLed.TabIndex = 12;
             ControllerLed.TabStop = false;
             // 
+            // EStopBanner
+            // 
+            EStopBanner.BackColor = Color.Red;
+            EStopBanner.Controls.Add(label5);
+            EStopBanner.Dock = DockStyle.Right;
+            EStopBanner.Location = new Point(688, 0);
+            EStopBanner.Name = "EStopBanner";
+            EStopBanner.Size = new Size(228, 24);
+            EStopBanner.TabIndex = 13;
+            // 
+            // label5
+            // 
+            label5.Dock = DockStyle.Fill;
+            label5.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            label5.ForeColor = Color.WhiteSmoke;
+            label5.Location = new Point(0, 0);
+            label5.Name = "label5";
+            label5.Size = new Size(228, 24);
+            label5.TabIndex = 0;
+            label5.Text = "EMERGENCY STOP";
+            label5.TextAlign = ContentAlignment.MiddleCenter;
+            // 
             // StatusBar
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(EStopBanner);
             Controls.Add(ControllerLed);
             Controls.Add(label4);
             Controls.Add(label3);
@@ -192,7 +218,7 @@
             Controls.Add(FrontRTKLed);
             Controls.Add(TractorRTKLed);
             Name = "StatusBar";
-            Size = new Size(469, 24);
+            Size = new Size(916, 24);
             ((System.ComponentModel.ISupportInitialize)TractorRTKLed).EndInit();
             ((System.ComponentModel.ISupportInitialize)FrontRTKLed).EndInit();
             ((System.ComponentModel.ISupportInitialize)RearRTKLed).EndInit();
@@ -202,6 +228,7 @@
             ((System.ComponentModel.ISupportInitialize)FrontHeightLed).EndInit();
             ((System.ComponentModel.ISupportInitialize)RearHeightLed).EndInit();
             ((System.ComponentModel.ISupportInitialize)ControllerLed).EndInit();
+            EStopBanner.ResumeLayout(false);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -221,5 +248,7 @@
         private Label label3;
         private Label label4;
         private PictureBox ControllerLed;
+        private Panel EStopBanner;
+        private Label label5;
     }
 }
