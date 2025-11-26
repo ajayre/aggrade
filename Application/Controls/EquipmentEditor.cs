@@ -88,6 +88,26 @@ namespace AgGrade.Controls
             Settings.RearPan.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
             Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
 
+            // Parse Front Blade PWM Settings
+            Settings.FrontBlade.PWMGainUp = ValidateUInt(FrontBladePWMGainUp.Value, "Front Blade PWM Gain Up");
+            Settings.FrontBlade.PWMGainDown = ValidateUInt(FrontBladePWMGainDown.Value, "Front Blade PWM Gain Down");
+            Settings.FrontBlade.PWMMinUp = ValidateUInt(FrontBladePWMMinUp.Value, "Front Blade PWM Min Up");
+            Settings.FrontBlade.PWMMinDown = ValidateUInt(FrontBladePWMMinDown.Value, "Front Blade PWM Min Down");
+            Settings.FrontBlade.PWMMaxUp = ValidateUInt(FrontBladePWMMaxUp.Value, "Front Blade PWM Max Up");
+            Settings.FrontBlade.PWMMaxDown = ValidateUInt(FrontBladePWMMaxDown.Value, "Front Blade PWM Max Down");
+            Settings.FrontBlade.IntegralMultiplier = ValidateUInt(FrontBladeIntegralMultiplier.Value, "Front Blade Integral Multiplier");
+            Settings.FrontBlade.Deadband = ValidateUInt(FrontBladeDeadband.Value, "Front Blade Deadband");
+
+            // Parse Rear Blade PWM Settings
+            Settings.RearBlade.PWMGainUp = ValidateUInt(RearBladePWMGainUp.Value, "Rear Blade PWM Gain Up");
+            Settings.RearBlade.PWMGainDown = ValidateUInt(RearBladePWMGainDown.Value, "Rear Blade PWM Gain Down");
+            Settings.RearBlade.PWMMinUp = ValidateUInt(RearBladePWMMinUp.Value, "Rear Blade PWM Min Up");
+            Settings.RearBlade.PWMMinDown = ValidateUInt(RearBladePWMMinDown.Value, "Rear Blade PWM Min Down");
+            Settings.RearBlade.PWMMaxUp = ValidateUInt(RearBladePWMMaxUp.Value, "Rear Blade PWM Max Up");
+            Settings.RearBlade.PWMMaxDown = ValidateUInt(RearBladePWMMaxDown.Value, "Rear Blade PWM Max Down");
+            Settings.RearBlade.IntegralMultiplier = ValidateUInt(RearBladeIntegralMultiplier.Value, "Rear Blade Integral Multiplier");
+            Settings.RearBlade.Deadband = ValidateUInt(RearBladeDeadband.Value, "Rear Blade Deadband");
+
             return Settings;
         }
 
@@ -125,6 +145,26 @@ namespace AgGrade.Controls
             RearPanRaiseHeight.Value = (int)Settings.RearPan.RaiseHeightMm;
             RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
 
+            // Display Front Blade PWM Settings
+            FrontBladePWMGainUp.Value = (int)Settings.FrontBlade.PWMGainUp;
+            FrontBladePWMGainDown.Value = (int)Settings.FrontBlade.PWMGainDown;
+            FrontBladePWMMinUp.Value = (int)Settings.FrontBlade.PWMMinUp;
+            FrontBladePWMMinDown.Value = (int)Settings.FrontBlade.PWMMinDown;
+            FrontBladePWMMaxUp.Value = (int)Settings.FrontBlade.PWMMaxUp;
+            FrontBladePWMMaxDown.Value = (int)Settings.FrontBlade.PWMMaxDown;
+            FrontBladeIntegralMultiplier.Value = (int)Settings.FrontBlade.IntegralMultiplier;
+            FrontBladeDeadband.Value = (int)Settings.FrontBlade.Deadband;
+
+            // Display Rear Blade PWM Settings
+            RearBladePWMGainUp.Value = (int)Settings.RearBlade.PWMGainUp;
+            RearBladePWMGainDown.Value = (int)Settings.RearBlade.PWMGainDown;
+            RearBladePWMMinUp.Value = (int)Settings.RearBlade.PWMMinUp;
+            RearBladePWMMinDown.Value = (int)Settings.RearBlade.PWMMinDown;
+            RearBladePWMMaxUp.Value = (int)Settings.RearBlade.PWMMaxUp;
+            RearBladePWMMaxDown.Value = (int)Settings.RearBlade.PWMMaxDown;
+            RearBladeIntegralMultiplier.Value = (int)Settings.RearBlade.IntegralMultiplier;
+            RearBladeDeadband.Value = (int)Settings.RearBlade.Deadband;
+
             // Update UI state after displaying settings
             UpdateFrontPanUI();
             UpdateRearPanUI();
@@ -153,6 +193,24 @@ namespace AgGrade.Controls
             FrontPanEndofCuttingLabel.Enabled = isEquipped;
             FrontPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
             FrontPanMaxCutDepthLabel.Enabled = isEquipped;
+
+            // Enable/disable Front Blade PWM controls based on equipped status
+            FrontBladePWMGainUp.Enabled = isEquipped;
+            FrontBladePWMGainUpLabel.Enabled = isEquipped;
+            FrontBladePWMMinUp.Enabled = isEquipped;
+            FrontBladePWMMinUpLabel.Enabled = isEquipped;
+            FrontBladePWMMaxUp.Enabled = isEquipped;
+            FrontBladePWMMaxUpLabel.Enabled = isEquipped;
+            FrontBladePWMGainDown.Enabled = isEquipped;
+            FrontBladePWMGainDownLabel.Enabled = isEquipped;
+            FrontBladePWMMinDown.Enabled = isEquipped;
+            FrontBladePWMMinDownLabel.Enabled = isEquipped;
+            FrontBladePWMMaxDown.Enabled = isEquipped;
+            FrontBladePWMMaxDownLabel.Enabled = isEquipped;
+            FrontBladeIntegralMultiplier.Enabled = isEquipped;
+            FrontBladeIntegralMulLabel.Enabled = isEquipped;
+            FrontBladeDeadband.Enabled = isEquipped;
+            FrontBladeDeadbandLabel.Enabled = isEquipped;
         }
 
         /// <summary>
@@ -183,6 +241,24 @@ namespace AgGrade.Controls
             RearPanEndofCuttingLabel.Enabled = isEquipped;
             RearPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
             RearPanMaxCutDepthLabel.Enabled = isEquipped;
+
+            // Enable/disable Rear Blade PWM controls based on equipped status
+            RearBladePWMGainUp.Enabled = isEquipped;
+            RearBladePWMGainUpLabel.Enabled = isEquipped;
+            RearBladePWMMinUp.Enabled = isEquipped;
+            RearBladePWMMinUpLabel.Enabled = isEquipped;
+            RearBladePWMMaxUp.Enabled = isEquipped;
+            RearBladePWMMaxUpLabel.Enabled = isEquipped;
+            RearBladePWMGainDown.Enabled = isEquipped;
+            RearBladePWMGainDownLabel.Enabled = isEquipped;
+            RearBladePWMMinDown.Enabled = isEquipped;
+            RearBladePWMMinDownLabel.Enabled = isEquipped;
+            RearBladePWMMaxDown.Enabled = isEquipped;
+            RearBladePWMMaxDownLabel.Enabled = isEquipped;
+            RearBladeIntegralMultiplier.Enabled = isEquipped;
+            RearBladeIntegralMulLabel.Enabled = isEquipped;
+            RearBladeDeadband.Enabled = isEquipped;
+            RearBladeDeadbandLabel.Enabled = isEquipped;
         }
 
         /// <summary>

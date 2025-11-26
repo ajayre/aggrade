@@ -173,7 +173,9 @@ namespace AgGrade.Data
                         new XElement("TractorTurningCircleM", TractorTurningCircleM),
                         new XElement("TractorWidthMm", TractorWidthMm),
                         new XElement("FrontPanSettings", FrontPan.ToXml().Elements()),
-                        new XElement("RearPanSettings", RearPan.ToXml().Elements())
+                        new XElement("RearPanSettings", RearPan.ToXml().Elements()),
+                        new XElement("FrontBladeSettings", FrontBlade.ToXml().Elements()),
+                        new XElement("RearBladeSettings", RearBlade.ToXml().Elements())
                     )
                 );
                 
@@ -261,6 +263,24 @@ namespace AgGrade.Data
                     // Create a wrapper XElement with "PanSettings" as the name for FromXml
                     XElement rearPanXml = new XElement("PanSettings", rearPanSettingsElement.Elements());
                     RearPan.FromXml(rearPanXml);
+                }
+
+                // Parse FrontBladeSettings
+                XElement? frontBladeSettingsElement = root.Element("FrontBladeSettings");
+                if (frontBladeSettingsElement != null)
+                {
+                    // Create a wrapper XElement with "BladeConfiguration" as the name for FromXml
+                    XElement frontBladeXml = new XElement("BladeConfiguration", frontBladeSettingsElement.Elements());
+                    FrontBlade.FromXml(frontBladeXml);
+                }
+
+                // Parse RearBladeSettings
+                XElement? rearBladeSettingsElement = root.Element("RearBladeSettings");
+                if (rearBladeSettingsElement != null)
+                {
+                    // Create a wrapper XElement with "BladeConfiguration" as the name for FromXml
+                    XElement rearBladeXml = new XElement("BladeConfiguration", rearBladeSettingsElement.Elements());
+                    RearBlade.FromXml(rearBladeXml);
                 }
             }
             catch (Exception ex)

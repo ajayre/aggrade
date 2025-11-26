@@ -7,33 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Net;
+using System.Xml.Linq;
 
 namespace Controller
 {
-    public class BladeConfiguration
-    {
-        public uint PWMGainUp;
-        public uint PWMGainDown;
-        public uint PWMMinUp;
-        public uint PWMMinDown;
-        public uint PWMMaxUp;
-        public uint PWMMaxDown;
-        public uint IntegralMultiplier;
-        public uint Deadband;
-
-        public BladeConfiguration()
-        {
-            PWMGainUp = 4;
-            PWMGainDown = 3;
-            PWMMinUp = 50;
-            PWMMinDown = 50;
-            PWMMaxUp = 180;
-            PWMMaxDown = 180;
-            IntegralMultiplier = 20;
-            Deadband = 3;
-        }
-    };
-
     public struct IMUValue
     {
         public double Pitch;
