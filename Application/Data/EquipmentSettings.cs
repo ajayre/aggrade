@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.IO;
 using System.Windows.Forms;
+using Controller;
 
 namespace AgGrade.Data
 {
@@ -18,22 +19,22 @@ namespace AgGrade.Data
         }
 
         public bool Equipped;
-        public uint AntennaHeightCm;
-        public uint WidthCm;
+        public uint AntennaHeightMm;
+        public uint WidthMm;
         public EndOfCuttingOptions EndofCutting;
         public uint RaiseHeightMm;
-        public uint MaxCutDepthCm;
+        public uint MaxCutDepthMm;
 
         public PanSettings
             (
             )
         {
             Equipped = true;
-            AntennaHeightCm = 0;
-            WidthCm = 0;
+            AntennaHeightMm = 0;
+            WidthMm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
             RaiseHeightMm = 0;
-            MaxCutDepthCm = 6;
+            MaxCutDepthMm = 6;
         }
 
         public XElement ToXml
@@ -42,11 +43,11 @@ namespace AgGrade.Data
         {
             return new XElement("PanSettings",
                 new XElement("Equipped", Equipped),
-                new XElement("AntennaHeightCm", AntennaHeightCm),
-                new XElement("WidthCm", WidthCm),
+                new XElement("AntennaHeightMm", AntennaHeightMm),
+                new XElement("WidthMm", WidthMm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
                 new XElement("RaiseHeightMm", RaiseHeightMm),
-                new XElement("MaxCutDepthCm", MaxCutDepthCm)
+                new XElement("MaxCutDepthMm", MaxCutDepthMm)
             );
         }
 
@@ -67,18 +68,18 @@ namespace AgGrade.Data
                 Equipped = equipped;
             }
 
-            // Parse AntennaHeightCm
-            XElement? antennaHeightElement = xml.Element("AntennaHeightCm");
+            // Parse AntennaHeightMm
+            XElement? antennaHeightElement = xml.Element("AntennaHeightMm");
             if (antennaHeightElement != null && uint.TryParse(antennaHeightElement.Value, out uint antennaHeight))
             {
-                AntennaHeightCm = antennaHeight;
+                AntennaHeightMm = antennaHeight;
             }
 
-            // Parse WidthCm
-            XElement? widthElement = xml.Element("WidthCm");
+            // Parse WidthMm
+            XElement? widthElement = xml.Element("WidthMm");
             if (widthElement != null && uint.TryParse(widthElement.Value, out uint width))
             {
-                WidthCm = width;
+                WidthMm = width;
             }
 
             // Parse EndofCutting
@@ -98,37 +99,42 @@ namespace AgGrade.Data
                 RaiseHeightMm = raiseHeight;
             }
 
-            // Parse MaxCutDepthCm
-            XElement? maxCutDepthElement = xml.Element("MaxCutDepthCm");
+            // Parse MaxCutDepthMm
+            XElement? maxCutDepthElement = xml.Element("MaxCutDepthMm");
             if (maxCutDepthElement != null && uint.TryParse(maxCutDepthElement.Value, out uint maxCutDepth))
             {
-                MaxCutDepthCm = maxCutDepth;
+                MaxCutDepthMm = maxCutDepth;
             }
         }
     }
 
     public class EquipmentSettings
     {
-        public uint TractorAntennaHeightCm;
-        public int TractorAntennaLeftOffsetCm;
-        public int TractorAntennaForwardOffsetCm;
-        public uint TractorTurningCircleFt;
-        public uint TractorWidthCm;
+        public uint TractorAntennaHeightMm;
+        public int TractorAntennaLeftOffsetMm;
+        public int TractorAntennaForwardOffsetMm;
+        public uint TractorTurningCircleM;
+        public uint TractorWidthMm;
         public PanSettings FrontPan;
         public PanSettings RearPan;
+        public BladeConfiguration FrontBlade;
+        public BladeConfiguration RearBlade;
 
         public EquipmentSettings
             (
             )
         {
-            TractorAntennaHeightCm = 0;
-            TractorAntennaLeftOffsetCm = 0;
-            TractorAntennaForwardOffsetCm = 0;
-            TractorTurningCircleFt = 0;
-            TractorWidthCm = 0;
+            TractorAntennaHeightMm = 0;
+            TractorAntennaLeftOffsetMm = 0;
+            TractorAntennaForwardOffsetMm = 0;
+            TractorTurningCircleM = 0;
+            TractorWidthMm = 0;
 
             FrontPan = new PanSettings();
             RearPan = new PanSettings();
+
+            FrontBlade = new BladeConfiguration();
+            RearBlade = new BladeConfiguration();
         }
 
         /// <summary>
@@ -161,11 +167,11 @@ namespace AgGrade.Data
                 
                 XDocument doc = new XDocument(
                     new XElement("EquipmentSettings",
-                        new XElement("TractorAntennaHeightCm", TractorAntennaHeightCm),
-                        new XElement("TractorAntennaLeftOffsetCm", TractorAntennaLeftOffsetCm),
-                        new XElement("TractorAntennaForwardOffsetCm", TractorAntennaForwardOffsetCm),
-                        new XElement("TractorTurningCircleFt", TractorTurningCircleFt),
-                        new XElement("TractorWidthCm", TractorWidthCm),
+                        new XElement("TractorAntennaHeightMm", TractorAntennaHeightMm),
+                        new XElement("TractorAntennaLeftOffsetMm", TractorAntennaLeftOffsetMm),
+                        new XElement("TractorAntennaForwardOffsetMm", TractorAntennaForwardOffsetMm),
+                        new XElement("TractorTurningCircleM", TractorTurningCircleM),
+                        new XElement("TractorWidthMm", TractorWidthMm),
                         new XElement("FrontPanSettings", FrontPan.ToXml().Elements()),
                         new XElement("RearPanSettings", RearPan.ToXml().Elements())
                     )
@@ -204,39 +210,39 @@ namespace AgGrade.Data
                     return;
                 }
                 
-                // Parse TractorAntennaHeightCm
-                XElement? tractorAntennaHeightElement = root.Element("TractorAntennaHeightCm");
+                // Parse TractorAntennaHeightMm
+                XElement? tractorAntennaHeightElement = root.Element("TractorAntennaHeightMm");
                 if (tractorAntennaHeightElement != null && uint.TryParse(tractorAntennaHeightElement.Value, out uint tractorAntennaHeight))
                 {
-                    TractorAntennaHeightCm = tractorAntennaHeight;
+                    TractorAntennaHeightMm = tractorAntennaHeight;
                 }
                 
-                // Parse TractorAntennaLeftOffsetCm
-                XElement? tractorAntennaLeftOffsetElement = root.Element("TractorAntennaLeftOffsetCm");
+                // Parse TractorAntennaLeftOffsetMm
+                XElement? tractorAntennaLeftOffsetElement = root.Element("TractorAntennaLeftOffsetMm");
                 if (tractorAntennaLeftOffsetElement != null && int.TryParse(tractorAntennaLeftOffsetElement.Value, out int tractorAntennaLeftOffset))
                 {
-                    TractorAntennaLeftOffsetCm = tractorAntennaLeftOffset;
+                    TractorAntennaLeftOffsetMm = tractorAntennaLeftOffset;
                 }
                 
-                // Parse TractorAntennaForwardOffsetCm
-                XElement? tractorAntennaForwardOffsetElement = root.Element("TractorAntennaForwardOffsetCm");
+                // Parse TractorAntennaForwardOffsetMm
+                XElement? tractorAntennaForwardOffsetElement = root.Element("TractorAntennaForwardOffsetMm");
                 if (tractorAntennaForwardOffsetElement != null && int.TryParse(tractorAntennaForwardOffsetElement.Value, out int tractorAntennaForwardOffset))
                 {
-                    TractorAntennaForwardOffsetCm = tractorAntennaForwardOffset;
+                    TractorAntennaForwardOffsetMm = tractorAntennaForwardOffset;
                 }
                 
-                // Parse TractorTurningCircleFt
-                XElement? tractorTurningCircleElement = root.Element("TractorTurningCircleFt");
+                // Parse TractorTurningCircleM
+                XElement? tractorTurningCircleElement = root.Element("TractorTurningCircleM");
                 if (tractorTurningCircleElement != null && uint.TryParse(tractorTurningCircleElement.Value, out uint tractorTurningCircle))
                 {
-                    TractorTurningCircleFt = tractorTurningCircle;
+                    TractorTurningCircleM = tractorTurningCircle;
                 }
                 
-                // Parse TractorWidthCm
-                XElement? tractorWidthElement = root.Element("TractorWidthCm");
+                // Parse TractorWidthMm
+                XElement? tractorWidthElement = root.Element("TractorWidthMm");
                 if (tractorWidthElement != null && uint.TryParse(tractorWidthElement.Value, out uint tractorWidth))
                 {
-                    TractorWidthCm = tractorWidth;
+                    TractorWidthMm = tractorWidth;
                 }
                 
                 // Parse FrontPanSettings

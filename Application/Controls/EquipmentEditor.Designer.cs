@@ -149,9 +149,9 @@
             label13.Font = new Font("Segoe UI", 14F);
             label13.Location = new Point(795, 87);
             label13.Name = "label13";
-            label13.Size = new Size(37, 25);
+            label13.Size = new Size(44, 25);
             label13.TabIndex = 34;
-            label13.Text = "cm";
+            label13.Text = "mm";
             // 
             // TractorWidth
             // 
@@ -178,9 +178,9 @@
             label11.Font = new Font("Segoe UI", 14F);
             label11.Location = new Point(795, 40);
             label11.Name = "label11";
-            label11.Size = new Size(24, 25);
+            label11.Size = new Size(28, 25);
             label11.TabIndex = 31;
-            label11.Text = "ft";
+            label11.Text = "m";
             // 
             // TractorTurningCircle
             // 
@@ -207,9 +207,9 @@
             label5.Font = new Font("Segoe UI", 14F);
             label5.Location = new Point(423, 153);
             label5.Name = "label5";
-            label5.Size = new Size(37, 25);
+            label5.Size = new Size(44, 25);
             label5.TabIndex = 28;
-            label5.Text = "cm";
+            label5.Text = "mm";
             // 
             // TractorAntennaForwardOffset
             // 
@@ -236,9 +236,9 @@
             label2.Font = new Font("Segoe UI", 14F);
             label2.Location = new Point(423, 87);
             label2.Name = "label2";
-            label2.Size = new Size(37, 25);
+            label2.Size = new Size(44, 25);
             label2.TabIndex = 25;
-            label2.Text = "cm";
+            label2.Text = "mm";
             // 
             // TractorAntennaLeftOffset
             // 
@@ -265,9 +265,9 @@
             label3.Font = new Font("Segoe UI", 14F);
             label3.Location = new Point(423, 40);
             label3.Name = "label3";
-            label3.Size = new Size(37, 25);
+            label3.Size = new Size(44, 25);
             label3.TabIndex = 22;
-            label3.Text = "cm";
+            label3.Text = "mm";
             // 
             // TractorAntennaHeight
             // 
@@ -320,9 +320,9 @@
             label7.Font = new Font("Segoe UI", 14F);
             label7.Location = new Point(425, 167);
             label7.Name = "label7";
-            label7.Size = new Size(37, 25);
+            label7.Size = new Size(44, 25);
             label7.TabIndex = 38;
-            label7.Text = "cm";
+            label7.Text = "mm";
             // 
             // FrontPanMaxCutDepth
             // 
@@ -410,9 +410,9 @@
             FrontPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
             FrontPanWidthUnitsLabel.Location = new Point(795, 79);
             FrontPanWidthUnitsLabel.Name = "FrontPanWidthUnitsLabel";
-            FrontPanWidthUnitsLabel.Size = new Size(37, 25);
+            FrontPanWidthUnitsLabel.Size = new Size(44, 25);
             FrontPanWidthUnitsLabel.TabIndex = 28;
-            FrontPanWidthUnitsLabel.Text = "cm";
+            FrontPanWidthUnitsLabel.Text = "mm";
             // 
             // FrontPanWidth
             // 
@@ -439,9 +439,9 @@
             FrontPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
             FrontPanAntennaHeightUnitsLabel.Location = new Point(423, 79);
             FrontPanAntennaHeightUnitsLabel.Name = "FrontPanAntennaHeightUnitsLabel";
-            FrontPanAntennaHeightUnitsLabel.Size = new Size(37, 25);
+            FrontPanAntennaHeightUnitsLabel.Size = new Size(44, 25);
             FrontPanAntennaHeightUnitsLabel.TabIndex = 25;
-            FrontPanAntennaHeightUnitsLabel.Text = "cm";
+            FrontPanAntennaHeightUnitsLabel.Text = "mm";
             // 
             // FrontPanAntennaHeight
             // 
@@ -494,9 +494,9 @@
             label9.Font = new Font("Segoe UI", 14F);
             label9.Location = new Point(425, 167);
             label9.Name = "label9";
-            label9.Size = new Size(37, 25);
+            label9.Size = new Size(44, 25);
             label9.TabIndex = 41;
-            label9.Text = "cm";
+            label9.Text = "mm";
             // 
             // RearPanEquippedLabel
             // 
@@ -584,9 +584,9 @@
             RearPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
             RearPanWidthUnitsLabel.Location = new Point(795, 79);
             RearPanWidthUnitsLabel.Name = "RearPanWidthUnitsLabel";
-            RearPanWidthUnitsLabel.Size = new Size(37, 25);
+            RearPanWidthUnitsLabel.Size = new Size(44, 25);
             RearPanWidthUnitsLabel.TabIndex = 28;
-            RearPanWidthUnitsLabel.Text = "cm";
+            RearPanWidthUnitsLabel.Text = "mm";
             // 
             // RearPanWidth
             // 
@@ -613,9 +613,9 @@
             RearPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
             RearPanAntennaHeightUnitsLabel.Location = new Point(423, 79);
             RearPanAntennaHeightUnitsLabel.Name = "RearPanAntennaHeightUnitsLabel";
-            RearPanAntennaHeightUnitsLabel.Size = new Size(37, 25);
+            RearPanAntennaHeightUnitsLabel.Size = new Size(44, 25);
             RearPanAntennaHeightUnitsLabel.TabIndex = 25;
-            RearPanAntennaHeightUnitsLabel.Text = "cm";
+            RearPanAntennaHeightUnitsLabel.Text = "mm";
             // 
             // RearPanAntennaHeight
             // 

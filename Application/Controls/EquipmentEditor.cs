@@ -62,31 +62,31 @@ namespace AgGrade.Controls
             EquipmentSettings Settings = new EquipmentSettings();
 
             // Validate and parse tractor fields
-            Settings.TractorAntennaHeightCm = ValidateUInt(TractorAntennaHeight.Value, "Tractor Antenna Height");
-            Settings.TractorAntennaLeftOffsetCm = TractorAntennaLeftOffset.Value; // Can be negative
-            Settings.TractorAntennaForwardOffsetCm = TractorAntennaForwardOffset.Value; // Can be negative
-            Settings.TractorTurningCircleFt = ValidateUInt(TractorTurningCircle.Value, "Tractor Turning Circle");
-            Settings.TractorWidthCm = ValidateUInt(TractorWidth.Value, "Tractor Width");
+            Settings.TractorAntennaHeightMm = ValidateUInt(TractorAntennaHeight.Value, "Tractor Antenna Height");
+            Settings.TractorAntennaLeftOffsetMm = TractorAntennaLeftOffset.Value; // Can be negative
+            Settings.TractorAntennaForwardOffsetMm = TractorAntennaForwardOffset.Value; // Can be negative
+            Settings.TractorTurningCircleM = ValidateUInt(TractorTurningCircle.Value, "Tractor Turning Circle");
+            Settings.TractorWidthMm = ValidateUInt(TractorWidth.Value, "Tractor Width");
 
             // Parse Front Pan Settings
             Settings.FrontPan.Equipped = FrontPanEquipped.SelectedIndex == 1;
-            Settings.FrontPan.AntennaHeightCm = ValidateUInt(FrontPanAntennaHeight.Value, "Front Pan Antenna Height");
-            Settings.FrontPan.WidthCm = ValidateUInt(FrontPanWidth.Value, "Front Pan Width");
+            Settings.FrontPan.AntennaHeightMm = ValidateUInt(FrontPanAntennaHeight.Value, "Front Pan Antenna Height");
+            Settings.FrontPan.WidthMm = ValidateUInt(FrontPanWidth.Value, "Front Pan Width");
             Settings.FrontPan.EndofCutting = FrontPanEndofCutting.SelectedIndex == 0
                 ? PanSettings.EndOfCuttingOptions.Float
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.FrontPan.RaiseHeightMm = ValidateUInt(FrontPanRaiseHeight.Value, "Front Pan Raise Height");
-            Settings.FrontPan.MaxCutDepthCm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
+            Settings.FrontPan.MaxCutDepthMm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
 
             // Parse Rear Pan Settings
             Settings.RearPan.Equipped = RearPanEquipped.SelectedIndex == 1;
-            Settings.RearPan.AntennaHeightCm = ValidateUInt(RearPanAntennaHeight.Value, "Rear Pan Antenna Height");
-            Settings.RearPan.WidthCm = ValidateUInt(RearPanWidth.Value, "Rear Pan Width");
+            Settings.RearPan.AntennaHeightMm = ValidateUInt(RearPanAntennaHeight.Value, "Rear Pan Antenna Height");
+            Settings.RearPan.WidthMm = ValidateUInt(RearPanWidth.Value, "Rear Pan Width");
             Settings.RearPan.EndofCutting = RearPanEndofCutting.SelectedIndex == 0
                 ? PanSettings.EndOfCuttingOptions.Float
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.RearPan.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
-            Settings.RearPan.MaxCutDepthCm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
+            Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
 
             return Settings;
         }
@@ -101,29 +101,29 @@ namespace AgGrade.Controls
             )
         {
             // Display tractor fields
-            TractorAntennaHeight.Value = (int)Settings.TractorAntennaHeightCm;
-            TractorAntennaLeftOffset.Value = Settings.TractorAntennaLeftOffsetCm;
-            TractorAntennaForwardOffset.Value = Settings.TractorAntennaForwardOffsetCm;
-            TractorTurningCircle.Value = (int)Settings.TractorTurningCircleFt;
-            TractorWidth.Value = (int)Settings.TractorWidthCm;
+            TractorAntennaHeight.Value = (int)Settings.TractorAntennaHeightMm;
+            TractorAntennaLeftOffset.Value = Settings.TractorAntennaLeftOffsetMm;
+            TractorAntennaForwardOffset.Value = Settings.TractorAntennaForwardOffsetMm;
+            TractorTurningCircle.Value = (int)Settings.TractorTurningCircleM;
+            TractorWidth.Value = (int)Settings.TractorWidthMm;
 
             // Display Front Pan Settings
             FrontPanEquipped.SelectedIndex = Settings.FrontPan.Equipped ? 1 : 0;
-            FrontPanAntennaHeight.Value = (int)Settings.FrontPan.AntennaHeightCm;
-            FrontPanWidth.Value = (int)Settings.FrontPan.WidthCm;
+            FrontPanAntennaHeight.Value = (int)Settings.FrontPan.AntennaHeightMm;
+            FrontPanWidth.Value = (int)Settings.FrontPan.WidthMm;
             FrontPanEndofCutting.SelectedIndex = Settings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             FrontPanRaiseHeight.Value = (int)Settings.FrontPan.RaiseHeightMm;
-            FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthCm;
+            FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthMm;
 
             // Display Rear Pan Settings
             // Enforce constraint: if front pan is not equipped, rear pan must not be equipped
             bool rearPanEquipped = Settings.RearPan.Equipped && Settings.FrontPan.Equipped;
             RearPanEquipped.SelectedIndex = rearPanEquipped ? 1 : 0;
-            RearPanAntennaHeight.Value = (int)Settings.RearPan.AntennaHeightCm;
-            RearPanWidth.Value = (int)Settings.RearPan.WidthCm;
+            RearPanAntennaHeight.Value = (int)Settings.RearPan.AntennaHeightMm;
+            RearPanWidth.Value = (int)Settings.RearPan.WidthMm;
             RearPanEndofCutting.SelectedIndex = Settings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             RearPanRaiseHeight.Value = (int)Settings.RearPan.RaiseHeightMm;
-            RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthCm;
+            RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
 
             // Update UI state after displaying settings
             UpdateFrontPanUI();

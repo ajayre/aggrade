@@ -6,13 +6,24 @@ using AgGrade.Data;
 using AgGrade.Properties;
 using Controller;
 
+using Timer = System.Windows.Forms.Timer;
+
 namespace AgGrade
 {
     public partial class MainForm : Form
     {
+        // how often to attempt to connect to the controller
+        private const int CONTROLLER_TRY_CONNECT_PERIOD_MS = 200;
+
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
         private OGController Controller;
+        private bool TractorIMUFound;
+        private bool FrontIMUFound;
+        private bool RearIMUFound;
+        private bool FrontHeightFound;
+        private bool RearHeightFound;
+        private Timer ControllerConnectTimer;
 
         public MainForm
             (
@@ -62,6 +73,13 @@ namespace AgGrade
             CurrentEquipmentSettings = new EquipmentSettings();
             CurrentEquipmentSettings.Load();
 
+            TractorIMUFound = false;
+            FrontIMUFound = false;
+            RearIMUFound = false;
+
+            FrontHeightFound = false;
+            RearHeightFound = false;
+
             ShowMap();
         }
 
@@ -85,6 +103,12 @@ namespace AgGrade
             }
 
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.OK);
+
+            // stop trying to connect
+            ControllerConnectTimer.Stop();
+
+            // send current configuration
+            ConfigureController();
         }
 
         private void Controller_OnControllerLost()
@@ -98,6 +122,9 @@ namespace AgGrade
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
 
             SoundAlarm();
+
+            // start trying to connect
+            ControllerConnectTimer.Start();
         }
 
         private void Controller_OnEmergencyStop()
@@ -263,7 +290,9 @@ namespace AgGrade
             AppSettings AppSettings = Editor!.GetSettings();
             AppSettings.Save();
             CurrentAppSettings = AppSettings;
+
             ConnectToController();
+            ConfigureController();
         }
 
         /// <summary>
@@ -278,7 +307,13 @@ namespace AgGrade
             EquipmentSettings EquipmentSettings = Editor!.GetSettings();
             EquipmentSettings.Save();
             CurrentEquipmentSettings = EquipmentSettings;
+
+            Controller.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
+            Controller.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
+
             UpdateEnabledLeds();
+            UpdateIMULeds();
+            UpdateHeightLeds();
         }
 
         /// <summary>
@@ -417,16 +452,225 @@ namespace AgGrade
             Controller.OnEmergencyStopCleared += Controller_OnEmergencyStopCleared;
             Controller.OnControllerLost += Controller_OnControllerLost;
             Controller.OnControllerFound += Controller_OnControllerFound;
+            Controller.OnIMUFound += Controller_OnIMUFound;
+            Controller.OnIMULost += Controller_OnIMULost;
+            Controller.OnHeightFound += Controller_OnHeightFound;
+            Controller.OnHeightLost += Controller_OnHeightLost;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
             StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Error);
-            StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
 
-            ConnectToController();
+            ControllerConnectTimer = new Timer();
+            ControllerConnectTimer.Interval = CONTROLLER_TRY_CONNECT_PERIOD_MS;
+            ControllerConnectTimer.Tick += ControllerConnectTimer_Tick;
+            ControllerConnectTimer.Start();
 
             UpdateEnabledLeds();
+            UpdateIMULeds();
+            UpdateHeightLeds();
+        }
+
+        /// <summary>
+        /// Called perodically to attempt to connect to the controller
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ControllerConnectTimer_Tick(object? sender, EventArgs e)
+        {
+            // if no controller then try to connect
+            if (!Controller.IsControllerFound)
+            {
+                ConnectToController();
+            }
+        }
+
+        /// <summary>
+        /// Sends a configuration to the controller
+        /// </summary>
+        private void ConfigureController
+            (
+            )
+        {
+            Controller.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
+            Controller.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
+        }
+
+        /// <summary>
+        /// Called when height sensor has been lost
+        /// </summary>
+        /// <param name="Equip">The height sensor that was lost</param>
+        private void Controller_OnHeightLost(EquipType Equip)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnHeightLost, Equip);
+                return;
+            }
+
+            switch (Equip)
+            {
+                case EquipType.Front: FrontHeightFound = false; break;
+                case EquipType.Rear: RearHeightFound = false; break;
+            }
+
+            UpdateHeightLeds();
+        }
+
+        /// <summary>
+        /// Called when height sensor has been found
+        /// </summary>
+        /// <param name="Equip">The height sensor that was found</param>
+        private void Controller_OnHeightFound(EquipType Equip)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnHeightFound, Equip);
+                return;
+            }
+
+            switch (Equip)
+            {
+                case EquipType.Front: FrontHeightFound = true; break;
+                case EquipType.Rear: RearHeightFound = true; break;
+            }
+
+            UpdateHeightLeds();
+        }
+
+        /// <summary>
+        /// Called when an IMU has dissappeared from the network
+        /// </summary>
+        /// <param name="Equip">The IMU that was lost</param>
+        private void Controller_OnIMULost(EquipType Equip)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnIMULost, Equip);
+                return;
+            }
+
+            switch (Equip)
+            {
+                case EquipType.Tractor: TractorIMUFound = false; break;
+                case EquipType.Front:   FrontIMUFound   = false; break;
+                case EquipType.Rear:    RearIMUFound    = false; break;
+            }
+
+            UpdateIMULeds();
+        }
+
+        /// <summary>
+        /// Called when an IMU has appeared on the network
+        /// </summary>
+        /// <param name="Equip">The IMU that was found</param>
+        private void Controller_OnIMUFound(EquipType Equip)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnIMUFound, Equip);
+                return;
+            }
+
+            switch (Equip)
+            {
+                case EquipType.Tractor: TractorIMUFound = true; break;
+                case EquipType.Front:   FrontIMUFound   = true; break;
+                case EquipType.Rear:    RearIMUFound    = true; break;
+            }
+
+            UpdateIMULeds();
+        }
+
+        #region LED Update
+        /// <summary>
+        /// Updates the height LEDs based on if they have been found or not
+        /// </summary>
+        private void UpdateHeightLeds
+            (
+            )
+        {
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
+            {
+                if (FrontHeightFound)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.OK);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.FrontHeight, StatusBar.LedState.Disabled);
+            }
+
+            if (CurrentEquipmentSettings.RearPan.Equipped)
+            {
+                if (RearHeightFound)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.OK);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.Disabled);
+            }
+        }
+
+        /// <summary>
+        /// Updates the IMU LEDs based on if they have been found or not
+        /// </summary>
+        private void UpdateIMULeds
+            (
+            )
+        {
+            if (TractorIMUFound)
+            {
+                StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.OK);
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Error);
+            }
+
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
+            {
+                if (FrontIMUFound)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.OK);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Disabled);
+            }
+
+            if (CurrentEquipmentSettings.RearPan.Equipped)
+            {
+                if (RearIMUFound)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.OK);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Disabled);
+            }
         }
 
         /// <summary>
@@ -462,5 +706,6 @@ namespace AgGrade
                 StatusBar.SetLedState(StatusBar.Leds.RearHeight, StatusBar.LedState.Disabled);
             }
         }
+        #endregion
     }
 }

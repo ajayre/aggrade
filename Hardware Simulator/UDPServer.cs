@@ -20,6 +20,17 @@ namespace HardwareSim
         PGN_OG3D_STARTED = 0x0002,
         PGN_PING = 0x0003,
         PGN_CLEAR_ESTOP = 0x0004,
+        PGN_TRACTOR_IMU_FOUND = 0x0005,
+        PGN_TRACTOR_IMU_LOST = 0x0006,
+        PGN_FRONT_IMU_FOUND = 0x0007,
+        PGN_FRONT_IMU_LOST = 0x0008,
+        PGN_REAR_IMU_FOUND = 0x0009,
+        PGN_REAR_IMU_LOST = 0x000A,
+        PGN_FRONT_HEIGHT_FOUND = 0x000B,
+        PGN_FRONT_HEIGHT_LOST = 0x000C,
+        PGN_REAR_HEIGHT_FOUND = 0x000D,
+        PGN_REAR_HEIGHT_LOST = 0x000E,
+
 
         // blade control
         PGN_FRONT_CUT_VALVE = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX

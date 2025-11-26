@@ -10,7 +10,7 @@ using System.Net;
 
 namespace Controller
 {
-    public struct BladeConfiguration
+    public class BladeConfiguration
     {
         public uint PWMGainUp;
         public uint PWMGainDown;
@@ -20,6 +20,18 @@ namespace Controller
         public uint PWMMaxDown;
         public uint IntegralMultiplier;
         public uint Deadband;
+
+        public BladeConfiguration()
+        {
+            PWMGainUp = 4;
+            PWMGainDown = 3;
+            PWMMinUp = 50;
+            PWMMinDown = 50;
+            PWMMaxUp = 180;
+            PWMMaxDown = 180;
+            IntegralMultiplier = 20;
+            Deadband = 3;
+        }
     };
 
     public struct IMUValue
@@ -31,16 +43,26 @@ namespace Controller
         public byte CalibrationStatus;   // 0 - 4, 4 = best
     }
 
+    public enum EquipType
+    {
+        Tractor,
+        Front,
+        Rear
+    }
+
     public class OGController
     {
         public const uint CUTVALVE_MIN = 0;
         public const uint CUTVALVE_MAX = 200;
 
-        public delegate void ControllerLost();
-        public event ControllerLost OnControllerLost = null;
+        public event Action OnControllerLost = null;
+        public event Action OnControllerFound = null;
 
-        public delegate void ControllerFound();
-        public event ControllerFound OnControllerFound = null;
+        public event Action<EquipType> OnIMUFound = null;
+        public event Action<EquipType> OnIMULost = null;
+
+        public event Action<EquipType> OnHeightFound = null;
+        public event Action<EquipType> OnHeightLost = null;
 
         public delegate void EmergencyStop();
         public event EmergencyStop OnEmergencyStop = null;
@@ -77,6 +99,16 @@ namespace Controller
             PGN_OG3D_STARTED             = 0x0002,
             PGN_PING                     = 0x0003,
             PGN_CLEAR_ESTOP              = 0x0004,
+            PGN_TRACTOR_IMU_FOUND        = 0x0005,
+            PGN_TRACTOR_IMU_LOST         = 0x0006,
+            PGN_FRONT_IMU_FOUND          = 0x0007,
+            PGN_FRONT_IMU_LOST           = 0x0008,
+            PGN_REAR_IMU_FOUND           = 0x0009,
+            PGN_REAR_IMU_LOST            = 0x000A,
+            PGN_FRONT_HEIGHT_FOUND       = 0x000B,
+            PGN_FRONT_HEIGHT_LOST        = 0x000C,
+            PGN_REAR_HEIGHT_FOUND        = 0x000D,
+            PGN_REAR_HEIGHT_LOST         = 0x000E,
 
             // blade control
             PGN_FRONT_CUT_VALVE          = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX
@@ -172,10 +204,12 @@ namespace Controller
         private IMUValue RearScraperIMU = new IMUValue();
 
         private DateTime LastRxPingTime;
-        private bool IsControllerFound;
         private Thread WorkThread = null;
         private volatile bool WorkThreadCancellationRequested = false;
         private DateTime PingTime;
+
+        private bool _IsControllerFound;
+        public bool IsControllerFound { get { return _IsControllerFound; } }
 
         /// <summary>
         /// Connect to controller
@@ -207,7 +241,7 @@ namespace Controller
             PingTime = DateTime.Now.AddMilliseconds(PING_PERIOD_MS);
 
             LastRxPingTime = DateTime.Now;
-            IsControllerFound = false;
+            _IsControllerFound = false;
 
             WorkThreadCancellationRequested = false;
             WorkThread = new Thread(WorkThread_DoWork);
@@ -328,11 +362,51 @@ namespace Controller
 
                         case PGNValues.PGN_PING:
                             LastRxPingTime = DateTime.Now;
-                            if (!IsControllerFound)
+                            if (!_IsControllerFound)
                             {
-                                IsControllerFound = true;
+                                _IsControllerFound = true;
                                 OnControllerFound?.Invoke();
                             }
+                            break;
+
+                        case PGNValues.PGN_TRACTOR_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.Tractor);
+                            break;
+
+                        case PGNValues.PGN_TRACTOR_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.Tractor);
+                            break;
+
+                        case PGNValues.PGN_FRONT_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.Front);
+                            break;
+
+                        case PGNValues.PGN_FRONT_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.Front);
+                            break;
+
+                        case PGNValues.PGN_REAR_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.Rear);
+                            break;
+
+                        case PGNValues.PGN_REAR_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.Rear);
+                            break;
+
+                        case PGNValues.PGN_FRONT_HEIGHT_FOUND:
+                            OnHeightFound?.Invoke(EquipType.Front);
+                            break;
+
+                        case PGNValues.PGN_FRONT_HEIGHT_LOST:
+                            OnHeightLost?.Invoke(EquipType.Front);
+                            break;
+
+                        case PGNValues.PGN_REAR_HEIGHT_FOUND:
+                            OnHeightFound?.Invoke(EquipType.Rear);
+                            break;
+
+                        case PGNValues.PGN_REAR_HEIGHT_LOST:
+                            OnHeightLost?.Invoke(EquipType.Rear);
                             break;
 
                         // slave offsets
@@ -442,9 +516,9 @@ namespace Controller
                 }
 
                 // controller has disappeared (check after processing messages to avoid race condition)
-                if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && IsControllerFound)
+                if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && _IsControllerFound)
                 {
-                    IsControllerFound = false;
+                    _IsControllerFound = false;
 
                     OnControllerLost?.Invoke();
                 }

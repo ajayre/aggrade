@@ -25,6 +25,19 @@ namespace HardwareSim
             PingTimer.Start();
         }
 
+        private async void SendStatus
+            (
+            PGNValues PGN,
+            UInt32 Value
+            )
+        {
+            AgGradeStatus Status = new AgGradeStatus();
+            Status.PGN = PGN;
+            Status.Value = Value;
+
+            await uDPServer.Send(Status);
+        }
+
         /// <summary>
         /// Called periodically to transmit pings telling AgGrade we are alive
         /// </summary>
@@ -32,10 +45,7 @@ namespace HardwareSim
         /// <param name="e"></param>
         private void PingTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            AgGradeStatus Ping = new AgGradeStatus();
-            Ping.PGN = PGNValues.PGN_PING;
-            Ping.Value = 0;
-            uDPServer.Send(Ping);
+            SendStatus(PGNValues.PGN_PING, 0);
         }
 
         private void UDPServer_OnCommandReceived
@@ -45,22 +55,64 @@ namespace HardwareSim
         {
         }
 
-        private async void EStopBtn_Click(object sender, EventArgs e)
+        private void EStopBtn_Click(object sender, EventArgs e)
         {
-            AgGradeStatus Status = new AgGradeStatus();
-            Status.PGN = PGNValues.PGN_ESTOP;
-            Status.Value = 0;
-
-            await uDPServer.Send(Status);
+            SendStatus(PGNValues.PGN_ESTOP, 0);
         }
 
-        private async void ClearEStopBtn_Click(object sender, EventArgs e)
+        private void ClearEStopBtn_Click(object sender, EventArgs e)
         {
-            AgGradeStatus Status = new AgGradeStatus();
-            Status.PGN = PGNValues.PGN_CLEAR_ESTOP;
-            Status.Value = 0;
+            SendStatus(PGNValues.PGN_CLEAR_ESTOP, 0);
+        }
 
-            await uDPServer.Send(Status);
+        private void TractorIMUFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_TRACTOR_IMU_FOUND, 0);
+        }
+
+        private void TractorIMULostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_TRACTOR_IMU_LOST, 0);
+        }
+
+        private void FrontIMUFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_FRONT_IMU_FOUND, 0);
+        }
+
+        private void FrontIMULostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_FRONT_IMU_LOST, 0);
+        }
+
+        private void RearIMUFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_REAR_IMU_FOUND, 0);
+        }
+
+        private void RearIMULostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_REAR_IMU_LOST, 0);
+        }
+
+        private void FrontHeightFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_FRONT_HEIGHT_FOUND, 0);
+        }
+
+        private void FrontHeightLostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_FRONT_HEIGHT_LOST, 0);
+        }
+
+        private void RearHeightFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_REAR_HEIGHT_FOUND, 0);
+        }
+
+        private void RearHeightLostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(PGNValues.PGN_REAR_HEIGHT_LOST, 0);
         }
     }
 }
