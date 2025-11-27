@@ -17,6 +17,7 @@ namespace AgGrade
 
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
+        private EquipmentStatus CurrentEquipmentStatus;
         private OGController Controller;
         private bool TractorIMUFound;
         private bool FrontIMUFound;
@@ -72,6 +73,8 @@ namespace AgGrade
 
             CurrentEquipmentSettings = new EquipmentSettings();
             CurrentEquipmentSettings.Load();
+
+            CurrentEquipmentStatus = new EquipmentStatus();
 
             TractorIMUFound = false;
             FrontIMUFound = false;
@@ -276,6 +279,8 @@ namespace AgGrade
             statusPage.Parent = ContentPanel;
             statusPage.Dock = DockStyle.Fill;
             statusPage.Show();
+
+            statusPage.ShowStatus(CurrentEquipmentStatus);
         }
 
         /// <summary>
