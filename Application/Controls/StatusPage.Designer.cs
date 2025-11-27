@@ -30,6 +30,14 @@
         {
             sectionTitle1 = new SectionTitle();
             groupBox1 = new GroupBox();
+            label40 = new Label();
+            TractorGNSSHeading = new TextBox();
+            label41 = new Label();
+            label38 = new Label();
+            TractorSpeed = new TextBox();
+            label39 = new Label();
+            TractorIMUCalibrationStatus = new TextBox();
+            label35 = new Label();
             label11 = new Label();
             TractorHeading = new TextBox();
             label12 = new Label();
@@ -47,6 +55,14 @@
             TractorLocation = new TextBox();
             label1 = new Label();
             groupBox2 = new GroupBox();
+            label44 = new Label();
+            label42 = new Label();
+            FrontPanGNSSHeading = new TextBox();
+            label45 = new Label();
+            FrontPanIMUCalibrationStatus = new TextBox();
+            FrontPanSpeed = new TextBox();
+            label43 = new Label();
+            label36 = new Label();
             label7 = new Label();
             FrontPanBladeHeight = new TextBox();
             label8 = new Label();
@@ -67,6 +83,14 @@
             FrontPanLocation = new TextBox();
             label24 = new Label();
             groupBox3 = new GroupBox();
+            label48 = new Label();
+            label46 = new Label();
+            RearPanGNSSHeading = new TextBox();
+            label49 = new Label();
+            RearPanIMUCalibrationStatus = new TextBox();
+            RearPanSpeed = new TextBox();
+            label47 = new Label();
+            label37 = new Label();
             label17 = new Label();
             RearPanBladeHeight = new TextBox();
             label18 = new Label();
@@ -86,12 +110,6 @@
             label33 = new Label();
             RearPanLocation = new TextBox();
             label34 = new Label();
-            TractorIMUCalibrationStatus = new TextBox();
-            label35 = new Label();
-            FrontPanIMUCalibrationStatus = new TextBox();
-            label36 = new Label();
-            RearPanIMUCalibrationStatus = new TextBox();
-            label37 = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -104,11 +122,17 @@
             sectionTitle1.Name = "sectionTitle1";
             sectionTitle1.Size = new Size(869, 48);
             sectionTitle1.TabIndex = 0;
-            sectionTitle1.TitleText = "Status";
+            sectionTitle1.TitleText = "Live Status";
             // 
             // groupBox1
             // 
             groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.Controls.Add(label40);
+            groupBox1.Controls.Add(TractorGNSSHeading);
+            groupBox1.Controls.Add(label41);
+            groupBox1.Controls.Add(label38);
+            groupBox1.Controls.Add(TractorSpeed);
+            groupBox1.Controls.Add(label39);
             groupBox1.Controls.Add(TractorIMUCalibrationStatus);
             groupBox1.Controls.Add(label35);
             groupBox1.Controls.Add(label11);
@@ -130,16 +154,96 @@
             groupBox1.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             groupBox1.Location = new Point(3, 54);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(863, 188);
+            groupBox1.Size = new Size(863, 226);
             groupBox1.TabIndex = 1;
             groupBox1.TabStop = false;
             groupBox1.Text = "Tractor";
+            // 
+            // label40
+            // 
+            label40.AutoSize = true;
+            label40.Font = new Font("Segoe UI", 14F);
+            label40.Location = new Point(654, 186);
+            label40.Name = "label40";
+            label40.Size = new Size(97, 25);
+            label40.TabIndex = 26;
+            label40.Text = "deg (True)";
+            // 
+            // TractorGNSSHeading
+            // 
+            TractorGNSSHeading.Font = new Font("Segoe UI", 14F);
+            TractorGNSSHeading.Location = new Point(557, 183);
+            TractorGNSSHeading.Name = "TractorGNSSHeading";
+            TractorGNSSHeading.PlaceholderText = "179.123";
+            TractorGNSSHeading.ReadOnly = true;
+            TractorGNSSHeading.Size = new Size(91, 32);
+            TractorGNSSHeading.TabIndex = 25;
+            // 
+            // label41
+            // 
+            label41.AutoSize = true;
+            label41.Font = new Font("Segoe UI", 14F);
+            label41.Location = new Point(412, 186);
+            label41.Name = "label41";
+            label41.Size = new Size(139, 25);
+            label41.TabIndex = 24;
+            label41.Text = "GNSS Heading:";
+            // 
+            // label38
+            // 
+            label38.AutoSize = true;
+            label38.Font = new Font("Segoe UI", 14F);
+            label38.Location = new Point(201, 148);
+            label38.Name = "label38";
+            label38.Size = new Size(53, 25);
+            label38.TabIndex = 23;
+            label38.Text = "MPH";
+            // 
+            // TractorSpeed
+            // 
+            TractorSpeed.Font = new Font("Segoe UI", 14F);
+            TractorSpeed.Location = new Point(104, 145);
+            TractorSpeed.Name = "TractorSpeed";
+            TractorSpeed.PlaceholderText = "179.123";
+            TractorSpeed.ReadOnly = true;
+            TractorSpeed.Size = new Size(91, 32);
+            TractorSpeed.TabIndex = 22;
+            // 
+            // label39
+            // 
+            label39.AutoSize = true;
+            label39.Font = new Font("Segoe UI", 14F);
+            label39.Location = new Point(30, 148);
+            label39.Name = "label39";
+            label39.Size = new Size(68, 25);
+            label39.TabIndex = 21;
+            label39.Text = "Speed:";
+            // 
+            // TractorIMUCalibrationStatus
+            // 
+            TractorIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
+            TractorIMUCalibrationStatus.Location = new Point(557, 145);
+            TractorIMUCalibrationStatus.Name = "TractorIMUCalibrationStatus";
+            TractorIMUCalibrationStatus.PlaceholderText = "3";
+            TractorIMUCalibrationStatus.ReadOnly = true;
+            TractorIMUCalibrationStatus.Size = new Size(91, 32);
+            TractorIMUCalibrationStatus.TabIndex = 20;
+            // 
+            // label35
+            // 
+            label35.AutoSize = true;
+            label35.Font = new Font("Segoe UI", 14F);
+            label35.Location = new Point(452, 148);
+            label35.Name = "label35";
+            label35.Size = new Size(99, 25);
+            label35.TabIndex = 19;
+            label35.Text = "IMU Calib:";
             // 
             // label11
             // 
             label11.AutoSize = true;
             label11.Font = new Font("Segoe UI", 14F);
-            label11.Location = new Point(619, 110);
+            label11.Location = new Point(654, 110);
             label11.Name = "label11";
             label11.Size = new Size(97, 25);
             label11.TabIndex = 18;
@@ -148,7 +252,7 @@
             // TractorHeading
             // 
             TractorHeading.Font = new Font("Segoe UI", 14F);
-            TractorHeading.Location = new Point(522, 107);
+            TractorHeading.Location = new Point(557, 107);
             TractorHeading.Name = "TractorHeading";
             TractorHeading.PlaceholderText = "179.123";
             TractorHeading.ReadOnly = true;
@@ -159,17 +263,17 @@
             // 
             label12.AutoSize = true;
             label12.Font = new Font("Segoe UI", 14F);
-            label12.Location = new Point(429, 110);
+            label12.Location = new Point(424, 110);
             label12.Name = "label12";
-            label12.Size = new Size(87, 25);
+            label12.Size = new Size(127, 25);
             label12.TabIndex = 16;
-            label12.Text = "Heading:";
+            label12.Text = "IMU Heading:";
             // 
             // label10
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI", 14F);
-            label10.Location = new Point(619, 72);
+            label10.Location = new Point(654, 72);
             label10.Name = "label10";
             label10.Size = new Size(59, 25);
             label10.TabIndex = 15;
@@ -178,7 +282,7 @@
             // TractorYawRate
             // 
             TractorYawRate.Font = new Font("Segoe UI", 14F);
-            TractorYawRate.Location = new Point(522, 69);
+            TractorYawRate.Location = new Point(557, 69);
             TractorYawRate.Name = "TractorYawRate";
             TractorYawRate.PlaceholderText = "179.123";
             TractorYawRate.ReadOnly = true;
@@ -189,7 +293,7 @@
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(425, 72);
+            label9.Location = new Point(460, 72);
             label9.Name = "label9";
             label9.Size = new Size(91, 25);
             label9.TabIndex = 13;
@@ -258,7 +362,7 @@
             // TractorRTK
             // 
             TractorRTK.Font = new Font("Segoe UI", 14F);
-            TractorRTK.Location = new Point(522, 31);
+            TractorRTK.Location = new Point(557, 31);
             TractorRTK.Name = "TractorRTK";
             TractorRTK.PlaceholderText = "Float";
             TractorRTK.ReadOnly = true;
@@ -269,7 +373,7 @@
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 14F);
-            label2.Location = new Point(469, 34);
+            label2.Location = new Point(504, 34);
             label2.Name = "label2";
             label2.Size = new Size(47, 25);
             label2.TabIndex = 2;
@@ -298,7 +402,13 @@
             // groupBox2
             // 
             groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Controls.Add(label44);
+            groupBox2.Controls.Add(label42);
+            groupBox2.Controls.Add(FrontPanGNSSHeading);
+            groupBox2.Controls.Add(label45);
             groupBox2.Controls.Add(FrontPanIMUCalibrationStatus);
+            groupBox2.Controls.Add(FrontPanSpeed);
+            groupBox2.Controls.Add(label43);
             groupBox2.Controls.Add(label36);
             groupBox2.Controls.Add(label7);
             groupBox2.Controls.Add(FrontPanBladeHeight);
@@ -320,18 +430,98 @@
             groupBox2.Controls.Add(FrontPanLocation);
             groupBox2.Controls.Add(label24);
             groupBox2.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            groupBox2.Location = new Point(3, 248);
+            groupBox2.Location = new Point(3, 286);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(863, 187);
+            groupBox2.Size = new Size(863, 226);
             groupBox2.TabIndex = 19;
             groupBox2.TabStop = false;
             groupBox2.Text = "Front Pan";
+            // 
+            // label44
+            // 
+            label44.AutoSize = true;
+            label44.Font = new Font("Segoe UI", 14F);
+            label44.Location = new Point(654, 186);
+            label44.Name = "label44";
+            label44.Size = new Size(97, 25);
+            label44.TabIndex = 29;
+            label44.Text = "deg (True)";
+            // 
+            // label42
+            // 
+            label42.AutoSize = true;
+            label42.Font = new Font("Segoe UI", 14F);
+            label42.Location = new Point(201, 148);
+            label42.Name = "label42";
+            label42.Size = new Size(53, 25);
+            label42.TabIndex = 29;
+            label42.Text = "MPH";
+            // 
+            // FrontPanGNSSHeading
+            // 
+            FrontPanGNSSHeading.Font = new Font("Segoe UI", 14F);
+            FrontPanGNSSHeading.Location = new Point(557, 183);
+            FrontPanGNSSHeading.Name = "FrontPanGNSSHeading";
+            FrontPanGNSSHeading.PlaceholderText = "179.123";
+            FrontPanGNSSHeading.ReadOnly = true;
+            FrontPanGNSSHeading.Size = new Size(91, 32);
+            FrontPanGNSSHeading.TabIndex = 28;
+            // 
+            // label45
+            // 
+            label45.AutoSize = true;
+            label45.Font = new Font("Segoe UI", 14F);
+            label45.Location = new Point(412, 186);
+            label45.Name = "label45";
+            label45.Size = new Size(139, 25);
+            label45.TabIndex = 27;
+            label45.Text = "GNSS Heading:";
+            // 
+            // FrontPanIMUCalibrationStatus
+            // 
+            FrontPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
+            FrontPanIMUCalibrationStatus.Location = new Point(557, 145);
+            FrontPanIMUCalibrationStatus.Name = "FrontPanIMUCalibrationStatus";
+            FrontPanIMUCalibrationStatus.PlaceholderText = "3";
+            FrontPanIMUCalibrationStatus.ReadOnly = true;
+            FrontPanIMUCalibrationStatus.Size = new Size(91, 32);
+            FrontPanIMUCalibrationStatus.TabIndex = 22;
+            // 
+            // FrontPanSpeed
+            // 
+            FrontPanSpeed.Font = new Font("Segoe UI", 14F);
+            FrontPanSpeed.Location = new Point(104, 145);
+            FrontPanSpeed.Name = "FrontPanSpeed";
+            FrontPanSpeed.PlaceholderText = "179.123";
+            FrontPanSpeed.ReadOnly = true;
+            FrontPanSpeed.Size = new Size(91, 32);
+            FrontPanSpeed.TabIndex = 28;
+            // 
+            // label43
+            // 
+            label43.AutoSize = true;
+            label43.Font = new Font("Segoe UI", 14F);
+            label43.Location = new Point(30, 148);
+            label43.Name = "label43";
+            label43.Size = new Size(68, 25);
+            label43.TabIndex = 27;
+            label43.Text = "Speed:";
+            // 
+            // label36
+            // 
+            label36.AutoSize = true;
+            label36.Font = new Font("Segoe UI", 14F);
+            label36.Location = new Point(452, 148);
+            label36.Name = "label36";
+            label36.Size = new Size(99, 25);
+            label36.TabIndex = 21;
+            label36.Text = "IMU Calib:";
             // 
             // label7
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 14F);
-            label7.Location = new Point(201, 148);
+            label7.Location = new Point(201, 186);
             label7.Name = "label7";
             label7.Size = new Size(44, 25);
             label7.TabIndex = 21;
@@ -340,7 +530,7 @@
             // FrontPanBladeHeight
             // 
             FrontPanBladeHeight.Font = new Font("Segoe UI", 14F);
-            FrontPanBladeHeight.Location = new Point(104, 145);
+            FrontPanBladeHeight.Location = new Point(104, 183);
             FrontPanBladeHeight.Name = "FrontPanBladeHeight";
             FrontPanBladeHeight.PlaceholderText = "179.123";
             FrontPanBladeHeight.ReadOnly = true;
@@ -351,7 +541,7 @@
             // 
             label8.AutoSize = true;
             label8.Font = new Font("Segoe UI", 14F);
-            label8.Location = new Point(26, 148);
+            label8.Location = new Point(26, 186);
             label8.Name = "label8";
             label8.Size = new Size(72, 25);
             label8.TabIndex = 19;
@@ -361,7 +551,7 @@
             // 
             label13.AutoSize = true;
             label13.Font = new Font("Segoe UI", 14F);
-            label13.Location = new Point(619, 110);
+            label13.Location = new Point(654, 110);
             label13.Name = "label13";
             label13.Size = new Size(97, 25);
             label13.TabIndex = 18;
@@ -370,7 +560,7 @@
             // FrontPanHeading
             // 
             FrontPanHeading.Font = new Font("Segoe UI", 14F);
-            FrontPanHeading.Location = new Point(522, 107);
+            FrontPanHeading.Location = new Point(557, 107);
             FrontPanHeading.Name = "FrontPanHeading";
             FrontPanHeading.PlaceholderText = "179.123";
             FrontPanHeading.ReadOnly = true;
@@ -381,17 +571,17 @@
             // 
             label14.AutoSize = true;
             label14.Font = new Font("Segoe UI", 14F);
-            label14.Location = new Point(429, 110);
+            label14.Location = new Point(424, 110);
             label14.Name = "label14";
-            label14.Size = new Size(87, 25);
+            label14.Size = new Size(127, 25);
             label14.TabIndex = 16;
-            label14.Text = "Heading:";
+            label14.Text = "IMU Heading:";
             // 
             // label15
             // 
             label15.AutoSize = true;
             label15.Font = new Font("Segoe UI", 14F);
-            label15.Location = new Point(619, 72);
+            label15.Location = new Point(654, 72);
             label15.Name = "label15";
             label15.Size = new Size(59, 25);
             label15.TabIndex = 15;
@@ -400,7 +590,7 @@
             // FrontPanYawRate
             // 
             FrontPanYawRate.Font = new Font("Segoe UI", 14F);
-            FrontPanYawRate.Location = new Point(522, 69);
+            FrontPanYawRate.Location = new Point(557, 69);
             FrontPanYawRate.Name = "FrontPanYawRate";
             FrontPanYawRate.PlaceholderText = "179.123";
             FrontPanYawRate.ReadOnly = true;
@@ -411,7 +601,7 @@
             // 
             label16.AutoSize = true;
             label16.Font = new Font("Segoe UI", 14F);
-            label16.Location = new Point(425, 72);
+            label16.Location = new Point(460, 72);
             label16.Name = "label16";
             label16.Size = new Size(91, 25);
             label16.TabIndex = 13;
@@ -480,7 +670,7 @@
             // FrontPanRTK
             // 
             FrontPanRTK.Font = new Font("Segoe UI", 14F);
-            FrontPanRTK.Location = new Point(522, 31);
+            FrontPanRTK.Location = new Point(557, 31);
             FrontPanRTK.Name = "FrontPanRTK";
             FrontPanRTK.PlaceholderText = "Float";
             FrontPanRTK.ReadOnly = true;
@@ -491,7 +681,7 @@
             // 
             label23.AutoSize = true;
             label23.Font = new Font("Segoe UI", 14F);
-            label23.Location = new Point(469, 34);
+            label23.Location = new Point(504, 34);
             label23.Name = "label23";
             label23.Size = new Size(47, 25);
             label23.TabIndex = 2;
@@ -520,7 +710,13 @@
             // groupBox3
             // 
             groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Controls.Add(label48);
+            groupBox3.Controls.Add(label46);
+            groupBox3.Controls.Add(RearPanGNSSHeading);
+            groupBox3.Controls.Add(label49);
             groupBox3.Controls.Add(RearPanIMUCalibrationStatus);
+            groupBox3.Controls.Add(RearPanSpeed);
+            groupBox3.Controls.Add(label47);
             groupBox3.Controls.Add(label37);
             groupBox3.Controls.Add(label17);
             groupBox3.Controls.Add(RearPanBladeHeight);
@@ -542,18 +738,98 @@
             groupBox3.Controls.Add(RearPanLocation);
             groupBox3.Controls.Add(label34);
             groupBox3.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            groupBox3.Location = new Point(3, 441);
+            groupBox3.Location = new Point(3, 518);
             groupBox3.Name = "groupBox3";
-            groupBox3.Size = new Size(863, 210);
+            groupBox3.Size = new Size(863, 337);
             groupBox3.TabIndex = 22;
             groupBox3.TabStop = false;
             groupBox3.Text = "Rear Pan";
+            // 
+            // label48
+            // 
+            label48.AutoSize = true;
+            label48.Font = new Font("Segoe UI", 14F);
+            label48.Location = new Point(654, 186);
+            label48.Name = "label48";
+            label48.Size = new Size(97, 25);
+            label48.TabIndex = 32;
+            label48.Text = "deg (True)";
+            // 
+            // label46
+            // 
+            label46.AutoSize = true;
+            label46.Font = new Font("Segoe UI", 14F);
+            label46.Location = new Point(201, 148);
+            label46.Name = "label46";
+            label46.Size = new Size(53, 25);
+            label46.TabIndex = 32;
+            label46.Text = "MPH";
+            // 
+            // RearPanGNSSHeading
+            // 
+            RearPanGNSSHeading.Font = new Font("Segoe UI", 14F);
+            RearPanGNSSHeading.Location = new Point(557, 183);
+            RearPanGNSSHeading.Name = "RearPanGNSSHeading";
+            RearPanGNSSHeading.PlaceholderText = "179.123";
+            RearPanGNSSHeading.ReadOnly = true;
+            RearPanGNSSHeading.Size = new Size(91, 32);
+            RearPanGNSSHeading.TabIndex = 31;
+            // 
+            // label49
+            // 
+            label49.AutoSize = true;
+            label49.Font = new Font("Segoe UI", 14F);
+            label49.Location = new Point(412, 186);
+            label49.Name = "label49";
+            label49.Size = new Size(139, 25);
+            label49.TabIndex = 30;
+            label49.Text = "GNSS Heading:";
+            // 
+            // RearPanIMUCalibrationStatus
+            // 
+            RearPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
+            RearPanIMUCalibrationStatus.Location = new Point(557, 145);
+            RearPanIMUCalibrationStatus.Name = "RearPanIMUCalibrationStatus";
+            RearPanIMUCalibrationStatus.PlaceholderText = "3";
+            RearPanIMUCalibrationStatus.ReadOnly = true;
+            RearPanIMUCalibrationStatus.Size = new Size(91, 32);
+            RearPanIMUCalibrationStatus.TabIndex = 24;
+            // 
+            // RearPanSpeed
+            // 
+            RearPanSpeed.Font = new Font("Segoe UI", 14F);
+            RearPanSpeed.Location = new Point(104, 145);
+            RearPanSpeed.Name = "RearPanSpeed";
+            RearPanSpeed.PlaceholderText = "179.123";
+            RearPanSpeed.ReadOnly = true;
+            RearPanSpeed.Size = new Size(91, 32);
+            RearPanSpeed.TabIndex = 31;
+            // 
+            // label47
+            // 
+            label47.AutoSize = true;
+            label47.Font = new Font("Segoe UI", 14F);
+            label47.Location = new Point(30, 148);
+            label47.Name = "label47";
+            label47.Size = new Size(68, 25);
+            label47.TabIndex = 30;
+            label47.Text = "Speed:";
+            // 
+            // label37
+            // 
+            label37.AutoSize = true;
+            label37.Font = new Font("Segoe UI", 14F);
+            label37.Location = new Point(452, 148);
+            label37.Name = "label37";
+            label37.Size = new Size(99, 25);
+            label37.TabIndex = 23;
+            label37.Text = "IMU Calib:";
             // 
             // label17
             // 
             label17.AutoSize = true;
             label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(201, 148);
+            label17.Location = new Point(201, 186);
             label17.Name = "label17";
             label17.Size = new Size(44, 25);
             label17.TabIndex = 21;
@@ -562,7 +838,7 @@
             // RearPanBladeHeight
             // 
             RearPanBladeHeight.Font = new Font("Segoe UI", 14F);
-            RearPanBladeHeight.Location = new Point(104, 145);
+            RearPanBladeHeight.Location = new Point(104, 183);
             RearPanBladeHeight.Name = "RearPanBladeHeight";
             RearPanBladeHeight.PlaceholderText = "179.123";
             RearPanBladeHeight.ReadOnly = true;
@@ -573,7 +849,7 @@
             // 
             label18.AutoSize = true;
             label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(26, 148);
+            label18.Location = new Point(26, 186);
             label18.Name = "label18";
             label18.Size = new Size(72, 25);
             label18.TabIndex = 19;
@@ -583,7 +859,7 @@
             // 
             label25.AutoSize = true;
             label25.Font = new Font("Segoe UI", 14F);
-            label25.Location = new Point(619, 110);
+            label25.Location = new Point(654, 110);
             label25.Name = "label25";
             label25.Size = new Size(97, 25);
             label25.TabIndex = 18;
@@ -592,7 +868,7 @@
             // RearPanHeading
             // 
             RearPanHeading.Font = new Font("Segoe UI", 14F);
-            RearPanHeading.Location = new Point(522, 107);
+            RearPanHeading.Location = new Point(557, 107);
             RearPanHeading.Name = "RearPanHeading";
             RearPanHeading.PlaceholderText = "179.123";
             RearPanHeading.ReadOnly = true;
@@ -603,17 +879,17 @@
             // 
             label26.AutoSize = true;
             label26.Font = new Font("Segoe UI", 14F);
-            label26.Location = new Point(429, 110);
+            label26.Location = new Point(424, 110);
             label26.Name = "label26";
-            label26.Size = new Size(87, 25);
+            label26.Size = new Size(127, 25);
             label26.TabIndex = 16;
-            label26.Text = "Heading:";
+            label26.Text = "IMU Heading:";
             // 
             // label27
             // 
             label27.AutoSize = true;
             label27.Font = new Font("Segoe UI", 14F);
-            label27.Location = new Point(619, 72);
+            label27.Location = new Point(654, 72);
             label27.Name = "label27";
             label27.Size = new Size(59, 25);
             label27.TabIndex = 15;
@@ -622,7 +898,7 @@
             // RearPanYawRate
             // 
             RearPanYawRate.Font = new Font("Segoe UI", 14F);
-            RearPanYawRate.Location = new Point(522, 69);
+            RearPanYawRate.Location = new Point(557, 69);
             RearPanYawRate.Name = "RearPanYawRate";
             RearPanYawRate.PlaceholderText = "179.123";
             RearPanYawRate.ReadOnly = true;
@@ -633,7 +909,7 @@
             // 
             label28.AutoSize = true;
             label28.Font = new Font("Segoe UI", 14F);
-            label28.Location = new Point(425, 72);
+            label28.Location = new Point(460, 72);
             label28.Name = "label28";
             label28.Size = new Size(91, 25);
             label28.TabIndex = 13;
@@ -702,7 +978,7 @@
             // RearPanRTK
             // 
             RearPanRTK.Font = new Font("Segoe UI", 14F);
-            RearPanRTK.Location = new Point(522, 31);
+            RearPanRTK.Location = new Point(557, 31);
             RearPanRTK.Name = "RearPanRTK";
             RearPanRTK.PlaceholderText = "Float";
             RearPanRTK.ReadOnly = true;
@@ -713,7 +989,7 @@
             // 
             label33.AutoSize = true;
             label33.Font = new Font("Segoe UI", 14F);
-            label33.Location = new Point(469, 34);
+            label33.Location = new Point(504, 34);
             label33.Name = "label33";
             label33.Size = new Size(47, 25);
             label33.TabIndex = 2;
@@ -739,66 +1015,6 @@
             label34.TabIndex = 0;
             label34.Text = "Location:";
             // 
-            // TractorIMUCalibrationStatus
-            // 
-            TractorIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
-            TractorIMUCalibrationStatus.Location = new Point(522, 145);
-            TractorIMUCalibrationStatus.Name = "TractorIMUCalibrationStatus";
-            TractorIMUCalibrationStatus.PlaceholderText = "3";
-            TractorIMUCalibrationStatus.ReadOnly = true;
-            TractorIMUCalibrationStatus.Size = new Size(91, 32);
-            TractorIMUCalibrationStatus.TabIndex = 20;
-            // 
-            // label35
-            // 
-            label35.AutoSize = true;
-            label35.Font = new Font("Segoe UI", 14F);
-            label35.Location = new Point(417, 148);
-            label35.Name = "label35";
-            label35.Size = new Size(99, 25);
-            label35.TabIndex = 19;
-            label35.Text = "IMU Calib:";
-            // 
-            // FrontPanIMUCalibrationStatus
-            // 
-            FrontPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
-            FrontPanIMUCalibrationStatus.Location = new Point(522, 145);
-            FrontPanIMUCalibrationStatus.Name = "FrontPanIMUCalibrationStatus";
-            FrontPanIMUCalibrationStatus.PlaceholderText = "3";
-            FrontPanIMUCalibrationStatus.ReadOnly = true;
-            FrontPanIMUCalibrationStatus.Size = new Size(91, 32);
-            FrontPanIMUCalibrationStatus.TabIndex = 22;
-            // 
-            // label36
-            // 
-            label36.AutoSize = true;
-            label36.Font = new Font("Segoe UI", 14F);
-            label36.Location = new Point(417, 148);
-            label36.Name = "label36";
-            label36.Size = new Size(99, 25);
-            label36.TabIndex = 21;
-            label36.Text = "IMU Calib:";
-            // 
-            // RearPanIMUCalibrationStatus
-            // 
-            RearPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
-            RearPanIMUCalibrationStatus.Location = new Point(522, 145);
-            RearPanIMUCalibrationStatus.Name = "RearPanIMUCalibrationStatus";
-            RearPanIMUCalibrationStatus.PlaceholderText = "3";
-            RearPanIMUCalibrationStatus.ReadOnly = true;
-            RearPanIMUCalibrationStatus.Size = new Size(91, 32);
-            RearPanIMUCalibrationStatus.TabIndex = 24;
-            // 
-            // label37
-            // 
-            label37.AutoSize = true;
-            label37.Font = new Font("Segoe UI", 14F);
-            label37.Location = new Point(417, 148);
-            label37.Name = "label37";
-            label37.Size = new Size(99, 25);
-            label37.TabIndex = 23;
-            label37.Text = "IMU Calib:";
-            // 
             // StatusPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -808,7 +1024,7 @@
             Controls.Add(groupBox1);
             Controls.Add(sectionTitle1);
             Name = "StatusPage";
-            Size = new Size(869, 654);
+            Size = new Size(869, 858);
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             groupBox2.ResumeLayout(false);
@@ -884,5 +1100,23 @@
         private Label label36;
         private TextBox RearPanIMUCalibrationStatus;
         private Label label37;
+        private Label label40;
+        private TextBox TractorGNSSHeading;
+        private Label label41;
+        private Label label38;
+        private TextBox TractorSpeed;
+        private Label label39;
+        private Label label44;
+        private Label label42;
+        private TextBox FrontPanGNSSHeading;
+        private Label label45;
+        private TextBox FrontPanSpeed;
+        private Label label43;
+        private Label label48;
+        private Label label46;
+        private TextBox RearPanGNSSHeading;
+        private Label label49;
+        private TextBox RearPanSpeed;
+        private Label label47;
     }
 }

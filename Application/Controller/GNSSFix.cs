@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Controller
 {
-    public enum RTKTypes
+    public enum RTKStatus
     {
         None,
         Fix,
@@ -21,17 +21,17 @@ namespace Controller
         public double Altitude;  // meters
         public double Heading;   // deg
         public double Speed;     // kph
-        public RTKTypes RTKType;   // RTK type: None, Fix, or Float
+        public RTKStatus RTK;    // RTK type: None, Fix, or Float
 
         /// <summary>
         /// Returns true if RTKType is Fix or Float, false otherwise.
         /// </summary>
         public bool HasRTK
         {
-            get { return RTKType == RTKTypes.Fix || RTKType == RTKTypes.Float; }
+            get { return RTK == RTKStatus.Fix || RTK == RTKStatus.Float; }
         }
 
-        public GNSSFix() : this(0, 0, 0, 0, 0, RTKTypes.None)
+        public GNSSFix() : this(0, 0, 0, 0, 0, RTKStatus.None)
         {
         }
 
@@ -42,7 +42,7 @@ namespace Controller
             double Altitude,
             double Heading,
             double Speed,
-            RTKTypes RTKType
+            RTKStatus RTKType
             )
         {
             this.Longitude = Longitude;
@@ -50,7 +50,7 @@ namespace Controller
             this.Altitude  = Altitude;
             this.Heading   = Heading;
             this.Speed     = Speed;
-            this.RTKType   = RTKType;
+            this.RTK   = RTKType;
         }
 
         /// <summary>
@@ -171,7 +171,7 @@ namespace Controller
             // Parse quality to determine RTKType
             // Quality: 0=invalid, 1=GPS, 2=DGPS (not RTK), 4=RTK Fixed, 5=RTK Float
             // Reference: https://receiverhelp.trimble.com/alloy-gnss/en-us/NMEA-0183messages_GGA.html
-            RTKTypes rtkType = RTKTypes.None;
+            RTKStatus rtkType = RTKStatus.None;
             if (!string.IsNullOrEmpty(fields[6]))
             {
                 int quality;
@@ -182,11 +182,11 @@ namespace Controller
                 
                 if (quality == 4)
                 {
-                    rtkType = RTKTypes.Fix;
+                    rtkType = RTKStatus.Fix;
                 }
                 else if (quality == 5)
                 {
-                    rtkType = RTKTypes.Float;
+                    rtkType = RTKStatus.Float;
                 }
                 // else: quality is 0, 1, 2, 3, or 6 - not RTK, so defaults remain
             }

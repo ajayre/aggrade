@@ -8,11 +8,13 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AgGrade.Data;
+using Controller;
 
 namespace AgGrade.Controls
 {
     public partial class StatusPage : UserControl
     {
+        private const double KPH_TO_MPH = 0.621371;
         private EquipmentStatus? PreviousStatus = null;
 
         public StatusPage()
@@ -30,68 +32,89 @@ namespace AgGrade.Controls
             )
         {
             // Update Tractor fields
-            UpdateLocationTextBox(TractorLocation, Status.TractorLatitude, Status.TractorLongitude, PreviousStatus == null || PreviousStatus.TractorLatitude != Status.TractorLatitude || PreviousStatus.TractorLongitude != Status.TractorLongitude);
-            UpdateRTKTextBox(TractorRTK, Status.TractorRTK, PreviousStatus == null || PreviousStatus.TractorRTK != Status.TractorRTK);
+            UpdateLocationTextBox(TractorLocation, Status.TractorFix.Latitude, Status.TractorFix.Longitude, PreviousStatus == null || PreviousStatus.TractorFix.Latitude != Status.TractorFix.Latitude || PreviousStatus.TractorFix.Longitude != Status.TractorFix.Longitude);
+            UpdateRTKTextBox(TractorRTK, Status.TractorFix.RTK, PreviousStatus == null || PreviousStatus.TractorFix.RTK != Status.TractorFix.RTK);
             UpdateTextBoxIfChanged(TractorPitch, FormatDouble(Status.TractorPitch), PreviousStatus == null || PreviousStatus.TractorPitch != Status.TractorPitch);
             UpdateTextBoxIfChanged(TractorRoll, FormatDouble(Status.TractorRoll), PreviousStatus == null || PreviousStatus.TractorRoll != Status.TractorRoll);
             UpdateTextBoxIfChanged(TractorYawRate, FormatDouble(Status.TractorYawRate), PreviousStatus == null || PreviousStatus.TractorYawRate != Status.TractorYawRate);
             UpdateTextBoxIfChanged(TractorHeading, FormatDouble(Status.TractorHeading), PreviousStatus == null || PreviousStatus.TractorHeading != Status.TractorHeading);
+            UpdateTextBoxIfChanged(TractorSpeed, FormatDouble(Status.TractorFix.Speed * KPH_TO_MPH), PreviousStatus == null || PreviousStatus.TractorFix.Speed != Status.TractorFix.Speed);
+            UpdateTextBoxIfChanged(TractorGNSSHeading, FormatDouble(Status.TractorFix.Heading), PreviousStatus == null || PreviousStatus.TractorFix.Heading != Status.TractorFix.Heading);
             UpdateIMUCalibrationTextBox(TractorIMUCalibrationStatus, Status.TractorIMUCalibrationStatus, PreviousStatus == null || PreviousStatus.TractorIMUCalibrationStatus != Status.TractorIMUCalibrationStatus);
 
             // Update Front Pan fields
-            UpdateLocationTextBox(FrontPanLocation, Status.FrontPan.Latitude, Status.FrontPan.Longitude, PreviousStatus == null || PreviousStatus.FrontPan.Latitude != Status.FrontPan.Latitude || PreviousStatus.FrontPan.Longitude != Status.FrontPan.Longitude);
-            UpdateRTKTextBox(FrontPanRTK, Status.FrontPan.RTK, PreviousStatus == null || PreviousStatus.FrontPan.RTK != Status.FrontPan.RTK);
+            UpdateLocationTextBox(FrontPanLocation, Status.FrontPan.Fix.Latitude, Status.FrontPan.Fix.Longitude, PreviousStatus == null || PreviousStatus.FrontPan.Fix.Latitude != Status.FrontPan.Fix.Latitude || PreviousStatus.FrontPan.Fix.Longitude != Status.FrontPan.Fix.Longitude);
+            UpdateRTKTextBox(FrontPanRTK, Status.FrontPan.Fix.RTK, PreviousStatus == null || PreviousStatus.FrontPan.Fix.RTK != Status.FrontPan.Fix.RTK);
             UpdateTextBoxIfChanged(FrontPanPitch, FormatDouble(Status.FrontPan.Pitch), PreviousStatus == null || PreviousStatus.FrontPan.Pitch != Status.FrontPan.Pitch);
             UpdateTextBoxIfChanged(FrontPanRoll, FormatDouble(Status.FrontPan.Roll), PreviousStatus == null || PreviousStatus.FrontPan.Roll != Status.FrontPan.Roll);
             UpdateTextBoxIfChanged(FrontPanYawRate, FormatDouble(Status.FrontPan.YawRate), PreviousStatus == null || PreviousStatus.FrontPan.YawRate != Status.FrontPan.YawRate);
             UpdateTextBoxIfChanged(FrontPanHeading, FormatDouble(Status.FrontPan.Heading), PreviousStatus == null || PreviousStatus.FrontPan.Heading != Status.FrontPan.Heading);
             UpdateTextBoxIfChanged(FrontPanBladeHeight, FormatDouble(Status.FrontPan.BladeHeight), PreviousStatus == null || PreviousStatus.FrontPan.BladeHeight != Status.FrontPan.BladeHeight);
+            UpdateTextBoxIfChanged(FrontPanSpeed, FormatDouble(Status.FrontPan.Fix.Speed * KPH_TO_MPH), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Speed != Status.FrontPan.Fix.Speed);
+            UpdateTextBoxIfChanged(FrontPanGNSSHeading, FormatDouble(Status.FrontPan.Fix.Heading), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Heading != Status.FrontPan.Fix.Heading);
             UpdateIMUCalibrationTextBox(FrontPanIMUCalibrationStatus, Status.FrontPan.IMUCalibrationStatus, PreviousStatus == null || PreviousStatus.FrontPan.IMUCalibrationStatus != Status.FrontPan.IMUCalibrationStatus);
 
             // Update Rear Pan fields
-            UpdateLocationTextBox(RearPanLocation, Status.RearPan.Latitude, Status.RearPan.Longitude, PreviousStatus == null || PreviousStatus.RearPan.Latitude != Status.RearPan.Latitude || PreviousStatus.RearPan.Longitude != Status.RearPan.Longitude);
-            UpdateRTKTextBox(RearPanRTK, Status.RearPan.RTK, PreviousStatus == null || PreviousStatus.RearPan.RTK != Status.RearPan.RTK);
+            UpdateLocationTextBox(RearPanLocation, Status.RearPan.Fix.Latitude, Status.RearPan.Fix.Longitude, PreviousStatus == null || PreviousStatus.RearPan.Fix.Latitude != Status.RearPan.Fix.Latitude || PreviousStatus.RearPan.Fix.Longitude != Status.RearPan.Fix.Longitude);
+            UpdateRTKTextBox(RearPanRTK, Status.RearPan.Fix.RTK, PreviousStatus == null || PreviousStatus.RearPan.Fix.RTK != Status.RearPan.Fix.RTK);
             UpdateTextBoxIfChanged(RearPanPitch, FormatDouble(Status.RearPan.Pitch), PreviousStatus == null || PreviousStatus.RearPan.Pitch != Status.RearPan.Pitch);
             UpdateTextBoxIfChanged(RearPanRoll, FormatDouble(Status.RearPan.Roll), PreviousStatus == null || PreviousStatus.RearPan.Roll != Status.RearPan.Roll);
             UpdateTextBoxIfChanged(RearPanYawRate, FormatDouble(Status.RearPan.YawRate), PreviousStatus == null || PreviousStatus.RearPan.YawRate != Status.RearPan.YawRate);
             UpdateTextBoxIfChanged(RearPanHeading, FormatDouble(Status.RearPan.Heading), PreviousStatus == null || PreviousStatus.RearPan.Heading != Status.RearPan.Heading);
             UpdateTextBoxIfChanged(RearPanBladeHeight, FormatDouble(Status.RearPan.BladeHeight), PreviousStatus == null || PreviousStatus.RearPan.BladeHeight != Status.RearPan.BladeHeight);
+            UpdateTextBoxIfChanged(RearPanSpeed, FormatDouble(Status.RearPan.Fix.Speed * KPH_TO_MPH), PreviousStatus == null || PreviousStatus.RearPan.Fix.Speed != Status.RearPan.Fix.Speed);
+            UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Heading), PreviousStatus == null || PreviousStatus.RearPan.Fix.Heading != Status.RearPan.Fix.Heading);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMUCalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMUCalibrationStatus != Status.RearPan.IMUCalibrationStatus);
 
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus
             {
-                TractorLatitude = Status.TractorLatitude,
-                TractorLongitude = Status.TractorLongitude,
                 TractorPitch = Status.TractorPitch,
                 TractorRoll = Status.TractorRoll,
                 TractorHeading = Status.TractorHeading,
                 TractorYawRate = Status.TractorYawRate,
-                TractorRTK = Status.TractorRTK,
                 TractorIMUCalibrationStatus = Status.TractorIMUCalibrationStatus,
+                TractorFix = new GNSSFix
+                {
+                    Latitude = Status.TractorFix.Latitude,
+                    Longitude = Status.TractorFix.Longitude,
+                    RTK = Status.TractorFix.RTK,
+                    Speed = Status.TractorFix.Speed,
+                    Heading = Status.TractorFix.Heading
+                },
                 FrontPan = new PanStatus
                 {
-                    Latitude = Status.FrontPan.Latitude,
-                    Longitude = Status.FrontPan.Longitude,
                     Pitch = Status.FrontPan.Pitch,
                     Roll = Status.FrontPan.Roll,
                     Heading = Status.FrontPan.Heading,
                     YawRate = Status.FrontPan.YawRate,
-                    RTK = Status.FrontPan.RTK,
                     BladeHeight = Status.FrontPan.BladeHeight,
-                    IMUCalibrationStatus = Status.FrontPan.IMUCalibrationStatus
+                    IMUCalibrationStatus = Status.FrontPan.IMUCalibrationStatus,
+                    Fix = new GNSSFix
+                    {
+                        Latitude = Status.FrontPan.Fix.Latitude,
+                        Longitude = Status.FrontPan.Fix.Longitude,
+                        RTK = Status.FrontPan.Fix.RTK,
+                        Speed = Status.FrontPan.Fix.Speed,
+                        Heading = Status.FrontPan.Fix.Heading
+                    }
                 },
                 RearPan = new PanStatus
                 {
-                    Latitude = Status.RearPan.Latitude,
-                    Longitude = Status.RearPan.Longitude,
                     Pitch = Status.RearPan.Pitch,
                     Roll = Status.RearPan.Roll,
                     Heading = Status.RearPan.Heading,
                     YawRate = Status.RearPan.YawRate,
-                    RTK = Status.RearPan.RTK,
                     BladeHeight = Status.RearPan.BladeHeight,
-                    IMUCalibrationStatus = Status.RearPan.IMUCalibrationStatus
+                    IMUCalibrationStatus = Status.RearPan.IMUCalibrationStatus,
+                    Fix = new GNSSFix
+                    {
+                        Latitude = Status.RearPan.Fix.Latitude,
+                        Longitude = Status.RearPan.Fix.Longitude,
+                        RTK = Status.RearPan.Fix.RTK,
+                        Speed = Status.RearPan.Fix.Speed,
+                        Heading = Status.RearPan.Fix.Heading
+                    }
                 }
             };
         }
