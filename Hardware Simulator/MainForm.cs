@@ -31,7 +31,7 @@ namespace HardwareSim
             UInt32 Value
             )
         {
-            AgGradeStatus Status = new AgGradeStatus();
+            PGNPacket Status = new PGNPacket();
             Status.PGN = PGN;
             Status.Value = Value;
 
@@ -50,7 +50,7 @@ namespace HardwareSim
 
         private void UDPServer_OnCommandReceived
             (
-            AgGradeCommand Command
+            PGNPacket Command
             )
         {
         }

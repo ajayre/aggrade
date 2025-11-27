@@ -73,7 +73,7 @@ namespace Controller
             // misc
             PGN_ESTOP                    = 0x0000,
             PGN_RESET                    = 0x0001,
-            PGN_OG3D_STARTED             = 0x0002,
+            PGN_AGGRADE_STARTED          = 0x0002,
             PGN_PING                     = 0x0003,
             PGN_CLEAR_ESTOP              = 0x0004,
             PGN_TRACTOR_IMU_FOUND        = 0x0005,
@@ -157,16 +157,10 @@ namespace Controller
             PGN_REAR_IMUCALIBRATION      = 0x600E,
         }
 
-        private struct ControllerCommand
+        private struct PGNPacket
         {
             public PGNValues PGN;
-            public UInt32 Value;
-        }
-
-        private struct ControllerStatus
-        {
-            public PGNValues PGN;
-            public UInt32 Value;
+            public UInt64 Value;
         }
 
         // time between transmit of pings in milliseconds
@@ -213,7 +207,7 @@ namespace Controller
             ControllerChannel.Begin(Address, RemotePort, SubnetMask, LocalPort);
 
             // tell controller we are now running
-            SendControllerCommand(PGNValues.PGN_OG3D_STARTED, 0);
+            SendControllerCommand(PGNValues.PGN_AGGRADE_STARTED, 0);
 
             PingTime = DateTime.Now.AddMilliseconds(PING_PERIOD_MS);
 
@@ -325,7 +319,7 @@ namespace Controller
                 // message waiting from controller
                 if (ControllerChannel.Available() > 0)
                 {
-                    ControllerStatus Stat = GetControllerStatus();
+                    PGNPacket Stat = GetControllerStatus();
                     switch (Stat.PGN)
                     {
                         // misc
@@ -515,7 +509,7 @@ namespace Controller
         {
             if (Value > CUTVALVE_MAX) Value = CUTVALVE_MAX;
 
-            ControllerCommand TxCmd;
+            PGNPacket TxCmd;
             TxCmd.PGN = PGNValues.PGN_FRONT_CUT_VALVE;
             TxCmd.Value = Value;
             SendControllerCommand(TxCmd);
@@ -532,7 +526,7 @@ namespace Controller
         {
             if (Value > CUTVALVE_MAX) Value = CUTVALVE_MAX;
 
-            ControllerCommand TxCmd;
+            PGNPacket TxCmd;
             TxCmd.PGN = PGNValues.PGN_REAR_CUT_VALVE;
             TxCmd.Value = Value;
             SendControllerCommand(TxCmd);
@@ -555,7 +549,7 @@ namespace Controller
             UInt32 Value
             )
         {
-            ControllerCommand Cmd;
+            PGNPacket Cmd;
             Cmd.PGN = PGN;
             Cmd.Value = Value;
             SendControllerCommand(Cmd);
@@ -563,7 +557,7 @@ namespace Controller
 
         private void SendControllerCommand
             (
-            ControllerCommand Cmd
+            PGNPacket Cmd
             )
         {
             ControllerChannel.Packet.TxBuff[0] = (byte)((UInt16)Cmd.PGN & 0xFF);
@@ -576,11 +570,11 @@ namespace Controller
             //Console.WriteLine(string.Format("Tx: {0}:0x{1:X8}", Cmd.PGN, Cmd.Value));
         }
 
-        private ControllerStatus GetControllerStatus
+        private PGNPacket GetControllerStatus
             (
             )
         {
-            ControllerStatus Stat;
+            PGNPacket Stat;
 
             Stat.PGN = (PGNValues)(((UInt16)ControllerChannel.Packet.RxBuff[1] << 8) | ControllerChannel.Packet.RxBuff[0]);
             Stat.Value = (UInt32)(((UInt32)ControllerChannel.Packet.RxBuff[5] << 24) |

@@ -17,7 +17,7 @@ namespace HardwareSim
         // misc
         PGN_ESTOP = 0x0000,
         PGN_RESET = 0x0001,
-        PGN_OG3D_STARTED = 0x0002,
+        PGN_AGGRADE_STARTED = 0x0002,
         PGN_PING = 0x0003,
         PGN_CLEAR_ESTOP = 0x0004,
         PGN_TRACTOR_IMU_FOUND = 0x0005,
@@ -30,7 +30,6 @@ namespace HardwareSim
         PGN_FRONT_HEIGHT_LOST = 0x000C,
         PGN_REAR_HEIGHT_FOUND = 0x000D,
         PGN_REAR_HEIGHT_LOST = 0x000E,
-
 
         // blade control
         PGN_FRONT_CUT_VALVE = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX
@@ -102,16 +101,10 @@ namespace HardwareSim
         PGN_REAR_IMUCALIBRATION = 0x600E,
     }
 
-    internal struct AgGradeCommand
+    internal struct PGNPacket
     {
         public PGNValues PGN;
-        public UInt32 Value;
-    }
-
-    internal struct AgGradeStatus
-    {
-        public PGNValues PGN;
-        public UInt32 Value;
+        public UInt64 Value;
     }
 
     internal class UDPServer
@@ -125,11 +118,11 @@ namespace HardwareSim
         
         public Packet Packet { get; } = new Packet();
 
-        public event Action<AgGradeCommand> OnCommandReceived = null;
+        public event Action<PGNPacket> OnCommandReceived = null;
 
         public async Task Send
             (
-            AgGradeStatus Status
+            PGNPacket Status
             )
         {
             UdpClient? currentListener;
@@ -218,7 +211,7 @@ namespace HardwareSim
 
                         if (BytesRead > 0)
                         {
-                            AgGradeCommand Command = new AgGradeCommand();
+                            PGNPacket Command = new PGNPacket();
 
                             Command.PGN = (PGNValues)(((UInt16)Packet.RxBuff[1] << 8) | Packet.RxBuff[0]);
                             Command.Value = (UInt32)(((UInt32)Packet.RxBuff[5] << 24) |
