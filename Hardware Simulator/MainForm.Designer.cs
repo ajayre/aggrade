@@ -38,13 +38,19 @@
             RearIMUFoundBtn = new Button();
             tabControl1 = new TabControl();
             MiscPage = new TabPage();
-            tabPage2 = new TabPage();
-            FrontHeightFoundBtn = new Button();
-            RearHeightFoundBtn = new Button();
-            FrontHeightLostBtn = new Button();
             RearHeightLostBtn = new Button();
+            FrontHeightLostBtn = new Button();
+            RearHeightFoundBtn = new Button();
+            FrontHeightFoundBtn = new Button();
+            GNSSPage = new TabPage();
+            LatitudeInput = new TextBox();
+            LongitudeInput = new TextBox();
+            label1 = new Label();
+            label2 = new Label();
+            SetLocationBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
+            GNSSPage.SuspendLayout();
             SuspendLayout();
             // 
             // EStopBtn
@@ -130,12 +136,12 @@
             // tabControl1
             // 
             tabControl1.Controls.Add(MiscPage);
-            tabControl1.Controls.Add(tabPage2);
+            tabControl1.Controls.Add(GNSSPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(493, 450);
+            tabControl1.Size = new Size(605, 450);
             tabControl1.TabIndex = 8;
             // 
             // MiscPage
@@ -160,35 +166,15 @@
             MiscPage.Text = "Misc";
             MiscPage.UseVisualStyleBackColor = true;
             // 
-            // tabPage2
+            // RearHeightLostBtn
             // 
-            tabPage2.Location = new Point(4, 24);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(485, 422);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
-            tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // FrontHeightFoundBtn
-            // 
-            FrontHeightFoundBtn.Location = new Point(6, 122);
-            FrontHeightFoundBtn.Name = "FrontHeightFoundBtn";
-            FrontHeightFoundBtn.Size = new Size(127, 23);
-            FrontHeightFoundBtn.TabIndex = 8;
-            FrontHeightFoundBtn.Text = "Front Height Found";
-            FrontHeightFoundBtn.UseVisualStyleBackColor = true;
-            FrontHeightFoundBtn.Click += FrontHeightFoundBtn_Click;
-            // 
-            // RearHeightFoundBtn
-            // 
-            RearHeightFoundBtn.Location = new Point(6, 151);
-            RearHeightFoundBtn.Name = "RearHeightFoundBtn";
-            RearHeightFoundBtn.Size = new Size(127, 23);
-            RearHeightFoundBtn.TabIndex = 9;
-            RearHeightFoundBtn.Text = "Rear Height Found";
-            RearHeightFoundBtn.UseVisualStyleBackColor = true;
-            RearHeightFoundBtn.Click += RearHeightFoundBtn_Click;
+            RearHeightLostBtn.Location = new Point(139, 151);
+            RearHeightLostBtn.Name = "RearHeightLostBtn";
+            RearHeightLostBtn.Size = new Size(127, 23);
+            RearHeightLostBtn.TabIndex = 11;
+            RearHeightLostBtn.Text = "Rear Height Lost";
+            RearHeightLostBtn.UseVisualStyleBackColor = true;
+            RearHeightLostBtn.Click += RearHeightLostBtn_Click;
             // 
             // FrontHeightLostBtn
             // 
@@ -200,26 +186,95 @@
             FrontHeightLostBtn.UseVisualStyleBackColor = true;
             FrontHeightLostBtn.Click += FrontHeightLostBtn_Click;
             // 
-            // RearHeightLostBtn
+            // RearHeightFoundBtn
             // 
-            RearHeightLostBtn.Location = new Point(139, 151);
-            RearHeightLostBtn.Name = "RearHeightLostBtn";
-            RearHeightLostBtn.Size = new Size(127, 23);
-            RearHeightLostBtn.TabIndex = 11;
-            RearHeightLostBtn.Text = "Rear Height Lost";
-            RearHeightLostBtn.UseVisualStyleBackColor = true;
-            RearHeightLostBtn.Click += RearHeightLostBtn_Click;
+            RearHeightFoundBtn.Location = new Point(6, 151);
+            RearHeightFoundBtn.Name = "RearHeightFoundBtn";
+            RearHeightFoundBtn.Size = new Size(127, 23);
+            RearHeightFoundBtn.TabIndex = 9;
+            RearHeightFoundBtn.Text = "Rear Height Found";
+            RearHeightFoundBtn.UseVisualStyleBackColor = true;
+            RearHeightFoundBtn.Click += RearHeightFoundBtn_Click;
+            // 
+            // FrontHeightFoundBtn
+            // 
+            FrontHeightFoundBtn.Location = new Point(6, 122);
+            FrontHeightFoundBtn.Name = "FrontHeightFoundBtn";
+            FrontHeightFoundBtn.Size = new Size(127, 23);
+            FrontHeightFoundBtn.TabIndex = 8;
+            FrontHeightFoundBtn.Text = "Front Height Found";
+            FrontHeightFoundBtn.UseVisualStyleBackColor = true;
+            FrontHeightFoundBtn.Click += FrontHeightFoundBtn_Click;
+            // 
+            // GNSSPage
+            // 
+            GNSSPage.Controls.Add(SetLocationBtn);
+            GNSSPage.Controls.Add(label2);
+            GNSSPage.Controls.Add(label1);
+            GNSSPage.Controls.Add(LongitudeInput);
+            GNSSPage.Controls.Add(LatitudeInput);
+            GNSSPage.Location = new Point(4, 24);
+            GNSSPage.Name = "GNSSPage";
+            GNSSPage.Padding = new Padding(3);
+            GNSSPage.Size = new Size(597, 422);
+            GNSSPage.TabIndex = 1;
+            GNSSPage.Text = "GNSS";
+            GNSSPage.UseVisualStyleBackColor = true;
+            // 
+            // LatitudeInput
+            // 
+            LatitudeInput.Location = new Point(81, 6);
+            LatitudeInput.Name = "LatitudeInput";
+            LatitudeInput.Size = new Size(127, 23);
+            LatitudeInput.TabIndex = 0;
+            // 
+            // LongitudeInput
+            // 
+            LongitudeInput.Location = new Point(290, 6);
+            LongitudeInput.Name = "LongitudeInput";
+            LongitudeInput.Size = new Size(127, 23);
+            LongitudeInput.TabIndex = 1;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(22, 9);
+            label1.Name = "label1";
+            label1.Size = new Size(53, 15);
+            label1.TabIndex = 2;
+            label1.Text = "Latitude:";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(220, 9);
+            label2.Name = "label2";
+            label2.Size = new Size(64, 15);
+            label2.TabIndex = 3;
+            label2.Text = "Longitude:";
+            // 
+            // SetLocationBtn
+            // 
+            SetLocationBtn.Location = new Point(423, 6);
+            SetLocationBtn.Name = "SetLocationBtn";
+            SetLocationBtn.Size = new Size(55, 23);
+            SetLocationBtn.TabIndex = 4;
+            SetLocationBtn.Text = "Set";
+            SetLocationBtn.UseVisualStyleBackColor = true;
+            SetLocationBtn.Click += SetLocationBtn_Click;
             // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(493, 450);
+            ClientSize = new Size(605, 450);
             Controls.Add(tabControl1);
             Name = "MainForm";
             Text = "Hardware Simulator";
             tabControl1.ResumeLayout(false);
             MiscPage.ResumeLayout(false);
+            GNSSPage.ResumeLayout(false);
+            GNSSPage.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -235,10 +290,15 @@
         private Button RearIMUFoundBtn;
         private TabControl tabControl1;
         private TabPage MiscPage;
-        private TabPage tabPage2;
+        private TabPage GNSSPage;
         private Button RearHeightLostBtn;
         private Button FrontHeightLostBtn;
         private Button RearHeightFoundBtn;
         private Button FrontHeightFoundBtn;
+        private Label label2;
+        private Label label1;
+        private TextBox LongitudeInput;
+        private TextBox LatitudeInput;
+        private Button SetLocationBtn;
     }
 }

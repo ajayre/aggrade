@@ -8,8 +8,14 @@ namespace HardwareSim
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
 
+        private const double DEFAULT_LATITUDE = 36.448272;
+        private const double DEFAULT_LONGITUDE = -90.724986;
+
+        private const Int64 LOCATION_SCALE_FACTOR = 1000000000;
+
         private UDPServer uDPServer;
         private Timer PingTimer;
+        private GNSS GNSSSim;
 
         public MainForm()
         {
@@ -23,19 +29,33 @@ namespace HardwareSim
             PingTimer.Interval = PING_PERIOD_MS;
             PingTimer.Elapsed += PingTimer_Elapsed;
             PingTimer.Start();
+
+            GNSSSim = new GNSS();
+            GNSSSim.OnNewTractorLocation += GNSSSim_OnNewTractorLocation;
+
+            LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
+            LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
+            GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+
+            GNSSSim.Start();
+        }
+
+        private void GNSSSim_OnNewTractorLocation(double Latitude, double Longitude)
+        {
+            double LatScaled = Latitude * LOCATION_SCALE_FACTOR;
+            double LonScaled = Longitude * LOCATION_SCALE_FACTOR;
+            UInt64 RawLat = (UInt64)LatScaled;
+            UInt64 RawLon = (UInt64)LonScaled;
+
+            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_LOCATION, (UInt64)(Latitude * LOCATION_SCALE_FACTOR), (UInt64)(Longitude * LOCATION_SCALE_FACTOR)));
         }
 
         private async void SendStatus
             (
-            PGNValues PGN,
-            UInt32 Value
+            PGNPacket Packet
             )
         {
-            PGNPacket Status = new PGNPacket();
-            Status.PGN = PGN;
-            Status.Value = Value;
-
-            await uDPServer.Send(Status);
+            await uDPServer.Send(Packet);
         }
 
         /// <summary>
@@ -45,7 +65,7 @@ namespace HardwareSim
         /// <param name="e"></param>
         private void PingTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            SendStatus(PGNValues.PGN_PING, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_PING));
         }
 
         private void UDPServer_OnCommandReceived
@@ -57,62 +77,70 @@ namespace HardwareSim
 
         private void EStopBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_ESTOP, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_ESTOP));
         }
 
         private void ClearEStopBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_CLEAR_ESTOP, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_CLEAR_ESTOP));
         }
 
         private void TractorIMUFoundBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_TRACTOR_IMU_FOUND, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
         }
 
         private void TractorIMULostBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_TRACTOR_IMU_LOST, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_LOST));
         }
 
         private void FrontIMUFoundBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_FRONT_IMU_FOUND, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
         }
 
         private void FrontIMULostBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_FRONT_IMU_LOST, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_LOST));
         }
 
         private void RearIMUFoundBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_REAR_IMU_FOUND, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
         }
 
         private void RearIMULostBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_REAR_IMU_LOST, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_LOST));
         }
 
         private void FrontHeightFoundBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_FRONT_HEIGHT_FOUND, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_HEIGHT_FOUND));
         }
 
         private void FrontHeightLostBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_FRONT_HEIGHT_LOST, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_HEIGHT_LOST));
         }
 
         private void RearHeightFoundBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_REAR_HEIGHT_FOUND, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_HEIGHT_FOUND));
         }
 
         private void RearHeightLostBtn_Click(object sender, EventArgs e)
         {
-            SendStatus(PGNValues.PGN_REAR_HEIGHT_LOST, 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_HEIGHT_LOST));
+        }
+
+        private void SetLocationBtn_Click(object sender, EventArgs e)
+        {
+            double Lat = double.Parse(LatitudeInput.Text);
+            double Lon = double.Parse(LongitudeInput.Text);
+
+            GNSSSim.SetTractorLocation(Lat, Lon);
         }
     }
 }
