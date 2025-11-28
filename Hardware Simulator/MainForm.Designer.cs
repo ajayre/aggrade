@@ -43,11 +43,15 @@
             RearHeightFoundBtn = new Button();
             FrontHeightFoundBtn = new Button();
             GNSSPage = new TabPage();
-            LatitudeInput = new TextBox();
-            LongitudeInput = new TextBox();
-            label1 = new Label();
-            label2 = new Label();
+            ReverseBtn = new Button();
+            ForwardsBtn = new Button();
             SetLocationBtn = new Button();
+            label2 = new Label();
+            label1 = new Label();
+            LongitudeInput = new TextBox();
+            LatitudeInput = new TextBox();
+            SteerRightBtn = new Button();
+            SteerLeftBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -161,7 +165,7 @@
             MiscPage.Location = new Point(4, 24);
             MiscPage.Name = "MiscPage";
             MiscPage.Padding = new Padding(3);
-            MiscPage.Size = new Size(485, 422);
+            MiscPage.Size = new Size(597, 422);
             MiscPage.TabIndex = 0;
             MiscPage.Text = "Misc";
             MiscPage.UseVisualStyleBackColor = true;
@@ -208,6 +212,10 @@
             // 
             // GNSSPage
             // 
+            GNSSPage.Controls.Add(SteerLeftBtn);
+            GNSSPage.Controls.Add(SteerRightBtn);
+            GNSSPage.Controls.Add(ReverseBtn);
+            GNSSPage.Controls.Add(ForwardsBtn);
             GNSSPage.Controls.Add(SetLocationBtn);
             GNSSPage.Controls.Add(label2);
             GNSSPage.Controls.Add(label1);
@@ -221,37 +229,25 @@
             GNSSPage.Text = "GNSS";
             GNSSPage.UseVisualStyleBackColor = true;
             // 
-            // LatitudeInput
+            // ReverseBtn
             // 
-            LatitudeInput.Location = new Point(81, 6);
-            LatitudeInput.Name = "LatitudeInput";
-            LatitudeInput.Size = new Size(127, 23);
-            LatitudeInput.TabIndex = 0;
+            ReverseBtn.Image = Properties.Resources.down_48px;
+            ReverseBtn.Location = new Point(70, 98);
+            ReverseBtn.Name = "ReverseBtn";
+            ReverseBtn.Size = new Size(56, 56);
+            ReverseBtn.TabIndex = 6;
+            ReverseBtn.UseVisualStyleBackColor = true;
+            ReverseBtn.Click += ReverseBtn_Click;
             // 
-            // LongitudeInput
+            // ForwardsBtn
             // 
-            LongitudeInput.Location = new Point(290, 6);
-            LongitudeInput.Name = "LongitudeInput";
-            LongitudeInput.Size = new Size(127, 23);
-            LongitudeInput.TabIndex = 1;
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(22, 9);
-            label1.Name = "label1";
-            label1.Size = new Size(53, 15);
-            label1.TabIndex = 2;
-            label1.Text = "Latitude:";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(220, 9);
-            label2.Name = "label2";
-            label2.Size = new Size(64, 15);
-            label2.TabIndex = 3;
-            label2.Text = "Longitude:";
+            ForwardsBtn.Image = Properties.Resources.up_48px;
+            ForwardsBtn.Location = new Point(70, 36);
+            ForwardsBtn.Name = "ForwardsBtn";
+            ForwardsBtn.Size = new Size(56, 56);
+            ForwardsBtn.TabIndex = 5;
+            ForwardsBtn.UseVisualStyleBackColor = true;
+            ForwardsBtn.Click += ForwardsBtn_Click;
             // 
             // SetLocationBtn
             // 
@@ -262,6 +258,58 @@
             SetLocationBtn.Text = "Set";
             SetLocationBtn.UseVisualStyleBackColor = true;
             SetLocationBtn.Click += SetLocationBtn_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(220, 9);
+            label2.Name = "label2";
+            label2.Size = new Size(64, 15);
+            label2.TabIndex = 3;
+            label2.Text = "Longitude:";
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(22, 10);
+            label1.Name = "label1";
+            label1.Size = new Size(53, 15);
+            label1.TabIndex = 2;
+            label1.Text = "Latitude:";
+            // 
+            // LongitudeInput
+            // 
+            LongitudeInput.Location = new Point(290, 6);
+            LongitudeInput.Name = "LongitudeInput";
+            LongitudeInput.Size = new Size(127, 23);
+            LongitudeInput.TabIndex = 1;
+            // 
+            // LatitudeInput
+            // 
+            LatitudeInput.Location = new Point(81, 7);
+            LatitudeInput.Name = "LatitudeInput";
+            LatitudeInput.Size = new Size(127, 23);
+            LatitudeInput.TabIndex = 0;
+            // 
+            // SteerRightBtn
+            // 
+            SteerRightBtn.Image = Properties.Resources.right_48px;
+            SteerRightBtn.Location = new Point(132, 70);
+            SteerRightBtn.Name = "SteerRightBtn";
+            SteerRightBtn.Size = new Size(56, 56);
+            SteerRightBtn.TabIndex = 7;
+            SteerRightBtn.UseVisualStyleBackColor = true;
+            SteerRightBtn.Click += SteerRightBtn_Click;
+            // 
+            // SteerLeftBtn
+            // 
+            SteerLeftBtn.Image = Properties.Resources.left_48px;
+            SteerLeftBtn.Location = new Point(8, 70);
+            SteerLeftBtn.Name = "SteerLeftBtn";
+            SteerLeftBtn.Size = new Size(56, 56);
+            SteerLeftBtn.TabIndex = 8;
+            SteerLeftBtn.UseVisualStyleBackColor = true;
+            SteerLeftBtn.Click += SteerLeftBtn_Click;
             // 
             // MainForm
             // 
@@ -300,5 +348,9 @@
         private TextBox LongitudeInput;
         private TextBox LatitudeInput;
         private Button SetLocationBtn;
+        private Button ForwardsBtn;
+        private Button ReverseBtn;
+        private Button SteerLeftBtn;
+        private Button SteerRightBtn;
     }
 }

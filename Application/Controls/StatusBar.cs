@@ -21,7 +21,8 @@ namespace AgGrade.Controls
         {
             OK,
             Error,
-            Disabled
+            Disabled,
+            Warning
         }
 
         public enum Leds
@@ -87,6 +88,10 @@ namespace AgGrade.Controls
 
                     case LedState.OK:
                         newImage = Resources.led_green_24px;
+                        break;
+
+                    case LedState.Warning:
+                        newImage = Resources.led_orange_24px;
                         break;
                 }
 

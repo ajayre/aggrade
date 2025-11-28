@@ -39,12 +39,34 @@ namespace HardwareSim
             UpdateTimer = new Timer();
             UpdateTimer.Interval = 1000;
             UpdateTimer.Tick += UpdateTimer_Tick;
+
+            SpeedMPH = 0;
+            TrueHeading = 0;
         }
 
         private void UpdateTimer_Tick(object? sender, EventArgs e)
         {
+            if (SpeedMPH != 0)
+            {
+                GetNewLocation();
+            }
+
             OnNewTractorFix?.Invoke(GetNMEAGNGGAString());
             OnNewTractorFix?.Invoke(GetNMEAGNVTGString());
+        }
+
+        private void GetNewLocation
+            (
+            )
+        {
+            // how far have we travelled since the last call?
+            double MetersPerSec = SpeedMPH * 0.44704;
+
+            double Lat = TractorLatitude;
+            double Lon = TractorLongitude;
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, TrueHeading, MetersPerSec);
+            TractorLatitude = Lat;
+            TractorLongitude = Lon;
         }
 
         public void SetTractorLocation
@@ -59,16 +81,6 @@ namespace HardwareSim
             this.TractorLongitude = Longitude;
             this.TractorAltitude = Altitude;
             this.TractorRTKQuality = RTKQuality;
-        }
-
-        public void SetTractorVector
-            (
-            double TrueHeading,
-            double SpeedMPH
-            )
-        { 
-            this.TrueHeading = TrueHeading;
-            this.SpeedMPH = SpeedMPH;
         }
 
         /// <summary>
@@ -195,6 +207,39 @@ namespace HardwareSim
             )
         {
             UpdateTimer.Start();
+        }
+
+        public void IncreaseSpeed
+            (
+            )
+        {
+            SpeedMPH += 1;
+        }
+
+        public void DecreaseSpeed
+            (
+            )
+        {
+            SpeedMPH -= 1;
+            if (SpeedMPH < 0) SpeedMPH = 0;
+        }
+
+        public void TurnLeft
+            (
+            )
+        {
+            TrueHeading -= 2;
+            if (TrueHeading < 0) TrueHeading += 360;
+            if (TrueHeading > 360) TrueHeading -= 360;
+        }
+
+        public void TurnRight
+            (
+            )
+        {
+            TrueHeading += 2;
+            if (TrueHeading < 0) TrueHeading += 360;
+            if (TrueHeading > 360) TrueHeading -= 360;
         }
     }
 }

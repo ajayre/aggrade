@@ -36,7 +36,6 @@ namespace HardwareSim
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
             GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
-            GNSSSim.SetTractorVector(10, 3);
 
             GNSSSim.Start();
         }
@@ -138,6 +137,26 @@ namespace HardwareSim
             double Lon = double.Parse(LongitudeInput.Text);
 
             GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+        }
+
+        private void ForwardsBtn_Click(object sender, EventArgs e)
+        {
+            GNSSSim.IncreaseSpeed();
+        }
+
+        private void ReverseBtn_Click(object sender, EventArgs e)
+        {
+            GNSSSim.DecreaseSpeed();
+        }
+
+        private void SteerLeftBtn_Click(object sender, EventArgs e)
+        {
+            GNSSSim.TurnLeft();
+        }
+
+        private void SteerRightBtn_Click(object sender, EventArgs e)
+        {
+            GNSSSim.TurnRight();
         }
     }
 }

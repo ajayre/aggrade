@@ -126,6 +126,15 @@ namespace AgGrade
 
             SoundAlarm();
 
+            // no longer have RTK
+            CurrentEquipmentStatus.TractorFix.RTK = RTKStatus.None;
+            CurrentEquipmentStatus.FrontPan.Fix.RTK = RTKStatus.None;
+            CurrentEquipmentStatus.RearPan.Fix.RTK = RTKStatus.None;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateRTKLeds();
+
             // start trying to connect
             ControllerConnectTimer.Start();
         }
@@ -476,6 +485,7 @@ namespace AgGrade
             UpdateEnabledLeds();
             UpdateIMULeds();
             UpdateHeightLeds();
+            UpdateRTKLeds();
         }
 
         /// <summary>
@@ -487,6 +497,8 @@ namespace AgGrade
             CurrentEquipmentStatus.TractorFix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateRTKLeds();
         }
 
         /// <summary>
@@ -656,6 +668,67 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Updates the RTK LEDs based on if they have been found or not
+        /// </summary>
+        private void UpdateRTKLeds
+            (
+            )
+        {
+            if (CurrentEquipmentStatus.TractorFix.RTK == RTKStatus.Fix)
+            {
+                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
+            }
+            else if (CurrentEquipmentStatus.TractorFix.RTK == RTKStatus.Float)
+            {
+                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Warning);
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Error);
+            }
+
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
+            {
+                if (CurrentEquipmentStatus.FrontPan.Fix.RTK == RTKStatus.Fix)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.OK);
+                }
+                else if (CurrentEquipmentStatus.FrontPan.Fix.RTK == RTKStatus.Float)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Warning);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Disabled);
+            }
+
+            if (CurrentEquipmentSettings.RearPan.Equipped)
+            {
+                if (CurrentEquipmentStatus.RearPan.Fix.RTK == RTKStatus.Fix)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.OK);
+                }
+                else if (CurrentEquipmentStatus.RearPan.Fix.RTK == RTKStatus.Float)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Warning);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Error);
+                }
+            }
+            else
+            {
+                StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Disabled);
+            }
+        }
+
+        /// <summary>
         /// Updates the IMU LEDs based on if they have been found or not
         /// </summary>
         private void UpdateIMULeds
@@ -664,7 +737,14 @@ namespace AgGrade
         {
             if (TractorIMUFound)
             {
-                StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.OK);
+                if (CurrentEquipmentStatus.TractorIMU.CalibrationStatus >= 3)
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.OK);
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.Warning);
+                }
             }
             else
             {
@@ -673,9 +753,16 @@ namespace AgGrade
 
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
-                if (FrontIMUFound)
+                if (RearIMUFound)
                 {
-                    StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.OK);
+                    if (CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus >= 3)
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.OK);
+                    }
+                    else
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Warning);
+                    }
                 }
                 else
                 {
@@ -691,7 +778,14 @@ namespace AgGrade
             {
                 if (RearIMUFound)
                 {
-                    StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.OK);
+                    if (CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus >= 3)
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.OK);
+                    }
+                    else
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Warning);
+                    }
                 }
                 else
                 {
