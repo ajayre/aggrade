@@ -30,6 +30,9 @@
         {
             sectionTitle1 = new SectionTitle();
             groupBox1 = new GroupBox();
+            label50 = new Label();
+            TractorAltitude = new TextBox();
+            label51 = new Label();
             label40 = new Label();
             TractorGNSSHeading = new TextBox();
             label41 = new Label();
@@ -55,7 +58,10 @@
             TractorLocation = new TextBox();
             label1 = new Label();
             groupBox2 = new GroupBox();
+            label52 = new Label();
             label44 = new Label();
+            FrontPanAltitude = new TextBox();
+            label53 = new Label();
             label42 = new Label();
             FrontPanGNSSHeading = new TextBox();
             label45 = new Label();
@@ -83,7 +89,10 @@
             FrontPanLocation = new TextBox();
             label24 = new Label();
             groupBox3 = new GroupBox();
+            label54 = new Label();
             label48 = new Label();
+            RearPanAltitude = new TextBox();
+            label55 = new Label();
             label46 = new Label();
             RearPanGNSSHeading = new TextBox();
             label49 = new Label();
@@ -110,15 +119,6 @@
             label33 = new Label();
             RearPanLocation = new TextBox();
             label34 = new Label();
-            label50 = new Label();
-            TractorAltitude = new TextBox();
-            label51 = new Label();
-            label52 = new Label();
-            FrontPanAltitude = new TextBox();
-            label53 = new Label();
-            label54 = new Label();
-            RearPanAltitude = new TextBox();
-            label55 = new Label();
             groupBox1.SuspendLayout();
             groupBox2.SuspendLayout();
             groupBox3.SuspendLayout();
@@ -170,6 +170,36 @@
             groupBox1.TabIndex = 1;
             groupBox1.TabStop = false;
             groupBox1.Text = "Tractor";
+            // 
+            // label50
+            // 
+            label50.AutoSize = true;
+            label50.Font = new Font("Segoe UI", 14F);
+            label50.Location = new Point(201, 186);
+            label50.Name = "label50";
+            label50.Size = new Size(28, 25);
+            label50.TabIndex = 29;
+            label50.Text = "m";
+            // 
+            // TractorAltitude
+            // 
+            TractorAltitude.Font = new Font("Segoe UI", 14F);
+            TractorAltitude.Location = new Point(104, 183);
+            TractorAltitude.Name = "TractorAltitude";
+            TractorAltitude.PlaceholderText = "179.123";
+            TractorAltitude.ReadOnly = true;
+            TractorAltitude.Size = new Size(91, 32);
+            TractorAltitude.TabIndex = 28;
+            // 
+            // label51
+            // 
+            label51.AutoSize = true;
+            label51.Font = new Font("Segoe UI", 14F);
+            label51.Location = new Point(16, 186);
+            label51.Name = "label51";
+            label51.Size = new Size(82, 25);
+            label51.TabIndex = 27;
+            label51.Text = "Altitude:";
             // 
             // label40
             // 
@@ -236,7 +266,7 @@
             TractorIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
             TractorIMUCalibrationStatus.Location = new Point(557, 145);
             TractorIMUCalibrationStatus.Name = "TractorIMUCalibrationStatus";
-            TractorIMUCalibrationStatus.PlaceholderText = "3";
+            TractorIMUCalibrationStatus.PlaceholderText = "Excellent";
             TractorIMUCalibrationStatus.ReadOnly = true;
             TractorIMUCalibrationStatus.Size = new Size(91, 32);
             TractorIMUCalibrationStatus.TabIndex = 20;
@@ -452,6 +482,16 @@
             groupBox2.TabStop = false;
             groupBox2.Text = "Front Pan";
             // 
+            // label52
+            // 
+            label52.AutoSize = true;
+            label52.Font = new Font("Segoe UI", 14F);
+            label52.Location = new Point(201, 186);
+            label52.Name = "label52";
+            label52.Size = new Size(28, 25);
+            label52.TabIndex = 32;
+            label52.Text = "m";
+            // 
             // label44
             // 
             label44.AutoSize = true;
@@ -461,6 +501,26 @@
             label44.Size = new Size(97, 25);
             label44.TabIndex = 29;
             label44.Text = "deg (True)";
+            // 
+            // FrontPanAltitude
+            // 
+            FrontPanAltitude.Font = new Font("Segoe UI", 14F);
+            FrontPanAltitude.Location = new Point(104, 183);
+            FrontPanAltitude.Name = "FrontPanAltitude";
+            FrontPanAltitude.PlaceholderText = "179.123";
+            FrontPanAltitude.ReadOnly = true;
+            FrontPanAltitude.Size = new Size(91, 32);
+            FrontPanAltitude.TabIndex = 31;
+            // 
+            // label53
+            // 
+            label53.AutoSize = true;
+            label53.Font = new Font("Segoe UI", 14F);
+            label53.Location = new Point(16, 186);
+            label53.Name = "label53";
+            label53.Size = new Size(82, 25);
+            label53.TabIndex = 30;
+            label53.Text = "Altitude:";
             // 
             // label42
             // 
@@ -497,7 +557,7 @@
             FrontPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
             FrontPanIMUCalibrationStatus.Location = new Point(557, 145);
             FrontPanIMUCalibrationStatus.Name = "FrontPanIMUCalibrationStatus";
-            FrontPanIMUCalibrationStatus.PlaceholderText = "3";
+            FrontPanIMUCalibrationStatus.PlaceholderText = "Excellent";
             FrontPanIMUCalibrationStatus.ReadOnly = true;
             FrontPanIMUCalibrationStatus.Size = new Size(91, 32);
             FrontPanIMUCalibrationStatus.TabIndex = 22;
@@ -763,6 +823,16 @@
             groupBox3.TabStop = false;
             groupBox3.Text = "Rear Pan";
             // 
+            // label54
+            // 
+            label54.AutoSize = true;
+            label54.Font = new Font("Segoe UI", 14F);
+            label54.Location = new Point(201, 186);
+            label54.Name = "label54";
+            label54.Size = new Size(28, 25);
+            label54.TabIndex = 35;
+            label54.Text = "m";
+            // 
             // label48
             // 
             label48.AutoSize = true;
@@ -772,6 +842,26 @@
             label48.Size = new Size(97, 25);
             label48.TabIndex = 32;
             label48.Text = "deg (True)";
+            // 
+            // RearPanAltitude
+            // 
+            RearPanAltitude.Font = new Font("Segoe UI", 14F);
+            RearPanAltitude.Location = new Point(104, 183);
+            RearPanAltitude.Name = "RearPanAltitude";
+            RearPanAltitude.PlaceholderText = "179.123";
+            RearPanAltitude.ReadOnly = true;
+            RearPanAltitude.Size = new Size(91, 32);
+            RearPanAltitude.TabIndex = 34;
+            // 
+            // label55
+            // 
+            label55.AutoSize = true;
+            label55.Font = new Font("Segoe UI", 14F);
+            label55.Location = new Point(16, 186);
+            label55.Name = "label55";
+            label55.Size = new Size(82, 25);
+            label55.TabIndex = 33;
+            label55.Text = "Altitude:";
             // 
             // label46
             // 
@@ -808,7 +898,7 @@
             RearPanIMUCalibrationStatus.Font = new Font("Segoe UI", 14F);
             RearPanIMUCalibrationStatus.Location = new Point(557, 145);
             RearPanIMUCalibrationStatus.Name = "RearPanIMUCalibrationStatus";
-            RearPanIMUCalibrationStatus.PlaceholderText = "3";
+            RearPanIMUCalibrationStatus.PlaceholderText = "Excellent";
             RearPanIMUCalibrationStatus.ReadOnly = true;
             RearPanIMUCalibrationStatus.Size = new Size(91, 32);
             RearPanIMUCalibrationStatus.TabIndex = 24;
@@ -1032,96 +1122,6 @@
             label34.Size = new Size(88, 25);
             label34.TabIndex = 0;
             label34.Text = "Location:";
-            // 
-            // label50
-            // 
-            label50.AutoSize = true;
-            label50.Font = new Font("Segoe UI", 14F);
-            label50.Location = new Point(201, 186);
-            label50.Name = "label50";
-            label50.Size = new Size(28, 25);
-            label50.TabIndex = 29;
-            label50.Text = "m";
-            // 
-            // TractorAltitude
-            // 
-            TractorAltitude.Font = new Font("Segoe UI", 14F);
-            TractorAltitude.Location = new Point(104, 183);
-            TractorAltitude.Name = "TractorAltitude";
-            TractorAltitude.PlaceholderText = "179.123";
-            TractorAltitude.ReadOnly = true;
-            TractorAltitude.Size = new Size(91, 32);
-            TractorAltitude.TabIndex = 28;
-            // 
-            // label51
-            // 
-            label51.AutoSize = true;
-            label51.Font = new Font("Segoe UI", 14F);
-            label51.Location = new Point(16, 186);
-            label51.Name = "label51";
-            label51.Size = new Size(82, 25);
-            label51.TabIndex = 27;
-            label51.Text = "Altitude:";
-            // 
-            // label52
-            // 
-            label52.AutoSize = true;
-            label52.Font = new Font("Segoe UI", 14F);
-            label52.Location = new Point(201, 186);
-            label52.Name = "label52";
-            label52.Size = new Size(28, 25);
-            label52.TabIndex = 32;
-            label52.Text = "m";
-            // 
-            // FrontPanAltitude
-            // 
-            FrontPanAltitude.Font = new Font("Segoe UI", 14F);
-            FrontPanAltitude.Location = new Point(104, 183);
-            FrontPanAltitude.Name = "FrontPanAltitude";
-            FrontPanAltitude.PlaceholderText = "179.123";
-            FrontPanAltitude.ReadOnly = true;
-            FrontPanAltitude.Size = new Size(91, 32);
-            FrontPanAltitude.TabIndex = 31;
-            // 
-            // label53
-            // 
-            label53.AutoSize = true;
-            label53.Font = new Font("Segoe UI", 14F);
-            label53.Location = new Point(16, 186);
-            label53.Name = "label53";
-            label53.Size = new Size(82, 25);
-            label53.TabIndex = 30;
-            label53.Text = "Altitude:";
-            // 
-            // label54
-            // 
-            label54.AutoSize = true;
-            label54.Font = new Font("Segoe UI", 14F);
-            label54.Location = new Point(201, 186);
-            label54.Name = "label54";
-            label54.Size = new Size(28, 25);
-            label54.TabIndex = 35;
-            label54.Text = "m";
-            // 
-            // RearPanAltitude
-            // 
-            RearPanAltitude.Font = new Font("Segoe UI", 14F);
-            RearPanAltitude.Location = new Point(104, 183);
-            RearPanAltitude.Name = "RearPanAltitude";
-            RearPanAltitude.PlaceholderText = "179.123";
-            RearPanAltitude.ReadOnly = true;
-            RearPanAltitude.Size = new Size(91, 32);
-            RearPanAltitude.TabIndex = 34;
-            // 
-            // label55
-            // 
-            label55.AutoSize = true;
-            label55.Font = new Font("Segoe UI", 14F);
-            label55.Location = new Point(16, 186);
-            label55.Name = "label55";
-            label55.Size = new Size(82, 25);
-            label55.TabIndex = 33;
-            label55.Text = "Altitude:";
             // 
             // StatusPage
             // 

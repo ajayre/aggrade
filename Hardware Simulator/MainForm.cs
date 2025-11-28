@@ -32,12 +32,26 @@ namespace HardwareSim
 
             GNSSSim = new GNSS();
             GNSSSim.OnNewTractorFix += GNSSSim_OnNewTractorFix;
+            GNSSSim.OnNewTractorIMU += GNSSSim_OnNewTractorIMU;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
             GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
 
             GNSSSim.Start();
+        }
+
+        private void GNSSSim_OnNewTractorIMU(IMUValue Value)
+        {
+            byte[] Data = new byte[PGNPacket.MAX_LEN];
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_TRACTOR_IMU;
+            Packet.SetUInt32(0, (UInt32)(Value.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(Value.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(Value.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(Value.YawRate * 100));
+            Packet.Data[16] = (byte)Value.CalibrationStatus;
+            SendStatus(Packet);
         }
 
         private void GNSSSim_OnNewTractorFix(string NMEAString)

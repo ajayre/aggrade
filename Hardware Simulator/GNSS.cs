@@ -29,22 +29,43 @@ namespace HardwareSim
         public double SpeedMPH {  get; private set; }
 
         public event Action<string> OnNewTractorFix = null;
+        public event Action<IMUValue> OnNewTractorIMU = null;
 
-        private Timer UpdateTimer;
+        private Timer GNSSUpdateTimer;
+        private Timer IMUUpdateTimer;
+        private IMUValue TractorIMU;
 
         public GNSS
             (
             )
         {
-            UpdateTimer = new Timer();
-            UpdateTimer.Interval = 1000;
-            UpdateTimer.Tick += UpdateTimer_Tick;
+            GNSSUpdateTimer = new Timer();
+            GNSSUpdateTimer.Interval = 1000;
+            GNSSUpdateTimer.Tick += GNSSUpdateTimer_Tick;
+
+            IMUUpdateTimer = new Timer();
+            IMUUpdateTimer.Interval = 50;
+            IMUUpdateTimer.Tick += IMUUpdateTimer_Tick;
+
+            TractorIMU = new IMUValue();
+
+            // fixme - remove
+            TractorIMU.Pitch = 1;
+            TractorIMU.Roll = 2;
+            TractorIMU.Heading = 3;
+            TractorIMU.YawRate = 4;
+            TractorIMU.CalibrationStatus = IMUValue.Calibration.Adequate;
 
             SpeedMPH = 0;
             TrueHeading = 0;
         }
 
-        private void UpdateTimer_Tick(object? sender, EventArgs e)
+        private void IMUUpdateTimer_Tick(object? sender, EventArgs e)
+        {
+            OnNewTractorIMU?.Invoke(TractorIMU);
+        }
+
+        private void GNSSUpdateTimer_Tick(object? sender, EventArgs e)
         {
             if (SpeedMPH != 0)
             {
@@ -206,7 +227,8 @@ namespace HardwareSim
             (
             )
         {
-            UpdateTimer.Start();
+            GNSSUpdateTimer.Start();
+            IMUUpdateTimer.Start();
         }
 
         public void IncreaseSpeed

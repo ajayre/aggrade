@@ -79,7 +79,14 @@ namespace AgGrade.Controls
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus
             {
-                TractorIMU = Status.TractorIMU,
+                TractorIMU = new IMUValue
+                {
+                    Pitch = Status.TractorIMU.Pitch,
+                    Heading = Status.TractorIMU.Heading,
+                    Roll = Status.TractorIMU.Roll,
+                    YawRate = Status.TractorIMU.YawRate,
+                    CalibrationStatus = Status.TractorIMU.CalibrationStatus
+                },
                 TractorFix = new GNSSFix
                 {
                     Latitude = Status.TractorFix.Latitude,
@@ -90,7 +97,14 @@ namespace AgGrade.Controls
                 },
                 FrontPan = new PanStatus
                 {
-                    IMU = Status.FrontPan.IMU,
+                    IMU = new IMUValue
+                    {
+                        Pitch = Status.FrontPan.IMU.Pitch,
+                        Heading = Status.FrontPan.IMU.Heading,
+                        Roll = Status.FrontPan.IMU.Roll,
+                        YawRate = Status.FrontPan.IMU.YawRate,
+                        CalibrationStatus = Status.FrontPan.IMU.CalibrationStatus
+                    },
                     BladeHeight = Status.FrontPan.BladeHeight,
                     Fix = new GNSSFix
                     {
@@ -103,7 +117,14 @@ namespace AgGrade.Controls
                 },
                 RearPan = new PanStatus
                 {
-                    IMU = Status.RearPan.IMU,
+                    IMU = new IMUValue
+                    {
+                        Pitch = Status.RearPan.IMU.Pitch,
+                        Heading = Status.RearPan.IMU.Heading,
+                        Roll = Status.RearPan.IMU.Roll,
+                        YawRate = Status.RearPan.IMU.YawRate,
+                        CalibrationStatus = Status.RearPan.IMU.CalibrationStatus
+                    },
                     BladeHeight = Status.RearPan.BladeHeight,
                     Fix = new GNSSFix
                     {
@@ -202,27 +223,42 @@ namespace AgGrade.Controls
         /// <summary>
         /// Updates IMU calibration status textbox with text and background color
         /// </summary>
-        private void UpdateIMUCalibrationTextBox(TextBox textBox, uint calibrationStatus, bool hasChanged)
+        private void UpdateIMUCalibrationTextBox(TextBox textBox, IMUValue.Calibration calibrationStatus, bool hasChanged)
         {
             if (hasChanged)
             {
-                textBox.Text = calibrationStatus.ToString();
+                switch (calibrationStatus)
+                {
+                    default:
+                    case IMUValue.Calibration.None:
+                        textBox.Text = "None";
+                        textBox.BackColor = Color.Red;
+                        textBox.ForeColor = Color.White;
+                        break;
 
-                // Set background color based on IMU calibration status
-                if ((calibrationStatus == 3) || (calibrationStatus == 4))
-                {
-                    textBox.BackColor = Color.Green;
-                    textBox.ForeColor = Color.Black;
-                }
-                else if (calibrationStatus == 2)
-                {
-                    textBox.BackColor = Color.Orange;
-                    textBox.ForeColor = Color.Black;
-                }
-                else
-                {
-                    textBox.BackColor = Color.Red;
-                    textBox.ForeColor = Color.White;
+                    case IMUValue.Calibration.Poor:
+                        textBox.Text = "Poor";
+                        textBox.BackColor = Color.Red;
+                        textBox.ForeColor = Color.White;
+                        break;
+
+                    case IMUValue.Calibration.Adequate:
+                        textBox.Text = "Adequate";
+                        textBox.BackColor = Color.Orange;
+                        textBox.ForeColor = Color.Black;
+                        break;
+
+                    case IMUValue.Calibration.Good:
+                        textBox.Text = "Good";
+                        textBox.BackColor = Color.Green;
+                        textBox.ForeColor = Color.Black;
+                        break;
+
+                    case IMUValue.Calibration.Excellent:
+                        textBox.Text = "Excellent";
+                        textBox.BackColor = Color.Green;
+                        textBox.ForeColor = Color.Black;
+                        break;
                 }
             }
         }

@@ -296,67 +296,31 @@ namespace Controller
                             break;
 
                         // IMU
-                        case PGNValues.PGN_TRACTOR_PITCH:
-                            TractorIMU.Pitch = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnTractorIMUChanged?.Invoke(TractorIMU);
-                            break;
-                        case PGNValues.PGN_TRACTOR_ROLL:
-                            TractorIMU.Roll = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnTractorIMUChanged?.Invoke(TractorIMU);
-                            break;
-                        case PGNValues.PGN_TRACTOR_HEADING:
-                            TractorIMU.Heading = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnTractorIMUChanged?.Invoke(TractorIMU);
-                            break;
-                        case PGNValues.PGN_TRACTOR_YAWRATE:
-                            TractorIMU.YawRate = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnTractorIMUChanged?.Invoke(TractorIMU);
-                            break;
-                        case PGNValues.PGN_TRACTOR_IMUCALIBRATION:
-                            TractorIMU.CalibrationStatus = Stat.GetByte();
+                        case PGNValues.PGN_TRACTOR_IMU:
+                            TractorIMU.Pitch   = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            TractorIMU.Roll    = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            TractorIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            TractorIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            TractorIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
                             OnTractorIMUChanged?.Invoke(TractorIMU);
                             break;
 
-                        case PGNValues.PGN_FRONT_PITCH:
-                            FrontScraperIMU.Pitch = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnFrontIMUChanged?.Invoke(FrontScraperIMU);
-                            break;
-                        case PGNValues.PGN_FRONT_ROLL:
-                            FrontScraperIMU.Roll = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnFrontIMUChanged?.Invoke(FrontScraperIMU);
-                            break;
-                        case PGNValues.PGN_FRONT_HEADING:
-                            FrontScraperIMU.Heading = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnFrontIMUChanged?.Invoke(FrontScraperIMU);
-                            break;
-                        case PGNValues.PGN_FRONT_YAWRATE:
-                            FrontScraperIMU.YawRate = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnFrontIMUChanged?.Invoke(FrontScraperIMU);
-                            break;
-                        case PGNValues.PGN_FRONT_IMUCALIBRATION:
-                            FrontScraperIMU.CalibrationStatus = Stat.GetByte();
+                        case PGNValues.PGN_FRONT_IMU:
+                            FrontScraperIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            FrontScraperIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            FrontScraperIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            FrontScraperIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            FrontScraperIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
                             OnFrontIMUChanged?.Invoke(FrontScraperIMU);
                             break;
 
-                        case PGNValues.PGN_REAR_PITCH:
-                            RearScraperIMU.Pitch = ((Int32)Stat.GetUInt32()) / 100.0;
+                        case PGNValues.PGN_REAR_IMU:
+                            RearScraperIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            RearScraperIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            RearScraperIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            RearScraperIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            RearScraperIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
                             OnRearIMUChanged?.Invoke(RearScraperIMU);
-                            break;
-                        case PGNValues.PGN_REAR_ROLL:
-                            RearScraperIMU.Roll = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnRearIMUChanged?.Invoke(RearScraperIMU);
-                            break;
-                        case PGNValues.PGN_REAR_HEADING:
-                            RearScraperIMU.Heading = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnRearIMUChanged?.Invoke(RearScraperIMU);
-                            break;
-                        case PGNValues.PGN_REAR_YAWRATE:
-                            RearScraperIMU.YawRate = ((Int32)Stat.GetUInt32()) / 100.0;
-                            OnRearIMUChanged?.Invoke(RearScraperIMU);
-                            break;
-                        case PGNValues.PGN_REAR_IMUCALIBRATION:
-                            RearScraperIMU.CalibrationStatus = (byte)Stat.GetUInt32();
-                            OnRearIMUChanged?.Invoke(FrontScraperIMU);
                             break;
 
                         // blade auto flags

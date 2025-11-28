@@ -131,8 +131,17 @@ namespace AgGrade
             CurrentEquipmentStatus.FrontPan.Fix.RTK = RTKStatus.None;
             CurrentEquipmentStatus.RearPan.Fix.RTK = RTKStatus.None;
 
+            // no longer have IMU
+            CurrentEquipmentStatus.TractorIMU.CalibrationStatus = IMUValue.Calibration.None;
+            CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus = IMUValue.Calibration.None;
+            CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus = IMUValue.Calibration.None;
+            TractorIMUFound = false;
+            FrontIMUFound = false;
+            RearIMUFound = false;
+
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
+            UpdateIMULeds();
             UpdateRTKLeds();
 
             // start trying to connect
@@ -471,6 +480,7 @@ namespace AgGrade
             Controller.OnHeightFound += Controller_OnHeightFound;
             Controller.OnHeightLost += Controller_OnHeightLost;
             Controller.OnTractorLocationChanged += Controller_OnTractorLocationChanged;
+            Controller.OnTractorIMUChanged += Controller_OnTractorIMUChanged;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
@@ -486,6 +496,21 @@ namespace AgGrade
             UpdateIMULeds();
             UpdateHeightLeds();
             UpdateRTKLeds();
+        }
+
+        /// <summary>
+        /// Received new IMU data for the tractor
+        /// </summary>
+        /// <param name="Value">New IMU data</param>
+        private void Controller_OnTractorIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.TractorIMU = Value;
+
+            TractorIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
         }
 
         /// <summary>
@@ -737,7 +762,8 @@ namespace AgGrade
         {
             if (TractorIMUFound)
             {
-                if (CurrentEquipmentStatus.TractorIMU.CalibrationStatus >= 3)
+                if ((CurrentEquipmentStatus.TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                    (CurrentEquipmentStatus.TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
                 {
                     StatusBar.SetLedState(StatusBar.Leds.TractorIMU, StatusBar.LedState.OK);
                 }
@@ -753,9 +779,10 @@ namespace AgGrade
 
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
-                if (RearIMUFound)
+                if (FrontIMUFound)
                 {
-                    if (CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus >= 3)
+                    if ((CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                        (CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus == IMUValue.Calibration.Excellent))
                     {
                         StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.OK);
                     }
@@ -778,7 +805,8 @@ namespace AgGrade
             {
                 if (RearIMUFound)
                 {
-                    if (CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus >= 3)
+                    if ((CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                        (CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus == IMUValue.Calibration.Excellent))
                     {
                         StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.OK);
                     }

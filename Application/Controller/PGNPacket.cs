@@ -78,21 +78,9 @@ namespace Controller
         PGN_REAR_BLADE_HEIGHT = 0x5009,
 
         // IMU
-        PGN_TRACTOR_PITCH = 0x6000,
-        PGN_TRACTOR_ROLL = 0x6001,
-        PGN_TRACTOR_HEADING = 0x6002,
-        PGN_TRACTOR_YAWRATE = 0x6003,
-        PGN_TRACTOR_IMUCALIBRATION = 0x6004,
-        PGN_FRONT_PITCH = 0x6005,
-        PGN_FRONT_ROLL = 0x6006,
-        PGN_FRONT_HEADING = 0x6007,
-        PGN_FRONT_YAWRATE = 0x6008,
-        PGN_FRONT_IMUCALIBRATION = 0x6009,
-        PGN_REAR_PITCH = 0x600A,
-        PGN_REAR_ROLL = 0x600B,
-        PGN_REAR_HEADING = 0x600C,
-        PGN_REAR_YAWRATE = 0x600D,
-        PGN_REAR_IMUCALIBRATION = 0x600E,
+        PGN_TRACTOR_IMU = 0x6000,
+        PGN_FRONT_IMU = 0x6001,
+        PGN_REAR_IMU = 0x6002,
 
         // GNSS
         PGN_TRACTOR_NMEA = 0x7000,
@@ -171,6 +159,19 @@ namespace Controller
             return ((UInt32)Data[3] << 24) | ((UInt32)Data[2] << 16) | ((UInt32)Data[1] << 8) | Data[0];
         }
 
+        /// <summary>
+        /// Gets a UInt32 from the packet data, starting at an offset
+        /// </summary>
+        /// <param name="Offset">Starting offset into data</param>
+        /// <returns>UInt32 value</returns>
+        public UInt32 GetUInt32
+            (
+            uint Offset
+            )
+        {
+            return ((UInt32)Data[Offset + 3] << 24) | ((UInt32)Data[Offset + 2] << 16) | ((UInt32)Data[Offset + 1] << 8) | Data[Offset];
+        }
+
         public UInt64 GetUInt64
             (
             )
@@ -199,6 +200,19 @@ namespace Controller
             )
         {
             return Data[0];
+        }
+
+        /// <summary>
+        /// Gets a byte from an offset into the data
+        /// </summary>
+        /// <param name="Offset">Offset to access</param>
+        /// <returns>Byte of data</returns>
+        public byte GetByte
+            (
+            uint Offset
+            )
+        {
+            return Data[Offset];
         }
     }
 }

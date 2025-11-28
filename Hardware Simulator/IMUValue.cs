@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Controller
+namespace HardwareSim
 {
     public class IMUValue
     {
@@ -25,24 +25,8 @@ namespace Controller
 
         public IMUValue
             (
-            ) : this(0, 0, 0, 0, Calibration.None)
-        {
-        }
-
-        public IMUValue
-            (
-            double Pitch,
-            double Heading,
-            double Roll,
-            double YawRate,
-            Calibration CalibrationStatus
             )
         {
-            this.Pitch = Pitch;
-            this.Heading = Heading;
-            this.Roll = Roll;
-            this.YawRate = YawRate;
-            this.CalibrationStatus = CalibrationStatus;
         }
 
         /// <summary>

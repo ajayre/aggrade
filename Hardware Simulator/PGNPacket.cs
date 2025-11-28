@@ -78,21 +78,9 @@ namespace HardwareSim
         PGN_REAR_BLADE_HEIGHT = 0x5009,
 
         // IMU
-        PGN_TRACTOR_PITCH = 0x6000,
-        PGN_TRACTOR_ROLL = 0x6001,
-        PGN_TRACTOR_HEADING = 0x6002,
-        PGN_TRACTOR_YAWRATE = 0x6003,
-        PGN_TRACTOR_IMUCALIBRATION = 0x6004,
-        PGN_FRONT_PITCH = 0x6005,
-        PGN_FRONT_ROLL = 0x6006,
-        PGN_FRONT_HEADING = 0x6007,
-        PGN_FRONT_YAWRATE = 0x6008,
-        PGN_FRONT_IMUCALIBRATION = 0x6009,
-        PGN_REAR_PITCH = 0x600A,
-        PGN_REAR_ROLL = 0x600B,
-        PGN_REAR_HEADING = 0x600C,
-        PGN_REAR_YAWRATE = 0x600D,
-        PGN_REAR_IMUCALIBRATION = 0x600E,
+        PGN_TRACTOR_IMU = 0x6000,
+        PGN_FRONT_IMU = 0x6001,
+        PGN_REAR_IMU = 0x6002,
 
         // GNSS
         PGN_TRACTOR_NMEA = 0x7000,
@@ -181,6 +169,23 @@ namespace HardwareSim
             )
         {
             return ((UInt32)Data[3] << 24) | ((UInt32)Data[2] << 16) | ((UInt32)Data[1] << 8) | Data[0];
+        }
+
+        /// <summary>
+        /// Stores a UInt32 at an offset into the data
+        /// </summary>
+        /// <param name="Offset">Offset to use</param>
+        /// <param name="Value">Value to store</param>
+        public void SetUInt32
+            (
+            uint Offset,
+            UInt32 Value
+            )
+        {
+            Data[Offset]     = (byte)(Value & 0xFF);
+            Data[Offset + 1] = (byte)((Value >> 8) & 0xFF);
+            Data[Offset + 2] = (byte)((Value >> 16) & 0xFF);
+            Data[Offset + 3] = (byte)((Value >> 24) & 0xFF);
         }
 
         public UInt64 GetUInt64
