@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using System.Text;
+using static System.Windows.Forms.AxHost;
 
 namespace Controller
 {
@@ -75,6 +76,10 @@ namespace Controller
         private DateTime PingTime;
         private GNSSVector? TractorVector = null;
         private GNSSFix? TractorFix = null;
+        private GNSSVector? FrontVector = null;
+        private GNSSFix? FrontFix = null;
+        private GNSSVector? RearVector = null;
+        private GNSSFix? RearFix = null;
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -297,8 +302,8 @@ namespace Controller
 
                         // IMU
                         case PGNValues.PGN_TRACTOR_IMU:
-                            TractorIMU.Pitch   = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            TractorIMU.Roll    = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            TractorIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            TractorIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
                             TractorIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
                             TractorIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
                             TractorIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
@@ -347,41 +352,23 @@ namespace Controller
 
                         // location
                         case PGNValues.PGN_TRACTOR_NMEA:
-                            string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                            if (Sentence.StartsWith("$GNGGA"))
                             {
-                                try
-                                {
-                                    GNSSFix TractorFix = GNSSFix.ParseNMEA(Sentence);
-                                    if (TractorVector != null)
-                                    {
-                                        TractorFix.Vector = TractorVector.Clone();
-                                    }
-                                    // fixme - to do - fuse with IMU
-                                    OnTractorLocationChanged?.Invoke(TractorFix);
-                                }
-                                catch (NMEAParseException)
-                                {
-                                    // throw away
-                                }
+                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
+                                ProcessNMEA(Sentence, ref TractorFix, ref TractorVector, OnTractorLocationChanged);
                             }
-                            else if (Sentence.StartsWith("$GPVTG") || Sentence.StartsWith("$GNVTG"))
-                            {
-                                try
-                                {
-                                    TractorVector = GNSSVector.ParseNMEA(Sentence);
-                                    if (TractorFix != null)
-                                    {
-                                        TractorFix.Vector = TractorVector.Clone();
+                            break;
 
-                                        // fixme - to do - fuse with IMU
-                                        OnTractorLocationChanged?.Invoke(TractorFix);
-                                    }
-                                }
-                                catch (NMEAParseException)
-                                {
-                                    // throw away
-                                }
+                        case PGNValues.PGN_FRONT_NMEA:
+                            {
+                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
+                                ProcessNMEA(Sentence, ref FrontFix, ref FrontVector, OnFrontLocationChanged);
+                            }
+                            break;
+                        
+                        case PGNValues.PGN_REAR_NMEA:
+                            {
+                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
+                                ProcessNMEA(Sentence, ref RearFix, ref RearVector, OnRearLocationChanged);
                             }
                             break;
                     }
@@ -396,6 +383,59 @@ namespace Controller
                 }
 
                 Thread.Sleep(1);
+            }
+        }
+
+        /// <summary>
+        /// Process an NMEA sentence
+        /// </summary>
+        /// <param name="Sentence">Sentence to process</param>
+        /// <param name="Fix">Equipment fix to update</param>
+        /// <param name="Vector">Equipment vector to update</param>
+        private void ProcessNMEA
+            (
+            string Sentence,
+            ref GNSSFix? Fix,
+            ref GNSSVector? Vector,
+            LocationChanged LocChangedEvent
+            )
+        {
+            if (Sentence.StartsWith("$GNGGA"))
+            {
+                try
+                {
+                    Fix = GNSSFix.ParseNMEA(Sentence);
+                    if (Vector != null)
+                    {
+                        Fix.Vector = Vector.Clone();
+                    }
+                    // fixme - to do - fuse with IMU
+                    LocChangedEvent?.Invoke(Fix);
+                    //OnTractorLocationChanged?.Invoke(Fix);
+                }
+                catch (NMEAParseException)
+                {
+                    // throw away
+                }
+            }
+            else if (Sentence.StartsWith("$GPVTG") || Sentence.StartsWith("$GNVTG"))
+            {
+                try
+                {
+                    Vector = GNSSVector.ParseNMEA(Sentence);
+                    if (Fix != null)
+                    {
+                        Fix.Vector = Vector.Clone();
+
+                        // fixme - to do - fuse with IMU
+                        LocChangedEvent?.Invoke(Fix);
+                        //OnTractorLocationChanged?.Invoke(Fix);
+                    }
+                }
+                catch (NMEAParseException)
+                {
+                    // throw away
+                }
             }
         }
 

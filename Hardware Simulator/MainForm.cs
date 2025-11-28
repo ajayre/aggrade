@@ -1,3 +1,4 @@
+using Microsoft.VisualBasic.Logging;
 using System;
 using System.Text;
 using Timer = System.Timers.Timer;
@@ -12,6 +13,9 @@ namespace HardwareSim
         private const double DEFAULT_LATITUDE = 36.448272;
         private const double DEFAULT_LONGITUDE = -90.724986;
         private const double DEFAULT_ALTITUDE = 0;
+
+        private const int DISTANCE_TRACTOR_TO_FRONT_M = 20;
+        private const int DISTANCE_FRONT_TO_REAR_M = 20;
 
         private UDPServer uDPServer;
         private Timer PingTimer;
@@ -32,13 +36,56 @@ namespace HardwareSim
 
             GNSSSim = new GNSS();
             GNSSSim.OnNewTractorFix += GNSSSim_OnNewTractorFix;
+            GNSSSim.OnNewFrontFix += GNSSSim_OnNewFrontFix;
+            GNSSSim.OnNewRearFix += GNSSSim_OnNewRearFix;
             GNSSSim.OnNewTractorIMU += GNSSSim_OnNewTractorIMU;
+            GNSSSim.OnNewFrontIMU += GNSSSim_OnNewFrontIMU;
+            GNSSSim.OnNewRearIMU += GNSSSim_OnNewRearIMU;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
-            GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
+
+            double Lat = DEFAULT_LATITUDE;
+            double Lon = DEFAULT_LONGITUDE;
+            GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
+
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_TRACTOR_TO_FRONT_M);
+            GNSSSim.SetFrontLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_FRONT_TO_REAR_M);
+            GNSSSim.SetRearLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
 
             GNSSSim.Start();
+        }
+
+        private void GNSSSim_OnNewRearIMU(IMUValue Value)
+        {
+            byte[] Data = new byte[PGNPacket.MAX_LEN];
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_FRONT_IMU;
+            Packet.SetUInt32(0, (UInt32)(Value.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(Value.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(Value.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(Value.YawRate * 100));
+            Packet.Data[16] = (byte)Value.CalibrationStatus;
+            SendStatus(Packet);
+        }
+
+        private void GNSSSim_OnNewFrontIMU(IMUValue Value)
+        {
+            byte[] Data = new byte[PGNPacket.MAX_LEN];
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_REAR_IMU;
+            Packet.SetUInt32(0, (UInt32)(Value.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(Value.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(Value.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(Value.YawRate * 100));
+            Packet.Data[16] = (byte)Value.CalibrationStatus;
+            SendStatus(Packet);
         }
 
         private void GNSSSim_OnNewTractorIMU(IMUValue Value)
@@ -58,6 +105,18 @@ namespace HardwareSim
         {
             byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
             SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_NMEA, Data));
+        }
+
+        private void GNSSSim_OnNewRearFix(string NMEAString)
+        {
+            byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_NMEA, Data));
+        }
+
+        private void GNSSSim_OnNewFrontFix(string NMEAString)
+        {
+            byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_NMEA, Data));
         }
 
         private async void SendStatus
@@ -150,6 +209,12 @@ namespace HardwareSim
             double Lat = double.Parse(LatitudeInput.Text);
             double Lon = double.Parse(LongitudeInput.Text);
 
+            GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_TRACTOR_TO_FRONT_M);
+            GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_FRONT_TO_REAR_M);
             GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
         }
 

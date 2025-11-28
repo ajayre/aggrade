@@ -214,7 +214,7 @@ namespace AgGrade.Controls
                         break;
                     case RTKStatus.Fix:
                         textBox.BackColor = Color.Green;
-                        textBox.ForeColor = Color.Black;
+                        textBox.ForeColor = Color.White;
                         break;
                 }
             }
@@ -251,13 +251,13 @@ namespace AgGrade.Controls
                     case IMUValue.Calibration.Good:
                         textBox.Text = "Good";
                         textBox.BackColor = Color.Green;
-                        textBox.ForeColor = Color.Black;
+                        textBox.ForeColor = Color.White;
                         break;
 
                     case IMUValue.Calibration.Excellent:
                         textBox.Text = "Excellent";
                         textBox.BackColor = Color.Green;
-                        textBox.ForeColor = Color.Black;
+                        textBox.ForeColor = Color.White;
                         break;
                 }
             }

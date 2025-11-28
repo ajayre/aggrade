@@ -480,7 +480,11 @@ namespace AgGrade
             Controller.OnHeightFound += Controller_OnHeightFound;
             Controller.OnHeightLost += Controller_OnHeightLost;
             Controller.OnTractorLocationChanged += Controller_OnTractorLocationChanged;
+            Controller.OnFrontLocationChanged += Controller_OnFrontLocationChanged;
+            Controller.OnRearLocationChanged += Controller_OnRearLocationChanged;
             Controller.OnTractorIMUChanged += Controller_OnTractorIMUChanged;
+            Controller.OnFrontIMUChanged += Controller_OnFrontIMUChanged;
+            Controller.OnRearIMUChanged += Controller_OnRearIMUChanged;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
@@ -496,6 +500,36 @@ namespace AgGrade
             UpdateIMULeds();
             UpdateHeightLeds();
             UpdateRTKLeds();
+        }
+
+        /// <summary>
+        /// Received IMU data for the rear scraper
+        /// </summary>
+        /// <param name="Value"></param>
+        private void Controller_OnRearIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.FrontPan.IMU = Value;
+
+            FrontIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
+        }
+
+        /// <summary>
+        /// Received IMU data for the front scraper
+        /// </summary>
+        /// <param name="Value"></param>
+        private void Controller_OnFrontIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.RearPan.IMU = Value;
+
+            RearIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
         }
 
         /// <summary>
@@ -520,6 +554,32 @@ namespace AgGrade
         private void Controller_OnTractorLocationChanged(GNSSFix Fix)
         {
             CurrentEquipmentStatus.TractorFix = Fix;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateRTKLeds();
+        }
+
+        /// <summary>
+        /// Called when the front scraper's location changed
+        /// </summary>
+        /// <param name="Fix">New scraper location</param>
+        private void Controller_OnRearLocationChanged(GNSSFix Fix)
+        {
+            CurrentEquipmentStatus.FrontPan.Fix = Fix;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateRTKLeds();
+        }
+
+        /// <summary>
+        /// Called when the rear scraper's location changes
+        /// </summary>
+        /// <param name="Fix">New scraper location</param>
+        private void Controller_OnFrontLocationChanged(GNSSFix Fix)
+        {
+            CurrentEquipmentStatus.RearPan.Fix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 

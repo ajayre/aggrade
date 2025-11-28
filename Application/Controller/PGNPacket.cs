@@ -84,6 +84,8 @@ namespace Controller
 
         // GNSS
         PGN_TRACTOR_NMEA = 0x7000,
+        PGN_FRONT_NMEA = 0x7001,
+        PGN_REAR_NMEA = 0x7002,
     }
 
     public class PGNPacket
