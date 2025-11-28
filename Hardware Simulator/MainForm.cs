@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using Timer = System.Timers.Timer;
 
 namespace HardwareSim
@@ -10,6 +11,7 @@ namespace HardwareSim
 
         private const double DEFAULT_LATITUDE = 36.448272;
         private const double DEFAULT_LONGITUDE = -90.724986;
+        private const double DEFAULT_ALTITUDE = 0;
 
         private UDPServer uDPServer;
         private Timer PingTimer;
@@ -33,15 +35,16 @@ namespace HardwareSim
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
-            GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE);
+            GNSSSim.SetTractorLocation(DEFAULT_LATITUDE, DEFAULT_LONGITUDE, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
+            GNSSSim.SetTractorVector(10, 3);
 
             GNSSSim.Start();
         }
 
         private void GNSSSim_OnNewTractorFix(string NMEAString)
         {
-
-            //SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_NMEA, (UInt64)(Latitude * LOCATION_SCALE_FACTOR), (UInt64)(Longitude * LOCATION_SCALE_FACTOR)));
+            byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
+            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_NMEA, Data));
         }
 
         private async void SendStatus
@@ -134,7 +137,7 @@ namespace HardwareSim
             double Lat = double.Parse(LatitudeInput.Text);
             double Lon = double.Parse(LongitudeInput.Text);
 
-            GNSSSim.SetTractorLocation(Lat, Lon);
+            GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
         }
     }
 }

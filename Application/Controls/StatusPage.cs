@@ -32,6 +32,12 @@ namespace AgGrade.Controls
             AppSettings Settings
             )
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(ShowStatus, Status, Settings);
+                return;
+            }
+
             // Update Tractor fields
             UpdateLocationTextBox(TractorLocation, Status.TractorFix.Latitude, Status.TractorFix.Longitude, PreviousStatus == null || PreviousStatus.TractorFix.Latitude != Status.TractorFix.Latitude || PreviousStatus.TractorFix.Longitude != Status.TractorFix.Longitude);
             UpdateRTKTextBox(TractorRTK, Status.TractorFix.RTK, PreviousStatus == null || PreviousStatus.TractorFix.RTK != Status.TractorFix.RTK);
@@ -41,6 +47,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(TractorHeading, FormatDouble(Status.TractorIMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.TractorIMU.Heading != Status.TractorIMU.Heading);
             UpdateTextBoxIfChanged(TractorSpeed, FormatDouble(Status.TractorFix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.TractorFix.Vector.Speedkph != Status.TractorFix.Vector.Speedkph);
             UpdateTextBoxIfChanged(TractorGNSSHeading, FormatDouble(Status.TractorFix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.TractorFix.Vector.TrackMagneticDeg != Status.TractorFix.Vector.TrackMagneticDeg);
+            UpdateTextBoxIfChanged(TractorAltitude, FormatDouble(Status.TractorFix.Altitude), PreviousStatus == null || PreviousStatus.TractorFix.Altitude != Status.TractorFix.Altitude);
             UpdateIMUCalibrationTextBox(TractorIMUCalibrationStatus, Status.TractorIMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.TractorIMU.CalibrationStatus != Status.TractorIMU.CalibrationStatus);
 
             // Update Front Pan fields
@@ -53,6 +60,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(FrontPanBladeHeight, FormatDouble(Status.FrontPan.BladeHeight), PreviousStatus == null || PreviousStatus.FrontPan.BladeHeight != Status.FrontPan.BladeHeight);
             UpdateTextBoxIfChanged(FrontPanSpeed, FormatDouble(Status.FrontPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.Speedkph != Status.FrontPan.Fix.Vector.Speedkph);
             UpdateTextBoxIfChanged(FrontPanGNSSHeading, FormatDouble(Status.FrontPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.TrackMagneticDeg != Status.FrontPan.Fix.Vector.TrackMagneticDeg);
+            UpdateTextBoxIfChanged(FrontPanAltitude, FormatDouble(Status.FrontPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Altitude != Status.FrontPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(FrontPanIMUCalibrationStatus, Status.FrontPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.FrontPan.IMU.CalibrationStatus != Status.FrontPan.IMU.CalibrationStatus);
 
             // Update Rear Pan fields
@@ -65,6 +73,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanBladeHeight, FormatDouble(Status.RearPan.BladeHeight), PreviousStatus == null || PreviousStatus.RearPan.BladeHeight != Status.RearPan.BladeHeight);
             UpdateTextBoxIfChanged(RearPanSpeed, FormatDouble(Status.RearPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.Speedkph != Status.RearPan.Fix.Vector.Speedkph);
             UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.TrackMagneticDeg != Status.RearPan.Fix.Vector.TrackMagneticDeg);
+            UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMU.CalibrationStatus != Status.RearPan.IMU.CalibrationStatus);
 
             // Store current status for next comparison
@@ -75,6 +84,7 @@ namespace AgGrade.Controls
                 {
                     Latitude = Status.TractorFix.Latitude,
                     Longitude = Status.TractorFix.Longitude,
+                    Altitude = Status.TractorFix.Altitude,
                     RTK = Status.TractorFix.RTK,
                     Vector = Status.TractorFix.Vector
                 },
@@ -86,6 +96,7 @@ namespace AgGrade.Controls
                     {
                         Latitude = Status.FrontPan.Fix.Latitude,
                         Longitude = Status.FrontPan.Fix.Longitude,
+                        Altitude = Status.FrontPan.Fix.Altitude,
                         RTK = Status.FrontPan.Fix.RTK,
                         Vector = Status.FrontPan.Fix.Vector
                     }
@@ -98,6 +109,7 @@ namespace AgGrade.Controls
                     {
                         Latitude = Status.RearPan.Fix.Latitude,
                         Longitude = Status.RearPan.Fix.Longitude,
+                        Altitude = Status.RearPan.Fix.Altitude,
                         RTK = Status.RearPan.Fix.RTK,
                         Vector = Status.RearPan.Fix.Vector
                     }
@@ -118,7 +130,7 @@ namespace AgGrade.Controls
         /// </summary>
         private string FormatLocation(double latitude, double longitude)
         {
-            return $"{latitude:F3} {longitude:F3}";
+            return $"{latitude:F8} {longitude:F8}";
         }
 
         /// <summary>
@@ -152,7 +164,7 @@ namespace AgGrade.Controls
                 }
                 else
                 {
-                    textBox.BackColor = SystemColors.Window;
+                    textBox.BackColor = SystemColors.Control;
                     textBox.ForeColor = SystemColors.WindowText;
                 }
             }

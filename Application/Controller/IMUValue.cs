@@ -37,7 +37,12 @@ namespace Controller
             if (MagneticDeclinationDeg < 0) Min = -Min;
 
             double DecDegrees = MagneticDeclinationDeg + (Min / 60.0);
-            return Heading + DecDegrees;
+            double TrueHeading = Heading + DecDegrees;
+
+            if (TrueHeading < 0) TrueHeading += 360.0;
+            if (TrueHeading >= 360) TrueHeading -= 360.0;
+
+            return TrueHeading;
         }
     }
 }

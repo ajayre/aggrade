@@ -1,13 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO.Ports;
-using System.Linq;
+﻿using System.Net;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Runtime.InteropServices;
-using System.Net;
-using System.Xml.Linq;
 
 namespace Controller
 {
@@ -57,6 +49,11 @@ namespace Controller
         public event IMUChanged OnFrontIMUChanged = null;
         public event IMUChanged OnRearIMUChanged = null;
 
+        public delegate void LocationChanged(GNSSFix Fix);
+        public event LocationChanged OnTractorLocationChanged = null;
+        public event LocationChanged OnFrontLocationChanged = null;
+        public event LocationChanged OnRearLocationChanged = null;
+
         public delegate void BladeHeightChanged(int Height);
         public event BladeHeightChanged OnFrontBladeHeightChanged = null;
         public event BladeHeightChanged OnRearBladeHeightChanged = null;
@@ -77,6 +74,7 @@ namespace Controller
         private volatile bool WorkThreadCancellationRequested = false;
         private DateTime PingTime;
         private GNSSVector? TractorVector = null;
+        private GNSSFix? TractorFix = null;
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -388,16 +386,38 @@ namespace Controller
                             string Sentence = Encoding.ASCII.GetString(Stat.Data);
                             if (Sentence.StartsWith("$GNGGA"))
                             {
-                                GNSSFix TractorFix = GNSSFix.ParseNMEA(Sentence);
-                                if (TractorVector != null)
+                                try
                                 {
-                                    TractorFix.Vector = TractorVector.Clone();
+                                    GNSSFix TractorFix = GNSSFix.ParseNMEA(Sentence);
+                                    if (TractorVector != null)
+                                    {
+                                        TractorFix.Vector = TractorVector.Clone();
+                                    }
+                                    // fixme - to do - fuse with IMU
+                                    OnTractorLocationChanged?.Invoke(TractorFix);
                                 }
-                                // fixme - to do
+                                catch (NMEAParseException)
+                                {
+                                    // throw away
+                                }
                             }
                             else if (Sentence.StartsWith("$GPVTG") || Sentence.StartsWith("$GNVTG"))
                             {
-                                TractorVector = GNSSVector.ParseNMEA(Sentence);
+                                try
+                                {
+                                    TractorVector = GNSSVector.ParseNMEA(Sentence);
+                                    if (TractorFix != null)
+                                    {
+                                        TractorFix.Vector = TractorVector.Clone();
+
+                                        // fixme - to do - fuse with IMU
+                                        OnTractorLocationChanged?.Invoke(TractorFix);
+                                    }
+                                }
+                                catch (NMEAParseException)
+                                {
+                                    // throw away
+                                }
                             }
                             break;
                     }

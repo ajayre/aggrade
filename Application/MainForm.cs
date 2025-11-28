@@ -461,6 +461,7 @@ namespace AgGrade
             Controller.OnIMULost += Controller_OnIMULost;
             Controller.OnHeightFound += Controller_OnHeightFound;
             Controller.OnHeightLost += Controller_OnHeightLost;
+            Controller.OnTractorLocationChanged += Controller_OnTractorLocationChanged;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
@@ -475,6 +476,31 @@ namespace AgGrade
             UpdateEnabledLeds();
             UpdateIMULeds();
             UpdateHeightLeds();
+        }
+
+        /// <summary>
+        /// Called when the tractor's location changes
+        /// </summary>
+        /// <param name="Fix">New tractor location</param>
+        private void Controller_OnTractorLocationChanged(GNSSFix Fix)
+        {
+            CurrentEquipmentStatus.TractorFix = Fix;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+        }
+
+        /// <summary>
+        /// Checks if we are showing the status page and gets it if we are
+        /// </summary>
+        /// <returns>The status page or null if we are not showing it </returns>
+        private StatusPage? GetStatusPage
+            (
+            )
+        {
+            if (ContentPanel.Controls.Count == 0) return null;
+            if (ContentPanel.Controls[0] is StatusPage) return ContentPanel.Controls[0] as StatusPage;
+
+            return null;
         }
 
         /// <summary>
