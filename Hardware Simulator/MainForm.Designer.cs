@@ -43,6 +43,8 @@
             RearHeightFoundBtn = new Button();
             FrontHeightFoundBtn = new Button();
             GNSSPage = new TabPage();
+            SteerLeftBtn = new Button();
+            SteerRightBtn = new Button();
             ReverseBtn = new Button();
             ForwardsBtn = new Button();
             SetLocationBtn = new Button();
@@ -50,8 +52,7 @@
             label1 = new Label();
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
-            SteerRightBtn = new Button();
-            SteerLeftBtn = new Button();
+            FrontPage = new TabPage();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -141,6 +142,7 @@
             // 
             tabControl1.Controls.Add(MiscPage);
             tabControl1.Controls.Add(GNSSPage);
+            tabControl1.Controls.Add(FrontPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
@@ -229,6 +231,26 @@
             GNSSPage.Text = "GNSS";
             GNSSPage.UseVisualStyleBackColor = true;
             // 
+            // SteerLeftBtn
+            // 
+            SteerLeftBtn.Image = Properties.Resources.left_48px;
+            SteerLeftBtn.Location = new Point(8, 70);
+            SteerLeftBtn.Name = "SteerLeftBtn";
+            SteerLeftBtn.Size = new Size(56, 56);
+            SteerLeftBtn.TabIndex = 8;
+            SteerLeftBtn.UseVisualStyleBackColor = true;
+            SteerLeftBtn.Click += SteerLeftBtn_Click;
+            // 
+            // SteerRightBtn
+            // 
+            SteerRightBtn.Image = Properties.Resources.right_48px;
+            SteerRightBtn.Location = new Point(132, 70);
+            SteerRightBtn.Name = "SteerRightBtn";
+            SteerRightBtn.Size = new Size(56, 56);
+            SteerRightBtn.TabIndex = 7;
+            SteerRightBtn.UseVisualStyleBackColor = true;
+            SteerRightBtn.Click += SteerRightBtn_Click;
+            // 
             // ReverseBtn
             // 
             ReverseBtn.Image = Properties.Resources.down_48px;
@@ -291,25 +313,15 @@
             LatitudeInput.Size = new Size(127, 23);
             LatitudeInput.TabIndex = 0;
             // 
-            // SteerRightBtn
+            // FrontPage
             // 
-            SteerRightBtn.Image = Properties.Resources.right_48px;
-            SteerRightBtn.Location = new Point(132, 70);
-            SteerRightBtn.Name = "SteerRightBtn";
-            SteerRightBtn.Size = new Size(56, 56);
-            SteerRightBtn.TabIndex = 7;
-            SteerRightBtn.UseVisualStyleBackColor = true;
-            SteerRightBtn.Click += SteerRightBtn_Click;
-            // 
-            // SteerLeftBtn
-            // 
-            SteerLeftBtn.Image = Properties.Resources.left_48px;
-            SteerLeftBtn.Location = new Point(8, 70);
-            SteerLeftBtn.Name = "SteerLeftBtn";
-            SteerLeftBtn.Size = new Size(56, 56);
-            SteerLeftBtn.TabIndex = 8;
-            SteerLeftBtn.UseVisualStyleBackColor = true;
-            SteerLeftBtn.Click += SteerLeftBtn_Click;
+            FrontPage.Location = new Point(4, 24);
+            FrontPage.Name = "FrontPage";
+            FrontPage.Padding = new Padding(3);
+            FrontPage.Size = new Size(597, 422);
+            FrontPage.TabIndex = 2;
+            FrontPage.Text = "Front Pan";
+            FrontPage.UseVisualStyleBackColor = true;
             // 
             // MainForm
             // 
@@ -352,5 +364,6 @@
         private Button ReverseBtn;
         private Button SteerLeftBtn;
         private Button SteerRightBtn;
+        private TabPage FrontPage;
     }
 }

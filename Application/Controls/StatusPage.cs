@@ -57,7 +57,11 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(FrontPanRoll, FormatDouble(Status.FrontPan.IMU.Roll), PreviousStatus == null || PreviousStatus.FrontPan.IMU.Roll != Status.FrontPan.IMU.Roll);
             UpdateTextBoxIfChanged(FrontPanYawRate, FormatDouble(Status.FrontPan.IMU.YawRate), PreviousStatus == null || PreviousStatus.FrontPan.IMU.YawRate != Status.FrontPan.IMU.YawRate);
             UpdateTextBoxIfChanged(FrontPanHeading, FormatDouble(Status.FrontPan.IMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.IMU.Heading != Status.FrontPan.IMU.Heading);
-            UpdateTextBoxIfChanged(FrontPanBladeHeight, FormatDouble(Status.FrontPan.BladeHeight), PreviousStatus == null || PreviousStatus.FrontPan.BladeHeight != Status.FrontPan.BladeHeight);
+            UpdateTextBoxIfChanged(FrontPanBladeHeight, Status.FrontPan.BladeHeight.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladeHeight != Status.FrontPan.BladeHeight);
+            UpdateTextBoxIfChanged(FrontPanBladeOffset, Status.FrontPan.BladeOffset.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladeOffset != Status.FrontPan.BladeOffset);
+            UpdateTextBoxIfChanged(FrontPanBladeAuto, Status.FrontPan.BladeAuto ? "Yes" : "No", PreviousStatus == null || PreviousStatus.FrontPan.BladeAuto != Status.FrontPan.BladeAuto);
+            UpdateTextBoxIfChanged(FrontPanBladePWM, Status.FrontPan.BladePWM.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladePWM != Status.FrontPan.BladePWM);
+            UpdateTextBoxIfChanged(FrontPanBladeDirection, Status.FrontPan.Direction.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.Direction != Status.FrontPan.Direction);
             UpdateTextBoxIfChanged(FrontPanSpeed, FormatDouble(Status.FrontPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.Speedkph != Status.FrontPan.Fix.Vector.Speedkph);
             UpdateTextBoxIfChanged(FrontPanGNSSHeading, FormatDouble(Status.FrontPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.TrackMagneticDeg != Status.FrontPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(FrontPanAltitude, FormatDouble(Status.FrontPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Altitude != Status.FrontPan.Fix.Altitude);
@@ -70,7 +74,11 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanRoll, FormatDouble(Status.RearPan.IMU.Roll), PreviousStatus == null || PreviousStatus.RearPan.IMU.Roll != Status.RearPan.IMU.Roll);
             UpdateTextBoxIfChanged(RearPanYawRate, FormatDouble(Status.RearPan.IMU.YawRate), PreviousStatus == null || PreviousStatus.RearPan.IMU.YawRate != Status.RearPan.IMU.YawRate);
             UpdateTextBoxIfChanged(RearPanHeading, FormatDouble(Status.RearPan.IMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.IMU.Heading != Status.RearPan.IMU.Heading);
-            UpdateTextBoxIfChanged(RearPanBladeHeight, FormatDouble(Status.RearPan.BladeHeight), PreviousStatus == null || PreviousStatus.RearPan.BladeHeight != Status.RearPan.BladeHeight);
+            UpdateTextBoxIfChanged(RearPanBladeHeight, Status.RearPan.BladeHeight.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladeHeight != Status.RearPan.BladeHeight);
+            UpdateTextBoxIfChanged(RearPanBladeOffset, Status.RearPan.BladeOffset.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladeOffset != Status.RearPan.BladeOffset);
+            UpdateTextBoxIfChanged(RearPanBladeAuto, Status.RearPan.BladeAuto ? "Yes" : "No", PreviousStatus == null || PreviousStatus.RearPan.BladeAuto != Status.RearPan.BladeAuto);
+            UpdateTextBoxIfChanged(RearPanBladePWM, Status.RearPan.BladePWM.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladePWM != Status.RearPan.BladePWM);
+            UpdateTextBoxIfChanged(RearPanBladeDirection, Status.RearPan.Direction.ToString(), PreviousStatus == null || PreviousStatus.RearPan.Direction != Status.RearPan.Direction);
             UpdateTextBoxIfChanged(RearPanSpeed, FormatDouble(Status.RearPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.Speedkph != Status.RearPan.Fix.Vector.Speedkph);
             UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.TrackMagneticDeg != Status.RearPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
@@ -106,6 +114,10 @@ namespace AgGrade.Controls
                         CalibrationStatus = Status.FrontPan.IMU.CalibrationStatus
                     },
                     BladeHeight = Status.FrontPan.BladeHeight,
+                    BladeOffset = Status.FrontPan.BladeOffset,
+                    BladeAuto = Status.FrontPan.BladeAuto,
+                    BladePWM = Status.FrontPan.BladePWM,
+                    Direction = Status.FrontPan.Direction,
                     Fix = new GNSSFix
                     {
                         Latitude = Status.FrontPan.Fix.Latitude,
@@ -126,6 +138,10 @@ namespace AgGrade.Controls
                         CalibrationStatus = Status.RearPan.IMU.CalibrationStatus
                     },
                     BladeHeight = Status.RearPan.BladeHeight,
+                    BladeOffset = Status.RearPan.BladeOffset,
+                    BladeAuto = Status.RearPan.BladeAuto,
+                    BladePWM = Status.RearPan.BladePWM,
+                    Direction = Status.RearPan.Direction,
                     Fix = new GNSSFix
                     {
                         Latitude = Status.RearPan.Fix.Latitude,

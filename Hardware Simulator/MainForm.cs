@@ -44,22 +44,6 @@ namespace HardwareSim
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
-
-            double Lat = DEFAULT_LATITUDE;
-            double Lon = DEFAULT_LONGITUDE;
-            GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
-
-            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_TRACTOR_TO_FRONT_M);
-            GNSSSim.SetFrontLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
-
-            Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_FRONT_TO_REAR_M);
-            GNSSSim.SetRearLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
-
-            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
-            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
-            SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
-
-            GNSSSim.Start();
         }
 
         private void GNSSSim_OnNewRearIMU(IMUValue Value)
@@ -142,6 +126,30 @@ namespace HardwareSim
             PGNPacket Command
             )
         {
+            if (Command.PGN == PGNValues.PGN_AGGRADE_STARTED)
+            {
+                double Lat = DEFAULT_LATITUDE;
+                double Lon = DEFAULT_LONGITUDE;
+                GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFloat);
+
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_TRACTOR_TO_FRONT_M);
+                GNSSSim.SetFrontLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, GNSSSim.TractorGNSS.TrueHeading, DISTANCE_FRONT_TO_REAR_M);
+                GNSSSim.SetRearLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix);
+
+                SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
+                SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
+
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, 5));
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE, 6));
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_PWMVALUE, 127));
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_DIRECTION, 1));
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, 1));
+
+                GNSSSim.Start();
+            }
         }
 
         private void EStopBtn_Click(object sender, EventArgs e)

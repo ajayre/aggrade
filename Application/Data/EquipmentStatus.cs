@@ -9,9 +9,20 @@ namespace AgGrade.Data
 {
     public class PanStatus
     {
+        public enum BladeDirection
+        {
+            None,
+            Up,
+            Down
+        }
+
         public IMUValue IMU; 
         public GNSSFix Fix;
-        public double BladeHeight;
+        public int BladeHeight;
+        public int BladeOffset;
+        public bool BladeAuto;
+        public byte BladePWM;
+        public BladeDirection Direction;
 
         public PanStatus
             (

@@ -45,6 +45,10 @@ namespace Controller
         public event BladeDirectionChanged OnFrontBladeDirectionChanged = null;
         public event BladeDirectionChanged OnRearBladeDirectionChanged = null;
 
+        public delegate void BladePWMChanged(byte PWMValue);
+        public event BladePWMChanged OnFrontBladePWMChanged = null;
+        public event BladePWMChanged OnRearBladePWMChanged = null;
+
         public delegate void IMUChanged(IMUValue Value);
         public event IMUChanged OnTractorIMUChanged = null;
         public event IMUChanged OnFrontIMUChanged = null;
@@ -348,6 +352,14 @@ namespace Controller
                         case PGNValues.PGN_REAR_BLADE_DIRECTION:
                             Up = Stat.GetByte() == 1 ? true : false;
                             OnRearBladeDirectionChanged?.Invoke(Up);
+                            break;
+
+                        case PGNValues.PGN_FRONT_BLADE_PWMVALUE:
+                            OnFrontBladePWMChanged?.Invoke(Stat.Data[0]);
+                            break;
+
+                        case PGNValues.PGN_REAR_BLADE_PWMVALUE:
+                            OnRearBladePWMChanged?.Invoke(Stat.Data[0]);
                             break;
 
                         // location

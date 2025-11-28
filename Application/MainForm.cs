@@ -473,18 +473,33 @@ namespace AgGrade
             Controller = new OGController();
             Controller.OnEmergencyStop += Controller_OnEmergencyStop;
             Controller.OnEmergencyStopCleared += Controller_OnEmergencyStopCleared;
+            
             Controller.OnControllerLost += Controller_OnControllerLost;
             Controller.OnControllerFound += Controller_OnControllerFound;
             Controller.OnIMUFound += Controller_OnIMUFound;
             Controller.OnIMULost += Controller_OnIMULost;
             Controller.OnHeightFound += Controller_OnHeightFound;
             Controller.OnHeightLost += Controller_OnHeightLost;
+            
             Controller.OnTractorLocationChanged += Controller_OnTractorLocationChanged;
             Controller.OnFrontLocationChanged += Controller_OnFrontLocationChanged;
             Controller.OnRearLocationChanged += Controller_OnRearLocationChanged;
+
             Controller.OnTractorIMUChanged += Controller_OnTractorIMUChanged;
             Controller.OnFrontIMUChanged += Controller_OnFrontIMUChanged;
             Controller.OnRearIMUChanged += Controller_OnRearIMUChanged;
+
+            Controller.OnFrontBladeAutoChanged += Controller_OnFrontBladeAutoChanged;
+            Controller.OnFrontBladeDirectionChanged += Controller_OnFrontBladeDirectionChanged;
+            Controller.OnFrontBladePWMChanged += Controller_OnFrontBladePWMChanged;
+            Controller.OnFrontBladeHeightChanged += Controller_OnFrontBladeHeightChanged;
+            Controller.OnFrontSlaveOffsetChanged += Controller_OnFrontSlaveOffsetChanged;
+
+            Controller.OnRearBladeAutoChanged += Controller_OnRearBladeAutoChanged;
+            Controller.OnRearBladeDirectionChanged += Controller_OnRearBladeDirectionChanged;
+            Controller.OnRearBladePWMChanged += Controller_OnRearBladePWMChanged;
+            Controller.OnRearBladeHeightChanged += Controller_OnRearBladeHeightChanged;
+            Controller.OnRearSlaveOffsetChanged += Controller_OnRearSlaveOffsetChanged;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
@@ -500,6 +515,70 @@ namespace AgGrade
             UpdateIMULeds();
             UpdateHeightLeds();
             UpdateRTKLeds();
+        }
+
+        private void Controller_OnRearSlaveOffsetChanged(int Offset)
+        {
+            CurrentEquipmentStatus.RearPan.BladeOffset = Offset;
+        }
+
+        private void Controller_OnRearBladeHeightChanged(int Height)
+        {
+            CurrentEquipmentStatus.RearPan.BladeHeight = Height;
+        }
+
+        private void Controller_OnRearBladePWMChanged(byte PWMValue)
+        {
+            CurrentEquipmentStatus.RearPan.BladePWM = PWMValue;
+        }
+
+        private void Controller_OnRearBladeDirectionChanged(bool IsMovingUp)
+        {
+            if (IsMovingUp)
+            {
+                CurrentEquipmentStatus.RearPan.Direction = PanStatus.BladeDirection.Up;
+            }
+            else
+            {
+                CurrentEquipmentStatus.RearPan.Direction = PanStatus.BladeDirection.Down;
+            }
+        }
+
+        private void Controller_OnRearBladeAutoChanged(bool IsAuto)
+        {
+            CurrentEquipmentStatus.RearPan.BladeAuto = IsAuto;
+        }
+
+        private void Controller_OnFrontBladeHeightChanged(int Height)
+        {
+            CurrentEquipmentStatus.FrontPan.BladeHeight = Height;
+        }
+
+        private void Controller_OnFrontSlaveOffsetChanged(int Offset)
+        {
+            CurrentEquipmentStatus.FrontPan.BladeOffset = Offset;
+        }
+
+        private void Controller_OnFrontBladePWMChanged(byte PWMValue)
+        {
+            CurrentEquipmentStatus.FrontPan.BladePWM = PWMValue;
+        }
+
+        private void Controller_OnFrontBladeDirectionChanged(bool IsMovingUp)
+        {
+            if (IsMovingUp)
+            {
+                CurrentEquipmentStatus.FrontPan.Direction = PanStatus.BladeDirection.Up;
+            }
+            else
+            {
+                CurrentEquipmentStatus.FrontPan.Direction = PanStatus.BladeDirection.Down;
+            }
+        }
+
+        private void Controller_OnFrontBladeAutoChanged(bool IsAuto)
+        {
+            CurrentEquipmentStatus.FrontPan.BladeAuto = IsAuto;
         }
 
         /// <summary>
