@@ -280,7 +280,7 @@ namespace AgGrade
             statusPage.Dock = DockStyle.Fill;
             statusPage.Show();
 
-            statusPage.ShowStatus(CurrentEquipmentStatus);
+            statusPage.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>

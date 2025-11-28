@@ -95,12 +95,12 @@ namespace Controller
         PGN_REAR_IMUCALIBRATION = 0x600E,
 
         // GNSS
-        PGN_TRACTOR_LOCATION = 0x7000,
+        PGN_TRACTOR_NMEA = 0x7000,
     }
 
     public class PGNPacket
     {
-        public const int MAX_LEN = 16;
+        public const int MAX_LEN = 82;
 
         public PGNValues PGN;
         public byte[] Data = new byte[MAX_LEN];

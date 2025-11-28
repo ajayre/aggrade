@@ -11,15 +11,6 @@ using System.Xml.Linq;
 
 namespace Controller
 {
-    public struct IMUValue
-    {
-        public double Pitch;
-        public double Heading;
-        public double Roll;
-        public double YawRate;           // deg/s
-        public byte CalibrationStatus;   // 0 - 4, 4 = best
-    }
-
     public enum EquipType
     {
         Tractor,
@@ -85,6 +76,7 @@ namespace Controller
         private Thread WorkThread = null;
         private volatile bool WorkThreadCancellationRequested = false;
         private DateTime PingTime;
+        private GNSSVector? TractorVector = null;
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -392,10 +384,21 @@ namespace Controller
                             break;
 
                         // location
-                        case PGNValues.PGN_TRACTOR_LOCATION:
-                            UInt64[] RawValues = Stat.GetUInt64Array();
-                            double Latitude = (double)(Int64)RawValues[0] / (double)LOCATION_SCALE_FACTOR;
-                            double Longitude = (double)(Int64)RawValues[1] / (double)LOCATION_SCALE_FACTOR;
+                        case PGNValues.PGN_TRACTOR_NMEA:
+                            string Sentence = Encoding.ASCII.GetString(Stat.Data);
+                            if (Sentence.StartsWith("$GNGGA"))
+                            {
+                                GNSSFix TractorFix = GNSSFix.ParseNMEA(Sentence);
+                                if (TractorVector != null)
+                                {
+                                    TractorFix.Vector = TractorVector.Clone();
+                                }
+                                // fixme - to do
+                            }
+                            else if (Sentence.StartsWith("$GPVTG") || Sentence.StartsWith("$GNVTG"))
+                            {
+                                TractorVector = GNSSVector.ParseNMEA(Sentence);
+                            }
                             break;
                     }
                 }

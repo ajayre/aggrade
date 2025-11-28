@@ -11,8 +11,6 @@ namespace HardwareSim
         private const double DEFAULT_LATITUDE = 36.448272;
         private const double DEFAULT_LONGITUDE = -90.724986;
 
-        private const Int64 LOCATION_SCALE_FACTOR = 1000000000;
-
         private UDPServer uDPServer;
         private Timer PingTimer;
         private GNSS GNSSSim;
@@ -31,7 +29,7 @@ namespace HardwareSim
             PingTimer.Start();
 
             GNSSSim = new GNSS();
-            GNSSSim.OnNewTractorLocation += GNSSSim_OnNewTractorLocation;
+            GNSSSim.OnNewTractorFix += GNSSSim_OnNewTractorFix;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
@@ -40,14 +38,10 @@ namespace HardwareSim
             GNSSSim.Start();
         }
 
-        private void GNSSSim_OnNewTractorLocation(double Latitude, double Longitude)
+        private void GNSSSim_OnNewTractorFix(string NMEAString)
         {
-            double LatScaled = Latitude * LOCATION_SCALE_FACTOR;
-            double LonScaled = Longitude * LOCATION_SCALE_FACTOR;
-            UInt64 RawLat = (UInt64)LatScaled;
-            UInt64 RawLon = (UInt64)LonScaled;
 
-            SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_LOCATION, (UInt64)(Latitude * LOCATION_SCALE_FACTOR), (UInt64)(Longitude * LOCATION_SCALE_FACTOR)));
+            //SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_NMEA, (UInt64)(Latitude * LOCATION_SCALE_FACTOR), (UInt64)(Longitude * LOCATION_SCALE_FACTOR)));
         }
 
         private async void SendStatus

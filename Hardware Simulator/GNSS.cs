@@ -13,7 +13,7 @@ namespace HardwareSim
         public double TractorLatitude { get; private set; }
         public double TractorLongitude { get; private set; }
 
-        public event Action<double, double> OnNewTractorLocation = null;
+        public event Action<string> OnNewTractorFix = null;
 
         private Timer UpdateTimer;
 
@@ -28,7 +28,9 @@ namespace HardwareSim
 
         private void UpdateTimer_Tick(object? sender, EventArgs e)
         {
-            OnNewTractorLocation?.Invoke(TractorLatitude, TractorLongitude);
+            string NMEAString = "";
+
+            OnNewTractorFix?.Invoke(NMEAString);
         }
 
         public void SetTractorLocation

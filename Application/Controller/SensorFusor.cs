@@ -65,9 +65,9 @@ namespace Controller
             if (IMUGyroOffset == INVALID_GYRO)
             {
                 // we are going fast enough to use GNSS heading
-                if ((Fix.Speed > SPEED_THRESHOLD) && Fix.HasRTK)
+                if ((Fix.Vector.Speedkph > SPEED_THRESHOLD) && Fix.HasRTK)
                 {
-                    Heading = Fix.Heading;
+                    Heading = Fix.Vector.TrackMagneticDeg;
                 }
                 // assume going forward, but it's still slow, so we need to go at least some distance
                 else
@@ -103,9 +103,9 @@ namespace Controller
 
                 // assume we're going forward, at a decent speed, and not turning very fast
                 // we'll use mostly gps heading with some gyro heading (adjust?)
-                if (Fix.HasRTK && Fix.Speed > SPEED_THRESHOLD && IMUYawRate < YAW_RATE_THRESHOLD)
+                if (Fix.HasRTK && Fix.Vector.Speedkph > SPEED_THRESHOLD && IMUYawRate < YAW_RATE_THRESHOLD)
                 {
-                    Heading = Fix.Heading * 0.6 + GyroHeading * 0.4;
+                    Heading = Fix.Vector.TrackMagneticDeg * 0.6 + GyroHeading * 0.4;
 
                     // recompute offset
                     IMUGyroOffset = Heading - IMUHeading;
@@ -176,8 +176,8 @@ namespace Controller
                 CorrectedFix.Altitude = Altitude;
 
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Heading = Fix.Heading;
-                CorrectedFix.Speed = Fix.Speed;
+                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
 
                 LastLatitude = Latitude;
                 LastLongitude = Longitude;
@@ -218,8 +218,8 @@ namespace Controller
 
                 CorrectedFix.Altitude = Altitude;
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Heading = Fix.Heading;
-                CorrectedFix.Speed = Fix.Speed;
+                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
 
                 LastLatitude = Latitude;
                 LastLongitude = Longitude;
@@ -235,8 +235,8 @@ namespace Controller
 
                 CorrectedFix.Altitude = Altitude;
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Heading = Fix.Heading;
-                CorrectedFix.Speed = Fix.Speed;
+                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
 
                 LastLatitude = Fix.Latitude;
                 LastLongitude = Fix.Longitude;

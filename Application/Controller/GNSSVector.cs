@@ -9,7 +9,8 @@ namespace Controller
 {
     public class GNSSVector
     {
-        public double TrackTrueDeg;      // deg (track made good relative to true north)
+        private const double KPH_TO_MPH = 0.621371;
+
         public double TrackMagneticDeg;  // deg (track made good relative to magnetic north)
         public double Speedkph;          // kph (speed over ground)
 
@@ -17,24 +18,52 @@ namespace Controller
         {
             get
             {
-                return Speedkph * 0.621371;
+                return Speedkph * KPH_TO_MPH;
             }
         }
 
-        public GNSSVector() : this(0, 0, 0)
+        public GNSSVector() : this(0, 0)
         {
         }
 
         public GNSSVector
             (
-            double TrackTrueDeg,
             double TrackMagneticDeg,
             double Speedkph
             )
         {
-            this.TrackTrueDeg = TrackTrueDeg;
             this.TrackMagneticDeg = TrackMagneticDeg;
             this.Speedkph = Speedkph;
+        }
+
+        /// <summary>
+        /// Gets the true heading
+        /// </summary>
+        /// <param name="MagneticDeclinationDeg">Degrees of magnetic declination</param>
+        /// <param name="MagneticDeclinationMin">Minutes of magnetic declination</param>
+        /// <returns></returns>
+        public double GetTrueHeading
+            (
+            int MagneticDeclinationDeg,
+            uint MagneticDeclinationMin
+            )
+        {
+            int Min = (int)MagneticDeclinationMin;
+            if (MagneticDeclinationDeg < 0) Min = -Min;
+
+            double DecDegrees = MagneticDeclinationDeg + (Min / 60.0);
+            return TrackMagneticDeg + DecDegrees;
+        }
+
+        /// <summary>
+        /// Clones the vector
+        /// </summary>
+        /// <returns>Cloned vector</returns>
+        public GNSSVector Clone
+            (
+            )
+        {
+            return new GNSSVector(this.TrackMagneticDeg, this.Speedkph);
         }
 
         /// <summary>
@@ -170,7 +199,7 @@ namespace Controller
                 }
             }
 
-            return new GNSSVector(trackTrueDeg, trackMagneticDeg, speedKph);
+            return new GNSSVector(trackMagneticDeg, speedKph);
         }
     }
 }

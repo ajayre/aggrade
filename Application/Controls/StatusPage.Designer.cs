@@ -1023,6 +1023,7 @@
             Controls.Add(groupBox2);
             Controls.Add(groupBox1);
             Controls.Add(sectionTitle1);
+            DoubleBuffered = true;
             Name = "StatusPage";
             Size = new Size(869, 858);
             groupBox1.ResumeLayout(false);

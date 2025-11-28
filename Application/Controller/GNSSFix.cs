@@ -19,8 +19,7 @@ namespace Controller
         public double Longitude; // deg
         public double Latitude;  // deg
         public double Altitude;  // meters
-        public double Heading;   // deg
-        public double Speed;     // kph
+        public GNSSVector Vector;
         public RTKStatus RTK;    // RTK type: None, Fix, or Float
 
         /// <summary>
@@ -31,7 +30,7 @@ namespace Controller
             get { return RTK == RTKStatus.Fix || RTK == RTKStatus.Float; }
         }
 
-        public GNSSFix() : this(0, 0, 0, 0, 0, RTKStatus.None)
+        public GNSSFix() : this(0, 0, 0, new GNSSVector(), RTKStatus.None)
         {
         }
 
@@ -40,17 +39,15 @@ namespace Controller
             double Longitude,
             double Latitude,
             double Altitude,
-            double Heading,
-            double Speed,
+            GNSSVector Vector,
             RTKStatus RTKType
             )
         {
             this.Longitude = Longitude;
             this.Latitude  = Latitude;
             this.Altitude  = Altitude;
-            this.Heading   = Heading;
-            this.Speed     = Speed;
-            this.RTK   = RTKType;
+            this.Vector    = Vector;
+            this.RTK       = RTKType;
         }
 
         /// <summary>
@@ -192,7 +189,7 @@ namespace Controller
             }
 
             // GNGGA doesn't contain heading or speed, so they remain 0
-            return new GNSSFix(longitude, latitude, altitude, 0.0, 0.0, rtkType);
+            return new GNSSFix(longitude, latitude, altitude, new GNSSVector(), rtkType);
         }
 
         /// <summary>
