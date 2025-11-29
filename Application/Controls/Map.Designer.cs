@@ -38,6 +38,7 @@
             MapCanvas.Location = new Point(0, 0);
             MapCanvas.Name = "MapCanvas";
             MapCanvas.Size = new Size(574, 356);
+            MapCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             MapCanvas.TabIndex = 0;
             MapCanvas.TabStop = false;
             // 
@@ -45,7 +46,7 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.Control;
+            BackColor = Color.LightGray;
             Controls.Add(MapCanvas);
             Name = "Map";
             Size = new Size(574, 356);

@@ -283,7 +283,6 @@ namespace AgGrade
             Map map = new Map();
             map.Parent = ContentPanel;
             map.Dock = DockStyle.Fill;
-            map.Show();
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
@@ -292,8 +291,9 @@ namespace AgGrade
             AGDLoader Loader = new AGDLoader();
             Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
             NewField.Name = "ShopB4";
-            MapGenerator MapGen = new MapGenerator();
-            Bitmap Map = MapGen.Generate(NewField);
+            map.ShowField(NewField);
+
+            map.Show();
         }
 
         /// <summary>
