@@ -12,4 +12,9 @@ public class Bin
     public double FillAmountM { get; set; }
     public double ExistingElevationM { get; set; }
     public double TargetElevationM { get; set; }
+
+    public override string ToString()
+    {
+        return string.Format("{0},{1}: {2}/{3}", X, Y, CutAmountM, FillAmountM);
+    }
 }

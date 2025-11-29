@@ -18,57 +18,50 @@ namespace AgGrade.Data
         private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
         private const double ACCURACY_TOLERANCE_M = 0.03048; // 0.1ft in meters
 
-        public List<TopologyPoint> TopologyPoints { get; private set; }
-        public double FieldCentroidLat { get; private set; }
-		public double FieldCentroidLon { get; private set; }
-        public double FieldMinX { get; private set; }
-        public double FieldMinY { get; private set; }
-        public List<Bin> Bins { get; private set; }
-        public int UTMZone { get; private set; }
-        public bool IsNorthernHemisphere { get; private set; }
-        public double TotalCutBCY { get; private set; }
-        public double TotalFillBCY { get; private set; }
-
         public AGDLoader
 			(
 			)
 		{
-			TopologyPoints = new List<TopologyPoint>();
-            //CutFillMap = new Dictionary<Point, double>();
-            Bins = new List<Bin>();
 		}
 
         /// <summary>
         /// Loads in an AGD (Optisurface) file
         /// </summary>
-        /// <param name="FileName"></param>
-        public void Load
+        /// <param name="FileName">Path and name of file to load</param>
+        /// <returns>New field</returns>
+        public Field Load
 			(
 			string FileName
 			)
 		{
-			TopologyPoints = LoadTopologyData(FileName);
+            Field NewField = new Field();
 
-            CalculateSiteCentroid();
+			LoadTopologyData(FileName, NewField);
+
+            CalculateSiteCentroid(NewField);
             
-			ConvertToLocalCoordinates();
+			ConvertToLocalCoordinates(NewField);
 			
 			// create 2ft x 2ft bins
-            CalculateCutFillVolumesWithBinning();
+            CalculateCutFillVolumesWithBinning(NewField);
+
+            return NewField;
         }
 
-		/// <summary>
-		/// Gets the lat,lon for the center of the field
-		/// </summary>
-		private void CalculateSiteCentroid
+        /// <summary>
+        /// Gets the lat,lon for the center of the field
+        /// </summary>
+        /// <param name="Field">Field to update</param>
+        private void CalculateSiteCentroid
 			(
+            Field Field
 			)
 		{
             double TotalLat = 0;
             double TotalLon = 0;
             int Count = 0;
 
-            foreach (TopologyPoint Point in TopologyPoints)
+            foreach (TopologyPoint Point in Field.TopologyPoints)
             {
                 if (Point.ExistingElevation != 0 || Point.ProposedElevation != 0)
                 {
@@ -78,28 +71,32 @@ namespace AgGrade.Data
                 }
             }
 
-            FieldCentroidLat = TotalLat / Count;
-            FieldCentroidLon = TotalLon / Count;
+            Field.FieldCentroidLat = TotalLat / Count;
+            Field.FieldCentroidLon = TotalLon / Count;
         }
 
-		/// <summary>
-		/// Gets the X,Y for SW corner of field
-		/// Gets the X,Y for each point in the topology
-		/// </summary>
-        private void ConvertToLocalCoordinates()
+        /// <summary>
+        /// Gets the X,Y for SW corner of field
+        /// Gets the X,Y for each point in the topology
+        /// </summary>
+        /// <param name="Field">Field to update</param>
+        private void ConvertToLocalCoordinates
+            (
+            Field Field
+            )
         {
             // find the Southwest corner (minimum X and Y) to use as origin
-            double MinLat = TopologyPoints.Min(p => p.Latitude);
-            double MinLon = TopologyPoints.Min(p => p.Longitude);
+            double MinLat = Field.TopologyPoints.Min(p => p.Latitude);
+            double MinLon = Field.TopologyPoints.Min(p => p.Longitude);
 
 			UTM.UTMCoordinate MinXY = UTM.FromLatLon(MinLat, MinLon);
-			FieldMinX = MinXY.Easting;
-			FieldMinY = MinXY.Northing;
+			Field.FieldMinX = MinXY.Easting;
+			Field.FieldMinY = MinXY.Northing;
 
-            UTMZone = MinXY.Zone;
-            IsNorthernHemisphere = MinXY.IsNorthernHemisphere;
+            Field.UTMZone = MinXY.Zone;
+            Field.IsNorthernHemisphere = MinXY.IsNorthernHemisphere;
 
-            foreach (TopologyPoint Point in TopologyPoints)
+            foreach (TopologyPoint Point in Field.TopologyPoints)
             {
 				UTM.UTMCoordinate Coord = UTM.FromLatLon(Point.Latitude, Point.Longitude);
 				Point.X = Coord.Easting;
@@ -110,16 +107,20 @@ namespace AgGrade.Data
         /// <summary>
         /// Divides the field up into 2ft x 2ft bins and calculates the cut and fill volume for each bin
         /// </summary>
-        private void CalculateCutFillVolumesWithBinning()
+        /// <param name="Field">Field to update</param>
+        private void CalculateCutFillVolumesWithBinning
+            (
+            Field Field
+            )
         {
             // Create 2ft x 2ft bins (2ft = 0.6096m)
             double BinSizeM = 0.6096;
 
             // Find bounds of the field
-            double MinX = TopologyPoints.Min(p => p.X);
-            double MaxX = TopologyPoints.Max(p => p.X);
-            double MinY = TopologyPoints.Min(p => p.Y);
-            double MaxY = TopologyPoints.Max(p => p.Y);
+            double MinX = Field.TopologyPoints.Min(p => p.X);
+            double MaxX = Field.TopologyPoints.Max(p => p.X);
+            double MinY = Field.TopologyPoints.Min(p => p.Y);
+            double MaxY = Field.TopologyPoints.Max(p => p.Y);
 
             // get size of field in bins
             int BinWidth = (int)Math.Ceiling((MaxX - MinX) / BinSizeM);
@@ -130,13 +131,13 @@ namespace AgGrade.Data
             Dictionary<Point, double> CutFillMap = new Dictionary<Point, double>();
             Dictionary<Point, List<double>> BinExistingElevationValues = new Dictionary<Point, List<double>>();
             Dictionary<Point, List<double>> BinTargetElevationValues = new Dictionary<Point, List<double>>();
-            Bins.Clear();
+            Field.Bins.Clear();
 
             int ProcessedPoints = 0;
-            int TotalPoints = TopologyPoints.Count;
+            int TotalPoints = Field.TopologyPoints.Count;
 
             // Bin the AGD data points
-            foreach (TopologyPoint Point in TopologyPoints)
+            foreach (TopologyPoint Point in Field.TopologyPoints)
             {
                 ProcessedPoints++;
 
@@ -217,16 +218,16 @@ namespace AgGrade.Data
 
                     double Lat;
                     double Lon;
-                    UTM.ToLatLon(UTMZone, IsNorthernHemisphere, BinMinX, BinMinY, out Lat, out Lon);
+                    UTM.ToLatLon(Field.UTMZone, Field.IsNorthernHemisphere, BinMinX, BinMinY, out Lat, out Lon);
                     NewBin.SouthwestCorner = new Coordinate() { Latitude = Lat, Longitude = Lon };
 
-                    UTM.ToLatLon(UTMZone, IsNorthernHemisphere, BinMaxX, BinMaxY, out Lat, out Lon);
+                    UTM.ToLatLon(Field.UTMZone, Field.IsNorthernHemisphere, BinMaxX, BinMaxY, out Lat, out Lon);
                     NewBin.NortheastCorner = new Coordinate() { Latitude = Lat, Longitude = Lon };
 
-                    UTM.ToLatLon(UTMZone, IsNorthernHemisphere, CentroidX, CentroidY, out Lat, out Lon);
+                    UTM.ToLatLon(Field.UTMZone, Field.IsNorthernHemisphere, CentroidX, CentroidY, out Lat, out Lon);
                     NewBin.Centroid = new Coordinate() { Latitude = Lat, Longitude = Lon };
 
-                    Bins.Add(NewBin);
+                    Field.Bins.Add(NewBin);
                 }
             }
 
@@ -235,24 +236,28 @@ namespace AgGrade.Data
             double TotalFillVolumeM3 = 0;
             double BinAreaM2 = BinSizeM * BinSizeM; // 0.3716 m² per bin (4 ft²)
 
-            foreach (Bin b in Bins)
+            foreach (Bin b in Field.Bins)
             {
                 TotalCutVolumeM3 += (b.CutAmountM * BinAreaM2);
                 TotalFillVolumeM3 += (b.FillAmountM * BinAreaM2);
             }
 
-            TotalCutBCY = TotalCutVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
-            TotalFillBCY = TotalFillVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
+            Field.TotalCutBCY = TotalCutVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
+            Field.TotalFillBCY = TotalFillVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
         }
 
         /// <summary>
         /// Loads the AGD file into a set of points
         /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        private List<TopologyPoint> LoadTopologyData(string filePath)
+        /// <param name="filePath">Path and name of file to load</param>
+        /// <param name="Field">Field to update</param>
+        private void LoadTopologyData
+            (
+            string filePath,
+            Field Field
+            )
 		{
-			var topologyPoints = new List<TopologyPoint>();
+			Field.TopologyPoints = new List<TopologyPoint>();
 
 			string[] lines = File.ReadAllLines(filePath);
 
@@ -297,13 +302,10 @@ namespace AgGrade.Data
 							point.CutFill = point.ExistingElevation - point.ProposedElevation;
 						}
 
-						topologyPoints.Add(point);
+						Field.TopologyPoints.Add(point);
 					}
 				}
 			}
-
-			return topologyPoints;
 		}
 	}
 }
-
