@@ -79,7 +79,7 @@ namespace HardwareSim
         /// <param name="tractorLat">Tractor rear axle latitude (degrees)</param>
         /// <param name="tractorLon">Tractor rear axle longitude (degrees)</param>
         /// <param name="tractorHeading">Tractor heading (degrees, 0-360)</param>
-        /// <returns>Initial positions of both trailers (rear axle positions)</returns>
+        /// <returns>Initial positions of both trailers (location points, accounting for offsets from rear axles)</returns>
         public TrailerPositions GetInitialLocations(
             double tractorLat,
             double tractorLon,
@@ -98,6 +98,12 @@ namespace HardwareSim
             Haversine.MoveDistanceBearing(ref trailer1RearLat, ref trailer1RearLon,
                 tractorHeading + 180.0, _trailer1Length);
 
+            // Calculate first trailer location point (offset forward from rear axle)
+            double trailer1LocationLat = trailer1RearLat;
+            double trailer1LocationLon = trailer1RearLon;
+            Haversine.MoveDistanceBearing(ref trailer1LocationLat, ref trailer1LocationLon,
+                tractorHeading, _trailer1LocationOffset);
+
             // Calculate second trailer hitch position (behind first trailer rear axle)
             double trailer2HitchLat = trailer1RearLat;
             double trailer2HitchLon = trailer1RearLon;
@@ -110,12 +116,18 @@ namespace HardwareSim
             Haversine.MoveDistanceBearing(ref trailer2RearLat, ref trailer2RearLon,
                 tractorHeading + 180.0, _trailer2Length);
 
+            // Calculate second trailer location point (offset forward from rear axle)
+            double trailer2LocationLat = trailer2RearLat;
+            double trailer2LocationLon = trailer2RearLon;
+            Haversine.MoveDistanceBearing(ref trailer2LocationLat, ref trailer2LocationLon,
+                tractorHeading, _trailer2LocationOffset);
+
             return new TrailerPositions
             {
-                Trailer1Latitude = trailer1RearLat,
-                Trailer1Longitude = trailer1RearLon,
-                Trailer2Latitude = trailer2RearLat,
-                Trailer2Longitude = trailer2RearLon
+                Trailer1Latitude = trailer1LocationLat,
+                Trailer1Longitude = trailer1LocationLon,
+                Trailer2Latitude = trailer2LocationLat,
+                Trailer2Longitude = trailer2LocationLon
             };
         }
 
@@ -163,12 +175,32 @@ namespace HardwareSim
                 _trailer2Length,
                 distanceTraveled);
 
+            // Calculate trailer headings (from rear axle to hitch - forward direction) to apply location offsets
+            double trailer1Heading = Haversine.Bearing(trailer1Result.RearAxleLat, trailer1Result.RearAxleLon,
+                trailer1Result.HitchNewLat, trailer1Result.HitchNewLon) * Haversine.toDegrees;
+            if (trailer1Heading < 0) trailer1Heading += 360.0;
+
+            double trailer2Heading = Haversine.Bearing(trailer2Result.RearAxleLat, trailer2Result.RearAxleLon,
+                trailer2Result.HitchNewLat, trailer2Result.HitchNewLon) * Haversine.toDegrees;
+            if (trailer2Heading < 0) trailer2Heading += 360.0;
+
+            // Calculate trailer location points (offset forward from rear axle)
+            double trailer1LocationLat = trailer1Result.RearAxleLat;
+            double trailer1LocationLon = trailer1Result.RearAxleLon;
+            Haversine.MoveDistanceBearing(ref trailer1LocationLat, ref trailer1LocationLon,
+                trailer1Heading, _trailer1LocationOffset);
+
+            double trailer2LocationLat = trailer2Result.RearAxleLat;
+            double trailer2LocationLon = trailer2Result.RearAxleLon;
+            Haversine.MoveDistanceBearing(ref trailer2LocationLat, ref trailer2LocationLon,
+                trailer2Heading, _trailer2LocationOffset);
+
             return new TrailerPositions
             {
-                Trailer1Latitude = trailer1Result.RearAxleLat,
-                Trailer1Longitude = trailer1Result.RearAxleLon,
-                Trailer2Latitude = trailer2Result.RearAxleLat,
-                Trailer2Longitude = trailer2Result.RearAxleLon
+                Trailer1Latitude = trailer1LocationLat,
+                Trailer1Longitude = trailer1LocationLon,
+                Trailer2Latitude = trailer2LocationLat,
+                Trailer2Longitude = trailer2LocationLon
             };
         }
 
