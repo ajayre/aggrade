@@ -28,18 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
+            MapCanvas = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             SuspendLayout();
+            // 
+            // MapCanvas
+            // 
+            MapCanvas.Dock = DockStyle.Fill;
+            MapCanvas.Location = new Point(0, 0);
+            MapCanvas.Name = "MapCanvas";
+            MapCanvas.Size = new Size(574, 356);
+            MapCanvas.TabIndex = 0;
+            MapCanvas.TabStop = false;
             // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.SeaShell;
+            BackColor = SystemColors.Control;
+            Controls.Add(MapCanvas);
             Name = "Map";
             Size = new Size(574, 356);
+            ((System.ComponentModel.ISupportInitialize)MapCanvas).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
+
+        private PictureBox MapCanvas;
     }
 }

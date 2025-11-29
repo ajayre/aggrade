@@ -287,6 +287,10 @@ namespace AgGrade
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
+
+            // fixme - allow user to choose file
+            AGDLoader Loader = new AGDLoader();
+            Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
         }
 
         /// <summary>
