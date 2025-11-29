@@ -4,7 +4,7 @@ using System.Media;
 using AgGrade.Controls;
 using AgGrade.Data;
 using AgGrade.Properties;
-using Controller;
+using AgGrade.Controller;
 
 using Timer = System.Windows.Forms.Timer;
 

@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     public class BladeConfiguration
     {

@@ -2,7 +2,7 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     /// <summary>
     /// Reads GNSS data from a COM port and parses $GNGGA NMEA sentences.

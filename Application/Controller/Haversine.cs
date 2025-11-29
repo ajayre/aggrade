@@ -1,6 +1,6 @@
 using System;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     /// <summary>
     /// Haversine formula implementation for calculating distances and bearings between GPS coordinates.

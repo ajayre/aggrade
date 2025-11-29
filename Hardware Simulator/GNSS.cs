@@ -93,7 +93,7 @@ namespace HardwareSim
             PreviousTractorTrueHeading = 0;
 
             TractrixCalc = new Tractrix();
-            TractrixCalc.SetEquipment(3, 0.5, 5.94, 0.2, 5.94, 1, 1);
+            TractrixCalc.SetEquipment(3, 1.2, 5.94, 0.5, 5.94, 1, 1);
         }
 
         private void IMUUpdateTimer_Tick(object? sender, EventArgs e)

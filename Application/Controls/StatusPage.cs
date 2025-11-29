@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AgGrade.Data;
-using Controller;
+using AgGrade.Controller;
 
 namespace AgGrade.Controls
 {

@@ -1,6 +1,6 @@
 using System;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     /// <summary>
     /// Exception thrown when an NMEA sentence is malformed, corrupted, or incomplete.

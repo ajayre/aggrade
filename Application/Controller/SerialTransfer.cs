@@ -2,7 +2,7 @@
 using System.IO.Ports;
 using System.Threading;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     /// <summary>
     /// C# port of SerialTransfer class for packet-based serial communication

@@ -2,7 +2,7 @@
 using System.Text;
 using static System.Windows.Forms.AxHost;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     public enum EquipType
     {

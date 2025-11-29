@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     internal class PacketCRC
     {

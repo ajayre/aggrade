@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     /// <summary>
     /// UDP-based packet transfer class with the same functionality as SerialTransfer

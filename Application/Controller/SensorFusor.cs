@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     // Adapted from: https://github.com/torriem/f9p_imu/blob/master/f9p_imu.ino
     public class SensorFusor

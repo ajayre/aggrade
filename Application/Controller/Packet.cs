@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace Controller
+namespace AgGrade.Controller
 {
     internal enum PacketStatus
     {
