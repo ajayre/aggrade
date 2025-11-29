@@ -12,7 +12,7 @@ namespace HardwareSim
     internal enum RTKQuality
     {
         NotValid = 0,
-        Fix = 1,
+        BasicFix = 1,
         DGPS = 2,
         RTKFix = 4,
         RTKFloat = 5
@@ -47,6 +47,9 @@ namespace HardwareSim
         private IMUValue TractorIMU;
         private IMUValue FrontIMU;
         private IMUValue RearIMU;
+
+        private Tractrix TractrixCalc;
+        private double PreviousTractorTrueHeading;
 
         public GNSS
             (
@@ -87,6 +90,10 @@ namespace HardwareSim
 
             TractorGNSS.SpeedMPH = 0;
             TractorGNSS.TrueHeading = 0;
+            PreviousTractorTrueHeading = 0;
+
+            TractrixCalc = new Tractrix();
+            TractrixCalc.SetEquipment(3, 0.5, 5.94, 0.2, 5.94, 1, 1);
         }
 
         private void IMUUpdateTimer_Tick(object? sender, EventArgs e)
@@ -124,6 +131,9 @@ namespace HardwareSim
             // how far have we travelled since the last call?
             double MetersPerSec = TractorGNSS.SpeedMPH * 0.44704;
 
+            double StartLat = TractorGNSS.Latitude;
+            double StartLon = TractorGNSS.Longitude;
+
             double Lat = TractorGNSS.Latitude;
             double Lon = TractorGNSS.Longitude;
             Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorGNSS.TrueHeading, MetersPerSec);
@@ -131,9 +141,15 @@ namespace HardwareSim
             TractorGNSS.Longitude = Lon;
 
             // update front and rear locations
-            // fixme - to do - need proper model for how the "trailers" move
 
-            FrontGNSS.TrueHeading = TractorGNSS.TrueHeading;
+            Tractrix.TrailerPositions Scrapers = TractrixCalc.CalculateTrailerPositions(StartLat, StartLon, TractorGNSS.TrueHeading, Lat, Lon,
+                PreviousTractorTrueHeading, MetersPerSec, FrontGNSS.Latitude,
+                FrontGNSS.Longitude, RearGNSS.Latitude, RearGNSS.Longitude);
+
+            SetFrontLocation(Scrapers.Trailer1Latitude, Scrapers.Trailer1Longitude, TractorGNSS.Altitude, RTKQuality.RTKFix);
+            SetRearLocation(Scrapers.Trailer2Latitude, Scrapers.Trailer2Longitude, TractorGNSS.Altitude, RTKQuality.RTKFix);
+
+            /*FrontGNSS.TrueHeading = TractorGNSS.TrueHeading;
             MetersPerSec = FrontGNSS.SpeedMPH * 0.44704;
             Haversine.MoveDistanceBearing(ref Lat, ref Lon, FrontGNSS.TrueHeading, MetersPerSec);
             FrontGNSS.Latitude = Lat;
@@ -143,7 +159,9 @@ namespace HardwareSim
             MetersPerSec = RearGNSS.SpeedMPH * 0.44704;
             Haversine.MoveDistanceBearing(ref Lat, ref Lon, RearGNSS.TrueHeading, MetersPerSec);
             RearGNSS.Latitude = Lat;
-            RearGNSS.Longitude = Lon;
+            RearGNSS.Longitude = Lon;*/
+
+            PreviousTractorTrueHeading = TractorGNSS.TrueHeading;
         }
 
         public void SetTractorLocation
@@ -151,13 +169,22 @@ namespace HardwareSim
             double Latitude,
             double Longitude,
             double Altitude,
-            RTKQuality RTKQuality
+            RTKQuality RTKQuality,
+            bool CalcScraperInitialLocations
             )
         {
             this.TractorGNSS.Latitude = Latitude;
             this.TractorGNSS.Longitude = Longitude;
             this.TractorGNSS.Altitude = Altitude;
             this.TractorGNSS.RTKQuality = RTKQuality;
+
+            if (CalcScraperInitialLocations)
+            {
+                Tractrix.TrailerPositions Scrapers = TractrixCalc.GetInitialLocations(TractorGNSS.Latitude, TractorGNSS.Longitude, TractorGNSS.TrueHeading);
+
+                SetFrontLocation(Scrapers.Trailer1Latitude, Scrapers.Trailer1Longitude, Altitude, RTKQuality);
+                SetRearLocation(Scrapers.Trailer2Latitude, Scrapers.Trailer2Longitude, Altitude, RTKQuality);
+            }
         }
 
         public void SetFrontLocation

@@ -129,9 +129,10 @@ namespace Controller
             (
             )
         {
+            WorkThreadCancellationRequested = true;
+
             if (WorkThread != null)
             {
-                WorkThreadCancellationRequested = true;
                 if (WorkThread.IsAlive)
                 {
                     WorkThread.Join(1000); // Wait up to 1 second for thread to finish

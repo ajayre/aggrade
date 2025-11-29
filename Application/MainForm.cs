@@ -139,10 +139,15 @@ namespace AgGrade
             FrontIMUFound = false;
             RearIMUFound = false;
 
+            // no longer have height
+            FrontHeightFound = false;
+            RearHeightFound = false;
+
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
             UpdateIMULeds();
             UpdateRTKLeds();
+            UpdateHeightLeds();
 
             // start trying to connect
             ControllerConnectTimer.Start();
