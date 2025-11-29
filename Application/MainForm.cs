@@ -292,6 +292,8 @@ namespace AgGrade
             AGDLoader Loader = new AGDLoader();
             Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
             NewField.Name = "ShopB4";
+            MapGenerator MapGen = new MapGenerator();
+            Bitmap Map = MapGen.Generate(NewField);
         }
 
         /// <summary>

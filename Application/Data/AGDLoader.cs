@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Policy;
 
@@ -16,7 +17,8 @@ namespace AgGrade.Data
 	public class AGDLoader
 	{
         private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
-        private const double ACCURACY_TOLERANCE_M = 0.03048; // 0.1ft in meters
+        //private const double ACCURACY_TOLERANCE_M = 0.03048; // 0.1ft in meters
+        private const double ACCURACY_TOLERANCE_M = 0;
 
         public AGDLoader
 			(
@@ -45,7 +47,101 @@ namespace AgGrade.Data
 			// create 2ft x 2ft bins
             CalculateCutFillVolumesWithBinning(NewField);
 
+            FillEmptyBins(NewField);
+
             return NewField;
+        }
+
+        /// <summary>
+        /// Locates bins that have no existing elevation data because they had
+        /// no topology points placed into them, and extrapolates from
+        /// a minimum of four surrounding bins that have both existing and target elevation data.
+        /// Edge bins are automatically excluded as they will have fewer than four neighbors with data.
+        /// </summary>
+        /// <param name="Field">Field to update</param>
+        private void FillEmptyBins
+            (
+            Field Field
+            )
+        {
+            if (Field.Bins == null || Field.Bins.Count == 0)
+                return;
+
+            // Create a dictionary for quick bin lookup by (X, Y) coordinates
+            Dictionary<(int X, int Y), Bin> binMap = new Dictionary<(int X, int Y), Bin>();
+            foreach (Bin bin in Field.Bins)
+            {
+                binMap[(bin.X, bin.Y)] = bin;
+            }
+
+            // Process each bin
+            foreach (Bin bin in Field.Bins)
+            {
+                // Check if bin is empty (no existing elevation data)
+                // A bin is considered empty if it has no existing elevation data
+                // We check if ExistingElevationM is 0, which is the default when no data was assigned
+                bool isEmpty = bin.ExistingElevationM == 0 && bin.TargetElevationM == 0;
+
+                // Skip if not empty
+                if (!isEmpty)
+                    continue;
+
+                // Find surrounding bins with data (8 neighbors: N, S, E, W, NE, NW, SE, SW)
+                // Only consider neighbors that have BOTH existing and target elevation data
+                List<Bin> neighborsWithData = new List<Bin>();
+                
+                for (int dx = -1; dx <= 1; dx++)
+                {
+                    for (int dy = -1; dy <= 1; dy++)
+                    {
+                        // Skip the current bin itself
+                        if (dx == 0 && dy == 0)
+                            continue;
+
+                        int neighborX = bin.X + dx;
+                        int neighborY = bin.Y + dy;
+
+                        // Check if neighbor exists and has both existing and target elevation data
+                        if (binMap.TryGetValue((neighborX, neighborY), out Bin neighbor))
+                        {
+                            // Neighbor must have both existing and target elevation data
+                            if (neighbor.ExistingElevationM != 0 && neighbor.TargetElevationM != 0)
+                            {
+                                neighborsWithData.Add(neighbor);
+                            }
+                        }
+                    }
+                }
+
+                // Need at least 4 neighbors with data to fill the empty bin
+                // This automatically excludes edge bins which will have fewer neighbors
+                if (neighborsWithData.Count >= 4)
+                {
+                    // Calculate averages from all neighbors that have data
+                    // Use all available neighbors, not just those with non-zero values
+                    double avgExistingElevation = neighborsWithData
+                        .Select(n => n.ExistingElevationM)
+                        .Average();
+
+                    double avgTargetElevation = neighborsWithData
+                        .Select(n => n.TargetElevationM)
+                        .Average();
+
+                    double avgCutAmount = neighborsWithData
+                        .Select(n => n.CutAmountM)
+                        .Average();
+
+                    double avgFillAmount = neighborsWithData
+                        .Select(n => n.FillAmountM)
+                        .Average();
+
+                    // Fill the empty bin with averaged values
+                    bin.ExistingElevationM = avgExistingElevation;
+                    bin.TargetElevationM = avgTargetElevation;
+                    bin.CutAmountM = avgCutAmount;
+                    bin.FillAmountM = avgFillAmount;
+                }
+            }
         }
 
         /// <summary>
@@ -197,6 +293,7 @@ namespace AgGrade.Data
                             NewBin.FillAmountM = Math.Abs(AverageCutFill);
                         }
                     }
+
                     if (BinExistingElevationValues.ContainsKey(Key))
                     {
                         NewBin.ExistingElevationM = BinExistingElevationValues[Key].Average();
@@ -234,7 +331,7 @@ namespace AgGrade.Data
             // Calculate volumes using proper 2ft x 2ft bin areas
             double TotalCutVolumeM3 = 0;
             double TotalFillVolumeM3 = 0;
-            double BinAreaM2 = BinSizeM * BinSizeM; // 0.3716 m² per bin (4 ft²)
+            double BinAreaM2 = BinSizeM * BinSizeM; // 0.3716 mï¿½ per bin (4 ftï¿½)
 
             foreach (Bin b in Field.Bins)
             {
