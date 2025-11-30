@@ -14,6 +14,8 @@ namespace AgGrade.Data
         public double FieldCentroidLon;
         public double FieldMinX;
         public double FieldMinY;
+        public double FieldMaxX;
+        public double FieldMaxY;
         public List<Bin> Bins;
         public int UTMZone;
         public bool IsNorthernHemisphere;

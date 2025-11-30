@@ -16,7 +16,10 @@ namespace AgGrade.Controls
         private Field CurrentField;
         private MapGenerator MapGen;
         
-        public uint ScaleFactor { get; private set; }
+        /// <summary>
+        /// pixels per meter
+        /// </summary>
+        public double ScaleFactor { get; private set; }
 
 
         public Map()
@@ -24,7 +27,7 @@ namespace AgGrade.Controls
             InitializeComponent();
 
             MapGen = new MapGenerator();
-            ScaleFactor = 1;
+            ScaleFactor = 6.56;
         }
 
         public void ShowField
@@ -52,8 +55,8 @@ namespace AgGrade.Controls
             (
             )
         {
+            // fixme - add limit
             ScaleFactor *= 2;
-            if (ScaleFactor > 16) ScaleFactor = 16;
             RefreshMap();
         }
 
@@ -64,8 +67,8 @@ namespace AgGrade.Controls
             (
             )
         {
+            // fixme - add limit
             ScaleFactor /= 2;
-            if (ScaleFactor < 1) ScaleFactor = 1;
             RefreshMap();
         }
     }

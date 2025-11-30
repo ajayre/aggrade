@@ -49,7 +49,7 @@ namespace AgGrade.Data
         /// <param name="Width">Width of bitmap</param>
         /// <param name="Height">Height of bitmap</param>
         /// <param name="ShowGrid">true to show the bin grid</param>
-        /// <param name="ScaleFactor">Zoom level for map</param>
+        /// <param name="ScaleFactor">Zoom level for map in pixels per m</param>
         /// <param name="TractorX">UTM X location of tractor</param>
         /// <param name="TractorY">UTM Y location of tractor</param>
         /// <param name="TractorHeading">Heading of tractor in degrees</param>
@@ -57,8 +57,8 @@ namespace AgGrade.Data
         public Bitmap Generate
             (
             Field Field,
-            int Width,
-            int Height,
+            int ImageWidthpx,
+            int ImageHeightpx,
             bool ShowGrid,
             double ScaleFactor,
             double TractorX,
@@ -72,7 +72,23 @@ namespace AgGrade.Data
             }
 
             // Create bitmap directly in memory
-            //Bitmap bitmap = new Bitmap(Width, Height, PixelFormat.Format24bppRgb);
+            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format24bppRgb);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
+            }
+
+            // get size of display in meters
+            double ImageWidthM = ImageWidthpx * ScaleFactor;
+            double ImageHeightM = ImageHeightpx * ScaleFactor;
+
+            // get size of map in meters
+            double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
+            double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
+
+            // get size of map in pixels
+            int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
+            int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
             // Calculate grid dimensions
             var bins = Field.Bins;
@@ -83,10 +99,6 @@ namespace AgGrade.Data
 
             var gridWidth = maxX - minX + 1;
             var gridHeight = maxY - minY + 1;
-
-            // Calculate image dimensions
-            int scaledWidth = (int)(gridWidth * ScaleFactor);
-            int scaledHeight = (int)(gridHeight * ScaleFactor);
 
             var elevationGrid = CreateElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
 
@@ -110,31 +122,33 @@ namespace AgGrade.Data
             // Generate color palette
             var colorPalette = GenerateColorPalette();
 
-            // Create bitmap directly in memory
-            Bitmap bitmap = new Bitmap(scaledWidth, scaledHeight, PixelFormat.Format24bppRgb);
-            
+            // get top left corner of map inside image
+            // we align the tractor location with the location on the map
+            int MapLeftpx = (ImageWidthpx - MapWidthpx) / 2;
+            int MapToppx = (ImageHeightpx - MapHeightpx) / 2;
+
             // Lock bitmap data for direct memory access
             BitmapData bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, scaledWidth, scaledHeight),
+                new Rectangle(MapLeftpx, MapToppx, MapWidthpx, MapHeightpx),
                 ImageLockMode.WriteOnly,
                 PixelFormat.Format24bppRgb);
 
             try
             {
                 int stride = bitmapData.Stride;
-                int rowPadding = stride - (scaledWidth * 3);
+                int bytesPerRow = MapWidthpx * 3; // Actual bytes needed for one row of the locked rectangle
                 
                 // Allocate buffer for one row of pixel data (BGR format)
-                byte[] rowData = new byte[stride];
+                byte[] rowData = new byte[bytesPerRow];
 
                 // Write pixel data directly to bitmap memory (rows stored bottom-to-top in BMP)
-                for (int y = 0; y < scaledHeight; y++)
+                for (int y = 0; y < MapHeightpx; y++)
                 {
                     // BMP format stores rows bottom-to-top, so we need to flip Y
-                    int bmpY = scaledHeight - 1 - y;
+                    int bmpY = MapHeightpx - 1 - y;
                     int rowOffset = 0;
 
-                    for (int x = 0; x < scaledWidth; x++)
+                    for (int x = 0; x < MapWidthpx; x++)
                     {
                         var gridX = (int)(x / ScaleFactor);
                         var gridY = (int)(y / ScaleFactor);
@@ -189,8 +203,9 @@ namespace AgGrade.Data
                     }
 
                     // Copy row data to bitmap memory
+                    // Scan0 points to the locked rectangle, stride is the full bitmap stride
                     IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
-                    Marshal.Copy(rowData, 0, rowPtr, stride);
+                    Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
                 }
             }
             finally

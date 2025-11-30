@@ -187,10 +187,17 @@ namespace AgGrade.Data
 
 			UTM.UTMCoordinate MinXY = UTM.FromLatLon(MinLat, MinLon);
 			Field.FieldMinX = MinXY.Easting;
-			Field.FieldMinY = MinXY.Northing;
+            Field.FieldMinY = MinXY.Northing;
 
             Field.UTMZone = MinXY.Zone;
             Field.IsNorthernHemisphere = MinXY.IsNorthernHemisphere;
+
+            // find the northeast corner (maximum X and Y)
+            double MaxLat = Field.TopologyPoints.Max(p => p.Latitude);
+            double MaxLon = Field.TopologyPoints.Max( p => p.Longitude);
+            UTM.UTMCoordinate MaxXY = UTM.FromLatLon(MaxLat, MaxLon);
+            Field.FieldMaxX = MaxXY.Easting;
+            Field.FieldMaxY = MaxXY.Northing;
 
             foreach (TopologyPoint Point in Field.TopologyPoints)
             {
