@@ -8,6 +8,9 @@ namespace AgGrade.Data
 {
     public class Field
     {
+        // Bin size in meters (2ft = 0.6096m)
+        public const double BIN_SIZE_M = 0.6096;
+
         public string Name;
         public List<TopologyPoint> TopologyPoints;
         public double FieldCentroidLat;

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,6 +14,17 @@ namespace AgGrade.Data
     public class MapGenerator
     {
         private Color Background = Color.LightGray;
+
+        /// <summary>
+        /// The current scaling in pixels per meter
+        /// </summary>
+        public double CurrentScaleFactor { get; private set; }
+        public Field CurrentField { get; private set; }
+
+        /// <summary>
+        /// Offset of tractor Y position from top of screen in range 0 -> 1 where 0.5 is middle of screen
+        /// </summary>
+        public double TractorYOffset = 0.7;
 
         /*public Bitmap GenerateZoomToFit
             (
@@ -42,6 +55,7 @@ namespace AgGrade.Data
             return Generate(Field, ShowGrid, ScaleFactor);
         }*/
 
+
         /// <summary>
         /// Generates the map as a bitmap
         /// </summary>
@@ -50,8 +64,8 @@ namespace AgGrade.Data
         /// <param name="Height">Height of bitmap</param>
         /// <param name="ShowGrid">true to show the bin grid</param>
         /// <param name="ScaleFactor">Zoom level for map in pixels per m</param>
-        /// <param name="TractorX">UTM X location of tractor</param>
-        /// <param name="TractorY">UTM Y location of tractor</param>
+        /// <param name="TractorLat">Tractor latitude</param>
+        /// <param name="TractorLon">Tractor longitude</param>
         /// <param name="TractorHeading">Heading of tractor in degrees</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
@@ -61,8 +75,8 @@ namespace AgGrade.Data
             int ImageHeightpx,
             bool ShowGrid,
             double ScaleFactor,
-            double TractorX,
-            double TractorY,
+            double TractorLat,
+            double TractorLon,
             double TractorHeading
             )
         {
@@ -70,6 +84,9 @@ namespace AgGrade.Data
             {
                 throw new InvalidOperationException("No bin data available for map generation");
             }
+
+            CurrentField = Field;
+            CurrentScaleFactor = ScaleFactor;
 
             // Create bitmap directly in memory
             Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format24bppRgb);
@@ -90,6 +107,10 @@ namespace AgGrade.Data
             int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
             int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
+            // calculate location of tractor in pixels
+            int TractorXpx = ImageWidthpx / 2;
+            int TractorYpx = (int)(ImageHeightpx * TractorYOffset);
+
             // Calculate grid dimensions
             var bins = Field.Bins;
             var minX = bins.Min(b => b.X);
@@ -101,6 +122,13 @@ namespace AgGrade.Data
             var gridHeight = maxY - minY + 1;
 
             var elevationGrid = CreateElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
+            
+            // The bin origin is the field coordinate that corresponds to bin grid index 0
+            // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
+            // where MinX is the minimum X of topology points, which should equal Field.FieldMinX
+            // So bin grid index 0 corresponds to field coordinate Field.FieldMinX
+            double binOriginX = Field.FieldMinX;
+            double binOriginY = Field.FieldMinY;
 
             double[] ElevationRange = CalculateInitialElevationRange(Field);
             double minElevation = ElevationRange[0];
@@ -123,9 +151,14 @@ namespace AgGrade.Data
             var colorPalette = GenerateColorPalette();
 
             // get top left corner of map inside image
+            Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx);
+
+            // get top left corner of map inside image
             // we align the tractor location with the location on the map
-            int MapLeftpx = (ImageWidthpx - MapWidthpx) / 2;
-            int MapToppx = (ImageHeightpx - MapHeightpx) / 2;
+            //int MapLeftpx = (ImageWidthpx - MapWidthpx) / 2;
+            //int MapToppx = (ImageHeightpx - MapHeightpx) / 2;
+            int MapLeftpx = MapTopLeft.X;
+            int MapToppx = MapTopLeft.Y;
 
             // Lock bitmap data for direct memory access
             BitmapData bitmapData = bitmap.LockBits(
@@ -150,8 +183,12 @@ namespace AgGrade.Data
 
                     for (int x = 0; x < MapWidthpx; x++)
                     {
-                        var gridX = (int)(x / ScaleFactor);
-                        var gridY = (int)(y / ScaleFactor);
+                        // convert pixel coordinates to bin grid indices
+                        Point BinPoint = PixelToBin(x, y);
+
+                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
+                        int gridX = BinPoint.X - minX;
+                        int gridY = BinPoint.Y - minY;
 
                         byte r, g, b;
 
@@ -227,11 +264,147 @@ namespace AgGrade.Data
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-                int CenterX = Map.Width / 2;
-                int CenterY = Map.Height / 2;
-
-                g.DrawImage(Properties.Resources.navarrow_256px, CenterX - 24, CenterY - 24, 48, 48);
+                // draw tractor
+                int TractorXpx = Map.Width / 2;
+                int TractorYpx = (int)(Map.Height * TractorYOffset);
+                g.DrawImage(Properties.Resources.navarrow_256px, TractorXpx - 24, TractorYpx - 24, 48, 48);
             }
+        }
+
+        /// <summary>
+        /// Gets the top left location of the map inside the image
+        /// </summary>
+        /// <param name="TractorLat">Current tractor latitude</param>
+        /// <param name="TractorLon">Current tractor longitude</param>
+        /// <param name="TractorXpx">Current tractor X location in image in pixels</param>
+        /// <param name="TractorYpx">Current tractor Y location in image in pixels</param>
+        /// <returns>Top-left corner of the map in image pixel coordinates</returns>
+        private Point GetMapOffset
+            (
+            double TractorLat,
+            double TractorLon,
+            int TractorXpx,
+            int TractorYpx
+            )
+        {
+            // Convert tractor's lat/lon to UTM coordinates (field coordinates in meters)
+            UTM.UTMCoordinate TractorUTM = UTM.FromLatLon(TractorLat, TractorLon);
+            double TractorFieldX = TractorUTM.Easting;
+            double TractorFieldY = TractorUTM.Northing;
+
+            // Convert tractor's field coordinates to pixel coordinates relative to the map (0,0 is top-left of map)
+            Point TractorFieldPx = FieldMToPixel(TractorFieldX, TractorFieldY);
+
+            // Calculate the offset so that the tractor's field position aligns with the fixed pixel position
+            // MapTopLeft = TractorImagePosition - TractorFieldPosition
+            int MapLeftpx = TractorXpx - TractorFieldPx.X;
+            int MapToppx = TractorYpx - TractorFieldPx.Y;
+
+            return new Point(MapLeftpx, MapToppx);
+        }
+
+        /// <summary>
+        /// Convert pixel coordinates to field coordinate in meters
+        /// </summary>
+        /// <param name="PixelX">Pixel X coordinate</param>
+        /// <param name="PixelY">Pixel Y coordinate</param>
+        /// <returns></returns>
+        private PointD PixelToFieldM
+            (
+            int PixelX,
+            int PixelY
+            )
+        {
+            double FieldX = CurrentField.FieldMinX + (PixelX / CurrentScaleFactor);
+            double FieldY = CurrentField.FieldMinY + (PixelY / CurrentScaleFactor);
+
+            return new PointD(FieldX, FieldY);
+        }
+
+        /// <summary>
+        /// Convert field coordinate in meters to bin grid indices
+        /// </summary>
+        /// <param name="FieldX">Field X coordinate in meters</param>
+        /// <param name="FieldY">Field Y coordinate in meters</param>
+        /// <returns>Bin grid X and Y</returns>
+        private Point FieldMToBin
+            (
+            double FieldX,
+            double FieldY
+            )
+        {
+            int binGridX = (int)Math.Floor((FieldX - CurrentField.FieldMinX) / Field.BIN_SIZE_M);
+            int binGridY = (int)Math.Floor((FieldY - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
+
+            return new Point(binGridX, binGridY);
+        }
+
+        /// <summary>
+        /// Converts pixel coordinates to bin grid indices
+        /// </summary>
+        /// <param name="PixelX">Pixel X coordinate</param>
+        /// <param name="PixelY">Pixel Y coordinate</param>
+        /// <returns>Bin grid X and Y</returns>
+        private Point PixelToBin
+            (
+            int PixelX,
+            int PixelY
+            )
+        {
+            PointD FieldPoint = PixelToFieldM(PixelX, PixelY);
+            return FieldMToBin(FieldPoint.X, FieldPoint.Y);
+        }
+
+        /// <summary>
+        /// Converts bin grid indices to pixel coordinates
+        /// </summary>
+        /// <param name="BinGridX">Bin grid X index</param>
+        /// <param name="BinGridY">Bin grid Y index</param>
+        /// <returns>Pixel X and Y coordinates</returns>
+        private Point BinToPixel
+            (
+            int BinGridX,
+            int BinGridY
+            )
+        {
+            PointD FieldPoint = BinToFieldM(BinGridX, BinGridY);
+            return FieldMToPixel(FieldPoint.X, FieldPoint.Y);
+        }
+
+        /// <summary>
+        /// Convert field coordinate in meters to pixel coordinates
+        /// </summary>
+        /// <param name="FieldX">Field X coordinate in meters</param>
+        /// <param name="FieldY">Field Y coordinate in meters</param>
+        /// <returns>Pixel X and Y coordinates</returns>
+        private Point FieldMToPixel
+            (
+            double FieldX,
+            double FieldY
+            )
+        {
+            int PixelX = (int)Math.Round((FieldX - CurrentField.FieldMinX) * CurrentScaleFactor);
+            int PixelY = (int)Math.Round((FieldY - CurrentField.FieldMinY) * CurrentScaleFactor);
+
+            return new Point(PixelX, PixelY);
+        }
+
+        /// <summary>
+        /// Convert bin grid indices to field coordinate in meters
+        /// </summary>
+        /// <param name="BinGridX">Bin grid X index</param>
+        /// <param name="BinGridY">Bin grid Y index</param>
+        /// <returns>Field X and Y coordinates in meters</returns>
+        private PointD BinToFieldM
+            (
+            int BinGridX,
+            int BinGridY
+            )
+        {
+            double FieldX = CurrentField.FieldMinX + (BinGridX * Field.BIN_SIZE_M);
+            double FieldY = CurrentField.FieldMinY + (BinGridY * Field.BIN_SIZE_M);
+
+            return new PointD(FieldX, FieldY);
         }
 
         // Calculate and set the initial elevation range (ignoring zero elevations)
