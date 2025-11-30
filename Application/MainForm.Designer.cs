@@ -70,6 +70,7 @@
             ZoomInBtn.Size = new Size(60, 60);
             ZoomInBtn.TabIndex = 7;
             ZoomInBtn.UseVisualStyleBackColor = true;
+            ZoomInBtn.Click += ZoomInBtn_Click;
             // 
             // ZoomOutBtn
             // 
@@ -80,6 +81,7 @@
             ZoomOutBtn.Size = new Size(60, 60);
             ZoomOutBtn.TabIndex = 6;
             ZoomOutBtn.UseVisualStyleBackColor = true;
+            ZoomOutBtn.Click += ZoomOutBtn_Click;
             // 
             // indicatorButton2
             // 
@@ -203,6 +205,7 @@
             StatusBar.Dock = DockStyle.Fill;
             StatusBar.Location = new Point(0, 0);
             StatusBar.Name = "StatusBar";
+            StatusBar.ShowEStop = false;
             StatusBar.Size = new Size(893, 26);
             StatusBar.TabIndex = 0;
             // 

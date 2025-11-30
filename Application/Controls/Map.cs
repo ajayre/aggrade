@@ -13,13 +13,18 @@ namespace AgGrade.Controls
 {
     public partial class Map : UserControl
     {
+        private Field CurrentField;
         private MapGenerator MapGen;
+        
+        public uint ScaleFactor { get; private set; }
+
 
         public Map()
         {
             InitializeComponent();
 
             MapGen = new MapGenerator();
+            ScaleFactor = 1;
         }
 
         public void ShowField
@@ -27,8 +32,41 @@ namespace AgGrade.Controls
             Field Field
             )
         {
-            Bitmap Map = MapGen.Generate(Field, false, 3);
-            MapCanvas.Image = Map;
+            CurrentField = Field;
+            RefreshMap();
+        }
+
+        private void RefreshMap
+            (
+            )
+        {
+            //MapCanvas.Image = MapGen.GenerateZoomToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, false);
+            MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
+                36.446847109944279, -90.72286177445794, 0);
+        }
+
+        /// <summary>
+        /// Zoom into the map
+        /// </summary>
+        public void ZoomIn
+            (
+            )
+        {
+            ScaleFactor *= 2;
+            if (ScaleFactor > 16) ScaleFactor = 16;
+            RefreshMap();
+        }
+
+        /// <summary>
+        /// Zoom out of the map
+        /// </summary>
+        public void ZoomOut
+            (
+            )
+        {
+            ScaleFactor /= 2;
+            if (ScaleFactor < 1) ScaleFactor = 1;
+            RefreshMap();
         }
     }
 }

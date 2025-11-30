@@ -10,8 +10,8 @@ namespace HardwareSim
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
 
-        private const double DEFAULT_LATITUDE = 36.448272;
-        private const double DEFAULT_LONGITUDE = -90.724986;
+        private const double DEFAULT_LATITUDE = 36.446847109944279;
+        private const double DEFAULT_LONGITUDE = -90.72286177445794;
         private const double DEFAULT_ALTITUDE = 0;
 
         private UDPServer uDPServer;

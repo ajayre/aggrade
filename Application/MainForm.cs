@@ -485,14 +485,14 @@ namespace AgGrade
             Controller = new OGController();
             Controller.OnEmergencyStop += Controller_OnEmergencyStop;
             Controller.OnEmergencyStopCleared += Controller_OnEmergencyStopCleared;
-            
+
             Controller.OnControllerLost += Controller_OnControllerLost;
             Controller.OnControllerFound += Controller_OnControllerFound;
             Controller.OnIMUFound += Controller_OnIMUFound;
             Controller.OnIMULost += Controller_OnIMULost;
             Controller.OnHeightFound += Controller_OnHeightFound;
             Controller.OnHeightLost += Controller_OnHeightLost;
-            
+
             Controller.OnTractorLocationChanged += Controller_OnTractorLocationChanged;
             Controller.OnFrontLocationChanged += Controller_OnFrontLocationChanged;
             Controller.OnRearLocationChanged += Controller_OnRearLocationChanged;
@@ -692,6 +692,20 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Checks if we are showing the map and gets it if we are
+        /// </summary>
+        /// <returns>The map or null if we are not showing it</returns>
+        private Map? GetMap
+            (
+            )
+        {
+            if (ContentPanel.Controls.Count == 0) return null;
+            if (ContentPanel.Controls[0] is Map) return ContentPanel.Controls[0] as Map;
+
+            return null;
+        }
+
+        /// <summary>
         /// Called perodically to attempt to connect to the controller
         /// </summary>
         /// <param name="sender"></param>
@@ -773,8 +787,8 @@ namespace AgGrade
             switch (Equip)
             {
                 case EquipType.Tractor: TractorIMUFound = false; break;
-                case EquipType.Front:   FrontIMUFound   = false; break;
-                case EquipType.Rear:    RearIMUFound    = false; break;
+                case EquipType.Front: FrontIMUFound = false; break;
+                case EquipType.Rear: RearIMUFound = false; break;
             }
 
             UpdateIMULeds();
@@ -795,8 +809,8 @@ namespace AgGrade
             switch (Equip)
             {
                 case EquipType.Tractor: TractorIMUFound = true; break;
-                case EquipType.Front:   FrontIMUFound   = true; break;
-                case EquipType.Rear:    RearIMUFound    = true; break;
+                case EquipType.Front: FrontIMUFound = true; break;
+                case EquipType.Rear: RearIMUFound = true; break;
             }
 
             UpdateIMULeds();
@@ -1011,5 +1025,27 @@ namespace AgGrade
             }
         }
         #endregion
+
+        /// <summary>
+        /// Called when user taps on the zoom in button
+        /// Zooms into the map if we are displaying it
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ZoomInBtn_Click(object sender, EventArgs e)
+        {
+            GetMap()?.ZoomIn();
+        }
+
+        /// <summary>
+        /// Called when user taps on the zoom out button
+        /// Zooms out of the map if we are displaying it
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ZoomOutBtn_Click(object sender, EventArgs e)
+        {
+            GetMap()?.ZoomOut();
+        }
     }
 }

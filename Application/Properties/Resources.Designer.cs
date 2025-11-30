@@ -118,5 +118,15 @@ namespace AgGrade.Properties {
                 return ResourceManager.GetStream("mixkit-street-public-alarm-997", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap navarrow_256px {
+            get {
+                object obj = ResourceManager.GetObject("navarrow_256px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }
