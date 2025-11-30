@@ -1,13 +1,16 @@
-﻿using System;
+﻿using AgGrade.Controls;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace AgGrade.Data
 {
@@ -126,13 +129,6 @@ namespace AgGrade.Data
             CurrentField = Field;
             CurrentScaleFactor = ScaleFactor;
 
-            // Create bitmap directly in memory
-            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format24bppRgb);
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
-            }
-
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
             double ImageHeightM = ImageHeightpx * ScaleFactor;
@@ -144,6 +140,9 @@ namespace AgGrade.Data
             // get size of map in pixels
             int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
             int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
+
+            // create bitmap for map only
+            Bitmap mapbitmap = new Bitmap(MapWidthpx, MapHeightpx, PixelFormat.Format24bppRgb);
 
             // calculate location of tractor in pixels
             int TractorXpx = ImageWidthpx / 2;
@@ -188,58 +187,42 @@ namespace AgGrade.Data
             // Generate color palette
             var colorPalette = GenerateColorPalette();
 
-            // get top left corner of map inside image
-            Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx);
-
-            int MapLeftpx = MapTopLeft.X;
-            int MapToppx = MapTopLeft.Y;
-
-            // Calculate the visible portion of the map (intersection with bitmap bounds)
-            // The map can be larger than the bitmap, so we need to clip it
-            int VisibleLeft = Math.Max(0, MapLeftpx);
-            int VisibleTop = Math.Max(0, MapToppx);
-            int VisibleRight = Math.Min(ImageWidthpx, MapLeftpx + MapWidthpx);
-            int VisibleBottom = Math.Min(ImageHeightpx, MapToppx + MapHeightpx);
-            
-            int VisibleWidth = VisibleRight - VisibleLeft;
-            int VisibleHeight = VisibleBottom - VisibleTop;
-
-            // Calculate the offset within the map for the visible portion
-            int MapOffsetX = VisibleLeft - MapLeftpx;  // How many pixels from left edge of map
-            int MapOffsetY = VisibleTop - MapToppx;    // How many pixels from top edge of map
-
             // Only render if there's a visible portion
-            if (VisibleWidth > 0 && VisibleHeight > 0)
+            if (MapWidthpx > 0 && MapHeightpx > 0)
             {
                 // Lock bitmap data for direct memory access (only the visible portion)
-                BitmapData bitmapData = bitmap.LockBits(
-                    new Rectangle(VisibleLeft, VisibleTop, VisibleWidth, VisibleHeight),
+                BitmapData bitmapData = mapbitmap.LockBits(
+                    new Rectangle(0, 0, MapWidthpx, MapHeightpx),
                     ImageLockMode.WriteOnly,
                     PixelFormat.Format24bppRgb);
 
                 try
                 {
                     int stride = bitmapData.Stride;
-                    int bytesPerRow = VisibleWidth * 3; // Actual bytes needed for one row of the visible rectangle
+                    int bytesPerRow = MapWidthpx * 3; // Actual bytes needed for one row of the visible rectangle
                     
                     // Allocate buffer for one row of pixel data (BGR format)
                     byte[] rowData = new byte[bytesPerRow];
 
-                    // Write pixel data directly to bitmap memory (rows stored bottom-to-top in BMP)
+                    // Write pixel data directly to bitmap memory
+                    // LockBits stores data top-to-bottom in memory (y=0 is top row)
                     // Iterate over visible portion only
-                    for (int y = 0; y < VisibleHeight; y++)
+                    for (int y = 0; y < MapHeightpx; y++)
                     {
-                        // BMP format stores rows bottom-to-top, so we need to flip Y
-                        int bmpY = VisibleHeight - 1 - y;
+                        // LockBits stores top-to-bottom, so y directly corresponds to the row
+                        int bmpY = y;
                         int rowOffset = 0;
 
                         // Map Y coordinate (relative to map origin)
-                        int mapY = MapOffsetY + y;
+                        // PixelToFieldM inverts Y: PixelY=0 maps to FieldMaxY (north), PixelY=MapHeightpx-1 maps to FieldMinY (south)
+                        // We want: top of image (y=0) shows FieldMaxY, bottom (y=MapHeightpx-1) shows FieldMinY
+                        // So: y=0 → mapY=0 → FieldMaxY → bmpY=0 (top) ✓
+                        int mapY = y;
 
-                        for (int x = 0; x < VisibleWidth; x++)
+                        for (int x = 0; x < MapWidthpx; x++)
                         {
                             // Map X coordinate (relative to map origin)
-                            int mapX = MapOffsetX + x;
+                            int mapX = 0 + x;
 
                             // convert pixel coordinates to bin grid indices (using map coordinates)
                             Point BinPoint = PixelToBin(mapX, mapY);
@@ -305,13 +288,61 @@ namespace AgGrade.Data
                 }
                 finally
                 {
-                    bitmap.UnlockBits(bitmapData);
+                    mapbitmap.UnlockBits(bitmapData);
                 }
+            }
+
+            if (TractorHeading != 0)
+            {
+                mapbitmap = Rotate(mapbitmap, TractorHeading);
+            }
+
+            // get top left corner of map inside image
+            Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
+
+            int MapLeftpx = MapTopLeft.X;
+            int MapToppx = MapTopLeft.Y;
+
+            // Create bitmap directly in memory
+            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format24bppRgb);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
+                g.DrawImage(mapbitmap, new Point(MapLeftpx, MapToppx));
             }
 
             Decorate(bitmap);
 
             return bitmap;
+        }
+
+        /// <summary>
+        /// Rotates the map so heading is up
+        /// </summary>
+        /// <param name="Heading">Heading</param>
+        private Bitmap Rotate
+            (
+            Bitmap Map,
+            double Heading
+            )
+        {
+            // Create a new bitmap with dimensions adjusted for the rotated image to avoid cropping
+            // This calculation ensures the entire rotated image fits within the new bitmap.
+            double radians = Heading * Math.PI / 180;
+            int newWidth = (int)Math.Ceiling(Math.Abs(Map.Width * Math.Cos(radians)) + Math.Abs(Map.Height * Math.Sin(radians)));
+            int newHeight = (int)Math.Ceiling(Math.Abs(Map.Width * Math.Sin(radians)) + Math.Abs(Map.Height * Math.Cos(radians)));
+
+            Bitmap rotatedBitmap = new Bitmap(newWidth, newHeight);
+
+            using (Graphics g = Graphics.FromImage(rotatedBitmap))
+            {
+                g.TranslateTransform((float)newWidth / 2, (float)newHeight / 2); // Move origin to center of new bitmap
+                g.RotateTransform((float)-Heading); // Apply rotation
+                g.TranslateTransform(-(float)Map.Width / 2, -(float)Map.Height / 2); // Move origin back to original bitmap's center
+                g.DrawImage(Map, new Point(0, 0)); // Draw the original bitmap
+            }
+            
+            return rotatedBitmap;
         }
 
         private void Decorate
@@ -337,13 +368,15 @@ namespace AgGrade.Data
         /// <param name="TractorLon">Current tractor longitude</param>
         /// <param name="TractorXpx">Current tractor X location in image in pixels</param>
         /// <param name="TractorYpx">Current tractor Y location in image in pixels</param>
+        /// <param name="TractorHeading">The heading of the tractor in degrees</param>
         /// <returns>Top-left corner of the map in image pixel coordinates</returns>
         private Point GetMapOffset
             (
             double TractorLat,
             double TractorLon,
             int TractorXpx,
-            int TractorYpx
+            int TractorYpx,
+            double TractorHeading
             )
         {
             // Convert tractor's lat/lon to UTM coordinates (field coordinates in meters)
@@ -352,7 +385,8 @@ namespace AgGrade.Data
             double TractorFieldY = TractorUTM.Northing;
 
             // Convert tractor's field coordinates to pixel coordinates relative to the map (0,0 is top-left of map)
-            Point TractorFieldPx = FieldMToPixel(TractorFieldX, TractorFieldY);
+            // Account for rotation if the map has been rotated
+            Point TractorFieldPx = FieldMToPixel(TractorFieldX, TractorFieldY, TractorHeading);
 
             // Calculate the offset so that the tractor's field position aligns with the fixed pixel position
             // MapTopLeft = TractorImagePosition - TractorFieldPosition
@@ -375,7 +409,8 @@ namespace AgGrade.Data
             )
         {
             double FieldX = CurrentField.FieldMinX + (PixelX / CurrentScaleFactor);
-            double FieldY = CurrentField.FieldMinY + (PixelY / CurrentScaleFactor);
+            // Y: PixelY=0 maps to FieldMaxY, PixelY=MapHeightpx maps to FieldMinY (inverted for image coordinates)
+            double FieldY = CurrentField.FieldMaxY - (PixelY / CurrentScaleFactor);
 
             return new PointD(FieldX, FieldY);
         }
@@ -439,13 +474,54 @@ namespace AgGrade.Data
         private Point FieldMToPixel
             (
             double FieldX,
-            double FieldY
+            double FieldY,
+            double Heading = 0.0
             )
         {
+            // Convert to pixel coordinates in the unrotated map
+            // X: FieldMinX maps to 0, FieldMaxX maps to MapWidthpx (left to right)
             int PixelX = (int)Math.Round((FieldX - CurrentField.FieldMinX) * CurrentScaleFactor);
-            int PixelY = (int)Math.Round((FieldY - CurrentField.FieldMinY) * CurrentScaleFactor);
+            // Y: FieldMaxY maps to 0, FieldMinY maps to MapHeightpx (north to south, inverted for image coordinates)
+            int PixelY = (int)Math.Round((CurrentField.FieldMaxY - FieldY) * CurrentScaleFactor);
 
-            return new Point(PixelX, PixelY);
+            // If no rotation, return the unrotated coordinates
+            if (Heading == 0.0)
+            {
+                return new Point(PixelX, PixelY);
+            }
+
+            // Calculate unrotated map dimensions
+            double MapWidthM = CurrentField.FieldMaxX - CurrentField.FieldMinX;
+            double MapHeightM = CurrentField.FieldMaxY - CurrentField.FieldMinY;
+            int MapWidthpx = (int)Math.Round(MapWidthM * CurrentScaleFactor);
+            int MapHeightpx = (int)Math.Round(MapHeightM * CurrentScaleFactor);
+
+            // Calculate rotated map dimensions (same as in Rotate function)
+            double radians = Heading * Math.PI / 180.0;
+            int rotatedWidth = (int)Math.Ceiling(Math.Abs(MapWidthpx * Math.Cos(radians)) + Math.Abs(MapHeightpx * Math.Sin(radians)));
+            int rotatedHeight = (int)Math.Ceiling(Math.Abs(MapWidthpx * Math.Sin(radians)) + Math.Abs(MapHeightpx * Math.Cos(radians)));
+
+            // Rotation center in unrotated map
+            double centerX = MapWidthpx / 2.0;
+            double centerY = MapHeightpx / 2.0;
+
+            // Translate point to be relative to rotation center
+            double relX = PixelX - centerX;
+            double relY = PixelY - centerY;
+
+            // Rotate around center (counter-clockwise, so negative heading)
+            double cosAngle = Math.Cos(-radians);
+            double sinAngle = Math.Sin(-radians);
+            double rotatedX = relX * cosAngle - relY * sinAngle;
+            double rotatedY = relX * sinAngle + relY * cosAngle;
+
+            // Translate back relative to rotated map center
+            double rotatedCenterX = rotatedWidth / 2.0;
+            double rotatedCenterY = rotatedHeight / 2.0;
+            int finalX = (int)Math.Round(rotatedX + rotatedCenterX);
+            int finalY = (int)Math.Round(rotatedY + rotatedCenterY);
+
+            return new Point(finalX, finalY);
         }
 
         /// <summary>

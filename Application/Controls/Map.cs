@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AgGrade.Controller;
 using AgGrade.Data;
 
 namespace AgGrade.Controls
@@ -46,9 +47,14 @@ namespace AgGrade.Controls
             (
             )
         {
+            double Lat = 36.446847109944279;
+            double Lon = -90.72286177445794;
+
+            Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, 20);
+
             //MapCanvas.Image = MapGen.GenerateZoomToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, false);
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
-                36.446847109944279, -90.72286177445794, 45);
+                Lat, Lon, 0);
         }
 
         /// <summary>
