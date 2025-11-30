@@ -41,6 +41,7 @@
             MapCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             MapCanvas.TabIndex = 0;
             MapCanvas.TabStop = false;
+            MapCanvas.SizeChanged += MapCanvas_SizeChanged;
             // 
             // Map
             // 

@@ -26,6 +26,44 @@ namespace AgGrade.Data
         /// </summary>
         public double TractorYOffset = 0.7;
 
+        /// <summary>
+        /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
+        /// Takes into account that the field may be wider than it is tall, or taller than it is wide
+        /// </summary>
+        /// <param name="Field">The field to fit</param>
+        /// <param name="ImageWidthpx">Width of the image in pixels</param>
+        /// <param name="ImageHeightpx">Height of the image in pixels</param>
+        /// <returns>Scale factor in pixels per meter that will fit the map in the image</returns>
+        public static double CalculateScaleFactorToFit
+            (
+            Field Field,
+            int ImageWidthpx,
+            int ImageHeightpx
+            )
+        {
+            if (ImageWidthpx <= 0 || ImageHeightpx <= 0)
+            {
+                throw new ArgumentException("Image dimensions must be greater than zero");
+            }
+
+            // Calculate field dimensions in meters
+            double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
+            double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
+
+            if (MapWidthM <= 0 || MapHeightM <= 0)
+            {
+                throw new ArgumentException("Field dimensions must be greater than zero");
+            }
+
+            // Calculate scale factors for both dimensions
+            // Use the smaller scale factor to ensure the map fits in both dimensions
+            double ScaleFactorX = ImageWidthpx / MapWidthM;
+            double ScaleFactorY = ImageHeightpx / MapHeightM;
+
+            // Return the smaller scale factor to ensure the entire map fits
+            return Math.Min(ScaleFactorX, ScaleFactorY);
+        }
+
         /*public Bitmap GenerateZoomToFit
             (
             Field Field,
@@ -153,38 +191,58 @@ namespace AgGrade.Data
             // get top left corner of map inside image
             Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx);
 
-            // get top left corner of map inside image
-            // we align the tractor location with the location on the map
-            //int MapLeftpx = (ImageWidthpx - MapWidthpx) / 2;
-            //int MapToppx = (ImageHeightpx - MapHeightpx) / 2;
             int MapLeftpx = MapTopLeft.X;
             int MapToppx = MapTopLeft.Y;
 
-            // Lock bitmap data for direct memory access
-            BitmapData bitmapData = bitmap.LockBits(
-                new Rectangle(MapLeftpx, MapToppx, MapWidthpx, MapHeightpx),
-                ImageLockMode.WriteOnly,
-                PixelFormat.Format24bppRgb);
+            // Calculate the visible portion of the map (intersection with bitmap bounds)
+            // The map can be larger than the bitmap, so we need to clip it
+            int VisibleLeft = Math.Max(0, MapLeftpx);
+            int VisibleTop = Math.Max(0, MapToppx);
+            int VisibleRight = Math.Min(ImageWidthpx, MapLeftpx + MapWidthpx);
+            int VisibleBottom = Math.Min(ImageHeightpx, MapToppx + MapHeightpx);
+            
+            int VisibleWidth = VisibleRight - VisibleLeft;
+            int VisibleHeight = VisibleBottom - VisibleTop;
 
-            try
+            // Calculate the offset within the map for the visible portion
+            int MapOffsetX = VisibleLeft - MapLeftpx;  // How many pixels from left edge of map
+            int MapOffsetY = VisibleTop - MapToppx;    // How many pixels from top edge of map
+
+            // Only render if there's a visible portion
+            if (VisibleWidth > 0 && VisibleHeight > 0)
             {
-                int stride = bitmapData.Stride;
-                int bytesPerRow = MapWidthpx * 3; // Actual bytes needed for one row of the locked rectangle
-                
-                // Allocate buffer for one row of pixel data (BGR format)
-                byte[] rowData = new byte[bytesPerRow];
+                // Lock bitmap data for direct memory access (only the visible portion)
+                BitmapData bitmapData = bitmap.LockBits(
+                    new Rectangle(VisibleLeft, VisibleTop, VisibleWidth, VisibleHeight),
+                    ImageLockMode.WriteOnly,
+                    PixelFormat.Format24bppRgb);
 
-                // Write pixel data directly to bitmap memory (rows stored bottom-to-top in BMP)
-                for (int y = 0; y < MapHeightpx; y++)
+                try
                 {
-                    // BMP format stores rows bottom-to-top, so we need to flip Y
-                    int bmpY = MapHeightpx - 1 - y;
-                    int rowOffset = 0;
+                    int stride = bitmapData.Stride;
+                    int bytesPerRow = VisibleWidth * 3; // Actual bytes needed for one row of the visible rectangle
+                    
+                    // Allocate buffer for one row of pixel data (BGR format)
+                    byte[] rowData = new byte[bytesPerRow];
 
-                    for (int x = 0; x < MapWidthpx; x++)
+                    // Write pixel data directly to bitmap memory (rows stored bottom-to-top in BMP)
+                    // Iterate over visible portion only
+                    for (int y = 0; y < VisibleHeight; y++)
                     {
-                        // convert pixel coordinates to bin grid indices
-                        Point BinPoint = PixelToBin(x, y);
+                        // BMP format stores rows bottom-to-top, so we need to flip Y
+                        int bmpY = VisibleHeight - 1 - y;
+                        int rowOffset = 0;
+
+                        // Map Y coordinate (relative to map origin)
+                        int mapY = MapOffsetY + y;
+
+                        for (int x = 0; x < VisibleWidth; x++)
+                        {
+                            // Map X coordinate (relative to map origin)
+                            int mapX = MapOffsetX + x;
+
+                            // convert pixel coordinates to bin grid indices (using map coordinates)
+                            Point BinPoint = PixelToBin(mapX, mapY);
 
                         // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
                         int gridX = BinPoint.X - minX;
@@ -223,10 +281,10 @@ namespace AgGrade.Data
                             b = Background.B;
                         }
 
-                        // Draw grid lines
+                        // Draw grid lines (using map coordinates)
                         if (ShowGrid)
                         {
-                            if ((x % ScaleFactor == 0) || (y % ScaleFactor == 0))
+                            if ((mapX % ScaleFactor == 0) || (mapY % ScaleFactor == 0))
                             {
                                 r = g = b = 0x40; // Dark gray
                             }
@@ -239,15 +297,16 @@ namespace AgGrade.Data
                         rowOffset += 3;
                     }
 
-                    // Copy row data to bitmap memory
-                    // Scan0 points to the locked rectangle, stride is the full bitmap stride
-                    IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
-                    Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
+                        // Copy row data to bitmap memory
+                        // Scan0 points to the locked rectangle, stride is the full bitmap stride
+                        IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
+                        Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
+                    }
                 }
-            }
-            finally
-            {
-                bitmap.UnlockBits(bitmapData);
+                finally
+                {
+                    bitmap.UnlockBits(bitmapData);
+                }
             }
 
             Decorate(bitmap);
