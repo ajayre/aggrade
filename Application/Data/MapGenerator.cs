@@ -225,60 +225,61 @@ namespace AgGrade.Data
                             int mapX = 0 + x;
 
                             // convert pixel coordinates to bin grid indices (using map coordinates)
-                            Point BinPoint = PixelToBin(mapX, mapY);
+                            // no rotation here because we haven't rotated the map yet
+                            Point BinPoint = PixelToBin(mapX, mapY, 0);
 
-                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
-                        int gridX = BinPoint.X - minX;
-                        int gridY = BinPoint.Y - minY;
+                            // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
+                            int gridX = BinPoint.X - minX;
+                            int gridY = BinPoint.Y - minY;
 
-                        byte r, g, b;
+                            byte r, g, b;
 
-                        if (gridX < gridWidth && gridY < gridHeight)
-                        {
-                            var elevation = elevationGrid[gridY, gridX];
-
-                            if (elevation.HasValue && elevation.Value != 0.0)
+                            if (gridX < gridWidth && gridY < gridHeight)
                             {
-                                // Normalize elevation to 0-255 range
-                                var normalizedElevation = (elevation.Value - minElevation) / (maxElevation - minElevation);
-                                var colorIndex = Math.Max(0, Math.Min(255, (int)(normalizedElevation * 255)));
+                                var elevation = elevationGrid[gridY, gridX];
 
-                                // Apply color from palette (palette is RGB, bitmap needs BGR)
-                                r = (byte)colorPalette[colorIndex, 0]; // Red
-                                g = (byte)colorPalette[colorIndex, 1]; // Green
-                                b = (byte)colorPalette[colorIndex, 2]; // Blue
+                                if (elevation.HasValue && elevation.Value != 0.0)
+                                {
+                                    // Normalize elevation to 0-255 range
+                                    var normalizedElevation = (elevation.Value - minElevation) / (maxElevation - minElevation);
+                                    var colorIndex = Math.Max(0, Math.Min(255, (int)(normalizedElevation * 255)));
+
+                                    // Apply color from palette (palette is RGB, bitmap needs BGR)
+                                    r = (byte)colorPalette[colorIndex, 0]; // Red
+                                    g = (byte)colorPalette[colorIndex, 1]; // Green
+                                    b = (byte)colorPalette[colorIndex, 2]; // Blue
+                                }
+                                else
+                                {
+                                    // No data
+                                    r = Background.R;
+                                    g = Background.G;
+                                    b = Background.B;
+                                }
                             }
                             else
                             {
-                                // No data
+                                // outside grid
                                 r = Background.R;
                                 g = Background.G;
                                 b = Background.B;
                             }
-                        }
-                        else
-                        {
-                            // outside grid
-                            r = Background.R;
-                            g = Background.G;
-                            b = Background.B;
-                        }
 
-                        // Draw grid lines (using map coordinates)
-                        if (ShowGrid)
-                        {
-                            if ((mapX % ScaleFactor == 0) || (mapY % ScaleFactor == 0))
+                            // Draw grid lines (using map coordinates)
+                            if (ShowGrid)
                             {
-                                r = g = b = 0x40; // Dark gray
+                                if ((mapX % ScaleFactor == 0) || (mapY % ScaleFactor == 0))
+                                {
+                                    r = g = b = 0x40; // Dark gray
+                                }
                             }
-                        }
 
-                        // Write BGR (bitmap format)
-                        rowData[rowOffset + 0] = b; // Blue
-                        rowData[rowOffset + 1] = g; // Green
-                        rowData[rowOffset + 2] = r; // Red
-                        rowOffset += 3;
-                    }
+                            // Write BGR (bitmap format)
+                            rowData[rowOffset + 0] = b; // Blue
+                            rowData[rowOffset + 1] = g; // Green
+                            rowData[rowOffset + 2] = r; // Red
+                            rowOffset += 3;
+                        }
 
                         // Copy row data to bitmap memory
                         // Scan0 points to the locked rectangle, stride is the full bitmap stride
@@ -401,16 +402,61 @@ namespace AgGrade.Data
         /// </summary>
         /// <param name="PixelX">Pixel X coordinate</param>
         /// <param name="PixelY">Pixel Y coordinate</param>
-        /// <returns></returns>
+        /// <param name="Heading">Tractor heading in degrees</param>
+        /// <returns>Field coordinates in meters</returns>
         private PointD PixelToFieldM
             (
             int PixelX,
-            int PixelY
+            int PixelY,
+            double Heading = 0.0
             )
         {
-            double FieldX = CurrentField.FieldMinX + (PixelX / CurrentScaleFactor);
+            int unrotatedPixelX, unrotatedPixelY;
+
+            // If no rotation, use the pixel coordinates directly
+            if (Heading == 0.0)
+            {
+                unrotatedPixelX = PixelX;
+                unrotatedPixelY = PixelY;
+            }
+            else
+            {
+                // Calculate unrotated map dimensions
+                double MapWidthM = CurrentField.FieldMaxX - CurrentField.FieldMinX;
+                double MapHeightM = CurrentField.FieldMaxY - CurrentField.FieldMinY;
+                int MapWidthpx = (int)Math.Round(MapWidthM * CurrentScaleFactor);
+                int MapHeightpx = (int)Math.Round(MapHeightM * CurrentScaleFactor);
+
+                // Calculate rotated map dimensions (same as in Rotate function and FieldMToPixel)
+                double radians = Heading * Math.PI / 180.0;
+                int rotatedWidth = (int)Math.Ceiling(Math.Abs(MapWidthpx * Math.Cos(radians)) + Math.Abs(MapHeightpx * Math.Sin(radians)));
+                int rotatedHeight = (int)Math.Ceiling(Math.Abs(MapWidthpx * Math.Sin(radians)) + Math.Abs(MapHeightpx * Math.Cos(radians)));
+
+                // Rotation center in rotated map
+                double rotatedCenterX = rotatedWidth / 2.0;
+                double rotatedCenterY = rotatedHeight / 2.0;
+
+                // Translate point to be relative to rotated map center
+                double relX = PixelX - rotatedCenterX;
+                double relY = PixelY - rotatedCenterY;
+
+                // Apply inverse rotation (rotate back by positive heading, opposite of FieldMToPixel)
+                double cosAngle = Math.Cos(radians);  // Positive angle (inverse of -radians)
+                double sinAngle = Math.Sin(radians);
+                double unrotatedX = relX * cosAngle - relY * sinAngle;
+                double unrotatedY = relX * sinAngle + relY * cosAngle;
+
+                // Translate back relative to unrotated map center
+                double centerX = MapWidthpx / 2.0;
+                double centerY = MapHeightpx / 2.0;
+                unrotatedPixelX = (int)Math.Round(unrotatedX + centerX);
+                unrotatedPixelY = (int)Math.Round(unrotatedY + centerY);
+            }
+
+            // Convert unrotated pixel coordinates to field coordinates
+            double FieldX = CurrentField.FieldMinX + (unrotatedPixelX / CurrentScaleFactor);
             // Y: PixelY=0 maps to FieldMaxY, PixelY=MapHeightpx maps to FieldMinY (inverted for image coordinates)
-            double FieldY = CurrentField.FieldMaxY - (PixelY / CurrentScaleFactor);
+            double FieldY = CurrentField.FieldMaxY - (unrotatedPixelY / CurrentScaleFactor);
 
             return new PointD(FieldX, FieldY);
         }
@@ -438,31 +484,17 @@ namespace AgGrade.Data
         /// </summary>
         /// <param name="PixelX">Pixel X coordinate</param>
         /// <param name="PixelY">Pixel Y coordinate</param>
+        /// <param name="Heading">Tractor heading in degrees</param>
         /// <returns>Bin grid X and Y</returns>
         private Point PixelToBin
             (
             int PixelX,
-            int PixelY
+            int PixelY,
+            double Heading = 0.0
             )
         {
-            PointD FieldPoint = PixelToFieldM(PixelX, PixelY);
+            PointD FieldPoint = PixelToFieldM(PixelX, PixelY, Heading);
             return FieldMToBin(FieldPoint.X, FieldPoint.Y);
-        }
-
-        /// <summary>
-        /// Converts bin grid indices to pixel coordinates
-        /// </summary>
-        /// <param name="BinGridX">Bin grid X index</param>
-        /// <param name="BinGridY">Bin grid Y index</param>
-        /// <returns>Pixel X and Y coordinates</returns>
-        private Point BinToPixel
-            (
-            int BinGridX,
-            int BinGridY
-            )
-        {
-            PointD FieldPoint = BinToFieldM(BinGridX, BinGridY);
-            return FieldMToPixel(FieldPoint.X, FieldPoint.Y);
         }
 
         /// <summary>
