@@ -14,6 +14,9 @@ namespace AgGrade.Controls
 {
     public partial class Map : UserControl
     {
+        private const double MIN_SCALE_FACTOR = 0.5;
+        private const double MAX_SCALE_FACTOR = 750.0;
+
         private Field CurrentField;
         private MapGenerator MapGen;
 
@@ -56,7 +59,7 @@ namespace AgGrade.Controls
 
             //MapCanvas.Image = MapGen.GenerateZoomToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, false);
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
-                Lat, Lon, 0);
+                Lat, Lon, 45);
         }
 
         /// <summary>
@@ -66,8 +69,10 @@ namespace AgGrade.Controls
             (
             )
         {
-            // fixme - add limit
-            ScaleFactor *= 2;
+            if (ScaleFactor * 2 <= MAX_SCALE_FACTOR)
+            {
+                ScaleFactor *= 2;
+            }
             RefreshMap();
         }
 
@@ -78,8 +83,10 @@ namespace AgGrade.Controls
             (
             )
         {
-            // fixme - add limit
-            ScaleFactor /= 2;
+            if (ScaleFactor / 2 >= MIN_SCALE_FACTOR)
+            {
+                ScaleFactor /= 2;
+            }
             RefreshMap();
         }
 

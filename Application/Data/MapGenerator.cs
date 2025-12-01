@@ -16,6 +16,9 @@ namespace AgGrade.Data
 {
     public class MapGenerator
     {
+        private const int TILE_SIZE = 128;
+        private const int TILE_OVERLAP = 5;
+
         private class MapTile
         {
             public Bitmap bitmap;
@@ -207,7 +210,6 @@ namespace AgGrade.Data
             Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
 
             // Adjust for tile overlap - tiles are drawn with -TILE_OVERLAP offset, so we need to compensate
-            const int TILE_OVERLAP = 5;
             int MapLeftpx = MapTopLeft.X + TILE_OVERLAP;
             int MapToppx = MapTopLeft.Y + TILE_OVERLAP;
 
@@ -224,8 +226,7 @@ namespace AgGrade.Data
             // Only render if there's a visible portion
             if (MapWidthpx > 0 && MapHeightpx > 0)
             {
-                // Render map using 128x128 pixel tiles with 5px overlap
-                const int TILE_SIZE = 128;
+                // Render map using tiles with overlap
                 int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
                 int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
 
@@ -367,10 +368,9 @@ namespace AgGrade.Data
                         Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
                         Rectangle destRect = new Rectangle(drawX, drawY, drawWidth, drawHeight);
                         g.DrawImage(Tile.bitmap, destRect, srcRect, GraphicsUnit.Pixel);
+                        Tile.bitmap.Dispose();
                     }
                 }
-                
-                //g.DrawImage(mapbitmap, new Point(MapLeftpx, MapToppx));
             }
 
             Decorate(bitmap);
