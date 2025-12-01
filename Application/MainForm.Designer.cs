@@ -30,6 +30,7 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             panel3 = new Panel();
+            ZoomFitBtn = new Button();
             ZoomInBtn = new Button();
             ZoomOutBtn = new Button();
             indicatorButton2 = new AgGrade.Controls.IndicatorButton();
@@ -51,6 +52,7 @@
             // 
             // panel3
             // 
+            panel3.Controls.Add(ZoomFitBtn);
             panel3.Controls.Add(ZoomInBtn);
             panel3.Controls.Add(ZoomOutBtn);
             panel3.Controls.Add(indicatorButton2);
@@ -60,6 +62,17 @@
             panel3.Name = "panel3";
             panel3.Size = new Size(76, 740);
             panel3.TabIndex = 2;
+            // 
+            // ZoomFitBtn
+            // 
+            ZoomFitBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ZoomFitBtn.Image = (Image)resources.GetObject("ZoomFitBtn.Image");
+            ZoomFitBtn.Location = new Point(8, 542);
+            ZoomFitBtn.Name = "ZoomFitBtn";
+            ZoomFitBtn.Size = new Size(60, 60);
+            ZoomFitBtn.TabIndex = 8;
+            ZoomFitBtn.UseVisualStyleBackColor = true;
+            ZoomFitBtn.Click += ZoomFitBtn_Click;
             // 
             // ZoomInBtn
             // 
@@ -247,5 +260,6 @@
         private Button ZoomOutBtn;
         private Controls.StatusBar StatusBar;
         private Button StatusBtn;
+        private Button ZoomFitBtn;
     }
 }

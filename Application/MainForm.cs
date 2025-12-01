@@ -649,6 +649,8 @@ namespace AgGrade
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
+            GetMap()?.SetTractor(Fix.Latitude, Fix.Longitude, Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
+
             UpdateRTKLeds();
         }
 
@@ -1047,6 +1049,16 @@ namespace AgGrade
         private void ZoomOutBtn_Click(object sender, EventArgs e)
         {
             GetMap()?.ZoomOut();
+        }
+
+        /// <summary>
+        /// Called when user taps on the zoom to fit button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ZoomFitBtn_Click(object sender, EventArgs e)
+        {
+            GetMap()?.ZoomToFit();
         }
     }
 }

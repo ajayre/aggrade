@@ -122,9 +122,39 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap navarrow_256px {
+        internal static System.Drawing.Bitmap navarrow_blue_256px {
             get {
-                object obj = ResourceManager.GetObject("navarrow_256px", resourceCulture);
+                object obj = ResourceManager.GetObject("navarrow-blue_256px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap navarrow_green_256px {
+            get {
+                object obj = ResourceManager.GetObject("navarrow-green_256px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap navarrow_red_256px {
+            get {
+                object obj = ResourceManager.GetObject("navarrow-red-256px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap navarrow_yellow_256px {
+            get {
+                object obj = ResourceManager.GetObject("navarrow-yellow_256px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

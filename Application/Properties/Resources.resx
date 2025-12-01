@@ -136,7 +136,16 @@
   <data name="mixkit-street-public-alarm-997" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Audio\mixkit-street-public-alarm-997.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="navarrow_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\navarrow_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="navarrow-blue_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\navarrow-blue_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="navarrow-green_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\navarrow-green_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="navarrow-red-256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\navarrow-red-256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="navarrow-yellow_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\navarrow-yellow_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

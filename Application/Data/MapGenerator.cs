@@ -33,15 +33,31 @@ namespace AgGrade.Data
         private Color Background = Color.LightGray;
 
         /// <summary>
+        /// Supported tractor colors
+        /// </summary>
+        public enum TractorColors
+        {
+            Red,
+            Green,
+            Blue,
+            Yellow
+        }
+
+        /// <summary>
         /// The current scaling in pixels per meter
         /// </summary>
         public double CurrentScaleFactor { get; private set; }
         public Field CurrentField { get; private set; }
 
         /// <summary>
-        /// Offset of tractor Y position from top of screen in range 0 -> 1 where 0.5 is middle of screen
+        /// Offset of tractor Y position from top of screen in range 0 -> 10 where 5 is middle of screen and 10 is the bottom
         /// </summary>
-        public double TractorYOffset = 0.7;
+        public int TractorYOffset = 7;
+
+        /// <summary>
+        /// The color of the tractor symbol
+        /// </summary>
+        public TractorColors TractorColor = TractorColors.Red;
 
         // Transformation parameters for mapping unrotated map pixels to final image pixels
         private int _unrotatedMapWidthpx;
@@ -57,12 +73,14 @@ namespace AgGrade.Data
         /// <param name="Field">The field to fit</param>
         /// <param name="ImageWidthpx">Width of the image in pixels</param>
         /// <param name="ImageHeightpx">Height of the image in pixels</param>
+        /// <param name="TractorHeading">The tractor heading in degrees</param>
         /// <returns>Scale factor in pixels per meter that will fit the map in the image</returns>
         public static double CalculateScaleFactorToFit
             (
             Field Field,
             int ImageWidthpx,
-            int ImageHeightpx
+            int ImageHeightpx,
+            double TractorHeading
             )
         {
             if (ImageWidthpx <= 0 || ImageHeightpx <= 0)
@@ -79,43 +97,16 @@ namespace AgGrade.Data
                 throw new ArgumentException("Field dimensions must be greater than zero");
             }
 
+            PointD RotatedSizeM = GetRotatedSizeD(MapWidthM, MapHeightM, TractorHeading);
+
             // Calculate scale factors for both dimensions
             // Use the smaller scale factor to ensure the map fits in both dimensions
-            double ScaleFactorX = ImageWidthpx / MapWidthM;
-            double ScaleFactorY = ImageHeightpx / MapHeightM;
+            double ScaleFactorX = ImageWidthpx / RotatedSizeM.X;
+            double ScaleFactorY = ImageHeightpx / RotatedSizeM.Y;
 
             // Return the smaller scale factor to ensure the entire map fits
             return Math.Min(ScaleFactorX, ScaleFactorY);
         }
-
-        /*public Bitmap GenerateZoomToFit
-            (
-            Field Field,
-            int CanvasWidth,
-            int CanvasHeight,
-            bool ShowGrid
-            )
-        {
-            if (Field.Bins.Count == 0)
-            {
-                throw new InvalidOperationException("No bin data available for map generation");
-            }
-
-            // Calculate grid dimensions
-            var bins = Field.Bins;
-            var minX = bins.Min(b => b.X);
-            var maxX = bins.Max(b => b.X);
-            var minY = bins.Min(b => b.Y);
-            var maxY = bins.Max(b => b.Y);
-
-            var gridWidth = maxX - minX + 1;
-            var gridHeight = maxY - minY + 1;
-
-            // Calculate image dimensions
-            double ScaleFactor = CanvasWidth / gridWidth;
-
-            return Generate(Field, ShowGrid, ScaleFactor);
-        }*/
 
         /// <summary>
         /// Generates the map as a bitmap
@@ -163,7 +154,7 @@ namespace AgGrade.Data
 
             // calculate location of tractor in pixels
             int TractorXpx = ImageWidthpx / 2;
-            int TractorYpx = (int)(ImageHeightpx * TractorYOffset);
+            int TractorYpx = (int)(ImageHeightpx * TractorYOffset / 10.0);
 
             // Calculate grid dimensions
             var bins = Field.Bins;
@@ -538,7 +529,7 @@ namespace AgGrade.Data
         /// <param name="Height">Height of image</param>
         /// <param name="Angle">Angle of rotation in degrees</param>
         /// <returns>New image size to completely hold image</returns>
-        private Point GetRotatedSize
+        private static Point GetRotatedSize
             (
             int Width,
             int Height,
@@ -550,6 +541,27 @@ namespace AgGrade.Data
             int newHeight = (int)Math.Ceiling(Math.Abs(Width * Math.Sin(radians)) + Math.Abs(Height * Math.Cos(radians)));
 
             return new Point(newWidth, newHeight);
+        }
+
+        /// <summary>
+        /// Gets the size of an image after rotation
+        /// </summary>
+        /// <param name="Width">Width of image</param>
+        /// <param name="Height">Height of image</param>
+        /// <param name="Angle">Angle of rotation in degrees</param>
+        /// <returns>New image size to completely hold image</returns>
+        private static PointD GetRotatedSizeD
+            (
+            double Width,
+            double Height,
+            double Angle
+            )
+        {
+            double radians = Angle * Math.PI / 180;
+            double newWidth = (int)Math.Ceiling(Math.Abs(Width * Math.Cos(radians)) + Math.Abs(Height * Math.Sin(radians)));
+            double newHeight = (int)Math.Ceiling(Math.Abs(Width * Math.Sin(radians)) + Math.Abs(Height * Math.Cos(radians)));
+
+            return new PointD(newWidth, newHeight);
         }
 
         /// <summary>
@@ -597,9 +609,19 @@ namespace AgGrade.Data
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
                 // draw tractor
+                Bitmap TractorImage;
+                switch (TractorColor)
+                {
+                    default:
+                    case TractorColors.Green: TractorImage = Properties.Resources.navarrow_green_256px; break;
+                    case TractorColors.Red: TractorImage = Properties.Resources.navarrow_red_256px; break;
+                    case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
+                    case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
+                }
+
                 int TractorXpx = Map.Width / 2;
-                int TractorYpx = (int)(Map.Height * TractorYOffset);
-                g.DrawImage(Properties.Resources.navarrow_256px, TractorXpx - 24, TractorYpx - 24, 48, 48);
+                int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
+                g.DrawImage(TractorImage, TractorXpx - 24, TractorYpx - 24, 48, 48);
             }
         }
 
