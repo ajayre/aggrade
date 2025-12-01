@@ -290,6 +290,7 @@ namespace AgGrade
             // fixme - allow user to choose file
             AGDLoader Loader = new AGDLoader();
             Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
+            //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
             NewField.Name = "ShopB4";
             map.ShowField(NewField);
 

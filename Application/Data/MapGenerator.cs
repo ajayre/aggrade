@@ -16,6 +16,17 @@ namespace AgGrade.Data
 {
     public class MapGenerator
     {
+        private class MapTile
+        {
+            public Bitmap bitmap;
+            public int TileGridX;
+            public int TileGridY;
+            public int StartX;
+            public int StartY;
+            public int Width;
+            public int Height;
+        }
+
         private Color Background = Color.LightGray;
 
         /// <summary>
@@ -28,6 +39,13 @@ namespace AgGrade.Data
         /// Offset of tractor Y position from top of screen in range 0 -> 1 where 0.5 is middle of screen
         /// </summary>
         public double TractorYOffset = 0.7;
+
+        // Transformation parameters for mapping unrotated map pixels to final image pixels
+        private int _unrotatedMapWidthpx;
+        private int _unrotatedMapHeightpx;
+        private double _tractorHeading;
+        private int _mapLeftpx;
+        private int _mapToppx;
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -96,7 +114,6 @@ namespace AgGrade.Data
             return Generate(Field, ShowGrid, ScaleFactor);
         }*/
 
-
         /// <summary>
         /// Generates the map as a bitmap
         /// </summary>
@@ -141,21 +158,6 @@ namespace AgGrade.Data
             int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
             int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
-            // determine if we need to clip the map so we are not rendering parts that
-            // won't be visible
-            bool ClipMap = false;
-            Point MapRotatedSize = GetRotatedSize(MapWidthpx, MapHeightpx, TractorHeading);
-            Point ViewPortRotatedSize = GetRotatedSize(ImageWidthpx, ImageHeightpx, TractorHeading);
-            Point ClippedBounds;
-            if (MapRotatedSize.X > ViewPortRotatedSize.X || MapRotatedSize.Y > ViewPortRotatedSize.Y)
-            {
-                ClipMap = true;
-                ClippedBounds = ViewPortRotatedSize;
-            }
-
-            // create bitmap for map only
-            Bitmap mapbitmap = new Bitmap(MapWidthpx, MapHeightpx, PixelFormat.Format24bppRgb);
-
             // calculate location of tractor in pixels
             int TractorXpx = ImageWidthpx / 2;
             int TractorYpx = (int)(ImageHeightpx * TractorYOffset);
@@ -196,119 +198,10 @@ namespace AgGrade.Data
                 maxElevation = centerElevation + 0.1; // 10cm above center
             }
 
-            // Generate color palette
-            var colorPalette = GenerateColorPalette();
-
-            // Only render if there's a visible portion
-            if (MapWidthpx > 0 && MapHeightpx > 0)
-            {
-                // Lock bitmap data for direct memory access (only the visible portion)
-                BitmapData bitmapData = mapbitmap.LockBits(
-                    new Rectangle(0, 0, MapWidthpx, MapHeightpx),
-                    ImageLockMode.WriteOnly,
-                    PixelFormat.Format24bppRgb);
-
-                try
-                {
-                    int stride = bitmapData.Stride;
-                    int bytesPerRow = MapWidthpx * 3; // Actual bytes needed for one row of the visible rectangle
-                    
-                    // Allocate buffer for one row of pixel data (BGR format)
-                    byte[] rowData = new byte[bytesPerRow];
-
-                    // Write pixel data directly to bitmap memory
-                    // LockBits stores data top-to-bottom in memory (y=0 is top row)
-                    // Iterate over visible portion only
-                    for (int y = 0; y < MapHeightpx; y++)
-                    {
-                        // LockBits stores top-to-bottom, so y directly corresponds to the row
-                        int bmpY = y;
-                        int rowOffset = 0;
-
-                        // Map Y coordinate (relative to map origin)
-                        // PixelToFieldM inverts Y: PixelY=0 maps to FieldMaxY (north), PixelY=MapHeightpx-1 maps to FieldMinY (south)
-                        // We want: top of image (y=0) shows FieldMaxY, bottom (y=MapHeightpx-1) shows FieldMinY
-                        // So: y=0 → mapY=0 → FieldMaxY → bmpY=0 (top) ✓
-                        int mapY = y;
-
-                        for (int x = 0; x < MapWidthpx; x++)
-                        {
-                            // Map X coordinate (relative to map origin)
-                            int mapX = 0 + x;
-
-                            // convert pixel coordinates to bin grid indices (using map coordinates)
-                            // no rotation here because we haven't rotated the map yet
-                            Point BinPoint = PixelToBin(mapX, mapY, 0);
-
-                            // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
-                            int gridX = BinPoint.X - minX;
-                            int gridY = BinPoint.Y - minY;
-
-                            byte r, g, b;
-
-                            if (gridX < gridWidth && gridY < gridHeight)
-                            {
-                                var elevation = elevationGrid[gridY, gridX];
-
-                                if (elevation.HasValue && elevation.Value != 0.0)
-                                {
-                                    // Normalize elevation to 0-255 range
-                                    var normalizedElevation = (elevation.Value - minElevation) / (maxElevation - minElevation);
-                                    var colorIndex = Math.Max(0, Math.Min(255, (int)(normalizedElevation * 255)));
-
-                                    // Apply color from palette (palette is RGB, bitmap needs BGR)
-                                    r = (byte)colorPalette[colorIndex, 0]; // Red
-                                    g = (byte)colorPalette[colorIndex, 1]; // Green
-                                    b = (byte)colorPalette[colorIndex, 2]; // Blue
-                                }
-                                else
-                                {
-                                    // No data
-                                    r = Background.R;
-                                    g = Background.G;
-                                    b = Background.B;
-                                }
-                            }
-                            else
-                            {
-                                // outside grid
-                                r = Background.R;
-                                g = Background.G;
-                                b = Background.B;
-                            }
-
-                            // Draw grid lines (using map coordinates)
-                            if (ShowGrid)
-                            {
-                                if ((mapX % ScaleFactor == 0) || (mapY % ScaleFactor == 0))
-                                {
-                                    r = g = b = 0x40; // Dark gray
-                                }
-                            }
-
-                            // Write BGR (bitmap format)
-                            rowData[rowOffset + 0] = b; // Blue
-                            rowData[rowOffset + 1] = g; // Green
-                            rowData[rowOffset + 2] = r; // Red
-                            rowOffset += 3;
-                        }
-
-                        // Copy row data to bitmap memory
-                        // Scan0 points to the locked rectangle, stride is the full bitmap stride
-                        IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
-                        Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
-                    }
-                }
-                finally
-                {
-                    mapbitmap.UnlockBits(bitmapData);
-                }
-            }
-
-            if (TractorHeading != 0)
-            {
-                mapbitmap = Rotate(mapbitmap, TractorHeading);
-            }
+            // Store transformation parameters for helper function
+            _unrotatedMapWidthpx = MapWidthpx;
+            _unrotatedMapHeightpx = MapHeightpx;
+            _tractorHeading = TractorHeading;
 
             // get top left corner of map inside image
             Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
@@ -316,17 +209,320 @@ namespace AgGrade.Data
             int MapLeftpx = MapTopLeft.X;
             int MapToppx = MapTopLeft.Y;
 
-            // Create bitmap directly in memory
-            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format24bppRgb);
+            // Store translation parameters
+            _mapLeftpx = MapLeftpx;
+            _mapToppx = MapToppx;
+
+            // Generate color palette
+            var colorPalette = GenerateColorPalette();
+
+            // generate a list of visible tiles
+            List<MapTile> Tiles = new List<MapTile>();
+
+            // Only render if there's a visible portion
+            if (MapWidthpx > 0 && MapHeightpx > 0)
+            {
+                // Render map using 128x128 pixel tiles with 5px overlap
+                const int TILE_SIZE = 128;
+                const int TILE_OVERLAP = 5; // Overlap on each side
+                int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+                int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
+
+                for (int tileY = 0; tileY < tilesY; tileY++)
+                {
+                    for (int tileX = 0; tileX < tilesX; tileX++)
+                    {
+                        // Calculate tile bounds (core tile area)
+                        int tileStartX = tileX * TILE_SIZE;
+                        int tileStartY = tileY * TILE_SIZE;
+                        int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
+                        int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
+
+                        // Calculate extended bounds with overlap (5px on each side = 10px total larger)
+                        int extendedStartX = Math.Max(0, tileStartX - TILE_OVERLAP);
+                        int extendedStartY = Math.Max(0, tileStartY - TILE_OVERLAP);
+                        int extendedEndX = Math.Min(MapWidthpx, tileStartX + tileWidth + TILE_OVERLAP);
+                        int extendedEndY = Math.Min(MapHeightpx, tileStartY + tileHeight + TILE_OVERLAP);
+                        int extendedWidth = extendedEndX - extendedStartX;
+                        int extendedHeight = extendedEndY - extendedStartY;
+
+                        if (IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                        {
+                            MapTile NewTile = new MapTile();
+                            NewTile.TileGridX = tileX;
+                            NewTile.TileGridY = tileY;
+                            NewTile.StartX = tileStartX;
+                            NewTile.StartY = tileStartY;
+                            NewTile.Width = tileWidth;
+                            NewTile.Height = tileHeight;
+
+                            // Render this tile with extended bounds to include overlap
+                            NewTile.bitmap = RenderTile(
+                                extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                MapWidthpx, MapHeightpx,
+                                elevationGrid, minX, minY, gridWidth, gridHeight,
+                                minElevation, maxElevation,
+                                colorPalette, ShowGrid, ScaleFactor);
+
+                            Tiles.Add(NewTile);
+                        }
+                    }
+                }
+            }
+
+            if (TractorHeading != 0)
+            {
+                foreach (MapTile Tile in Tiles)
+                {
+                    Tile.bitmap = Rotate(Tile.bitmap, TractorHeading);
+                }
+
+                //mapbitmap = Rotate(mapbitmap, TractorHeading);
+            }
+
+            // Create bitmap directly in memory with transparency support
+            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(bitmap))
             {
+                // Configure Graphics for high-quality rendering with transparency
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                
                 g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
-                g.DrawImage(mapbitmap, new Point(MapLeftpx, MapToppx));
+
+                // add tiles
+                foreach (MapTile Tile in Tiles)
+                {
+                    // Recalculate StartX and StartY for rotated tiles
+                    if (TractorHeading != 0)
+                    {
+                        // Get original unrotated tile dimensions
+                        int originalWidth = Tile.Width;
+                        int originalHeight = Tile.Height;
+                        
+                        // Calculate the center of the unrotated tile in unrotated map coordinates
+                        int unrotatedCenterX = Tile.StartX + originalWidth / 2;
+                        int unrotatedCenterY = Tile.StartY + originalHeight / 2;
+                        
+                        // Transform the center point to final image coordinates
+                        Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(unrotatedCenterX, unrotatedCenterY);
+                        
+                        // Get the rotated tile dimensions
+                        int rotatedWidth = Tile.bitmap.Width;
+                        int rotatedHeight = Tile.bitmap.Height;
+                        
+                        // Calculate top-left position by subtracting half the rotated dimensions from the center
+                        Tile.StartX = rotatedCenter.X - rotatedWidth / 2;
+                        Tile.StartY = rotatedCenter.Y - rotatedHeight / 2;
+                        
+                        // Update Width and Height to match the rotated bitmap dimensions
+                        Tile.Width = rotatedWidth;
+                        Tile.Height = rotatedHeight;
+                    }
+                    
+                    // Draw tile - the bitmap already includes 5px overlap on all sides
+                    // For unrotated tiles: StartX/StartY is the core tile position, shift by -5px to account for overlap in bitmap
+                    // For rotated tiles: StartX/StartY is already calculated for the rotated position
+                    const int TILE_OVERLAP = 5;
+                    int drawX = Tile.StartX - TILE_OVERLAP;
+                    int drawY = Tile.StartY - TILE_OVERLAP;
+                    
+                    // Calculate source rectangle offset if drawing position is outside bounds
+                    int srcX = 0;
+                    int srcY = 0;
+                    int srcWidth = Tile.bitmap.Width;
+                    int srcHeight = Tile.bitmap.Height;
+                    
+                    // Adjust source rectangle if drawing position is outside bitmap bounds
+                    if (drawX < 0)
+                    {
+                        srcX = -drawX;
+                        srcWidth -= srcX;
+                        drawX = 0;
+                    }
+                    if (drawY < 0)
+                    {
+                        srcY = -drawY;
+                        srcHeight -= srcY;
+                        drawY = 0;
+                    }
+                    
+                    // Clip destination to bitmap bounds
+                    int drawWidth = Math.Min(srcWidth, bitmap.Width - drawX);
+                    int drawHeight = Math.Min(srcHeight, bitmap.Height - drawY);
+                    srcWidth = drawWidth;
+                    srcHeight = drawHeight;
+                    
+                    // Only draw if we have valid dimensions
+                    if (srcWidth > 0 && srcHeight > 0 && drawWidth > 0 && drawHeight > 0)
+                    {
+                        Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
+                        Rectangle destRect = new Rectangle(drawX, drawY, drawWidth, drawHeight);
+                        g.DrawImage(Tile.bitmap, destRect, srcRect, GraphicsUnit.Pixel);
+                    }
+                }
+                
+                //g.DrawImage(mapbitmap, new Point(MapLeftpx, MapToppx));
             }
 
             Decorate(bitmap);
 
             return bitmap;
+        }
+
+        /// <summary>
+        /// Checks if a tile is inside or partially inside the image after rotation and translation
+        /// </summary>
+        /// <param name="tileStartX">X coordinate of tile start in unrotated map pixels</param>
+        /// <param name="tileStartY">Y coordinate of tile start in unrotated map pixels</param>
+        /// <param name="tileWidth">Width of tile in pixels</param>
+        /// <param name="tileHeight">Height of tile in pixels</param>
+        /// <param name="ImageWidthpx">Width of image</param>
+        /// <param name="ImageHeightpx">Height of image</param>
+        /// <returns>true if any part of the tile is visible</returns>
+        private bool IsTileInView
+            (
+            int tileStartX,
+            int tileStartY,
+            int tileWidth,
+            int tileHeight,
+            int ImageWidthpx,
+            int ImageHeightpx
+            )
+        {
+            // Transform all four corners of the tile to final image coordinates
+            Point topLeft = UnrotatedMapPixelToFinalImagePixel(tileStartX, tileStartY);
+            Point topRight = UnrotatedMapPixelToFinalImagePixel(tileStartX + tileWidth, tileStartY);
+            Point bottomLeft = UnrotatedMapPixelToFinalImagePixel(tileStartX, tileStartY + tileHeight);
+            Point bottomRight = UnrotatedMapPixelToFinalImagePixel(tileStartX + tileWidth, tileStartY + tileHeight);
+
+            // Define the image bounds as a rectangle
+            Rectangle imageBounds = new Rectangle(0, 0, ImageWidthpx, ImageHeightpx);
+
+            // Check if any corner of the tile is inside the image bounds
+            if (imageBounds.Contains(topLeft) || imageBounds.Contains(topRight) ||
+                imageBounds.Contains(bottomLeft) || imageBounds.Contains(bottomRight))
+            {
+                return true;
+            }
+
+            // Check if any corner of the image is inside the rotated tile (using point-in-polygon)
+            Point[] imageCorners = new Point[]
+            {
+                new Point(0, 0),
+                new Point(ImageWidthpx, 0),
+                new Point(ImageWidthpx, ImageHeightpx),
+                new Point(0, ImageHeightpx)
+            };
+
+            Point[] tileCorners = new Point[] { topLeft, topRight, bottomRight, bottomLeft };
+            foreach (Point corner in imageCorners)
+            {
+                if (IsPointInPolygon(corner, tileCorners))
+                {
+                    return true;
+                }
+            }
+
+            // Check if any edge of the tile intersects any edge of the image
+            // Tile edges
+            Point[][] tileEdges = new Point[][]
+            {
+                new Point[] { topLeft, topRight },
+                new Point[] { topRight, bottomRight },
+                new Point[] { bottomRight, bottomLeft },
+                new Point[] { bottomLeft, topLeft }
+            };
+
+            // Image edges
+            Point[][] imageEdges = new Point[][]
+            {
+                new Point[] { new Point(0, 0), new Point(ImageWidthpx, 0) },
+                new Point[] { new Point(ImageWidthpx, 0), new Point(ImageWidthpx, ImageHeightpx) },
+                new Point[] { new Point(ImageWidthpx, ImageHeightpx), new Point(0, ImageHeightpx) },
+                new Point[] { new Point(0, ImageHeightpx), new Point(0, 0) }
+            };
+
+            // Check for edge intersections
+            foreach (Point[] tileEdge in tileEdges)
+            {
+                foreach (Point[] imageEdge in imageEdges)
+                {
+                    if (DoLineSegmentsIntersect(tileEdge[0], tileEdge[1], imageEdge[0], imageEdge[1]))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if a point is inside a polygon using the ray casting algorithm
+        /// </summary>
+        private bool IsPointInPolygon(Point point, Point[] polygon)
+        {
+            int intersections = 0;
+            int j = polygon.Length - 1;
+
+            for (int i = 0; i < polygon.Length; i++)
+            {
+                if (((polygon[i].Y > point.Y) != (polygon[j].Y > point.Y)) &&
+                    (point.X < (polygon[j].X - polygon[i].X) * (point.Y - polygon[i].Y) / (double)(polygon[j].Y - polygon[i].Y) + polygon[i].X))
+                {
+                    intersections++;
+                }
+                j = i;
+            }
+
+            return (intersections % 2) == 1;
+        }
+
+        /// <summary>
+        /// Checks if two line segments intersect using the orientation method
+        /// </summary>
+        private bool DoLineSegmentsIntersect(Point p1, Point p2, Point p3, Point p4)
+        {
+            int o1 = Orientation(p1, p2, p3);
+            int o2 = Orientation(p1, p2, p4);
+            int o3 = Orientation(p3, p4, p1);
+            int o4 = Orientation(p3, p4, p2);
+
+            // General case: segments intersect if orientations are different
+            if (o1 != o2 && o3 != o4)
+                return true;
+
+            // Special cases: collinear points
+            if (o1 == 0 && OnSegment(p1, p3, p2)) return true;
+            if (o2 == 0 && OnSegment(p1, p4, p2)) return true;
+            if (o3 == 0 && OnSegment(p3, p1, p4)) return true;
+            if (o4 == 0 && OnSegment(p3, p2, p4)) return true;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Calculates the orientation of three points (0 = collinear, 1 = clockwise, 2 = counterclockwise)
+        /// </summary>
+        private int Orientation(Point a, Point b, Point c)
+        {
+            int val = (b.Y - a.Y) * (c.X - b.X) - (b.X - a.X) * (c.Y - b.Y);
+            if (val == 0) return 0; // Collinear
+            return (val > 0) ? 1 : 2; // Clockwise or counterclockwise
+        }
+
+        /// <summary>
+        /// Checks if point q lies on segment pr
+        /// </summary>
+        private bool OnSegment(Point p, Point q, Point r)
+        {
+            if (q.X <= Math.Max(p.X, r.X) && q.X >= Math.Min(p.X, r.X) &&
+                q.Y <= Math.Max(p.Y, r.Y) && q.Y >= Math.Min(p.Y, r.Y))
+                return true;
+            return false;
         }
 
         /// <summary>
@@ -362,10 +558,20 @@ namespace AgGrade.Data
         {
             Point RotatedSize = GetRotatedSize(Map.Width, Map.Height, Heading);
 
-            Bitmap rotatedBitmap = new Bitmap(RotatedSize.X, RotatedSize.Y);
+            Bitmap rotatedBitmap = new Bitmap(RotatedSize.X, RotatedSize.Y, PixelFormat.Format32bppArgb);
 
             using (Graphics g = Graphics.FromImage(rotatedBitmap))
             {
+                // Clear to transparent
+                g.Clear(Color.Transparent);
+                
+                // Configure for high-quality rotation with transparency
+                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
                 g.TranslateTransform((float)RotatedSize.X / 2, (float)RotatedSize.Y / 2); // Move origin to center of new bitmap
                 g.RotateTransform((float)-Heading); // Apply rotation
                 g.TranslateTransform(-(float)Map.Width / 2, -(float)Map.Height / 2); // Move origin back to original bitmap's center
@@ -424,6 +630,64 @@ namespace AgGrade.Data
             int MapToppx = TractorYpx - TractorFieldPx.Y;
 
             return new Point(MapLeftpx, MapToppx);
+        }
+
+        /// <summary>
+        /// Converts a pixel coordinate from the unrotated map to the corresponding pixel coordinate
+        /// in the final rotated and translated image.
+        /// </summary>
+        /// <param name="unrotatedMapX">X coordinate in the unrotated map (0 to MapWidthpx-1)</param>
+        /// <param name="unrotatedMapY">Y coordinate in the unrotated map (0 to MapHeightpx-1)</param>
+        /// <returns>Pixel coordinate in the final image</returns>
+        private Point UnrotatedMapPixelToFinalImagePixel(int unrotatedMapX, int unrotatedMapY)
+        {
+            int rotatedX, rotatedY;
+
+            if (_tractorHeading == 0.0)
+            {
+                // No rotation, coordinates stay the same
+                rotatedX = unrotatedMapX;
+                rotatedY = unrotatedMapY;
+            }
+            else
+            {
+                // Apply rotation transformation (same as in Rotate method)
+                double radians = _tractorHeading * Math.PI / 180.0;
+                
+                // Calculate rotated map dimensions
+                Point rotatedSize = GetRotatedSize(_unrotatedMapWidthpx, _unrotatedMapHeightpx, _tractorHeading);
+                int rotatedWidth = rotatedSize.X;
+                int rotatedHeight = rotatedSize.Y;
+
+                // Original map center
+                double originalCenterX = _unrotatedMapWidthpx / 2.0;
+                double originalCenterY = _unrotatedMapHeightpx / 2.0;
+
+                // Rotated map center
+                double rotatedCenterX = rotatedWidth / 2.0;
+                double rotatedCenterY = rotatedHeight / 2.0;
+
+                // Translate point to be relative to original map center
+                double relX = unrotatedMapX - originalCenterX;
+                double relY = unrotatedMapY - originalCenterY;
+
+                // Apply rotation (counter-clockwise by -Heading, which is clockwise by Heading)
+                // Graphics.RotateTransform(-Heading) rotates counter-clockwise by -Heading
+                double cosAngle = Math.Cos(-radians);
+                double sinAngle = Math.Sin(-radians);
+                double rotatedRelX = relX * cosAngle - relY * sinAngle;
+                double rotatedRelY = relX * sinAngle + relY * cosAngle;
+
+                // Translate back relative to rotated map center
+                rotatedX = (int)Math.Round(rotatedRelX + rotatedCenterX);
+                rotatedY = (int)Math.Round(rotatedRelY + rotatedCenterY);
+            }
+
+            // Apply translation to get final image coordinates
+            int finalX = rotatedX + _mapLeftpx;
+            int finalY = rotatedY + _mapToppx;
+
+            return new Point(finalX, finalY);
         }
 
         /// <summary>
@@ -708,6 +972,133 @@ namespace AgGrade.Data
             }
 
             return elevationGrid;
+        }
+
+        /// <summary>
+        /// Renders a single tile of the map
+        /// </summary>
+        /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
+        /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
+        /// <param name="tileWidth">Width of tile in pixels</param>
+        /// <param name="tileHeight">Height of tile in pixels</param>
+        /// <param name="mapWidthpx">Total map width in pixels</param>
+        /// <param name="mapHeightpx">Total map height in pixels</param>
+        /// <param name="elevationGrid">Elevation grid data</param>
+        /// <param name="minX">Minimum X bin index</param>
+        /// <param name="minY">Minimum Y bin index</param>
+        /// <param name="gridWidth">Width of elevation grid</param>
+        /// <param name="gridHeight">Height of elevation grid</param>
+        /// <param name="minElevation">Minimum elevation value</param>
+        /// <param name="maxElevation">Maximum elevation value</param>
+        /// <param name="colorPalette">Color palette for elevation mapping</param>
+        /// <param name="showGrid">Whether to show grid lines</param>
+        /// <param name="scaleFactor">Scale factor in pixels per meter</param>
+        /// <returns>Rendered tile bitmap</returns>
+        private Bitmap RenderTile(
+            int tileStartX, int tileStartY, int tileWidth, int tileHeight,
+            int mapWidthpx, int mapHeightpx,
+            double?[,] elevationGrid, int minX, int minY, int gridWidth, int gridHeight,
+            double minElevation, double maxElevation,
+            int[,] colorPalette, bool showGrid, double scaleFactor)
+        {
+            Bitmap tile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
+
+            // Lock bitmap data for direct memory access
+            BitmapData bitmapData = tile.LockBits(
+                new Rectangle(0, 0, tileWidth, tileHeight),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+
+            try
+            {
+                int stride = bitmapData.Stride;
+                int bytesPerRow = tileWidth * 4; // Actual bytes needed for one row (BGRA format)
+
+                // Allocate buffer for one row of pixel data (BGRA format)
+                byte[] rowData = new byte[bytesPerRow];
+
+                // Write pixel data directly to bitmap memory
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    int rowOffset = 0;
+                    int bmpY = y;
+
+                    // Map Y coordinate (relative to map origin)
+                    int mapY = tileStartY + y;
+
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        // Map X coordinate (relative to map origin)
+                        int mapX = tileStartX + x;
+
+                        // Convert pixel coordinates to bin grid indices (using map coordinates)
+                        // No rotation here because we haven't rotated the map yet
+                        Point BinPoint = PixelToBin(mapX, mapY, 0);
+
+                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
+                        int gridX = BinPoint.X - minX;
+                        int gridY = BinPoint.Y - minY;
+
+                        byte r, g, b, a;
+
+                        if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
+                        {
+                            var elevation = elevationGrid[gridY, gridX];
+
+                            if (elevation.HasValue && elevation.Value != 0.0)
+                            {
+                                // Normalize elevation to 0-255 range
+                                var normalizedElevation = (elevation.Value - minElevation) / (maxElevation - minElevation);
+                                var colorIndex = Math.Max(0, Math.Min(255, (int)(normalizedElevation * 255)));
+
+                                // Apply color from palette (palette is RGB, bitmap needs BGR)
+                                r = (byte)colorPalette[colorIndex, 0]; // Red
+                                g = (byte)colorPalette[colorIndex, 1]; // Green
+                                b = (byte)colorPalette[colorIndex, 2]; // Blue
+                                a = 255; // Fully opaque
+                            }
+                            else
+                            {
+                                // No data - make transparent
+                                r = g = b = 0;
+                                a = 0; // Transparent
+                            }
+                        }
+                        else
+                        {
+                            // Outside grid - make transparent
+                            r = g = b = 0;
+                            a = 0; // Transparent
+                        }
+
+                        // Draw grid lines (using map coordinates)
+                        if (showGrid && a > 0)
+                        {
+                            if ((mapX % scaleFactor == 0) || (mapY % scaleFactor == 0))
+                            {
+                                r = g = b = 0x40; // Dark gray
+                            }
+                        }
+
+                        // Write BGRA (bitmap format with alpha)
+                        rowData[rowOffset + 0] = b; // Blue
+                        rowData[rowOffset + 1] = g; // Green
+                        rowData[rowOffset + 2] = r; // Red
+                        rowData[rowOffset + 3] = a; // Alpha
+                        rowOffset += 4;
+                    }
+
+                    // Copy row data to bitmap memory
+                    IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
+                    Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
+                }
+            }
+            finally
+            {
+                tile.UnlockBits(bitmapData);
+            }
+
+            return tile;
         }
     }
 }

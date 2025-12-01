@@ -28,7 +28,6 @@ namespace AgGrade.Controls
             InitializeComponent();
 
             MapGen = new MapGenerator();
-            ScaleFactor = 6.56;
         }
 
         public void ShowField
@@ -40,6 +39,9 @@ namespace AgGrade.Controls
 
             ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height);
 
+            // fixme - remove
+            //ScaleFactor = 200;
+
             RefreshMap();
         }
 
@@ -50,7 +52,7 @@ namespace AgGrade.Controls
             double Lat = 36.446847109944279;
             double Lon = -90.72286177445794;
 
-            Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, 20);
+            //Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, 20);
 
             //MapCanvas.Image = MapGen.GenerateZoomToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, false);
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
