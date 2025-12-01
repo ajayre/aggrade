@@ -56,7 +56,7 @@ namespace AgGrade.Controls
 
             //MapCanvas.Image = MapGen.GenerateZoomToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, false);
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
-                Lat, Lon, 45);
+                Lat, Lon, 0);
         }
 
         /// <summary>

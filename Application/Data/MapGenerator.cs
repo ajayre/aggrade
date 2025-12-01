@@ -206,8 +206,10 @@ namespace AgGrade.Data
             // get top left corner of map inside image
             Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
 
-            int MapLeftpx = MapTopLeft.X;
-            int MapToppx = MapTopLeft.Y;
+            // Adjust for tile overlap - tiles are drawn with -TILE_OVERLAP offset, so we need to compensate
+            const int TILE_OVERLAP = 5;
+            int MapLeftpx = MapTopLeft.X + TILE_OVERLAP;
+            int MapToppx = MapTopLeft.Y + TILE_OVERLAP;
 
             // Store translation parameters
             _mapLeftpx = MapLeftpx;
@@ -224,7 +226,6 @@ namespace AgGrade.Data
             {
                 // Render map using 128x128 pixel tiles with 5px overlap
                 const int TILE_SIZE = 128;
-                const int TILE_OVERLAP = 5; // Overlap on each side
                 int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
                 int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
 
@@ -276,8 +277,6 @@ namespace AgGrade.Data
                 {
                     Tile.bitmap = Rotate(Tile.bitmap, TractorHeading);
                 }
-
-                //mapbitmap = Rotate(mapbitmap, TractorHeading);
             }
 
             // Create bitmap directly in memory with transparency support
@@ -321,11 +320,18 @@ namespace AgGrade.Data
                         Tile.Width = rotatedWidth;
                         Tile.Height = rotatedHeight;
                     }
-                    
+                    else
+                    {
+                        // For unrotated tiles, translate from unrotated map coordinates to final image coordinates
+                        // StartX/StartY are in unrotated map pixel coordinates (0 to MapWidthpx-1)
+                        // Need to add map offset to get final image coordinates
+                        Tile.StartX = Tile.StartX + _mapLeftpx;
+                        Tile.StartY = Tile.StartY + _mapToppx;
+                    }
+
                     // Draw tile - the bitmap already includes 5px overlap on all sides
-                    // For unrotated tiles: StartX/StartY is the core tile position, shift by -5px to account for overlap in bitmap
-                    // For rotated tiles: StartX/StartY is already calculated for the rotated position
-                    const int TILE_OVERLAP = 5;
+                    // For unrotated tiles: StartX/StartY is now in final image coordinates, shift by -5px to account for overlap in bitmap
+                    // For rotated tiles: StartX/StartY is already calculated for the rotated position in final image coordinates
                     int drawX = Tile.StartX - TILE_OVERLAP;
                     int drawY = Tile.StartY - TILE_OVERLAP;
                     
