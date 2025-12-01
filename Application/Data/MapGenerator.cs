@@ -141,6 +141,18 @@ namespace AgGrade.Data
             int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
             int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
+            // determine if we need to clip the map so we are not rendering parts that
+            // won't be visible
+            bool ClipMap = false;
+            Point MapRotatedSize = GetRotatedSize(MapWidthpx, MapHeightpx, TractorHeading);
+            Point ViewPortRotatedSize = GetRotatedSize(ImageWidthpx, ImageHeightpx, TractorHeading);
+            Point ClippedBounds;
+            if (MapRotatedSize.X > ViewPortRotatedSize.X || MapRotatedSize.Y > ViewPortRotatedSize.Y)
+            {
+                ClipMap = true;
+                ClippedBounds = ViewPortRotatedSize;
+            }
+
             // create bitmap for map only
             Bitmap mapbitmap = new Bitmap(MapWidthpx, MapHeightpx, PixelFormat.Format24bppRgb);
 
@@ -318,6 +330,27 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Gets the size of an image after rotation
+        /// </summary>
+        /// <param name="Width">Width of image</param>
+        /// <param name="Height">Height of image</param>
+        /// <param name="Angle">Angle of rotation in degrees</param>
+        /// <returns>New image size to completely hold image</returns>
+        private Point GetRotatedSize
+            (
+            int Width,
+            int Height,
+            double Angle
+            )
+        {
+            double radians = Angle * Math.PI / 180;
+            int newWidth = (int)Math.Ceiling(Math.Abs(Width * Math.Cos(radians)) + Math.Abs(Height * Math.Sin(radians)));
+            int newHeight = (int)Math.Ceiling(Math.Abs(Width * Math.Sin(radians)) + Math.Abs(Height * Math.Cos(radians)));
+
+            return new Point(newWidth, newHeight);
+        }
+
+        /// <summary>
         /// Rotates the map so heading is up
         /// </summary>
         /// <param name="Heading">Heading</param>
@@ -327,17 +360,13 @@ namespace AgGrade.Data
             double Heading
             )
         {
-            // Create a new bitmap with dimensions adjusted for the rotated image to avoid cropping
-            // This calculation ensures the entire rotated image fits within the new bitmap.
-            double radians = Heading * Math.PI / 180;
-            int newWidth = (int)Math.Ceiling(Math.Abs(Map.Width * Math.Cos(radians)) + Math.Abs(Map.Height * Math.Sin(radians)));
-            int newHeight = (int)Math.Ceiling(Math.Abs(Map.Width * Math.Sin(radians)) + Math.Abs(Map.Height * Math.Cos(radians)));
+            Point RotatedSize = GetRotatedSize(Map.Width, Map.Height, Heading);
 
-            Bitmap rotatedBitmap = new Bitmap(newWidth, newHeight);
+            Bitmap rotatedBitmap = new Bitmap(RotatedSize.X, RotatedSize.Y);
 
             using (Graphics g = Graphics.FromImage(rotatedBitmap))
             {
-                g.TranslateTransform((float)newWidth / 2, (float)newHeight / 2); // Move origin to center of new bitmap
+                g.TranslateTransform((float)RotatedSize.X / 2, (float)RotatedSize.Y / 2); // Move origin to center of new bitmap
                 g.RotateTransform((float)-Heading); // Apply rotation
                 g.TranslateTransform(-(float)Map.Width / 2, -(float)Map.Height / 2); // Move origin back to original bitmap's center
                 g.DrawImage(Map, new Point(0, 0)); // Draw the original bitmap
