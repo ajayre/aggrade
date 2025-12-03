@@ -236,94 +236,157 @@ namespace HardwareSim
             double trailerLength,
             double totalDistance)
         {
-            // First, calculate where the hitch point should be (it follows the steering curve)
-            // The hitch maintains a constant distance from the steering point
-            double hitchStartLat = steeringStartLat;
-            double hitchStartLon = steeringStartLon;
-
-            // Calculate initial bearing from steering point to trailer rear axle
-            double initialBearing = Haversine.Bearing(steeringStartLat, steeringStartLon,
-                trailerRearStartLat, trailerRearStartLon) * Haversine.toDegrees;
-
-            // Normalize bearing to 0-360
-            if (initialBearing < 0) initialBearing += 360.0;
-
-            // Calculate initial hitch position (opposite direction from rear axle)
-            double hitchBearing = (initialBearing + 180.0) % 360.0;
+            // The hitch point follows the steering curve (path of previous unit's rear axle)
+            // According to the paper, the hitch follows this path directly.
+            // The rear axle follows a tractrix of the hitch path.
+            
+            // Calculate initial hitch position
+            // The hitch is at distance L from the rear axle, in the direction from rear axle to steering point
+            double hitchStartLat = trailerRearStartLat;
+            double hitchStartLon = trailerRearStartLon;
+            double bearingToSteering = Haversine.Bearing(trailerRearStartLat, trailerRearStartLon,
+                steeringStartLat, steeringStartLon) * Haversine.toDegrees;
+            if (bearingToSteering < 0) bearingToSteering += 360.0;
             Haversine.MoveDistanceBearing(ref hitchStartLat, ref hitchStartLon,
-                hitchBearing, trailerLength);
+                bearingToSteering, trailerLength);
+            
+            // Verify hitch is at correct distance from steering point (should be approximately L)
+            // If not, adjust to maintain geometric consistency
+            double hitchToSteeringDist = Haversine.Distance(hitchStartLat, hitchStartLon,
+                steeringStartLat, steeringStartLon);
+            if (Math.Abs(hitchToSteeringDist - trailerLength) > 0.1)
+            {
+                // Recalculate: hitch should be at distance L from steering point
+                // in direction from steering to rear axle
+                double bearingFromSteering = Haversine.Bearing(steeringStartLat, steeringStartLon,
+                    trailerRearStartLat, trailerRearStartLon) * Haversine.toDegrees;
+                if (bearingFromSteering < 0) bearingFromSteering += 360.0;
+                hitchStartLat = steeringStartLat;
+                hitchStartLon = steeringStartLon;
+                Haversine.MoveDistanceBearing(ref hitchStartLat, ref hitchStartLon,
+                    bearingFromSteering, trailerLength);
+            }
 
-            // Calculate new hitch position (follows the steering curve)
-            double hitchNewLat = steeringNewLat;
-            double hitchNewLon = steeringNewLon;
-            double bearingToHitch = Haversine.Bearing(steeringNewLat, steeringNewLon,
-                hitchStartLat, hitchStartLon) * Haversine.toDegrees;
-            if (bearingToHitch < 0) bearingToHitch += 360.0;
-            Haversine.MoveDistanceBearing(ref hitchNewLat, ref hitchNewLon,
-                bearingToHitch, trailerLength);
-
-            // Now calculate the tractrix path of the rear axle following the hitch
-            // Use numerical integration with small steps
-            double rearAxleLat = trailerRearStartLat;
-            double rearAxleLon = trailerRearStartLon;
-
-            // Calculate initial tractrix angle (angle between trailer heading and path heading)
-            double trailerHeading = Haversine.Bearing(hitchStartLat, hitchStartLon,
-                rearAxleLat, rearAxleLon) * Haversine.toDegrees;
-            if (trailerHeading < 0) trailerHeading += 360.0;
-
-            double pathHeading = Haversine.Bearing(hitchStartLat, hitchStartLon,
-                hitchNewLat, hitchNewLon) * Haversine.toDegrees;
-            if (pathHeading < 0) pathHeading += 360.0;
-
-            double tractrixAngle = NormalizeAngle(trailerHeading - pathHeading);
-
-            // Integrate along the path from hitch start to hitch new position
+            // The hitch follows the steering curve, so the hitch path is the steering curve
+            // Integrate along this path to calculate the tractrix
             double currentHitchLat = hitchStartLat;
             double currentHitchLon = hitchStartLon;
-            double currentRearLat = rearAxleLat;
-            double currentRearLon = rearAxleLon;
-            double currentAlpha = tractrixAngle * Haversine.toRadians;
-            double currentBeta = trailerHeading * Haversine.toRadians;
-
-            double remainingDistance = Haversine.Distance(hitchStartLat, hitchStartLon,
-                hitchNewLat, hitchNewLon);
-
-            while (remainingDistance > 0.001) // Continue until we've moved the full distance
+            double currentRearLat = trailerRearStartLat;
+            double currentRearLon = trailerRearStartLon;
+            
+            // Calculate initial trailer heading (from rear axle to hitch)
+            double initialTrailerHeading = Haversine.Bearing(currentRearLat, currentRearLon,
+                currentHitchLat, currentHitchLon) * Haversine.toRadians;
+            
+            // Calculate initial path heading (tangent to steering curve/hitch path at start)
+            double initialPathHeading = Haversine.Bearing(steeringStartLat, steeringStartLon,
+                steeringNewLat, steeringNewLon) * Haversine.toRadians;
+            
+            // Initial tractrix angle α (angle between trailer heading and path heading)
+            double currentAlpha = NormalizeAngle((initialTrailerHeading - initialPathHeading) * Haversine.toDegrees) * Haversine.toRadians;
+            
+            // Initial vehicle heading β (trailer heading)
+            double currentBeta = initialTrailerHeading;
+            
+            // Total distance along steering curve (hitch path)
+            double totalHitchDistance = Haversine.Distance(steeringStartLat, steeringStartLon,
+                steeringNewLat, steeringNewLon);
+            
+            double remainingHitchDistance = totalHitchDistance;
+            
+            // Store previous positions for radius calculation
+            double prevHitchLat = hitchStartLat;
+            double prevHitchLon = hitchStartLon;
+            double prevSteeringLat = steeringStartLat;
+            double prevSteeringLon = steeringStartLon;
+            
+            // Current position along steering curve
+            double currentSteeringLat = steeringStartLat;
+            double currentSteeringLon = steeringStartLon;
+            
+            while (remainingHitchDistance > 0.001)
             {
-                double ds = Math.Min(MAX_STEP_SIZE, remainingDistance);
-
-                // Calculate instantaneous radius of curvature
-                // For small steps, approximate as circular arc
-                double R = CalculateInstantaneousRadius(
-                    currentHitchLat, currentHitchLon,
-                    hitchNewLat, hitchNewLon,
-                    remainingDistance);
-
+                double ds = Math.Min(MAX_STEP_SIZE, remainingHitchDistance);
+                
+                // Move along steering curve (hitch path)
+                // The steering point moves along its path
+                double steeringBearing = Haversine.Bearing(currentSteeringLat, currentSteeringLon,
+                    steeringNewLat, steeringNewLon) * Haversine.toRadians;
+                
+                prevSteeringLat = currentSteeringLat;
+                prevSteeringLon = currentSteeringLon;
+                double steeringBearingDeg = steeringBearing * Haversine.toDegrees;
+                if (steeringBearingDeg < 0) steeringBearingDeg += 360.0;
+                Haversine.MoveDistanceBearing(ref currentSteeringLat, ref currentSteeringLon,
+                    steeringBearingDeg, ds);
+                
+                // The hitch follows the steering curve path (same path, moves by same distance ds)
+                // The hitch path is the steering curve, so move hitch along the same path
+                prevHitchLat = currentHitchLat;
+                prevHitchLon = currentHitchLon;
+                double hitchBearing = Haversine.Bearing(currentHitchLat, currentHitchLon,
+                    steeringNewLat, steeringNewLon) * Haversine.toDegrees;
+                if (hitchBearing < 0) hitchBearing += 360.0;
+                Haversine.MoveDistanceBearing(ref currentHitchLat, ref currentHitchLon,
+                    hitchBearing, ds);
+                
+                // Calculate instantaneous radius of curvature R of the steering curve
+                double nextSteeringLat = currentSteeringLat;
+                double nextSteeringLon = currentSteeringLon;
+                double nextBearing = Haversine.Bearing(currentSteeringLat, currentSteeringLon,
+                    steeringNewLat, steeringNewLon) * Haversine.toDegrees;
+                if (nextBearing < 0) nextBearing += 360.0;
+                double nextDs = Math.Min(MAX_STEP_SIZE, remainingHitchDistance - ds);
+                if (nextDs > 0.001)
+                {
+                    Haversine.MoveDistanceBearing(ref nextSteeringLat, ref nextSteeringLon,
+                        nextBearing, nextDs);
+                }
+                else
+                {
+                    nextSteeringLat = steeringNewLat;
+                    nextSteeringLon = steeringNewLon;
+                }
+                
+                double R = CalculateRadiusOfCurvature(
+                    prevSteeringLat, prevSteeringLon,
+                    currentSteeringLat, currentSteeringLon,
+                    nextSteeringLat, nextSteeringLon);
+                
                 // Update tractrix angle using: dα = ds[L/R - sin(α)]/L
                 double dAlpha = ds * ((trailerLength / R) - Math.Sin(currentAlpha)) / trailerLength;
                 currentAlpha += dAlpha;
-
+                
+                // Update path heading (tangent to steering curve at current position)
+                double currentPathHeading = Haversine.Bearing(currentSteeringLat, currentSteeringLon,
+                    steeringNewLat, steeringNewLon) * Haversine.toRadians;
+                
                 // Update vehicle heading: dβ = dθ - dα
-                double dTheta = ds / R;
+                // where dθ is the change in path heading
+                double prevPathHeading = steeringBearing;
+                double dTheta = NormalizeAngle((currentPathHeading - prevPathHeading) * Haversine.toDegrees) * Haversine.toRadians;
                 double dBeta = dTheta - dAlpha;
                 currentBeta += dBeta;
-
-                // Move hitch point forward along path
-                double hitchBearingRad = Haversine.Bearing(currentHitchLat, currentHitchLon,
-                    hitchNewLat, hitchNewLon);
-                Haversine.MoveDistanceBearing(ref currentHitchLat, ref currentHitchLon,
-                    hitchBearingRad * Haversine.toDegrees, ds);
-
-                // Move rear axle to maintain trailer length and heading
+                
+                // Normalize currentBeta to 0-2π range
+                while (currentBeta < 0) currentBeta += 2 * Math.PI;
+                while (currentBeta >= 2 * Math.PI) currentBeta -= 2 * Math.PI;
+                
+                // Update rear axle position: it's at distance L from hitch, in direction opposite to trailer heading
+                double rearBearing = (currentBeta * Haversine.toDegrees + 180.0) % 360.0;
                 currentRearLat = currentHitchLat;
                 currentRearLon = currentHitchLon;
-                double rearBearing = (currentBeta * Haversine.toDegrees + 180.0) % 360.0;
                 Haversine.MoveDistanceBearing(ref currentRearLat, ref currentRearLon,
                     rearBearing, trailerLength);
-
-                remainingDistance -= ds;
+                
+                remainingHitchDistance -= ds;
             }
+            
+            // Final hitch position: the hitch follows the steering curve path
+            // So the final hitch is at the end of the steering curve path
+            // (which is the same as steeringNewLat/Lon since the hitch path = steering curve)
+            double hitchNewLat = currentHitchLat;
+            double hitchNewLon = currentHitchLon;
 
             return new TractrixResult
             {
@@ -337,27 +400,40 @@ namespace HardwareSim
         }
 
         /// <summary>
-        /// Calculates the instantaneous radius of curvature for the path.
-        /// Uses a three-point method to estimate the radius.
+        /// Calculates the radius of curvature for a path using three points.
+        /// Uses the previous point, current point, and next point to estimate curvature.
         /// </summary>
-        private double CalculateInstantaneousRadius(
+        private double CalculateRadiusOfCurvature(
+            double prevLat, double prevLon,
             double currentLat, double currentLon,
-            double targetLat, double targetLon,
-            double remainingDistance)
+            double nextLat, double nextLon)
         {
-            // For a straight path or very large radius, return a large value
-            if (remainingDistance < 0.01)
-                return 1000000.0; // Effectively straight
-
-            // Calculate bearing change rate
-            double bearing = Haversine.Bearing(currentLat, currentLon, targetLat, targetLon);
-
-            // Estimate radius based on path curvature
-            // This is a simplified approximation - for more accuracy, use three-point method
-            // For now, assume moderate curvature if distance is reasonable
-            double estimatedRadius = Math.Max(remainingDistance * 10.0, 50.0);
-
-            return estimatedRadius;
+            // Calculate distances between points
+            double d1 = Haversine.Distance(prevLat, prevLon, currentLat, currentLon);
+            double d2 = Haversine.Distance(currentLat, currentLon, nextLat, nextLon);
+            
+            // If points are too close or path is nearly straight, return large radius
+            if (d1 < 0.01 || d2 < 0.01)
+                return 1000000.0;
+            
+            // Calculate bearings
+            double bearing1 = Haversine.Bearing(prevLat, prevLon, currentLat, currentLon);
+            double bearing2 = Haversine.Bearing(currentLat, currentLon, nextLat, nextLon);
+            
+            // Calculate change in bearing (curvature)
+            double deltaBearing = NormalizeAngle((bearing2 - bearing1) * Haversine.toDegrees) * Haversine.toRadians;
+            
+            // If bearing change is very small, path is nearly straight
+            if (Math.Abs(deltaBearing) < 0.001)
+                return 1000000.0;
+            
+            // For a circular arc, the radius is: R = ds / dθ
+            // Use average distance as ds
+            double avgDistance = (d1 + d2) / 2.0;
+            double radius = avgDistance / Math.Abs(deltaBearing);
+            
+            // Ensure minimum reasonable radius
+            return Math.Max(radius, 1.0);
         }
 
         /// <summary>

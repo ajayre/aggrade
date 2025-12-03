@@ -11,8 +11,9 @@ namespace HardwareSim
         // Constants matching the C++ implementation
         // const double EARTH_RADIUS = 6371000.00; //radius of earth in metres (commented out in original)
         public const double EARTH_RADIUS = 6378137.00; //radius of earth in metres
-        public const double toDegrees = 57.295779; //180/PI
-        public const double toRadians = 3.1415926535897932384626433832795 / 180.0;
+        // Using Math.PI directly for better precision instead of hardcoded constants
+        public const double toDegrees = 180.0 / Math.PI;
+        public const double toRadians = Math.PI / 180.0;
 
         /// <summary>
         /// Calculates the distance between two GPS coordinates using the Haversine formula.

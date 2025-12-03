@@ -70,3 +70,17 @@
     - enabled by exiting cutting mode if configured in settings
   - manual
     - enabled by moving joystick or exiting cutting mode if float not enabled
+
+19. Display amount of dirt in each pan as it is scraped
+
+20. When pan is full auto end cutting. Option to automatically switch to rear pan when front pan is full
+
+21. Transparency and color options for tractor display
+
+22. Map scale.
+
+23. OSM and satellite images around field.
+
+24. Manual slope entry and calculate for cut/fill ratio and import/export
+
+25. Don't allow dead reckoning to run for more than two seconds

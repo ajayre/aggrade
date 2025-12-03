@@ -1,5 +1,6 @@
 ﻿using AgGrade.Controls;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -65,6 +66,7 @@ namespace AgGrade.Data
         private double _tractorHeading;
         private int _mapLeftpx;
         private int _mapToppx;
+        private Point _mapOffsetInImage;
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -119,6 +121,12 @@ namespace AgGrade.Data
         /// <param name="TractorLat">Tractor latitude</param>
         /// <param name="TractorLon">Tractor longitude</param>
         /// <param name="TractorHeading">Heading of tractor in degrees</param>
+        /// <param name="FrontScraper">Front scraper location</param>
+        /// <param name="FrontScraperHeading">Heading of front scraper in degrees</param>
+        /// <param name="RearScraper">Rear scraper location</param>
+        /// <param name="RearScraperHeading">Heading of rear scraper in degrees</param>
+        /// <param name="Benchmarks">Benchmark points to show</param>
+        /// <param name="TractorLocationHistory">Locations where the tractor has been</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -129,7 +137,13 @@ namespace AgGrade.Data
             double ScaleFactor,
             double TractorLat,
             double TractorLon,
-            double TractorHeading
+            double TractorHeading,
+            Coordinate FrontScraper,
+            double FrontScraperHeading,
+            Coordinate RearScraper,
+            double RearScraperHeading,
+            List<Coordinate> Benchmarks,
+            List<Coordinate> TractorLocationHistory
             )
         {
             if (Field.Bins.Count == 0)
@@ -199,6 +213,8 @@ namespace AgGrade.Data
 
             // get top left corner of map inside image
             Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
+
+            _mapOffsetInImage = new Point(MapTopLeft.X, MapTopLeft.Y);
 
             // Adjust for tile overlap - tiles are drawn with -TILE_OVERLAP offset, so we need to compensate
             int MapLeftpx = MapTopLeft.X + TILE_OVERLAP;
@@ -364,9 +380,90 @@ namespace AgGrade.Data
                 }
             }
 
-            Decorate(bitmap);
+            Decorate(bitmap, TractorHeading, MapTopLeft, FrontScraper, FrontScraperHeading, RearScraper, RearScraperHeading, Benchmarks,
+                TractorLocationHistory);
 
             return bitmap;
+        }
+
+        private void Decorate
+            (
+            Bitmap Map,
+            double TractorHeading,
+            Point MapTopLeft,
+            Coordinate FrontScraper,
+            double FrontScraperHeading,
+            Coordinate RearScraper,
+            double RearScraperHeading,
+            List<Coordinate> Benchmarks,
+            List<Coordinate> TractorLocationHistory
+            )
+        {
+            using (Graphics g = Graphics.FromImage(Map))
+            {
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+
+                // draw benchmarks
+                foreach (Coordinate Benchmark in Benchmarks)
+                {
+                    Point Pix = LatLonToWorld(Benchmark);
+                    g.FillRectangle(new SolidBrush(Color.Orange), Pix.X - 5, Pix.Y - 5, 10, 10);
+                }
+
+                // draw tractor trail
+                Point? LastLocpx = null;
+                foreach (Coordinate TractorLocation in TractorLocationHistory)
+                {
+                    Point Pix = LatLonToWorld(TractorLocation);
+
+                    if (LastLocpx != null)
+                    {
+                        g.DrawLine(new Pen(Color.Red, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);
+                    }
+
+                    LastLocpx = Pix;
+                }
+
+                // draw tractor
+                Bitmap TractorImage;
+                switch (TractorColor)
+                {
+                    default:
+                    case TractorColors.Green: TractorImage = Properties.Resources.navarrow_green_256px; break;
+                    case TractorColors.Red: TractorImage = Properties.Resources.navarrow_red_256px; break;
+                    case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
+                    case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
+                }
+                int TractorXpx = Map.Width / 2;
+                int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
+                g.DrawImage(TractorImage, TractorXpx - 24, TractorYpx - 24, 48, 48);
+
+                // draw front scraper
+                Point FrontScraperPix = LatLonToWorld(FrontScraper);
+                g.FillEllipse(new SolidBrush(Color.Green), FrontScraperPix.X - 10, FrontScraperPix.Y - 10, 20, 20);
+
+                // draw rear scraper
+                Point RearScraperPix = LatLonToWorld(RearScraper);
+                g.FillEllipse(new SolidBrush(Color.Yellow), RearScraperPix.X - 10, RearScraperPix.Y - 10, 20, 20);
+            }
+        }
+
+        /// <summary>
+        /// Converts latitude and longitude to a pixel in the world
+        /// </summary>
+        /// <param name="Location">Location to convert</param>
+        /// <returns>Pixel location</returns>
+        private Point LatLonToWorld
+            (
+            Coordinate Location
+            )
+        {
+            UTM.UTMCoordinate Pos = UTM.FromLatLon(Location.Latitude, Location.Longitude);
+            Point Pix = FieldMToPixel(Pos.Easting, Pos.Northing, _tractorHeading);
+            Pix.X += _mapOffsetInImage.X;
+            Pix.Y += _mapOffsetInImage.Y;
+
+            return Pix;
         }
 
         /// <summary>
@@ -597,32 +694,6 @@ namespace AgGrade.Data
             }
             
             return rotatedBitmap;
-        }
-
-        private void Decorate
-            (
-            Bitmap Map
-            )
-        {
-            using (Graphics g = Graphics.FromImage(Map))
-            {
-                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-                // draw tractor
-                Bitmap TractorImage;
-                switch (TractorColor)
-                {
-                    default:
-                    case TractorColors.Green: TractorImage = Properties.Resources.navarrow_green_256px; break;
-                    case TractorColors.Red: TractorImage = Properties.Resources.navarrow_red_256px; break;
-                    case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
-                    case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
-                }
-
-                int TractorXpx = Map.Width / 2;
-                int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
-                g.DrawImage(TractorImage, TractorXpx - 24, TractorYpx - 24, 48, 48);
-            }
         }
 
         /// <summary>

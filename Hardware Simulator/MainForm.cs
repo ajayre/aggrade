@@ -22,6 +22,14 @@ namespace HardwareSim
         {
             InitializeComponent();
 
+            GNSSSim = new GNSS();
+            GNSSSim.OnNewTractorFix += GNSSSim_OnNewTractorFix;
+            GNSSSim.OnNewFrontFix += GNSSSim_OnNewFrontFix;
+            GNSSSim.OnNewRearFix += GNSSSim_OnNewRearFix;
+            GNSSSim.OnNewTractorIMU += GNSSSim_OnNewTractorIMU;
+            GNSSSim.OnNewFrontIMU += GNSSSim_OnNewFrontIMU;
+            GNSSSim.OnNewRearIMU += GNSSSim_OnNewRearIMU;
+
             uDPServer = new UDPServer();
             uDPServer.OnCommandReceived += UDPServer_OnCommandReceived;
             uDPServer.StartListener();
@@ -30,14 +38,6 @@ namespace HardwareSim
             PingTimer.Interval = PING_PERIOD_MS;
             PingTimer.Elapsed += PingTimer_Elapsed;
             PingTimer.Start();
-
-            GNSSSim = new GNSS();
-            GNSSSim.OnNewTractorFix += GNSSSim_OnNewTractorFix;
-            GNSSSim.OnNewFrontFix += GNSSSim_OnNewFrontFix;
-            GNSSSim.OnNewRearFix += GNSSSim_OnNewRearFix;
-            GNSSSim.OnNewTractorIMU += GNSSSim_OnNewTractorIMU;
-            GNSSSim.OnNewFrontIMU += GNSSSim_OnNewFrontIMU;
-            GNSSSim.OnNewRearIMU += GNSSSim_OnNewRearIMU;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();

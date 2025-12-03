@@ -645,13 +645,19 @@ namespace AgGrade
         /// <param name="Fix">New tractor location</param>
         private void Controller_OnTractorLocationChanged(GNSSFix Fix)
         {
-            CurrentEquipmentStatus.TractorFix = Fix;
+            // only execute if position has changed
+            if ((Fix.Latitude != CurrentEquipmentStatus.TractorFix.Latitude) || (Fix.Longitude != CurrentEquipmentStatus.TractorFix.Longitude))
+            {
+                CurrentEquipmentStatus.TractorFix = Fix;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+                GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
-            GetMap()?.SetTractor(Fix.Latitude, Fix.Longitude, Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
+                GetMap()?.SetTractor(Fix.Latitude, Fix.Longitude,
+                    Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes),
+                    Fix.Vector.Speedkph);
 
-            UpdateRTKLeds();
+                UpdateRTKLeds();
+            }
         }
 
         /// <summary>
@@ -663,6 +669,9 @@ namespace AgGrade
             CurrentEquipmentStatus.FrontPan.Fix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            GetMap()?.SetRearScraper(Fix.Latitude, Fix.Longitude,
+                Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
 
             UpdateRTKLeds();
         }
@@ -676,6 +685,9 @@ namespace AgGrade
             CurrentEquipmentStatus.RearPan.Fix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            GetMap()?.SetFrontScraper(Fix.Latitude, Fix.Longitude,
+                Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
 
             UpdateRTKLeds();
         }
