@@ -31,6 +31,28 @@ namespace HardwareSim
 
     internal class GNSS
     {
+        /// <summary>
+        /// time between calculations in millseconds
+        /// </summary>
+        private const int CALC_PERIOD_MS = 50;
+
+        /// <summary>
+        /// Distances between tractor and scrapers
+        /// </summary>
+        private const double TRACTOR_TO_FRONT_SCRAPER_M = 5.0;
+        private const double FRONT_SCRAPER_TO_REAR_SCRAPER_M = 5.0;
+
+        // the distance moved in meters at one MPH in the calc period
+        /*
+            1 mile = 1,609.34 meters
+            1 hour = 3,600 seconds
+            1 MPH = 1,609.34 m ÷ 3,600 s ≈ 0.447 m/s
+            Distance in 50ms:
+            50 ms = 0.05 seconds
+            Distance = 0.447 m/s × 0.05 s ≈ 0.0224 meters (about 2.24 centimeters)
+        */
+        private const double DIST_M_PER_MPH_PER_CALC_PERIOD = 0.0224;
+
         public GNSSData TractorGNSS = new GNSSData();
         public GNSSData FrontGNSS = new GNSSData();
         public GNSSData RearGNSS = new GNSSData();
@@ -44,12 +66,14 @@ namespace HardwareSim
 
         private Timer GNSSUpdateTimer;
         private Timer IMUUpdateTimer;
+        private Timer CalcTimer;
         private IMUValue TractorIMU;
         private IMUValue FrontIMU;
         private IMUValue RearIMU;
 
-        private Tractrix TractrixCalc;
-        private double PreviousTractorTrueHeading;
+        private List<Tuple<double, double>> TractorPath = new List<Tuple<double, double>>();
+        private int FrontScraperPathPointIndex;
+        private int RearScraperPathPointIndex;
 
         public GNSS
             (
@@ -62,6 +86,10 @@ namespace HardwareSim
             IMUUpdateTimer = new Timer();
             IMUUpdateTimer.Interval = 50;
             IMUUpdateTimer.Tick += IMUUpdateTimer_Tick;
+
+            CalcTimer = new Timer();
+            CalcTimer.Interval = CALC_PERIOD_MS;
+            CalcTimer.Tick += CalcTimer_Tick;
 
             TractorIMU = new IMUValue();
 
@@ -90,10 +118,21 @@ namespace HardwareSim
 
             TractorGNSS.SpeedMPH = 0;
             TractorGNSS.TrueHeading = 0;
-            PreviousTractorTrueHeading = 0;
 
-            TractrixCalc = new Tractrix();
-            TractrixCalc.SetEquipment(3, 1.2, 5.94, 0.5, 5.94, 1, 1);
+            TractorPath.Clear();
+        }
+
+        /// <summary>
+        /// Called frequency to update the tractor and scraper locations
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CalcTimer_Tick(object? sender, EventArgs e)
+        {
+            if (TractorGNSS.SpeedMPH != 0)
+            {
+                GetNewLocation();
+            }
         }
 
         private void IMUUpdateTimer_Tick(object? sender, EventArgs e)
@@ -105,11 +144,6 @@ namespace HardwareSim
 
         private void GNSSUpdateTimer_Tick(object? sender, EventArgs e)
         {
-            if (TractorGNSS.SpeedMPH != 0)
-            {
-                GetNewLocation();
-            }
-
             OnNewTractorFix?.Invoke(GetNMEAGNGGAString(TractorGNSS));
             OnNewTractorFix?.Invoke(GetNMEAGNVTGString(TractorGNSS));
 
@@ -129,7 +163,7 @@ namespace HardwareSim
             )
         {
             // how far have we travelled since the last call?
-            double MetersPerSec = TractorGNSS.SpeedMPH * 0.44704;
+            double MetersPerSec = (TractorGNSS.SpeedMPH * 0.44704) * CALC_PERIOD_MS / 1000.0;
 
             double StartLat = TractorGNSS.Latitude;
             double StartLon = TractorGNSS.Longitude;
@@ -140,28 +174,35 @@ namespace HardwareSim
             TractorGNSS.Latitude = Lat;
             TractorGNSS.Longitude = Lon;
 
-            // update front and rear locations
+            // update path, adding in intermediate points (the faster tractor goes the more points to add)
+            // ending with the current tractor location
+            // at 1MPH we only add the current tractor location
+            int PointsAdded = 0;
+            for (double m = (DIST_M_PER_MPH_PER_CALC_PERIOD * TractorGNSS.SpeedMPH) - DIST_M_PER_MPH_PER_CALC_PERIOD; m >= 0; m -= DIST_M_PER_MPH_PER_CALC_PERIOD)
+            {
+                Lat = TractorGNSS.Latitude;
+                Lon = TractorGNSS.Longitude;
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorGNSS.TrueHeading, -m);
+                TractorPath.Add(new Tuple<double, double>(Lat, Lon));
+                PointsAdded++;
+            }
+            // remove oldest points on path so overall number of points stays the same (= same path length)
+            for (int p = 0; p < PointsAdded; p++)
+            {
+                TractorPath.RemoveAt(0);
+            }
 
-            Tractrix.TrailerPositions Scrapers = TractrixCalc.CalculateTrailerPositions(StartLat, StartLon, TractorGNSS.TrueHeading, Lat, Lon,
-                PreviousTractorTrueHeading, MetersPerSec, FrontGNSS.Latitude,
-                FrontGNSS.Longitude, RearGNSS.Latitude, RearGNSS.Longitude);
+            // update front location
+            FrontGNSS.Latitude = TractorPath[FrontScraperPathPointIndex].Item1;
+            FrontGNSS.Longitude = TractorPath[FrontScraperPathPointIndex].Item2;
+            FrontGNSS.Altitude = TractorGNSS.Altitude;
+            FrontGNSS.RTKQuality = TractorGNSS.RTKQuality;
 
-            SetFrontLocation(Scrapers.Trailer1Latitude, Scrapers.Trailer1Longitude, TractorGNSS.Altitude, RTKQuality.RTKFix);
-            SetRearLocation(Scrapers.Trailer2Latitude, Scrapers.Trailer2Longitude, TractorGNSS.Altitude, RTKQuality.RTKFix);
-
-            /*FrontGNSS.TrueHeading = TractorGNSS.TrueHeading;
-            MetersPerSec = FrontGNSS.SpeedMPH * 0.44704;
-            Haversine.MoveDistanceBearing(ref Lat, ref Lon, FrontGNSS.TrueHeading, MetersPerSec);
-            FrontGNSS.Latitude = Lat;
-            FrontGNSS.Longitude = Lon;
-
-            RearGNSS.TrueHeading = TractorGNSS.TrueHeading;
-            MetersPerSec = RearGNSS.SpeedMPH * 0.44704;
-            Haversine.MoveDistanceBearing(ref Lat, ref Lon, RearGNSS.TrueHeading, MetersPerSec);
-            RearGNSS.Latitude = Lat;
-            RearGNSS.Longitude = Lon;*/
-
-            PreviousTractorTrueHeading = TractorGNSS.TrueHeading;
+            // update rear location
+            RearGNSS.Latitude = TractorPath[RearScraperPathPointIndex].Item1;
+            RearGNSS.Longitude = TractorPath[RearScraperPathPointIndex].Item2;
+            RearGNSS.Altitude = TractorGNSS.Altitude;
+            RearGNSS.RTKQuality = TractorGNSS.RTKQuality;
         }
 
         public void SetTractorLocation
@@ -180,10 +221,41 @@ namespace HardwareSim
 
             if (CalcScraperInitialLocations)
             {
-                Tractrix.TrailerPositions Scrapers = TractrixCalc.GetInitialLocations(TractorGNSS.Latitude, TractorGNSS.Longitude, TractorGNSS.TrueHeading);
+                double Lat = Latitude;
+                double Lon = Longitude;
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, -TRACTOR_TO_FRONT_SCRAPER_M);
+                FrontGNSS.Latitude = Lat;
+                FrontGNSS.Longitude = Lon;
+                FrontGNSS.Altitude = Altitude;
+                FrontGNSS.RTKQuality = RTKQuality;
 
-                SetFrontLocation(Scrapers.Trailer1Latitude, Scrapers.Trailer1Longitude, Altitude, RTKQuality);
-                SetRearLocation(Scrapers.Trailer2Latitude, Scrapers.Trailer2Longitude, Altitude, RTKQuality);
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, -FRONT_SCRAPER_TO_REAR_SCRAPER_M);
+                RearGNSS.Latitude = Lat;
+                RearGNSS.Longitude = Lon;
+                RearGNSS.Altitude = Altitude;
+                RearGNSS.RTKQuality = RTKQuality;
+
+                // create path from tractor to rear scraper
+                // the number of points in the path represents the total distance from tractor to rear scraper
+                TractorPath.Clear();
+                Lat = Latitude;
+                Lon = Longitude;
+                for (double m = TRACTOR_TO_FRONT_SCRAPER_M + FRONT_SCRAPER_TO_REAR_SCRAPER_M; m >= 0; m -= DIST_M_PER_MPH_PER_CALC_PERIOD)
+                {
+                    Lat = Latitude;
+                    Lon = Longitude;
+
+                    // if in the approximate middle of the path then this is where the front scraper is located
+                    if ((m >= TRACTOR_TO_FRONT_SCRAPER_M - 0.1) && (m <= TRACTOR_TO_FRONT_SCRAPER_M + 0.1))
+                    {
+                        FrontScraperPathPointIndex = TractorPath.Count;
+                    }
+
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, -m);
+                    TractorPath.Add(new Tuple<double, double>(Lat, Lon));
+                }
+                // always at the end of the path
+                RearScraperPathPointIndex = 0;
             }
         }
 
@@ -344,6 +416,7 @@ namespace HardwareSim
         {
             GNSSUpdateTimer.Start();
             IMUUpdateTimer.Start();
+            CalcTimer.Start();
         }
 
         public void IncreaseSpeed
@@ -360,15 +433,18 @@ namespace HardwareSim
             (
             )
         {
-            // all equipment moves at the same speed
-            TractorGNSS.SpeedMPH -= 1;
-            if (TractorGNSS.SpeedMPH < 0) TractorGNSS.SpeedMPH = 0;
+            if (TractorGNSS.SpeedMPH > 0)
+            {
+                // all equipment moves at the same speed
+                TractorGNSS.SpeedMPH -= 1;
+                if (TractorGNSS.SpeedMPH < 0) TractorGNSS.SpeedMPH = 0;
 
-            FrontGNSS.SpeedMPH -= 1;
-            if (FrontGNSS.SpeedMPH < 0) FrontGNSS.SpeedMPH = 0;
+                FrontGNSS.SpeedMPH -= 1;
+                if (FrontGNSS.SpeedMPH < 0) FrontGNSS.SpeedMPH = 0;
 
-            RearGNSS.SpeedMPH -= 1;
-            if (RearGNSS.SpeedMPH < 0) RearGNSS.SpeedMPH = 0;
+                RearGNSS.SpeedMPH -= 1;
+                if (RearGNSS.SpeedMPH < 0) RearGNSS.SpeedMPH = 0;
+            }
         }
 
         public void TurnLeft
