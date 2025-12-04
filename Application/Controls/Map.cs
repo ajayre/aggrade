@@ -24,22 +24,25 @@ namespace AgGrade.Controls
         private MapGenerator MapGen;
         private double TractorHeading;
         private double TractorSpeedkph;
-        private Coordinate TractorLocation;
-        private Coordinate FrontScraperLocation;
+        private GNSSFix TractorFix;
+        private GNSSFix FrontScraperFix;
         private double FrontScraperHeading;
-        private Coordinate RearScraperLocation;
+        private GNSSFix RearScraperFix;
         private double RearScraperHeading;
         private Timer DeadReckoningTimer;
         private DateTime LastLocationUpdate;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
 
         // maximum number of tractor history points to keep
-        private int MaxTractorHistoryLength = 60;
+        private int MaxTractorHistoryLength = 90;
 
         /// <summary>
         /// pixels per meter
         /// </summary>
         public double ScaleFactor { get; private set; }
+
+        private EquipmentSettings _CurrentEquipmentSettings;
+        private AppSettings _CurrentAppSettings;
 
         public Map()
         {
@@ -49,14 +52,30 @@ namespace AgGrade.Controls
             MapGen.TractorColor = MapGenerator.TractorColors.Red;
             MapGen.TractorYOffset = 7;
 
-            TractorLocation = new Coordinate();
-            FrontScraperLocation = new Coordinate();
-            RearScraperLocation = new Coordinate();
+            TractorFix = new GNSSFix();
+            FrontScraperFix = new GNSSFix();
+            RearScraperFix = new GNSSFix();
 
             DeadReckoningTimer = new Timer();
             DeadReckoningTimer.Interval = DEAD_RECKONING_PERIOD_MS;
             DeadReckoningTimer.Tick += DeadReckoningTimer_Tick;
             //DeadReckoningTimer.Start();
+        }
+
+        public void SetEquipmentSettings
+            (
+            EquipmentSettings Settings
+            )
+        {
+            _CurrentEquipmentSettings = Settings;
+        }
+
+        public void SetApplicationSettings
+            (
+            AppSettings Settings
+            )
+        {
+            _CurrentAppSettings = Settings;
         }
 
         /// <summary>
@@ -75,13 +94,13 @@ namespace AgGrade.Controls
                 double DistanceMovedM = (TractorSpeedkph * ElapsedTimeMs) / 3600.0;
 
                 // move tractor along current heading
-                double Lat = TractorLocation.Latitude;
-                double Lon = TractorLocation.Longitude;
+                double Lat = TractorFix.Latitude;
+                double Lon = TractorFix.Longitude;
 
                 Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorHeading, DistanceMovedM);
 
-                TractorLocation.Latitude = Lat;
-                TractorLocation.Longitude = Lon;
+                TractorFix.Latitude = Lat;
+                TractorFix.Longitude = Lon;
 
                 RefreshMap();
 
@@ -110,18 +129,12 @@ namespace AgGrade.Controls
         /// <param name="Speedkph">Speed in kph</param>
         public void SetTractor
             (
-            double Latitude,
-            double Longitude,
-            double Heading,
-            double Speedkph
+            GNSSFix Fix
             )
         {
-            TractorLocation.Latitude = Latitude;
-            TractorLocation.Longitude = Longitude;
-            TractorHeading = Heading;
-            TractorSpeedkph = Speedkph;
+            TractorFix = Fix.Clone();
 
-            TractorLocationHistory.Add(new Coordinate(Latitude, Longitude));
+            TractorLocationHistory.Add(new Coordinate(Fix.Latitude, Fix.Longitude));
             if (TractorLocationHistory.Count > MaxTractorHistoryLength)
             {
                 TractorLocationHistory.RemoveAt(0);
@@ -141,14 +154,10 @@ namespace AgGrade.Controls
         /// <param name="Speedkph">Speed in kph</param>
         public void SetFrontScraper
             (
-            double Latitude,
-            double Longitude,
-            double Heading
+            GNSSFix Fix
             )
         {
-            FrontScraperLocation.Latitude = Latitude;
-            FrontScraperLocation.Longitude = Longitude;
-            FrontScraperHeading = Heading;
+            FrontScraperFix = Fix.Clone();
 
             RefreshMap();
         }
@@ -162,14 +171,10 @@ namespace AgGrade.Controls
         /// <param name="Speedkph">Speed in kph</param>
         public void SetRearScraper
             (
-            double Latitude,
-            double Longitude,
-            double Heading
+            GNSSFix Fix
             )
         {
-            RearScraperLocation.Latitude = Latitude;
-            RearScraperLocation.Longitude = Longitude;
-            RearScraperHeading = Heading;
+            RearScraperFix = Fix.Clone();
 
             RefreshMap();
         }
@@ -186,10 +191,8 @@ namespace AgGrade.Controls
             Benchmarks.Add(B1);
 
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
-                TractorLocation.Latitude, TractorLocation.Longitude, TractorHeading,
-                FrontScraperLocation, FrontScraperHeading,
-                RearScraperLocation, RearScraperHeading, Benchmarks,
-                TractorLocationHistory);
+                TractorFix, FrontScraperFix, RearScraperFix,
+                Benchmarks, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
         }
 
         /// <summary>

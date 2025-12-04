@@ -1,4 +1,5 @@
-﻿using AgGrade.Controls;
+﻿using AgGrade.Controller;
+using AgGrade.Controls;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -32,6 +33,7 @@ namespace AgGrade.Data
         }
 
         private Color Background = Color.LightGray;
+        private Color ConstructionYellow = Color.FromArgb(0xFF, 0xC4, 0x00);
 
         /// <summary>
         /// Supported tractor colors
@@ -114,19 +116,17 @@ namespace AgGrade.Data
         /// Generates the map as a bitmap
         /// </summary>
         /// <param name="Field">Field to display</param>
-        /// <param name="Width">Width of bitmap</param>
-        /// <param name="Height">Height of bitmap</param>
+        /// <param name="ImageWidthpx">Width of bitmap</param>
+        /// <param name="ImageHeightpx">Height of bitmap</param>
         /// <param name="ShowGrid">true to show the bin grid</param>
         /// <param name="ScaleFactor">Zoom level for map in pixels per m</param>
-        /// <param name="TractorLat">Tractor latitude</param>
-        /// <param name="TractorLon">Tractor longitude</param>
-        /// <param name="TractorHeading">Heading of tractor in degrees</param>
-        /// <param name="FrontScraper">Front scraper location</param>
-        /// <param name="FrontScraperHeading">Heading of front scraper in degrees</param>
-        /// <param name="RearScraper">Rear scraper location</param>
-        /// <param name="RearScraperHeading">Heading of rear scraper in degrees</param>
+        /// <param name="TractorFix">Current tractor fix</param>
+        /// <param name="FrontScraperFix">Current front scraper fix</param>
+        /// <param name="RearScraperFix">Current rear scraper fix</param>
         /// <param name="Benchmarks">Benchmark points to show</param>
         /// <param name="TractorLocationHistory">Locations where the tractor has been</param>
+        /// <param name="CurrentEquipmentSettings">The current equipment settings</param>
+        /// <param name="CurrentAppSettings">The current application settings</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -135,22 +135,15 @@ namespace AgGrade.Data
             int ImageHeightpx,
             bool ShowGrid,
             double ScaleFactor,
-            double TractorLat,
-            double TractorLon,
-            double TractorHeading,
-            Coordinate FrontScraper,
-            double FrontScraperHeading,
-            Coordinate RearScraper,
-            double RearScraperHeading,
+            GNSSFix TractorFix,
+            GNSSFix FrontScraperFix,
+            GNSSFix RearScraperFix,
             List<Coordinate> Benchmarks,
-            List<Coordinate> TractorLocationHistory
+            List<Coordinate> TractorLocationHistory,
+            EquipmentSettings CurrentEquipmentSettings,
+            AppSettings CurrentAppSettings
             )
         {
-            if (Field.Bins.Count == 0)
-            {
-                throw new InvalidOperationException("No bin data available for map generation");
-            }
-
             CurrentField = Field;
             CurrentScaleFactor = ScaleFactor;
 
@@ -158,230 +151,238 @@ namespace AgGrade.Data
             double ImageWidthM = ImageWidthpx * ScaleFactor;
             double ImageHeightM = ImageHeightpx * ScaleFactor;
 
-            // get size of map in meters
-            double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
-            double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
-
-            // get size of map in pixels
-            int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
-            int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
-
             // calculate location of tractor in pixels
             int TractorXpx = ImageWidthpx / 2;
             int TractorYpx = (int)(ImageHeightpx * TractorYOffset / 10.0);
 
-            // Calculate grid dimensions
-            var bins = Field.Bins;
-            var minX = bins.Min(b => b.X);
-            var maxX = bins.Max(b => b.X);
-            var minY = bins.Min(b => b.Y);
-            var maxY = bins.Max(b => b.Y);
+            _tractorHeading = TractorFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
 
-            var gridWidth = maxX - minX + 1;
-            var gridHeight = maxY - minY + 1;
+            // Create bitmap directly in memory with transparency support
+            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format32bppArgb);
 
-            var elevationGrid = CreateElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
-            
-            // The bin origin is the field coordinate that corresponds to bin grid index 0
-            // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
-            // where MinX is the minimum X of topology points, which should equal Field.FieldMinX
-            // So bin grid index 0 corresponds to field coordinate Field.FieldMinX
-            double binOriginX = Field.FieldMinX;
-            double binOriginY = Field.FieldMinY;
-
-            double[] ElevationRange = CalculateInitialElevationRange(Field);
-            double minElevation = ElevationRange[0];
-            double maxElevation = ElevationRange[1];
-
-            if (minElevation == 0.0 && maxElevation == 0.0)
+            // if a field is defined then render it
+            if ((Field != null) && (Field.Bins.Count > 0))
             {
-                throw new InvalidOperationException("No valid non-zero elevation data found in initial elevation range");
-            }
+                // get size of map in meters
+                double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
+                double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
 
-            // If elevation range is too small, add some artificial range for visualization
-            if (maxElevation - minElevation < 0.01) // Less than 1cm difference
-            {
-                var centerElevation = (minElevation + maxElevation) / 2;
-                minElevation = centerElevation - 0.1; // 10cm below center
-                maxElevation = centerElevation + 0.1; // 10cm above center
-            }
+                // get size of map in pixels
+                int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
+                int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
-            // Store transformation parameters for helper function
-            _unrotatedMapWidthpx = MapWidthpx;
-            _unrotatedMapHeightpx = MapHeightpx;
-            _tractorHeading = TractorHeading;
+                // Calculate grid dimensions
+                var bins = Field.Bins;
+                var minX = bins.Min(b => b.X);
+                var maxX = bins.Max(b => b.X);
+                var minY = bins.Min(b => b.Y);
+                var maxY = bins.Max(b => b.Y);
 
-            // get top left corner of map inside image
-            Point MapTopLeft = GetMapOffset(TractorLat, TractorLon, TractorXpx, TractorYpx, TractorHeading);
+                var gridWidth = maxX - minX + 1;
+                var gridHeight = maxY - minY + 1;
 
-            _mapOffsetInImage = new Point(MapTopLeft.X, MapTopLeft.Y);
+                var elevationGrid = CreateElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
 
-            // Adjust for tile overlap - tiles are drawn with -TILE_OVERLAP offset, so we need to compensate
-            int MapLeftpx = MapTopLeft.X + TILE_OVERLAP;
-            int MapToppx = MapTopLeft.Y + TILE_OVERLAP;
+                // The bin origin is the field coordinate that corresponds to bin grid index 0
+                // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
+                // where MinX is the minimum X of topology points, which should equal Field.FieldMinX
+                // So bin grid index 0 corresponds to field coordinate Field.FieldMinX
+                double binOriginX = Field.FieldMinX;
+                double binOriginY = Field.FieldMinY;
 
-            // Store translation parameters
-            _mapLeftpx = MapLeftpx;
-            _mapToppx = MapToppx;
+                double[] ElevationRange = CalculateInitialElevationRange(Field);
+                double minElevation = ElevationRange[0];
+                double maxElevation = ElevationRange[1];
 
-            // Generate color palette
-            var colorPalette = GenerateColorPalette();
-
-            // generate a list of visible tiles
-            List<MapTile> Tiles = new List<MapTile>();
-
-            // Only render if there's a visible portion
-            if (MapWidthpx > 0 && MapHeightpx > 0)
-            {
-                // Render map using tiles with overlap
-                int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
-                int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
-
-                for (int tileY = 0; tileY < tilesY; tileY++)
+                if (minElevation == 0.0 && maxElevation == 0.0)
                 {
-                    for (int tileX = 0; tileX < tilesX; tileX++)
+                    throw new InvalidOperationException("No valid non-zero elevation data found in initial elevation range");
+                }
+
+                // If elevation range is too small, add some artificial range for visualization
+                if (maxElevation - minElevation < 0.01) // Less than 1cm difference
+                {
+                    var centerElevation = (minElevation + maxElevation) / 2;
+                    minElevation = centerElevation - 0.1; // 10cm below center
+                    maxElevation = centerElevation + 0.1; // 10cm above center
+                }
+
+                // Store transformation parameters for helper function
+                _unrotatedMapWidthpx = MapWidthpx;
+                _unrotatedMapHeightpx = MapHeightpx;
+
+                // get top left corner of map inside image
+                Point MapTopLeft = GetMapOffset(TractorFix.Latitude, TractorFix.Longitude, TractorXpx, TractorYpx, _tractorHeading);
+
+                _mapOffsetInImage = new Point(MapTopLeft.X, MapTopLeft.Y);
+
+                // Adjust for tile overlap - tiles are drawn with -TILE_OVERLAP offset, so we need to compensate
+                int MapLeftpx = MapTopLeft.X + TILE_OVERLAP;
+                int MapToppx = MapTopLeft.Y + TILE_OVERLAP;
+
+                // Store translation parameters
+                _mapLeftpx = MapLeftpx;
+                _mapToppx = MapToppx;
+
+                // Generate color palette
+                var colorPalette = GenerateColorPalette();
+
+                // generate a list of visible tiles
+                List<MapTile> Tiles = new List<MapTile>();
+
+                // Only render if there's a visible portion
+                if (MapWidthpx > 0 && MapHeightpx > 0)
+                {
+                    // Render map using tiles with overlap
+                    int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+                    int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
+
+                    for (int tileY = 0; tileY < tilesY; tileY++)
                     {
-                        // Calculate tile bounds (core tile area)
-                        int tileStartX = tileX * TILE_SIZE;
-                        int tileStartY = tileY * TILE_SIZE;
-                        int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
-                        int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
-
-                        // Calculate extended bounds with overlap (5px on each side = 10px total larger)
-                        int extendedStartX = Math.Max(0, tileStartX - TILE_OVERLAP);
-                        int extendedStartY = Math.Max(0, tileStartY - TILE_OVERLAP);
-                        int extendedEndX = Math.Min(MapWidthpx, tileStartX + tileWidth + TILE_OVERLAP);
-                        int extendedEndY = Math.Min(MapHeightpx, tileStartY + tileHeight + TILE_OVERLAP);
-                        int extendedWidth = extendedEndX - extendedStartX;
-                        int extendedHeight = extendedEndY - extendedStartY;
-
-                        if (IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                        for (int tileX = 0; tileX < tilesX; tileX++)
                         {
-                            MapTile NewTile = new MapTile();
-                            NewTile.TileGridX = tileX;
-                            NewTile.TileGridY = tileY;
-                            NewTile.StartX = tileStartX;
-                            NewTile.StartY = tileStartY;
-                            NewTile.Width = tileWidth;
-                            NewTile.Height = tileHeight;
+                            // Calculate tile bounds (core tile area)
+                            int tileStartX = tileX * TILE_SIZE;
+                            int tileStartY = tileY * TILE_SIZE;
+                            int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
+                            int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
 
-                            // Render this tile with extended bounds to include overlap
-                            NewTile.bitmap = RenderTile(
-                                extendedStartX, extendedStartY, extendedWidth, extendedHeight,
-                                MapWidthpx, MapHeightpx,
-                                elevationGrid, minX, minY, gridWidth, gridHeight,
-                                minElevation, maxElevation,
-                                colorPalette, ShowGrid, ScaleFactor);
+                            // Calculate extended bounds with overlap (5px on each side = 10px total larger)
+                            int extendedStartX = Math.Max(0, tileStartX - TILE_OVERLAP);
+                            int extendedStartY = Math.Max(0, tileStartY - TILE_OVERLAP);
+                            int extendedEndX = Math.Min(MapWidthpx, tileStartX + tileWidth + TILE_OVERLAP);
+                            int extendedEndY = Math.Min(MapHeightpx, tileStartY + tileHeight + TILE_OVERLAP);
+                            int extendedWidth = extendedEndX - extendedStartX;
+                            int extendedHeight = extendedEndY - extendedStartY;
 
-                            Tiles.Add(NewTile);
+                            if (IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                            {
+                                MapTile NewTile = new MapTile();
+                                NewTile.TileGridX = tileX;
+                                NewTile.TileGridY = tileY;
+                                NewTile.StartX = tileStartX;
+                                NewTile.StartY = tileStartY;
+                                NewTile.Width = tileWidth;
+                                NewTile.Height = tileHeight;
+
+                                // Render this tile with extended bounds to include overlap
+                                NewTile.bitmap = RenderTile(
+                                    extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                    MapWidthpx, MapHeightpx,
+                                    elevationGrid, minX, minY, gridWidth, gridHeight,
+                                    minElevation, maxElevation,
+                                    colorPalette, ShowGrid, ScaleFactor);
+
+                                Tiles.Add(NewTile);
+                            }
+                        }
+                    }
+                }
+
+                // rotate tiles
+                if (_tractorHeading != 0)
+                {
+                    foreach (MapTile Tile in Tiles)
+                    {
+                        Tile.bitmap = Rotate(Tile.bitmap, _tractorHeading);
+                    }
+                }
+
+                // render tiles
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    // Configure Graphics for high-quality rendering with transparency
+                    g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+                    g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+
+                    g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
+
+                    // add tiles
+                    foreach (MapTile Tile in Tiles)
+                    {
+                        // Recalculate StartX and StartY for rotated tiles
+                        if (_tractorHeading != 0)
+                        {
+                            // Get original unrotated tile dimensions
+                            int originalWidth = Tile.Width;
+                            int originalHeight = Tile.Height;
+
+                            // Calculate the center of the unrotated tile in unrotated map coordinates
+                            int unrotatedCenterX = Tile.StartX + originalWidth / 2;
+                            int unrotatedCenterY = Tile.StartY + originalHeight / 2;
+
+                            // Transform the center point to final image coordinates
+                            Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(unrotatedCenterX, unrotatedCenterY);
+
+                            // Get the rotated tile dimensions
+                            int rotatedWidth = Tile.bitmap.Width;
+                            int rotatedHeight = Tile.bitmap.Height;
+
+                            // Calculate top-left position by subtracting half the rotated dimensions from the center
+                            Tile.StartX = rotatedCenter.X - rotatedWidth / 2;
+                            Tile.StartY = rotatedCenter.Y - rotatedHeight / 2;
+
+                            // Update Width and Height to match the rotated bitmap dimensions
+                            Tile.Width = rotatedWidth;
+                            Tile.Height = rotatedHeight;
+                        }
+                        else
+                        {
+                            // For unrotated tiles, translate from unrotated map coordinates to final image coordinates
+                            // StartX/StartY are in unrotated map pixel coordinates (0 to MapWidthpx-1)
+                            // Need to add map offset to get final image coordinates
+                            Tile.StartX = Tile.StartX + _mapLeftpx;
+                            Tile.StartY = Tile.StartY + _mapToppx;
+                        }
+
+                        // Draw tile - the bitmap already includes 5px overlap on all sides
+                        // For unrotated tiles: StartX/StartY is now in final image coordinates, shift by -5px to account for overlap in bitmap
+                        // For rotated tiles: StartX/StartY is already calculated for the rotated position in final image coordinates
+                        int drawX = Tile.StartX - TILE_OVERLAP;
+                        int drawY = Tile.StartY - TILE_OVERLAP;
+
+                        // Calculate source rectangle offset if drawing position is outside bounds
+                        int srcX = 0;
+                        int srcY = 0;
+                        int srcWidth = Tile.bitmap.Width;
+                        int srcHeight = Tile.bitmap.Height;
+
+                        // Adjust source rectangle if drawing position is outside bitmap bounds
+                        if (drawX < 0)
+                        {
+                            srcX = -drawX;
+                            srcWidth -= srcX;
+                            drawX = 0;
+                        }
+                        if (drawY < 0)
+                        {
+                            srcY = -drawY;
+                            srcHeight -= srcY;
+                            drawY = 0;
+                        }
+
+                        // Clip destination to bitmap bounds
+                        int drawWidth = Math.Min(srcWidth, bitmap.Width - drawX);
+                        int drawHeight = Math.Min(srcHeight, bitmap.Height - drawY);
+                        srcWidth = drawWidth;
+                        srcHeight = drawHeight;
+
+                        // Only draw if we have valid dimensions
+                        if (srcWidth > 0 && srcHeight > 0 && drawWidth > 0 && drawHeight > 0)
+                        {
+                            Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
+                            Rectangle destRect = new Rectangle(drawX, drawY, drawWidth, drawHeight);
+                            g.DrawImage(Tile.bitmap, destRect, srcRect, GraphicsUnit.Pixel);
+                            Tile.bitmap.Dispose();
                         }
                     }
                 }
             }
 
-            if (TractorHeading != 0)
-            {
-                foreach (MapTile Tile in Tiles)
-                {
-                    Tile.bitmap = Rotate(Tile.bitmap, TractorHeading);
-                }
-            }
-
-            // Create bitmap directly in memory with transparency support
-            Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format32bppArgb);
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                // Configure Graphics for high-quality rendering with transparency
-                g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
-                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-                
-                g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
-
-                // add tiles
-                foreach (MapTile Tile in Tiles)
-                {
-                    // Recalculate StartX and StartY for rotated tiles
-                    if (TractorHeading != 0)
-                    {
-                        // Get original unrotated tile dimensions
-                        int originalWidth = Tile.Width;
-                        int originalHeight = Tile.Height;
-                        
-                        // Calculate the center of the unrotated tile in unrotated map coordinates
-                        int unrotatedCenterX = Tile.StartX + originalWidth / 2;
-                        int unrotatedCenterY = Tile.StartY + originalHeight / 2;
-                        
-                        // Transform the center point to final image coordinates
-                        Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(unrotatedCenterX, unrotatedCenterY);
-                        
-                        // Get the rotated tile dimensions
-                        int rotatedWidth = Tile.bitmap.Width;
-                        int rotatedHeight = Tile.bitmap.Height;
-                        
-                        // Calculate top-left position by subtracting half the rotated dimensions from the center
-                        Tile.StartX = rotatedCenter.X - rotatedWidth / 2;
-                        Tile.StartY = rotatedCenter.Y - rotatedHeight / 2;
-                        
-                        // Update Width and Height to match the rotated bitmap dimensions
-                        Tile.Width = rotatedWidth;
-                        Tile.Height = rotatedHeight;
-                    }
-                    else
-                    {
-                        // For unrotated tiles, translate from unrotated map coordinates to final image coordinates
-                        // StartX/StartY are in unrotated map pixel coordinates (0 to MapWidthpx-1)
-                        // Need to add map offset to get final image coordinates
-                        Tile.StartX = Tile.StartX + _mapLeftpx;
-                        Tile.StartY = Tile.StartY + _mapToppx;
-                    }
-
-                    // Draw tile - the bitmap already includes 5px overlap on all sides
-                    // For unrotated tiles: StartX/StartY is now in final image coordinates, shift by -5px to account for overlap in bitmap
-                    // For rotated tiles: StartX/StartY is already calculated for the rotated position in final image coordinates
-                    int drawX = Tile.StartX - TILE_OVERLAP;
-                    int drawY = Tile.StartY - TILE_OVERLAP;
-                    
-                    // Calculate source rectangle offset if drawing position is outside bounds
-                    int srcX = 0;
-                    int srcY = 0;
-                    int srcWidth = Tile.bitmap.Width;
-                    int srcHeight = Tile.bitmap.Height;
-                    
-                    // Adjust source rectangle if drawing position is outside bitmap bounds
-                    if (drawX < 0)
-                    {
-                        srcX = -drawX;
-                        srcWidth -= srcX;
-                        drawX = 0;
-                    }
-                    if (drawY < 0)
-                    {
-                        srcY = -drawY;
-                        srcHeight -= srcY;
-                        drawY = 0;
-                    }
-                    
-                    // Clip destination to bitmap bounds
-                    int drawWidth = Math.Min(srcWidth, bitmap.Width - drawX);
-                    int drawHeight = Math.Min(srcHeight, bitmap.Height - drawY);
-                    srcWidth = drawWidth;
-                    srcHeight = drawHeight;
-                    
-                    // Only draw if we have valid dimensions
-                    if (srcWidth > 0 && srcHeight > 0 && drawWidth > 0 && drawHeight > 0)
-                    {
-                        Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
-                        Rectangle destRect = new Rectangle(drawX, drawY, drawWidth, drawHeight);
-                        g.DrawImage(Tile.bitmap, destRect, srcRect, GraphicsUnit.Pixel);
-                        Tile.bitmap.Dispose();
-                    }
-                }
-            }
-
-            Decorate(bitmap, TractorHeading, MapTopLeft, FrontScraper, FrontScraperHeading, RearScraper, RearScraperHeading, Benchmarks,
-                TractorLocationHistory);
+            Decorate(bitmap, TractorFix, FrontScraperFix, RearScraperFix, Benchmarks,
+                TractorLocationHistory, CurrentEquipmentSettings, CurrentAppSettings);
 
             return bitmap;
         }
@@ -389,14 +390,13 @@ namespace AgGrade.Data
         private void Decorate
             (
             Bitmap Map,
-            double TractorHeading,
-            Point MapTopLeft,
-            Coordinate FrontScraper,
-            double FrontScraperHeading,
-            Coordinate RearScraper,
-            double RearScraperHeading,
+            GNSSFix TractorFix,
+            GNSSFix FrontScraperFix,
+            GNSSFix RearScraperFix,
             List<Coordinate> Benchmarks,
-            List<Coordinate> TractorLocationHistory
+            List<Coordinate> TractorLocationHistory,
+            EquipmentSettings CurrentEquipmentSettings,
+            AppSettings CurrentAppSettings
             )
         {
             using (Graphics g = Graphics.FromImage(Map))
@@ -439,12 +439,34 @@ namespace AgGrade.Data
                 g.DrawImage(TractorImage, TractorXpx - 24, TractorYpx - 24, 48, 48);
 
                 // draw front scraper
-                Point FrontScraperPix = LatLonToWorld(FrontScraper);
-                g.FillEllipse(new SolidBrush(Color.Green), FrontScraperPix.X - 10, FrontScraperPix.Y - 10, 20, 20);
+                Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
+                double PerpAngle = (FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                double BladeEndALat = FrontScraperFix.Latitude;
+                double BladeEndALon = FrontScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref BladeEndALat, ref BladeEndALon, PerpAngle, CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0);
+                Point BladeEndA = LatLonToWorld(new Coordinate(BladeEndALat, BladeEndALon));
+                double BladeEndBLat = FrontScraperFix.Latitude;
+                double BladeEndBLon = FrontScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref BladeEndBLat, ref BladeEndBLon, PerpAngle, -(CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0));
+                Point BladeEndB = LatLonToWorld(new Coordinate(BladeEndBLat, BladeEndBLon));
+                g.DrawLine(new Pen(ConstructionYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
 
                 // draw rear scraper
-                Point RearScraperPix = LatLonToWorld(RearScraper);
-                g.FillEllipse(new SolidBrush(Color.Yellow), RearScraperPix.X - 10, RearScraperPix.Y - 10, 20, 20);
+                Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
+                double RearPerpAngle = (RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                double RearBladeEndALat = RearScraperFix.Latitude;
+                double RearBladeEndALon = RearScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref RearBladeEndALat, ref RearBladeEndALon, RearPerpAngle, CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0);
+                Point RearBladeEndA = LatLonToWorld(new Coordinate(RearBladeEndALat, RearBladeEndALon));
+                double RearBladeEndBLat = RearScraperFix.Latitude;
+                double RearBladeEndBLon = RearScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref RearBladeEndBLat, ref RearBladeEndBLon, RearPerpAngle, -(CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0));
+                Point RearBladeEndB = LatLonToWorld(new Coordinate(RearBladeEndBLat, RearBladeEndBLon));
+                g.DrawLine(new Pen(ConstructionYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
+
+                // draw lines connecting tractor and scrapers
+                g.DrawLine(new Pen(ConstructionYellow, 1), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
+                g.DrawLine(new Pen(ConstructionYellow, 1), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
             }
         }
 

@@ -91,13 +91,13 @@ namespace HardwareSim
         private void GNSSSim_OnNewRearFix(string NMEAString)
         {
             byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
-            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_NMEA, Data));
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_NMEA, Data));
         }
 
         private void GNSSSim_OnNewFrontFix(string NMEAString)
         {
             byte[] Data = Encoding.ASCII.GetBytes(NMEAString);
-            SendStatus(new PGNPacket(PGNValues.PGN_REAR_NMEA, Data));
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_NMEA, Data));
         }
 
         private async void SendStatus

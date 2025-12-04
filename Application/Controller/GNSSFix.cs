@@ -15,11 +15,17 @@ namespace AgGrade.Controller
 
     public class GNSSFix
     {
+        /// <summary>
+        /// The number of milliseconds after which a fix is stale
+        /// </summary>
+        public const int FIX_STALE_TIME_MS = 2000;
+
         public double Longitude; // deg
         public double Latitude;  // deg
         public double Altitude;  // meters
         public GNSSVector Vector;
         public RTKStatus RTK;    // RTK type: None, Fix, or Float
+        public DateTime? LastFixTime;
 
         /// <summary>
         /// Returns true if RTKType is Fix or Float, false otherwise.
@@ -27,6 +33,22 @@ namespace AgGrade.Controller
         public bool HasRTK
         {
             get { return RTK == RTKStatus.Fix || RTK == RTKStatus.Float; }
+        }
+
+        /// <summary>
+        /// True if the fix is valid, false if not valid
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                // not received
+                if (LastFixTime == null) return false;
+                // stale
+                if (DateTime.Now > LastFixTime.Value.AddMilliseconds(FIX_STALE_TIME_MS)) return false;
+
+                return true;
+            }
         }
 
         public GNSSFix() : this(0, 0, 0, new GNSSVector(), RTKStatus.None)
@@ -47,6 +69,23 @@ namespace AgGrade.Controller
             this.Altitude  = Altitude;
             this.Vector    = Vector;
             this.RTK       = RTKType;
+
+            LastFixTime = null;
+        }
+
+        public GNSSFix Clone
+            (
+            )
+        {
+            GNSSFix Clone = new GNSSFix();
+            Clone.Latitude = this.Latitude;
+            Clone.Longitude = this.Longitude;
+            Clone.Altitude = this.Altitude;
+            Clone.Vector = this.Vector.Clone();
+            Clone.RTK = this.RTK;
+            Clone.LastFixTime = this.LastFixTime;
+
+            return Clone;
         }
 
         /// <summary>
@@ -95,7 +134,9 @@ namespace AgGrade.Controller
             // Check for GNGGA sentence
             if (fields[0].StartsWith("$GNGGA"))
             {
-                return ParseGNGGA(fields, nmeaSentence);
+                GNSSFix Fix = ParseGNGGA(fields, nmeaSentence);
+                Fix.LastFixTime = DateTime.Now;
+                return Fix;
             }
 
             // Unknown sentence type

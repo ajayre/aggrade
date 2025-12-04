@@ -29,6 +29,25 @@ namespace HardwareSim
         public double SpeedMPH;
     }
 
+    internal class PathPoint
+    {
+        public double Latitude;
+        public double Longitude;
+        public double Heading;
+
+        public PathPoint
+            (
+            double Latitude,
+            double Longitude,
+            double Heading
+            )
+        {
+            this.Latitude = Latitude;
+            this.Longitude = Longitude;
+            this.Heading = Heading;
+        }
+    }
+
     internal class GNSS
     {
         /// <summary>
@@ -71,7 +90,7 @@ namespace HardwareSim
         private IMUValue FrontIMU;
         private IMUValue RearIMU;
 
-        private List<Tuple<double, double>> TractorPath = new List<Tuple<double, double>>();
+        private List<PathPoint> TractorPath = new List<PathPoint> ();
         private int FrontScraperPathPointIndex;
         private int RearScraperPathPointIndex;
 
@@ -177,13 +196,36 @@ namespace HardwareSim
             // update path, adding in intermediate points (the faster tractor goes the more points to add)
             // ending with the current tractor location
             // at 1MPH we only add the current tractor location
+            /*
+                INITIAL:
+                R         F         T
+                0 1 2 3 4 5 6 7 8 9 10
+
+                1 MPH:
+                0 1 2 3 4 5 6 7 8 9 10 11
+                  1 2 3 4 5 6 7 8 9 10 11
+                  0 1 2 3 4 5 6 7 8 9  10
+                  R         F          T
+  
+                2 MPH:
+                0 1 2 3 4 5 6 7 8 9 10 11 12
+                    2 3 4 5 6 7 8 9 10 11 12
+	                0 1 2 3 4 5 6 7 8  9  10
+	                R         F           T
+
+                4 MPH:
+                0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
+                        4 5 6 7 8 9 10 11 12 13 14
+                        0 1 2 3 4 5 6  7  8  9  10
+		                R         F             T
+             */
             int PointsAdded = 0;
             for (double m = (DIST_M_PER_MPH_PER_CALC_PERIOD * TractorGNSS.SpeedMPH) - DIST_M_PER_MPH_PER_CALC_PERIOD; m >= 0; m -= DIST_M_PER_MPH_PER_CALC_PERIOD)
             {
                 Lat = TractorGNSS.Latitude;
                 Lon = TractorGNSS.Longitude;
                 Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorGNSS.TrueHeading, -m);
-                TractorPath.Add(new Tuple<double, double>(Lat, Lon));
+                TractorPath.Add(new PathPoint(Lat, Lon, TractorGNSS.TrueHeading));
                 PointsAdded++;
             }
             // remove oldest points on path so overall number of points stays the same (= same path length)
@@ -193,14 +235,16 @@ namespace HardwareSim
             }
 
             // update front location
-            FrontGNSS.Latitude = TractorPath[FrontScraperPathPointIndex].Item1;
-            FrontGNSS.Longitude = TractorPath[FrontScraperPathPointIndex].Item2;
+            FrontGNSS.Latitude = TractorPath[FrontScraperPathPointIndex].Latitude;
+            FrontGNSS.Longitude = TractorPath[FrontScraperPathPointIndex].Longitude;
+            FrontGNSS.TrueHeading = TractorPath[FrontScraperPathPointIndex].Heading;
             FrontGNSS.Altitude = TractorGNSS.Altitude;
             FrontGNSS.RTKQuality = TractorGNSS.RTKQuality;
 
             // update rear location
-            RearGNSS.Latitude = TractorPath[RearScraperPathPointIndex].Item1;
-            RearGNSS.Longitude = TractorPath[RearScraperPathPointIndex].Item2;
+            RearGNSS.Latitude = TractorPath[RearScraperPathPointIndex].Latitude;
+            RearGNSS.Longitude = TractorPath[RearScraperPathPointIndex].Longitude;
+            RearGNSS.TrueHeading = TractorPath[RearScraperPathPointIndex].Heading;
             RearGNSS.Altitude = TractorGNSS.Altitude;
             RearGNSS.RTKQuality = TractorGNSS.RTKQuality;
         }
@@ -252,7 +296,7 @@ namespace HardwareSim
                     }
 
                     Haversine.MoveDistanceBearing(ref Lat, ref Lon, 0, -m);
-                    TractorPath.Add(new Tuple<double, double>(Lat, Lon));
+                    TractorPath.Add(new PathPoint(Lat, Lon, 0));
                 }
                 // always at the end of the path
                 RearScraperPathPointIndex = 0;

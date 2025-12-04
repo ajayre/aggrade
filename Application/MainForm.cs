@@ -283,6 +283,8 @@ namespace AgGrade
             Map map = new Map();
             map.Parent = ContentPanel;
             map.Dock = DockStyle.Fill;
+            map.SetEquipmentSettings(CurrentEquipmentSettings);
+            map.SetApplicationSettings(CurrentAppSettings);
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
@@ -292,7 +294,13 @@ namespace AgGrade
             Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
             //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
             NewField.Name = "ShopB4";
+
             map.ShowField(NewField);
+
+            // give map initial conditions
+            map.SetTractor(CurrentEquipmentStatus.TractorFix);
+            map.SetFrontScraper(CurrentEquipmentStatus.FrontPan.Fix);
+            map.SetRearScraper(CurrentEquipmentStatus.RearPan.Fix);
 
             map.Show();
         }
@@ -327,6 +335,8 @@ namespace AgGrade
             AppSettings.Save();
             CurrentAppSettings = AppSettings;
 
+            GetMap()?.SetApplicationSettings(AppSettings);
+
             ConnectToController();
             ConfigureController();
         }
@@ -343,6 +353,8 @@ namespace AgGrade
             EquipmentSettings EquipmentSettings = Editor!.GetSettings();
             EquipmentSettings.Save();
             CurrentEquipmentSettings = EquipmentSettings;
+
+            GetMap()?.SetEquipmentSettings(EquipmentSettings);
 
             Controller.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
@@ -652,9 +664,7 @@ namespace AgGrade
 
                 GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
-                GetMap()?.SetTractor(Fix.Latitude, Fix.Longitude,
-                    Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes),
-                    Fix.Vector.Speedkph);
+                GetMap()?.SetTractor(Fix);
 
                 UpdateRTKLeds();
             }
@@ -670,8 +680,7 @@ namespace AgGrade
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
-            GetMap()?.SetRearScraper(Fix.Latitude, Fix.Longitude,
-                Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
+            GetMap()?.SetRearScraper(Fix);
 
             UpdateRTKLeds();
         }
@@ -686,8 +695,7 @@ namespace AgGrade
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
-            GetMap()?.SetFrontScraper(Fix.Latitude, Fix.Longitude,
-                Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes));
+            GetMap()?.SetFrontScraper(Fix);
 
             UpdateRTKLeds();
         }

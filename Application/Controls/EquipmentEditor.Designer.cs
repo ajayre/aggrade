@@ -1008,7 +1008,7 @@
             // 
             RearPanRaiseUnitsLabel.AutoSize = true;
             RearPanRaiseUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanRaiseUnitsLabel.Location = new Point(784, 99);
+            RearPanRaiseUnitsLabel.Location = new Point(784, 98);
             RearPanRaiseUnitsLabel.Name = "RearPanRaiseUnitsLabel";
             RearPanRaiseUnitsLabel.Size = new Size(44, 25);
             RearPanRaiseUnitsLabel.TabIndex = 84;
