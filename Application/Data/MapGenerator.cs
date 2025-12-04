@@ -32,7 +32,7 @@ namespace AgGrade.Data
             public int Height;
         }
 
-        private Color Background = Color.LightGray;
+        private Color Background = Color.FromArgb(0xD4, 0xF9, 0xD8);
         private Color ConstructionYellow = Color.FromArgb(0xFF, 0xC4, 0x00);
 
         /// <summary>
@@ -69,6 +69,13 @@ namespace AgGrade.Data
         private int _mapLeftpx;
         private int _mapToppx;
         private Point _mapOffsetInImage;
+        private GNSSFix TractorFix;
+        private int _tractorXpx;
+        private int _tractorYpx;
+        private GNSSFix FrontScraperFix;
+        private GNSSFix RearScraperFix;
+        private EquipmentSettings CurrentEquipmentSettings;
+        private AppSettings CurrentAppSettings;
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -92,24 +99,29 @@ namespace AgGrade.Data
                 throw new ArgumentException("Image dimensions must be greater than zero");
             }
 
-            // Calculate field dimensions in meters
-            double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
-            double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
-
-            if (MapWidthM <= 0 || MapHeightM <= 0)
+            if (Field != null)
             {
-                throw new ArgumentException("Field dimensions must be greater than zero");
+                // Calculate field dimensions in meters
+                double MapWidthM = Field.FieldMaxX - Field.FieldMinX;
+                double MapHeightM = Field.FieldMaxY - Field.FieldMinY;
+
+                if (MapWidthM <= 0 || MapHeightM <= 0)
+                {
+                    throw new ArgumentException("Field dimensions must be greater than zero");
+                }
+
+                PointD RotatedSizeM = GetRotatedSizeD(MapWidthM, MapHeightM, TractorHeading);
+
+                // Calculate scale factors for both dimensions
+                // Use the smaller scale factor to ensure the map fits in both dimensions
+                double ScaleFactorX = ImageWidthpx / RotatedSizeM.X;
+                double ScaleFactorY = ImageHeightpx / RotatedSizeM.Y;
+
+                // Return the smaller scale factor to ensure the entire map fits
+                return Math.Min(ScaleFactorX, ScaleFactorY);
             }
 
-            PointD RotatedSizeM = GetRotatedSizeD(MapWidthM, MapHeightM, TractorHeading);
-
-            // Calculate scale factors for both dimensions
-            // Use the smaller scale factor to ensure the map fits in both dimensions
-            double ScaleFactorX = ImageWidthpx / RotatedSizeM.X;
-            double ScaleFactorY = ImageHeightpx / RotatedSizeM.Y;
-
-            // Return the smaller scale factor to ensure the entire map fits
-            return Math.Min(ScaleFactorX, ScaleFactorY);
+            return 1;
         }
 
         /// <summary>
@@ -147,6 +159,13 @@ namespace AgGrade.Data
             CurrentField = Field;
             CurrentScaleFactor = ScaleFactor;
 
+            this.TractorFix = TractorFix;
+            this.FrontScraperFix = FrontScraperFix;
+            this.RearScraperFix = RearScraperFix;
+
+            this.CurrentEquipmentSettings = CurrentEquipmentSettings;
+            this.CurrentAppSettings = CurrentAppSettings;
+
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
             double ImageHeightM = ImageHeightpx * ScaleFactor;
@@ -155,10 +174,18 @@ namespace AgGrade.Data
             int TractorXpx = ImageWidthpx / 2;
             int TractorYpx = (int)(ImageHeightpx * TractorYOffset / 10.0);
 
+            // Store tractor pixel position for LatLonToWorld
+            _tractorXpx = TractorXpx;
+            _tractorYpx = TractorYpx;
+
             _tractorHeading = TractorFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
 
             // Create bitmap directly in memory with transparency support
             Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format32bppArgb);
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                g.FillRectangle(new SolidBrush(Background), 0, 0, ImageWidthpx, ImageHeightpx);
+            }
 
             // if a field is defined then render it
             if ((Field != null) && (Field.Bins.Count > 0))
@@ -297,7 +324,7 @@ namespace AgGrade.Data
                     g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                     g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
-                    g.FillRectangle(new SolidBrush(Color.LightGray), 0, 0, bitmap.Width, bitmap.Height);
+                    g.FillRectangle(new SolidBrush(Background), 0, 0, bitmap.Width, bitmap.Height);
 
                     // add tiles
                     foreach (MapTile Tile in Tiles)
@@ -381,8 +408,7 @@ namespace AgGrade.Data
                 }
             }
 
-            Decorate(bitmap, TractorFix, FrontScraperFix, RearScraperFix, Benchmarks,
-                TractorLocationHistory, CurrentEquipmentSettings, CurrentAppSettings);
+            Decorate(bitmap, Benchmarks, TractorLocationHistory);
 
             return bitmap;
         }
@@ -390,13 +416,8 @@ namespace AgGrade.Data
         private void Decorate
             (
             Bitmap Map,
-            GNSSFix TractorFix,
-            GNSSFix FrontScraperFix,
-            GNSSFix RearScraperFix,
             List<Coordinate> Benchmarks,
-            List<Coordinate> TractorLocationHistory,
-            EquipmentSettings CurrentEquipmentSettings,
-            AppSettings CurrentAppSettings
+            List<Coordinate> TractorLocationHistory
             )
         {
             using (Graphics g = Graphics.FromImage(Map))
@@ -472,6 +493,10 @@ namespace AgGrade.Data
 
         /// <summary>
         /// Converts latitude and longitude to a pixel in the world
+        /// This method is independent of Field data and uses only:
+        /// - Tractor location (in pixels and lat/lon)
+        /// - Tractor heading (rotation of the map)
+        /// - Scale factor (pixels per meter)
         /// </summary>
         /// <param name="Location">Location to convert</param>
         /// <returns>Pixel location</returns>
@@ -480,12 +505,46 @@ namespace AgGrade.Data
             Coordinate Location
             )
         {
+            // Convert input location to UTM coordinates
             UTM.UTMCoordinate Pos = UTM.FromLatLon(Location.Latitude, Location.Longitude);
-            Point Pix = FieldMToPixel(Pos.Easting, Pos.Northing, _tractorHeading);
-            Pix.X += _mapOffsetInImage.X;
-            Pix.Y += _mapOffsetInImage.Y;
 
-            return Pix;
+            // Convert tractor location to UTM coordinates
+            UTM.UTMCoordinate TractorUTM = UTM.FromLatLon(TractorFix.Latitude, TractorFix.Longitude);
+
+            // Calculate the difference in meters (in UTM coordinate system)
+            double deltaXM = Pos.Easting - TractorUTM.Easting;
+            double deltaYM = Pos.Northing - TractorUTM.Northing;
+
+            // Convert meters to pixels using the scale factor
+            // Note: In the map coordinate system, X increases east (same as UTM Easting)
+            // but Y increases south (opposite of UTM Northing, which increases north)
+            double deltaXPx = deltaXM * CurrentScaleFactor;
+            double deltaYPx = -deltaYM * CurrentScaleFactor; // Negative because UTM northing increases north, but map Y increases south
+
+            // Apply rotation around the tractor position
+            // The map is rotated so that the tractor heading is up (north)
+            // We need to rotate the delta vector by -_tractorHeading degrees (counter-clockwise)
+            // to align with the rotated map coordinate system (same as FieldMToPixel)
+            Point rotatedDelta;
+            if (_tractorHeading == 0.0)
+            {
+                rotatedDelta = new Point((int)Math.Round(deltaXPx), (int)Math.Round(deltaYPx));
+            }
+            else
+            {
+                double radians = -_tractorHeading * Math.PI / 180.0; // Negative because we rotate counter-clockwise (same as FieldMToPixel)
+                double cosAngle = Math.Cos(radians);
+                double sinAngle = Math.Sin(radians);
+                
+                // Rotate the delta vector
+                double rotatedX = deltaXPx * cosAngle - deltaYPx * sinAngle;
+                double rotatedY = deltaXPx * sinAngle + deltaYPx * cosAngle;
+                
+                rotatedDelta = new Point((int)Math.Round(rotatedX), (int)Math.Round(rotatedY));
+            }
+
+            // Add the tractor pixel position to get the final pixel location
+            return new Point(_tractorXpx + rotatedDelta.X, _tractorYpx + rotatedDelta.Y);
         }
 
         /// <summary>

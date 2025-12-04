@@ -19,6 +19,7 @@ namespace AgGrade.Controls
         private const double MIN_SCALE_FACTOR = 0.5;
         private const double MAX_SCALE_FACTOR = 750.0;
         private const int DEAD_RECKONING_PERIOD_MS = 50;
+        private const int DEFAULT_SCALE_FACTOR = 8;
 
         private Field CurrentField;
         private MapGenerator MapGen;
@@ -55,6 +56,8 @@ namespace AgGrade.Controls
             TractorFix = new GNSSFix();
             FrontScraperFix = new GNSSFix();
             RearScraperFix = new GNSSFix();
+
+            ScaleFactor = DEFAULT_SCALE_FACTOR;
 
             DeadReckoningTimer = new Timer();
             DeadReckoningTimer.Interval = DEAD_RECKONING_PERIOD_MS;
