@@ -20,6 +20,7 @@ namespace AgGrade.Data
     {
         private const int TILE_SIZE = 128;
         private const int TILE_OVERLAP = 5;
+        private const int PROJECTED_PATH_LENGTH_M = 30;
 
         private class MapTile
         {
@@ -444,6 +445,17 @@ namespace AgGrade.Data
             List<Coordinate> TractorLocationHistory
             )
         {
+            Pen TractorPen;
+            switch (TractorColor)
+            {
+                default:
+                case TractorColors.Green:  TractorPen = new Pen(TractorGreen, 2);  break;
+                case TractorColors.Red:    TractorPen = new Pen(TractorRed, 2);    break;
+                case TractorColors.Blue:   TractorPen = new Pen(TractorBlue, 2);   break;
+                case TractorColors.Yellow: TractorPen = new Pen(TractorYellow, 2); break;
+            }
+            TractorPen.Color = Color.FromArgb(127, TractorPen.Color);
+
             using (Graphics g = Graphics.FromImage(Map))
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
@@ -452,29 +464,36 @@ namespace AgGrade.Data
                 foreach (Coordinate Benchmark in Benchmarks)
                 {
                     Point Pix = LatLonToWorld(Benchmark);
-                    g.FillRectangle(new SolidBrush(Color.Orange), Pix.X - 5, Pix.Y - 5, 10, 10);
+                    //g.FillRectangle(new SolidBrush(Color.Orange), Pix.X - 5, Pix.Y - 5, 10, 10);
+
+                    g.FillPolygon(new SolidBrush(Color.Gray), new Point[] { new Point(Pix.X - 10, Pix.Y + 10), new Point(Pix.X + 10, Pix.Y + 10),
+                        new Point(Pix.X, Pix.Y - 10) });
+                    g.FillPolygon(new SolidBrush(Color.Orange), new Point[] { new Point(Pix.X - 9, Pix.Y + 9), new Point(Pix.X + 9, Pix.Y + 9),
+                        new Point(Pix.X, Pix.Y - 9) });
                 }
 
                 // draw tractor trail
                 Point? LastLocpx = null;
-                foreach (Coordinate TractorLocation in TractorLocationHistory)
+                foreach (Coordinate TractorLocation in TractorLocationHistory.ToList())
                 {
                     Point Pix = LatLonToWorld(TractorLocation);
 
                     if (LastLocpx != null)
                     {
-                        switch (TractorColor)
-                        {
-                            default:
-                            case TractorColors.Green:  g.DrawLine(new Pen(TractorGreen, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);  break;
-                            case TractorColors.Red:    g.DrawLine(new Pen(TractorRed, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);    break;
-                            case TractorColors.Blue:   g.DrawLine(new Pen(TractorBlue, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);   break;
-                            case TractorColors.Yellow: g.DrawLine(new Pen(TractorYellow, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y); break;
-                        }
+                        g.DrawLine(TractorPen, LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);
                     }
 
                     LastLocpx = Pix;
                 }
+
+                // draw tractor heading
+                double Lat = TractorFix.Latitude;
+                double Lon = TractorFix.Longitude;
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, _tractorHeading, PROJECTED_PATH_LENGTH_M);
+                Point DestPix = LatLonToWorld(new Coordinate(Lat, Lon));
+                float[] dashValues = { 4, 4 };
+                TractorPen.DashPattern = dashValues;
+                g.DrawLine(TractorPen, _tractorXpx, _tractorYpx, DestPix.X, DestPix.Y);
 
                 // draw tractor
                 // get tractor color

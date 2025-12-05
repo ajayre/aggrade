@@ -139,6 +139,7 @@
             RearPanBladeOffset = new TextBox();
             label56 = new Label();
             label57 = new Label();
+            sectionTitle2 = new SectionTitle();
             tabControl1.SuspendLayout();
             TractorPage.SuspendLayout();
             FrontPage.SuspendLayout();
@@ -1024,11 +1025,11 @@
             tabControl1.Controls.Add(RearPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            tabControl1.Location = new Point(0, 0);
+            tabControl1.Location = new Point(0, 48);
             tabControl1.Name = "tabControl1";
             tabControl1.Padding = new Point(20, 10);
             tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(869, 578);
+            tabControl1.Size = new Size(869, 530);
             tabControl1.TabIndex = 23;
             // 
             // TractorPage
@@ -1064,7 +1065,7 @@
             TractorPage.Location = new Point(4, 48);
             TractorPage.Name = "TractorPage";
             TractorPage.Padding = new Padding(3);
-            TractorPage.Size = new Size(861, 526);
+            TractorPage.Size = new Size(861, 478);
             TractorPage.TabIndex = 0;
             TractorPage.Text = "Tractor";
             // 
@@ -1102,7 +1103,7 @@
             FrontPage.Location = new Point(4, 48);
             FrontPage.Name = "FrontPage";
             FrontPage.Padding = new Padding(3);
-            FrontPage.Size = new Size(861, 478);
+            FrontPage.Size = new Size(861, 526);
             FrontPage.TabIndex = 1;
             FrontPage.Text = "Front Pan";
             // 
@@ -1368,11 +1369,21 @@
             label57.TabIndex = 24;
             label57.Text = "mm";
             // 
+            // sectionTitle2
+            // 
+            sectionTitle2.Dock = DockStyle.Top;
+            sectionTitle2.Location = new Point(0, 0);
+            sectionTitle2.Name = "sectionTitle2";
+            sectionTitle2.Size = new Size(869, 48);
+            sectionTitle2.TabIndex = 24;
+            sectionTitle2.TitleText = "Live Status";
+            // 
             // StatusPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(tabControl1);
+            Controls.Add(sectionTitle2);
             DoubleBuffered = true;
             Name = "StatusPage";
             Size = new Size(869, 578);
@@ -1504,5 +1515,6 @@
         private Label label61;
         private TextBox FrontPanBladePWM;
         private Label label62;
+        private SectionTitle sectionTitle2;
     }
 }

@@ -21,16 +21,15 @@ namespace AgGrade.Controls
         private const int DEAD_RECKONING_PERIOD_MS = 50;
         private const int DEFAULT_SCALE_FACTOR = 8;
         private const double ZOOM_FACTOR = 1.3;
+        private const int MAX_NAME_LENGTH = 20;
+
+        private const string DegreeSymbol = "°";
 
         private Field CurrentField;
         private MapGenerator MapGen;
-        private double TractorHeading;
-        private double TractorSpeedkph;
         private GNSSFix TractorFix;
         private GNSSFix FrontScraperFix;
-        private double FrontScraperHeading;
         private GNSSFix RearScraperFix;
-        private double RearScraperHeading;
         private Timer DeadReckoningTimer;
         private DateTime LastLocationUpdate;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
@@ -60,6 +59,14 @@ namespace AgGrade.Controls
 
             ScaleFactor = DEFAULT_SCALE_FACTOR;
 
+            FrontBladeDepthLabel.Text = "X mm";
+            RearBladeDepthLabel.Text = "X mm";
+            FrontLoadLabel.Text = "0 LCY";
+            RearLoadLabel.Text = "0 LCY";
+            HeadingLabel.Text = "0" + DegreeSymbol;
+            SpeedLabel.Text = "0 MPH";
+            FieldNameLabel.Text = "No Field";
+
             DeadReckoningTimer = new Timer();
             DeadReckoningTimer.Interval = DEAD_RECKONING_PERIOD_MS;
             DeadReckoningTimer.Tick += DeadReckoningTimer_Tick;
@@ -83,25 +90,36 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Gets the heading of the tractor
+        /// </summary>
+        /// <returns>Heading in degrees</returns>
+        private double TractorHeading
+            (
+            )
+        {
+            return TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+        }
+
+        /// <summary>
         /// Performs dead reckoning movement between GNSS data
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void DeadReckoningTimer_Tick(object? sender, EventArgs e)
         {
-            if (TractorSpeedkph > 0)
+            if (TractorFix.Vector.Speedkph > 0)
             {
                 // calculate distance moved since last location update
                 TimeSpan ElapsedTime = DateTime.Now - LastLocationUpdate;
                 double ElapsedTimeMs = ElapsedTime.TotalMilliseconds;
                 // Calculate distance: speed (kph) * time (ms) / 3600 (to convert kph*ms to meters)
-                double DistanceMovedM = (TractorSpeedkph * ElapsedTimeMs) / 3600.0;
+                double DistanceMovedM = (TractorFix.Vector.Speedkph * ElapsedTimeMs) / 3600.0;
 
                 // move tractor along current heading
                 double Lat = TractorFix.Latitude;
                 double Lon = TractorFix.Longitude;
 
-                Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorHeading, DistanceMovedM);
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorHeading(), DistanceMovedM);
 
                 TractorFix.Latitude = Lat;
                 TractorFix.Longitude = Lon;
@@ -119,7 +137,9 @@ namespace AgGrade.Controls
         {
             CurrentField = Field;
 
-            ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading);
+            ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
+
+            FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
 
             RefreshMap();
         }
@@ -136,17 +156,33 @@ namespace AgGrade.Controls
             GNSSFix Fix
             )
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<GNSSFix>(SetTractor), Fix);
+                return;
+            }
+
             if (Fix.IsValid)
             {
                 TractorFix = Fix.Clone();
 
-                TractorLocationHistory.Add(new Coordinate(Fix.Latitude, Fix.Longitude));
-                if (TractorLocationHistory.Count > MaxTractorHistoryLength)
+                // if moving then update location history
+                if (Fix.Vector.Speedkph > 0)
                 {
-                    TractorLocationHistory.RemoveAt(0);
+                    TractorLocationHistory.Add(new Coordinate(Fix.Latitude, Fix.Longitude));
+                    if (TractorLocationHistory.Count > MaxTractorHistoryLength)
+                    {
+                        TractorLocationHistory.RemoveAt(0);
+                    }
                 }
 
                 LastLocationUpdate = DateTime.Now;
+
+                double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+                if (TrueHeading >= 359.5) TrueHeading = 0;
+
+                HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;
+                SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
             }
 
             RefreshMap();
@@ -215,7 +251,7 @@ namespace AgGrade.Controls
             (
             )
         {
-            ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading);
+            ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
 
             RefreshMap();
         }
@@ -252,7 +288,7 @@ namespace AgGrade.Controls
         {
             if (CurrentField != null)
             {
-                ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading);
+                ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
                 RefreshMap();
             }
         }
