@@ -424,7 +424,6 @@ namespace AgGrade.Controller
                     }
                     // fixme - to do - fuse with IMU
                     LocChangedEvent?.Invoke(Fix);
-                    //OnTractorLocationChanged?.Invoke(Fix);
                 }
                 catch (NMEAParseException)
                 {
@@ -442,7 +441,6 @@ namespace AgGrade.Controller
 
                         // fixme - to do - fuse with IMU
                         LocChangedEvent?.Invoke(Fix);
-                        //OnTractorLocationChanged?.Invoke(Fix);
                     }
                 }
                 catch (NMEAParseException)

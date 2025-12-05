@@ -130,6 +130,10 @@ namespace AgGrade
             CurrentEquipmentStatus.TractorFix.RTK = RTKStatus.None;
             CurrentEquipmentStatus.FrontPan.Fix.RTK = RTKStatus.None;
             CurrentEquipmentStatus.RearPan.Fix.RTK = RTKStatus.None;
+            // no longer have fixes
+            CurrentEquipmentStatus.TractorFix.LastFixTime = DateTime.MinValue;
+            CurrentEquipmentStatus.FrontPan.Fix.LastFixTime = DateTime.MinValue;
+            CurrentEquipmentStatus.RearPan.Fix.LastFixTime = DateTime.MinValue;
 
             // no longer have IMU
             CurrentEquipmentStatus.TractorIMU.CalibrationStatus = IMUValue.Calibration.None;
@@ -151,6 +155,9 @@ namespace AgGrade
 
             // start trying to connect
             ControllerConnectTimer.Start();
+
+            // force map update
+            GetMap()?.SetTractor(CurrentEquipmentStatus.TractorFix);
         }
 
         private void Controller_OnEmergencyStop()
@@ -291,11 +298,11 @@ namespace AgGrade
 
             // fixme - allow user to choose file
             AGDLoader Loader = new AGDLoader();
-            //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
+            Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
             //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
-            //NewField.Name = "ShopB4";
+            NewField.Name = "ShopB4";
 
-            //map.ShowField(NewField);
+            map.ShowField(NewField);
 
             // give map initial conditions
             map.SetTractor(CurrentEquipmentStatus.TractorFix);
@@ -657,17 +664,13 @@ namespace AgGrade
         /// <param name="Fix">New tractor location</param>
         private void Controller_OnTractorLocationChanged(GNSSFix Fix)
         {
-            // only execute if position has changed
-            if ((Fix.Latitude != CurrentEquipmentStatus.TractorFix.Latitude) || (Fix.Longitude != CurrentEquipmentStatus.TractorFix.Longitude))
-            {
-                CurrentEquipmentStatus.TractorFix = Fix;
+            CurrentEquipmentStatus.TractorFix = Fix;
 
-                GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
-                GetMap()?.SetTractor(Fix);
+            GetMap()?.SetTractor(Fix);
 
-                UpdateRTKLeds();
-            }
+            UpdateRTKLeds();
         }
 
         /// <summary>

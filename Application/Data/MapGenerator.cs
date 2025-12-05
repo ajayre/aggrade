@@ -33,7 +33,11 @@ namespace AgGrade.Data
         }
 
         private Color Background = Color.FromArgb(0xD4, 0xF9, 0xD8);
-        private Color ConstructionYellow = Color.FromArgb(0xFF, 0xC4, 0x00);
+        // these are close to the official John Deere, CaseIH, New Holland and Catapillar colors
+        private Color TractorYellow = Color.FromArgb(0xFF, 0xC4, 0x00);
+        private Color TractorBlue = Color.FromArgb(0x00, 0x3F, 0x7D);
+        private Color TractorRed = Color.FromArgb(0xC3, 0x1F, 0x17);
+        private Color TractorGreen = Color.FromArgb(0x36, 0x7C, 0x2B);
 
         /// <summary>
         /// Supported tractor colors
@@ -185,6 +189,26 @@ namespace AgGrade.Data
             using (Graphics g = Graphics.FromImage(bitmap))
             {
                 g.FillRectangle(new SolidBrush(Background), 0, 0, ImageWidthpx, ImageHeightpx);
+            }
+
+            if (!TractorFix.IsValid)
+            {
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    Bitmap NoLocation = Properties.Resources.nolocation_800px;
+                    int Width = NoLocation.Width;
+                    int Height = NoLocation.Height;
+
+                    if (ImageWidthpx < Width)
+                    {
+                        Width = ImageWidthpx - 100;
+                        Height = Width / ImageWidthpx * Height;
+                    }
+
+                    g.DrawImage(NoLocation, (ImageWidthpx / 2) - (Width / 2), (ImageHeightpx / 2) - (Height / 2), Width, Height);
+                }
+
+                return bitmap;
             }
 
             // if a field is defined then render it
@@ -439,13 +463,21 @@ namespace AgGrade.Data
 
                     if (LastLocpx != null)
                     {
-                        g.DrawLine(new Pen(Color.Red, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);
+                        switch (TractorColor)
+                        {
+                            default:
+                            case TractorColors.Green:  g.DrawLine(new Pen(TractorGreen, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);  break;
+                            case TractorColors.Red:    g.DrawLine(new Pen(TractorRed, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);    break;
+                            case TractorColors.Blue:   g.DrawLine(new Pen(TractorBlue, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);   break;
+                            case TractorColors.Yellow: g.DrawLine(new Pen(TractorYellow, 2), LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y); break;
+                        }
                     }
 
                     LastLocpx = Pix;
                 }
 
                 // draw tractor
+                // get tractor color
                 Bitmap TractorImage;
                 switch (TractorColor)
                 {
@@ -455,9 +487,14 @@ namespace AgGrade.Data
                     case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
                     case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
                 }
+                // get tractor pixel location - always fixed
                 int TractorXpx = Map.Width / 2;
                 int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
-                g.DrawImage(TractorImage, TractorXpx - 24, TractorYpx - 24, 48, 48);
+                // scale tractor so the width of the symbol matches the tractor width
+                int TractorWidthpx = (int)(CurrentEquipmentSettings.TractorWidthMm / 1000.0 * CurrentScaleFactor);
+                if (TractorWidthpx < 16) TractorWidthpx = 16;
+                // draw
+                g.DrawImage(TractorImage, TractorXpx - (TractorWidthpx / 2), TractorYpx - (TractorWidthpx / 2), TractorWidthpx, TractorWidthpx);
 
                 // draw front scraper
                 Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
@@ -470,7 +507,7 @@ namespace AgGrade.Data
                 double BladeEndBLon = FrontScraperFix.Longitude;
                 Haversine.MoveDistanceBearing(ref BladeEndBLat, ref BladeEndBLon, PerpAngle, -(CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0));
                 Point BladeEndB = LatLonToWorld(new Coordinate(BladeEndBLat, BladeEndBLon));
-                g.DrawLine(new Pen(ConstructionYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
+                g.DrawLine(new Pen(TractorYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
 
                 // draw rear scraper
                 Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
@@ -483,11 +520,7 @@ namespace AgGrade.Data
                 double RearBladeEndBLon = RearScraperFix.Longitude;
                 Haversine.MoveDistanceBearing(ref RearBladeEndBLat, ref RearBladeEndBLon, RearPerpAngle, -(CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0));
                 Point RearBladeEndB = LatLonToWorld(new Coordinate(RearBladeEndBLat, RearBladeEndBLon));
-                g.DrawLine(new Pen(ConstructionYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
-
-                // draw lines connecting tractor and scrapers
-                g.DrawLine(new Pen(ConstructionYellow, 1), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
-                g.DrawLine(new Pen(ConstructionYellow, 1), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
+                g.DrawLine(new Pen(TractorYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
             }
         }
 

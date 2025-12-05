@@ -20,6 +20,7 @@ namespace AgGrade.Controls
         private const double MAX_SCALE_FACTOR = 750.0;
         private const int DEAD_RECKONING_PERIOD_MS = 50;
         private const int DEFAULT_SCALE_FACTOR = 8;
+        private const double ZOOM_FACTOR = 1.3;
 
         private Field CurrentField;
         private MapGenerator MapGen;
@@ -135,17 +136,20 @@ namespace AgGrade.Controls
             GNSSFix Fix
             )
         {
-            TractorFix = Fix.Clone();
-
-            TractorLocationHistory.Add(new Coordinate(Fix.Latitude, Fix.Longitude));
-            if (TractorLocationHistory.Count > MaxTractorHistoryLength)
+            if (Fix.IsValid)
             {
-                TractorLocationHistory.RemoveAt(0);
+                TractorFix = Fix.Clone();
+
+                TractorLocationHistory.Add(new Coordinate(Fix.Latitude, Fix.Longitude));
+                if (TractorLocationHistory.Count > MaxTractorHistoryLength)
+                {
+                    TractorLocationHistory.RemoveAt(0);
+                }
+
+                LastLocationUpdate = DateTime.Now;
             }
 
             RefreshMap();
-
-            LastLocationUpdate = DateTime.Now;
         }
 
         /// <summary>
@@ -160,9 +164,12 @@ namespace AgGrade.Controls
             GNSSFix Fix
             )
         {
-            FrontScraperFix = Fix.Clone();
+            if (Fix.IsValid)
+            {
+                FrontScraperFix = Fix.Clone();
 
-            RefreshMap();
+                RefreshMap();
+            }
         }
 
         /// <summary>
@@ -177,9 +184,12 @@ namespace AgGrade.Controls
             GNSSFix Fix
             )
         {
-            RearScraperFix = Fix.Clone();
+            if (Fix.IsValid)
+            {
+                RearScraperFix = Fix.Clone();
 
-            RefreshMap();
+                RefreshMap();
+            }
         }
 
         private void RefreshMap
@@ -217,9 +227,9 @@ namespace AgGrade.Controls
             (
             )
         {
-            if (ScaleFactor * 2 <= MAX_SCALE_FACTOR)
+            if (ScaleFactor * ZOOM_FACTOR <= MAX_SCALE_FACTOR)
             {
-                ScaleFactor *= 2;
+                ScaleFactor *= ZOOM_FACTOR;
             }
             RefreshMap();
         }
@@ -231,9 +241,9 @@ namespace AgGrade.Controls
             (
             )
         {
-            if (ScaleFactor / 2 >= MIN_SCALE_FACTOR)
+            if (ScaleFactor / ZOOM_FACTOR >= MIN_SCALE_FACTOR)
             {
-                ScaleFactor /= 2;
+                ScaleFactor /= ZOOM_FACTOR;
             }
             RefreshMap();
         }
