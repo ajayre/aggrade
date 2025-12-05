@@ -362,9 +362,10 @@ namespace AgGrade
             CurrentEquipmentSettings = EquipmentSettings;
 
             GetMap()?.SetEquipmentSettings(EquipmentSettings);
+            Controller?.SetEquipmentSettings(CurrentEquipmentSettings);
 
-            Controller.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
-            Controller.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
+            Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
+            Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
 
             UpdateEnabledLeds();
             UpdateIMULeds();
@@ -542,6 +543,8 @@ namespace AgGrade
             ControllerConnectTimer.Interval = CONTROLLER_TRY_CONNECT_PERIOD_MS;
             ControllerConnectTimer.Tick += ControllerConnectTimer_Tick;
             ControllerConnectTimer.Start();
+
+            Controller.SetEquipmentSettings(CurrentEquipmentSettings);
 
             UpdateEnabledLeds();
             UpdateIMULeds();

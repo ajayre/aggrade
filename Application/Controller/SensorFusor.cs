@@ -28,22 +28,22 @@ namespace AgGrade.Controller
         /// </summary>
         /// <param name="Fix">GNSS location and height</param>
         /// <param name="IMUReading">IMU reading</param>
-        /// <param name="AntennaHeight">Height of antenna in centimeters</param>
-        /// <param name="AntennaLeft">Distance antenna is left of target point (e.g. vehicle center) in centimeters</param>
-        /// <param name="AntennaForward">Distance antenna is foward of target point (e.g. axle) in centimeters</param>
+        /// <param name="AntennaHeight">Height of antenna in millimeters</param>
+        /// <param name="AntennaLeft">Distance antenna is left of target point (e.g. vehicle center) in millimeters</param>
+        /// <param name="AntennaForward">Distance antenna is foward of target point (e.g. axle) in millimeters</param>
         /// <returns>Corrected GNSS location and height</returns>
         public GNSSFix Fuse
             (
             GNSSFix Fix,
             IMUValue IMUReading,
-            int AntennaHeightCM,
-            int AntennaLeftCM,
-            int AntennaForwardCM
+            uint AntennaHeightMm,
+            int AntennaLeftMm,
+            int AntennaForwardMm
             )
         {
-            double AntennaHeight = AntennaHeightCM / 100.0;
-            double AntennaLeft = AntennaLeftCM / 100.0;
-            double AntennaForward = AntennaForwardCM / 100.0;
+            double AntennaHeight = AntennaHeightMm / 1000.0;
+            double AntennaLeft = AntennaLeftMm / 1000.0;
+            double AntennaForward = AntennaForwardMm / 1000.0;
 
             double GyroHeading = 0;
             double IMUYawRate = IMUReading.YawRate;
@@ -220,6 +220,7 @@ namespace AgGrade.Controller
                 CorrectedFix.RTK = Fix.RTK;
                 CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
                 CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
+                CorrectedFix.LastFixTime = Fix.LastFixTime;
 
                 LastLatitude = Latitude;
                 LastLongitude = Longitude;
@@ -237,6 +238,7 @@ namespace AgGrade.Controller
                 CorrectedFix.RTK = Fix.RTK;
                 CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
                 CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
+                CorrectedFix.LastFixTime = Fix.LastFixTime;
 
                 LastLatitude = Fix.Latitude;
                 LastLongitude = Fix.Longitude;

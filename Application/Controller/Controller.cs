@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using AgGrade.Data;
+using System.Net;
 using System.Text;
 using static System.Windows.Forms.AxHost;
 
@@ -84,6 +85,8 @@ namespace AgGrade.Controller
         private GNSSFix? FrontFix = null;
         private GNSSVector? RearVector = null;
         private GNSSFix? RearFix = null;
+        private SensorFusor Fusor = new SensorFusor();
+        private EquipmentSettings CurrentEquipmentSettings = new EquipmentSettings();
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -146,6 +149,18 @@ namespace AgGrade.Controller
                 ControllerChannel.Close();
                 ControllerChannel = null;
             }
+        }
+
+        /// <summary>
+        /// Sets the equipment settings
+        /// </summary>
+        /// <param name="Settings">New settings</param>
+        public void SetEquipmentSettings
+            (
+            EquipmentSettings Settings
+            )
+        {
+            CurrentEquipmentSettings = Settings;
         }
 
         /// <summary>
@@ -367,21 +382,25 @@ namespace AgGrade.Controller
                         case PGNValues.PGN_TRACTOR_NMEA:
                             {
                                 string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref TractorFix, ref TractorVector, OnTractorLocationChanged);
+                                ProcessNMEA(Sentence, ref TractorFix, ref TractorVector, OnTractorLocationChanged,
+                                    TractorIMU, CurrentEquipmentSettings.TractorAntennaHeightMm, CurrentEquipmentSettings.TractorAntennaLeftOffsetMm,
+                                    CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
                             }
                             break;
 
                         case PGNValues.PGN_FRONT_NMEA:
                             {
                                 string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref FrontFix, ref FrontVector, OnFrontLocationChanged);
+                                ProcessNMEA(Sentence, ref FrontFix, ref FrontVector, OnFrontLocationChanged,
+                                    FrontScraperIMU, CurrentEquipmentSettings.FrontPan.AntennaHeightMm, 0, 0);
                             }
                             break;
                         
                         case PGNValues.PGN_REAR_NMEA:
                             {
                                 string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref RearFix, ref RearVector, OnRearLocationChanged);
+                                ProcessNMEA(Sentence, ref RearFix, ref RearVector, OnRearLocationChanged,
+                                    RearScraperIMU, CurrentEquipmentSettings.RearPan.AntennaHeightMm, 0, 0);
                             }
                             break;
                     }
@@ -405,12 +424,21 @@ namespace AgGrade.Controller
         /// <param name="Sentence">Sentence to process</param>
         /// <param name="Fix">Equipment fix to update</param>
         /// <param name="Vector">Equipment vector to update</param>
+        /// <param name="LocChangedEvent">Event to raise</param>
+        /// <param name="IMU">The latest IMU reading</param>
+        /// <param name="AntennaHeightMm">Height of antenna in millimeters</param>
+        /// <param name="AntennaLeftOffsetMm">Left offset of antenna in millimeters</param>
+        /// <param name="AntennaForwardOffsetMm">Forward offset of antenna in millimeters</param>
         private void ProcessNMEA
             (
             string Sentence,
             ref GNSSFix? Fix,
             ref GNSSVector? Vector,
-            LocationChanged LocChangedEvent
+            LocationChanged LocChangedEvent,
+            IMUValue IMU,
+            uint AntennaHeightMm,
+            int AntennaLeftOffsetMm,
+            int AntennaForwardOffsetMm
             )
         {
             if (Sentence.StartsWith("$GNGGA"))
@@ -422,7 +450,13 @@ namespace AgGrade.Controller
                     {
                         Fix.Vector = Vector.Clone();
                     }
-                    // fixme - to do - fuse with IMU
+
+                    // fuse with IMU
+                    if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                    {
+                        Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                    }
+
                     LocChangedEvent?.Invoke(Fix);
                 }
                 catch (NMEAParseException)
@@ -439,7 +473,12 @@ namespace AgGrade.Controller
                     {
                         Fix.Vector = Vector.Clone();
 
-                        // fixme - to do - fuse with IMU
+                        // fuse with IMU
+                        if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                        {
+                            Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                        }
+
                         LocChangedEvent?.Invoke(Fix);
                     }
                 }
