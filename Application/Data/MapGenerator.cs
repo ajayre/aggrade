@@ -155,7 +155,7 @@ namespace AgGrade.Data
             GNSSFix TractorFix,
             GNSSFix FrontScraperFix,
             GNSSFix RearScraperFix,
-            List<Coordinate> Benchmarks,
+            List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory,
             EquipmentSettings CurrentEquipmentSettings,
             AppSettings CurrentAppSettings
@@ -441,7 +441,7 @@ namespace AgGrade.Data
         private void Decorate
             (
             Bitmap Map,
-            List<Coordinate> Benchmarks,
+            List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory
             )
         {
@@ -456,20 +456,24 @@ namespace AgGrade.Data
             }
             TractorPen.Color = Color.FromArgb(127, TractorPen.Color);
 
+            var BenchmarkFontFamily = new FontFamily("Arial");
+            var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);
+
             using (Graphics g = Graphics.FromImage(Map))
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
                 // draw benchmarks
-                foreach (Coordinate Benchmark in Benchmarks)
+                foreach (Benchmark bmark in Benchmarks)
                 {
-                    Point Pix = LatLonToWorld(Benchmark);
-                    //g.FillRectangle(new SolidBrush(Color.Orange), Pix.X - 5, Pix.Y - 5, 10, 10);
+                    Point Pix = LatLonToWorld(bmark.Location);
 
                     g.FillPolygon(new SolidBrush(Color.Gray), new Point[] { new Point(Pix.X - 10, Pix.Y + 10), new Point(Pix.X + 10, Pix.Y + 10),
                         new Point(Pix.X, Pix.Y - 10) });
                     g.FillPolygon(new SolidBrush(Color.Orange), new Point[] { new Point(Pix.X - 9, Pix.Y + 9), new Point(Pix.X + 9, Pix.Y + 9),
                         new Point(Pix.X, Pix.Y - 9) });
+
+                    g.DrawString(bmark.Name, BenchmarkFont, new SolidBrush(Color.Black), Pix.X + 12, Pix.Y - 6);
                 }
 
                 // draw tractor trail

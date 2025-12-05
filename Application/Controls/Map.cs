@@ -232,12 +232,9 @@ namespace AgGrade.Controls
             (
             )
         {
-            List<Coordinate> Benchmarks = new List<Coordinate>();
-
-            Coordinate B1 = new Coordinate();
-            B1.Latitude = 36.446847109944279;
-            B1.Longitude = -90.72286177445794;
-            Benchmarks.Add(B1);
+            // fixme - remove
+            List<Benchmark> Benchmarks = new List<Benchmark>();
+            Benchmarks.Add(new Benchmark(36.446857119955279, -90.72280187456794, "B1"));
 
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
