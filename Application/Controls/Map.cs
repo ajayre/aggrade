@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -31,8 +32,8 @@ namespace AgGrade.Controls
         private GNSSFix FrontScraperFix;
         private GNSSFix RearScraperFix;
         private Timer DeadReckoningTimer;
-        private DateTime LastLocationUpdate;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
+        private Stopwatch PrecisionTractorFixTimer;
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 90;
@@ -70,7 +71,9 @@ namespace AgGrade.Controls
             DeadReckoningTimer = new Timer();
             DeadReckoningTimer.Interval = DEAD_RECKONING_PERIOD_MS;
             DeadReckoningTimer.Tick += DeadReckoningTimer_Tick;
-            //DeadReckoningTimer.Start();
+
+            PrecisionTractorFixTimer = new Stopwatch();
+            PrecisionTractorFixTimer.Start();
         }
 
         public void SetEquipmentSettings
@@ -109,11 +112,12 @@ namespace AgGrade.Controls
         {
             if (TractorFix.Vector.Speedkph > 0)
             {
+                // get time since last tractor fix
+                long ElapsedMilliseconds = PrecisionTractorFixTimer.ElapsedMilliseconds;
+
                 // calculate distance moved since last location update
-                TimeSpan ElapsedTime = DateTime.Now - LastLocationUpdate;
-                double ElapsedTimeMs = ElapsedTime.TotalMilliseconds;
                 // Calculate distance: speed (kph) * time (ms) / 3600 (to convert kph*ms to meters)
-                double DistanceMovedM = (TractorFix.Vector.Speedkph * ElapsedTimeMs) / 3600.0;
+                double DistanceMovedM = (TractorFix.Vector.Speedkph * ElapsedMilliseconds) / 3600.0;
 
                 // move tractor along current heading
                 double Lat = TractorFix.Latitude;
@@ -124,9 +128,7 @@ namespace AgGrade.Controls
                 TractorFix.Latitude = Lat;
                 TractorFix.Longitude = Lon;
 
-                RefreshMap();
-
-                LastLocationUpdate = DateTime.Now;
+                SetTractor(TractorFix);
             }
         }
 
@@ -174,9 +176,20 @@ namespace AgGrade.Controls
                     {
                         TractorLocationHistory.RemoveAt(0);
                     }
+
+                    // start dead reckoning
+                    if (!DeadReckoningTimer.Enabled)
+                    {
+                        DeadReckoningTimer.Start();
+                    }
+                }
+                else
+                {
+                    // not moving, stop dead reckoning
+                    DeadReckoningTimer.Stop();
                 }
 
-                LastLocationUpdate = DateTime.Now;
+                PrecisionTractorFixTimer.Restart();
 
                 double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
                 if (TrueHeading >= 359.5) TrueHeading = 0;
@@ -228,6 +241,8 @@ namespace AgGrade.Controls
             }
         }
 
+        private long LastPerf = 0;
+
         private void RefreshMap
             (
             )
@@ -236,9 +251,24 @@ namespace AgGrade.Controls
             List<Benchmark> Benchmarks = new List<Benchmark>();
             Benchmarks.Add(new Benchmark(36.446857119955279, -90.72280187456794, "B1"));
 
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 Benchmarks, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
+            sw.Stop();
+            LastPerf = sw.ElapsedMilliseconds;
+            ShowPerf();
+        }
+
+        private void ShowPerf()
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(ShowPerf));
+                return;
+            }
+            FieldNameLabel.Text = LastPerf.ToString();
         }
 
         /// <summary>
