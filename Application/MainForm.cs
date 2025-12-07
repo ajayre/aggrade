@@ -25,6 +25,7 @@ namespace AgGrade
         private bool FrontHeightFound;
         private bool RearHeightFound;
         private Timer ControllerConnectTimer;
+        private BladeController BladeCtrl;
 
         public MainForm
             (
@@ -82,6 +83,8 @@ namespace AgGrade
 
             FrontHeightFound = false;
             RearHeightFound = false;
+
+            BladeCtrl = new BladeController();
 
             ShowMap();
         }
@@ -298,8 +301,8 @@ namespace AgGrade
 
             // fixme - allow user to choose file
             AGDLoader Loader = new AGDLoader();
-            Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
-            //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
+            //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
+            Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
             NewField.Name = "ShopB4";
 
             map.ShowField(NewField);
@@ -614,6 +617,14 @@ namespace AgGrade
         private void Controller_OnFrontBladeAutoChanged(bool IsAuto)
         {
             CurrentEquipmentStatus.FrontPan.BladeAuto = IsAuto;
+            if (IsAuto)
+            {
+                BladeCtrl.StartFront();
+            }
+            else
+            {
+                BladeCtrl.StopFront();
+            }
         }
 
         /// <summary>
@@ -702,6 +713,8 @@ namespace AgGrade
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
             GetMap()?.SetFrontScraper(Fix);
+
+            BladeCtrl.SetFrontFix(Fix);
 
             UpdateRTKLeds();
         }

@@ -17,6 +17,7 @@ namespace HardwareSim
         private UDPServer uDPServer;
         private Timer PingTimer;
         private GNSS GNSSSim;
+        private bool FrontBladeAuto = false;
 
         public MainForm()
         {
@@ -231,6 +232,15 @@ namespace HardwareSim
         private void SteerRightBtn_Click(object sender, EventArgs e)
         {
             GNSSSim.TurnRight();
+        }
+
+        private void FrontToggleCuttingBtn_Click(object sender, EventArgs e)
+        {
+            FrontBladeAuto = !FrontBladeAuto;
+
+            byte[] Data = new byte[1];
+            Data[0] = (byte)(FrontBladeAuto ? 1 : 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, Data));
         }
     }
 }

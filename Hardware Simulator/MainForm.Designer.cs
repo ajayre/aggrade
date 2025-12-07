@@ -53,6 +53,7 @@
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
             FrontPage = new TabPage();
+            FrontToggleCuttingBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -214,6 +215,7 @@
             // 
             // GNSSPage
             // 
+            GNSSPage.Controls.Add(FrontToggleCuttingBtn);
             GNSSPage.Controls.Add(SteerLeftBtn);
             GNSSPage.Controls.Add(SteerRightBtn);
             GNSSPage.Controls.Add(ReverseBtn);
@@ -323,6 +325,16 @@
             FrontPage.Text = "Front Pan";
             FrontPage.UseVisualStyleBackColor = true;
             // 
+            // FrontToggleCuttingBtn
+            // 
+            FrontToggleCuttingBtn.Location = new Point(8, 173);
+            FrontToggleCuttingBtn.Name = "FrontToggleCuttingBtn";
+            FrontToggleCuttingBtn.Size = new Size(75, 23);
+            FrontToggleCuttingBtn.TabIndex = 9;
+            FrontToggleCuttingBtn.Text = "Front Toggle Cutting";
+            FrontToggleCuttingBtn.UseVisualStyleBackColor = true;
+            FrontToggleCuttingBtn.Click += FrontToggleCuttingBtn_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -365,5 +377,6 @@
         private Button SteerLeftBtn;
         private Button SteerRightBtn;
         private TabPage FrontPage;
+        private Button FrontToggleCuttingBtn;
     }
 }

@@ -34,9 +34,10 @@ namespace AgGrade.Controls
         private Timer DeadReckoningTimer;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Stopwatch PrecisionTractorFixTimer;
+        private Timer RefreshTimer;
 
         // maximum number of tractor history points to keep
-        private int MaxTractorHistoryLength = 90;
+        private int MaxTractorHistoryLength = 500;
 
         /// <summary>
         /// pixels per meter
@@ -74,6 +75,21 @@ namespace AgGrade.Controls
 
             PrecisionTractorFixTimer = new Stopwatch();
             PrecisionTractorFixTimer.Start();
+
+            RefreshTimer = new Timer();
+            RefreshTimer.Interval = 250;
+            RefreshTimer.Tick += RefreshTimer_Tick;
+            RefreshTimer.Start();
+        }
+
+        /// <summary>
+        /// Called periodically to render the map
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RefreshTimer_Tick(object? sender, EventArgs e)
+        {
+            RefreshMap();
         }
 
         public void SetEquipmentSettings
@@ -104,6 +120,28 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Gets the heading of the front scraper
+        /// </summary>
+        /// <returns>Heading in degrees</returns>
+        private double FrontScraperHeading
+            (
+            )
+        {
+            return FrontScraperFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+        }
+
+        /// <summary>
+        /// Gets the heading of the rear scraper
+        /// </summary>
+        /// <returns>Heading in degrees</returns>
+        private double RearScraperHeading
+            (
+            )
+        {
+            return RearScraperFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+        }
+
+        /// <summary>
         /// Performs dead reckoning movement between GNSS data
         /// </summary>
         /// <param name="sender"></param>
@@ -122,13 +160,26 @@ namespace AgGrade.Controls
                 // move tractor along current heading
                 double Lat = TractorFix.Latitude;
                 double Lon = TractorFix.Longitude;
-
                 Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorHeading(), DistanceMovedM);
-
                 TractorFix.Latitude = Lat;
                 TractorFix.Longitude = Lon;
-
                 SetTractor(TractorFix);
+
+                // move front scraper along current heading
+                Lat = FrontScraperFix.Latitude;
+                Lon = FrontScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, FrontScraperHeading(), DistanceMovedM);
+                FrontScraperFix.Latitude = Lat;
+                FrontScraperFix.Longitude = Lon;
+                SetFrontScraper(FrontScraperFix);
+
+                // move rear scraper along current heading
+                Lat = RearScraperFix.Latitude;
+                Lon = RearScraperFix.Longitude;
+                Haversine.MoveDistanceBearing(ref Lat, ref Lon, RearScraperHeading(), DistanceMovedM);
+                RearScraperFix.Latitude = Lat;
+                RearScraperFix.Longitude = Lon;
+                SetRearScraper(RearScraperFix);
             }
         }
 
@@ -142,8 +193,6 @@ namespace AgGrade.Controls
             ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
 
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
-
-            RefreshMap();
         }
 
         /// <summary>
@@ -197,8 +246,6 @@ namespace AgGrade.Controls
                 HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;
                 SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
             }
-
-            RefreshMap();
         }
 
         /// <summary>
@@ -216,8 +263,6 @@ namespace AgGrade.Controls
             if (Fix.IsValid)
             {
                 FrontScraperFix = Fix.Clone();
-
-                RefreshMap();
             }
         }
 
@@ -236,8 +281,6 @@ namespace AgGrade.Controls
             if (Fix.IsValid)
             {
                 RearScraperFix = Fix.Clone();
-
-                RefreshMap();
             }
         }
 
@@ -251,14 +294,15 @@ namespace AgGrade.Controls
             List<Benchmark> Benchmarks = new List<Benchmark>();
             Benchmarks.Add(new Benchmark(36.446857119955279, -90.72280187456794, "B1"));
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            // fixme - remove debug code
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 Benchmarks, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
-            sw.Stop();
-            LastPerf = sw.ElapsedMilliseconds;
-            ShowPerf();
+            //sw.Stop();
+            //LastPerf = sw.ElapsedMilliseconds;
+            //ShowPerf();
         }
 
         private void ShowPerf()
@@ -279,8 +323,6 @@ namespace AgGrade.Controls
             )
         {
             ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
-
-            RefreshMap();
         }
 
         /// <summary>
@@ -294,7 +336,6 @@ namespace AgGrade.Controls
             {
                 ScaleFactor *= ZOOM_FACTOR;
             }
-            RefreshMap();
         }
 
         /// <summary>
@@ -308,15 +349,16 @@ namespace AgGrade.Controls
             {
                 ScaleFactor /= ZOOM_FACTOR;
             }
-            RefreshMap();
         }
 
         private void MapCanvas_SizeChanged(object sender, EventArgs e)
         {
-            if (CurrentField != null)
+            if (_CurrentAppSettings != null)
             {
-                ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
-                RefreshMap();
+                if (CurrentField != null)
+                {
+                    ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
+                }
             }
         }
     }

@@ -20,11 +20,12 @@ namespace AgGrade.Data
     {
         private const int TILE_SIZE = 128;
         private const int TILE_OVERLAP = 5;
-        private const int PROJECTED_PATH_LENGTH_M = 30;
+        private const int PROJECTED_PATH_LENGTH_M = 80;
 
         private class MapTile
         {
-            public Bitmap bitmap;
+            public Bitmap Bitmap;
+            public Bitmap RotatedBitmap;
             public int TileGridX;
             public int TileGridY;
             public int StartX;
@@ -33,12 +34,22 @@ namespace AgGrade.Data
             public int Height;
         }
 
+        private class TileCache
+        {
+            public List<MapTile> Tiles = new List<MapTile>();
+            public double ScaleFactor;
+            public int ImageWidthpx;
+            public int ImageHeightpx;
+        }
+
         private Color Background = Color.FromArgb(0xD4, 0xF9, 0xD8);
         // these are close to the official John Deere, CaseIH, New Holland and Catapillar colors
         private Color TractorYellow = Color.FromArgb(0xFF, 0xC4, 0x00);
         private Color TractorBlue = Color.FromArgb(0x00, 0x3F, 0x7D);
         private Color TractorRed = Color.FromArgb(0xC3, 0x1F, 0x17);
         private Color TractorGreen = Color.FromArgb(0x36, 0x7C, 0x2B);
+
+        private TileCache Cache = new TileCache();
 
         /// <summary>
         /// Supported tractor colors
@@ -185,6 +196,26 @@ namespace AgGrade.Data
 
             _tractorHeading = TractorFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
 
+            // if tile cache is empty then set up
+            if (Cache.Tiles.Count == 0)
+            {
+                Cache.ScaleFactor = ScaleFactor;
+                Cache.ImageHeightpx = ImageHeightpx;
+                Cache.ImageWidthpx = ImageWidthpx;
+            }
+            // cache is not empty, check if we need to empty it
+            else
+            {
+                // if anything that affects the cache has changed then empty it and set up
+                if ((ScaleFactor != Cache.ScaleFactor) || (ImageHeightpx != Cache.ImageHeightpx) || (ImageWidthpx != Cache.ImageWidthpx))
+                {
+                    Cache.Tiles.Clear();
+                    Cache.ScaleFactor = ScaleFactor;
+                    Cache.ImageHeightpx = ImageHeightpx;
+                    Cache.ImageWidthpx = ImageWidthpx;
+                }
+            }
+
             // Create bitmap directly in memory with transparency support
             Bitmap bitmap = new Bitmap(ImageWidthpx, ImageHeightpx, PixelFormat.Format32bppArgb);
             using (Graphics g = Graphics.FromImage(bitmap))
@@ -299,7 +330,7 @@ namespace AgGrade.Data
                             int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
                             int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
 
-                            // Calculate extended bounds with overlap (5px on each side = 10px total larger)
+                            // Calculate extended bounds with overlap
                             int extendedStartX = Math.Max(0, tileStartX - TILE_OVERLAP);
                             int extendedStartY = Math.Max(0, tileStartY - TILE_OVERLAP);
                             int extendedEndX = Math.Min(MapWidthpx, tileStartX + tileWidth + TILE_OVERLAP);
@@ -307,36 +338,62 @@ namespace AgGrade.Data
                             int extendedWidth = extendedEndX - extendedStartX;
                             int extendedHeight = extendedEndY - extendedStartY;
 
+                            // if this tile can be seen then retrieve from cache or render and add to list of tiles to show
                             if (IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
                             {
-                                MapTile NewTile = new MapTile();
-                                NewTile.TileGridX = tileX;
-                                NewTile.TileGridY = tileY;
-                                NewTile.StartX = tileStartX;
-                                NewTile.StartY = tileStartY;
-                                NewTile.Width = tileWidth;
-                                NewTile.Height = tileHeight;
+                                // look in cache for tile
+                                bool InCache = false;
+                                foreach (MapTile CTile in Cache.Tiles)
+                                {
+                                    if ((CTile.TileGridX == tileX) && (CTile.TileGridY == tileY))
+                                    {
+                                        Tiles.Add(CTile);
+                                        InCache = true;
+                                        break;
+                                    }
+                                }
 
-                                // Render this tile with extended bounds to include overlap
-                                NewTile.bitmap = RenderTile(
-                                    extendedStartX, extendedStartY, extendedWidth, extendedHeight,
-                                    MapWidthpx, MapHeightpx,
-                                    elevationGrid, minX, minY, gridWidth, gridHeight,
-                                    minElevation, maxElevation,
-                                    colorPalette, ShowGrid, ScaleFactor);
+                                if (!InCache)
+                                {
+                                    MapTile NewTile = new MapTile();
+                                    NewTile.TileGridX = tileX;
+                                    NewTile.TileGridY = tileY;
+                                    NewTile.StartX = tileStartX;
+                                    NewTile.StartY = tileStartY;
+                                    NewTile.Width = tileWidth;
+                                    NewTile.Height = tileHeight;
 
-                                Tiles.Add(NewTile);
+                                    // Render this tile with extended bounds to include overlap
+                                    NewTile.Bitmap = RenderTile(
+                                        extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                        MapWidthpx, MapHeightpx,
+                                        elevationGrid, minX, minY, gridWidth, gridHeight,
+                                        minElevation, maxElevation,
+                                        colorPalette, ShowGrid, ScaleFactor);
+
+                                    // cache it
+                                    Cache.Tiles.Add(NewTile);
+                                    // show it
+                                    Tiles.Add(NewTile);
+                                }
                             }
                         }
                     }
                 }
 
                 // rotate tiles
-                if (_tractorHeading != 0)
+                foreach (MapTile Tile in Tiles)
                 {
-                    foreach (MapTile Tile in Tiles)
+                    if (_tractorHeading != 0)
                     {
-                        Tile.bitmap = Rotate(Tile.bitmap, _tractorHeading);
+                        if (IsTileInView(Tile.StartX, Tile.StartY, Tile.Width, Tile.Height, ImageWidthpx, ImageHeightpx))
+                        {
+                            Tile.RotatedBitmap = Rotate(Tile.Bitmap, _tractorHeading);
+                        }
+                    }
+                    else
+                    {
+                        Tile.RotatedBitmap = Tile.Bitmap;
                     }
                 }
 
@@ -354,6 +411,9 @@ namespace AgGrade.Data
                     // add tiles
                     foreach (MapTile Tile in Tiles)
                     {
+                        int StartX;
+                        int StartY;
+
                         // Recalculate StartX and StartY for rotated tiles
                         if (_tractorHeading != 0)
                         {
@@ -369,37 +429,33 @@ namespace AgGrade.Data
                             Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(unrotatedCenterX, unrotatedCenterY);
 
                             // Get the rotated tile dimensions
-                            int rotatedWidth = Tile.bitmap.Width;
-                            int rotatedHeight = Tile.bitmap.Height;
+                            int rotatedWidth = Tile.RotatedBitmap.Width;
+                            int rotatedHeight = Tile.RotatedBitmap.Height;
 
                             // Calculate top-left position by subtracting half the rotated dimensions from the center
-                            Tile.StartX = rotatedCenter.X - rotatedWidth / 2;
-                            Tile.StartY = rotatedCenter.Y - rotatedHeight / 2;
-
-                            // Update Width and Height to match the rotated bitmap dimensions
-                            Tile.Width = rotatedWidth;
-                            Tile.Height = rotatedHeight;
+                            StartX = rotatedCenter.X - rotatedWidth / 2;
+                            StartY = rotatedCenter.Y - rotatedHeight / 2;
                         }
                         else
                         {
                             // For unrotated tiles, translate from unrotated map coordinates to final image coordinates
                             // StartX/StartY are in unrotated map pixel coordinates (0 to MapWidthpx-1)
                             // Need to add map offset to get final image coordinates
-                            Tile.StartX = Tile.StartX + _mapLeftpx;
-                            Tile.StartY = Tile.StartY + _mapToppx;
+                            StartX = Tile.StartX + _mapLeftpx;
+                            StartY = Tile.StartY + _mapToppx;
                         }
 
                         // Draw tile - the bitmap already includes 5px overlap on all sides
                         // For unrotated tiles: StartX/StartY is now in final image coordinates, shift by -5px to account for overlap in bitmap
                         // For rotated tiles: StartX/StartY is already calculated for the rotated position in final image coordinates
-                        int drawX = Tile.StartX - TILE_OVERLAP;
-                        int drawY = Tile.StartY - TILE_OVERLAP;
+                        int drawX = StartX - TILE_OVERLAP;
+                        int drawY = StartY - TILE_OVERLAP;
 
                         // Calculate source rectangle offset if drawing position is outside bounds
                         int srcX = 0;
                         int srcY = 0;
-                        int srcWidth = Tile.bitmap.Width;
-                        int srcHeight = Tile.bitmap.Height;
+                        int srcWidth = Tile.RotatedBitmap.Width;
+                        int srcHeight = Tile.RotatedBitmap.Height;
 
                         // Adjust source rectangle if drawing position is outside bitmap bounds
                         if (drawX < 0)
@@ -426,8 +482,7 @@ namespace AgGrade.Data
                         {
                             Rectangle srcRect = new Rectangle(srcX, srcY, srcWidth, srcHeight);
                             Rectangle destRect = new Rectangle(drawX, drawY, drawWidth, drawHeight);
-                            g.DrawImage(Tile.bitmap, destRect, srcRect, GraphicsUnit.Pixel);
-                            Tile.bitmap.Dispose();
+                            g.DrawImage(Tile.RotatedBitmap, destRect, srcRect, GraphicsUnit.Pixel);
                         }
                     }
                 }
@@ -445,16 +500,7 @@ namespace AgGrade.Data
             List<Coordinate> TractorLocationHistory
             )
         {
-            Pen TractorPen;
-            switch (TractorColor)
-            {
-                default:
-                case TractorColors.Green:  TractorPen = new Pen(TractorGreen, 2);  break;
-                case TractorColors.Red:    TractorPen = new Pen(TractorRed, 2);    break;
-                case TractorColors.Blue:   TractorPen = new Pen(TractorBlue, 2);   break;
-                case TractorColors.Yellow: TractorPen = new Pen(TractorYellow, 2); break;
-            }
-            TractorPen.Color = Color.FromArgb(127, TractorPen.Color);
+            Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
 
             var BenchmarkFontFamily = new FontFamily("Arial");
             var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);

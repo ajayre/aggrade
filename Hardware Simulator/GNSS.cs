@@ -187,6 +187,7 @@ namespace HardwareSim
             double StartLat = TractorGNSS.Latitude;
             double StartLon = TractorGNSS.Longitude;
 
+            // move the tractor forwards along the current heading
             double Lat = TractorGNSS.Latitude;
             double Lon = TractorGNSS.Longitude;
             Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorGNSS.TrueHeading, MetersPerSec);
@@ -218,7 +219,7 @@ namespace HardwareSim
                         4 5 6 7 8 9 10 11 12 13 14
                         0 1 2 3 4 5 6  7  8  9  10
 		                R         F             T
-             */
+            */
             int PointsAdded = 0;
             for (double m = (DIST_M_PER_MPH_PER_CALC_PERIOD * TractorGNSS.SpeedMPH) - DIST_M_PER_MPH_PER_CALC_PERIOD; m >= 0; m -= DIST_M_PER_MPH_PER_CALC_PERIOD)
             {
