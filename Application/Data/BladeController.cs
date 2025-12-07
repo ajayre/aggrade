@@ -15,6 +15,7 @@ namespace AgGrade.Data
         private bool FrontBladeAuto;
         private bool RearBladeAuto;
         private GNSSFix FrontFix;
+        private GNSSFix RearFix;
         private Timer CalcTimer;
 
         public BladeController
@@ -72,6 +73,18 @@ namespace AgGrade.Data
             )
         {
             FrontFix = Fix;
+        }
+
+        /// <summary>
+        /// Sets the current fix of the rear blade
+        /// </summary>
+        /// <param name="Fix">Current fix</param>
+        public void SetRearFix
+            (
+            GNSSFix Fix
+            )
+        {
+            RearFix = Fix;
         }
     }
 }

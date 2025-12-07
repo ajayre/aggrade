@@ -31,9 +31,7 @@ namespace AgGrade.Controls
         private GNSSFix TractorFix;
         private GNSSFix FrontScraperFix;
         private GNSSFix RearScraperFix;
-        private Timer DeadReckoningTimer;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
-        private Stopwatch PrecisionTractorFixTimer;
         private Timer RefreshTimer;
 
         // maximum number of tractor history points to keep
@@ -68,13 +66,6 @@ namespace AgGrade.Controls
             HeadingLabel.Text = "0" + DegreeSymbol;
             SpeedLabel.Text = "0 MPH";
             FieldNameLabel.Text = "No Field";
-
-            DeadReckoningTimer = new Timer();
-            DeadReckoningTimer.Interval = DEAD_RECKONING_PERIOD_MS;
-            DeadReckoningTimer.Tick += DeadReckoningTimer_Tick;
-
-            PrecisionTractorFixTimer = new Stopwatch();
-            PrecisionTractorFixTimer.Start();
 
             RefreshTimer = new Timer();
             RefreshTimer.Interval = 250;
@@ -119,70 +110,6 @@ namespace AgGrade.Controls
             return TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
         }
 
-        /// <summary>
-        /// Gets the heading of the front scraper
-        /// </summary>
-        /// <returns>Heading in degrees</returns>
-        private double FrontScraperHeading
-            (
-            )
-        {
-            return FrontScraperFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
-        }
-
-        /// <summary>
-        /// Gets the heading of the rear scraper
-        /// </summary>
-        /// <returns>Heading in degrees</returns>
-        private double RearScraperHeading
-            (
-            )
-        {
-            return RearScraperFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
-        }
-
-        /// <summary>
-        /// Performs dead reckoning movement between GNSS data
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DeadReckoningTimer_Tick(object? sender, EventArgs e)
-        {
-            if (TractorFix.Vector.Speedkph > 0)
-            {
-                // get time since last tractor fix
-                long ElapsedMilliseconds = PrecisionTractorFixTimer.ElapsedMilliseconds;
-
-                // calculate distance moved since last location update
-                // Calculate distance: speed (kph) * time (ms) / 3600 (to convert kph*ms to meters)
-                double DistanceMovedM = (TractorFix.Vector.Speedkph * ElapsedMilliseconds) / 3600.0;
-
-                // move tractor along current heading
-                double Lat = TractorFix.Latitude;
-                double Lon = TractorFix.Longitude;
-                Haversine.MoveDistanceBearing(ref Lat, ref Lon, TractorHeading(), DistanceMovedM);
-                TractorFix.Latitude = Lat;
-                TractorFix.Longitude = Lon;
-                SetTractor(TractorFix);
-
-                // move front scraper along current heading
-                Lat = FrontScraperFix.Latitude;
-                Lon = FrontScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref Lat, ref Lon, FrontScraperHeading(), DistanceMovedM);
-                FrontScraperFix.Latitude = Lat;
-                FrontScraperFix.Longitude = Lon;
-                SetFrontScraper(FrontScraperFix);
-
-                // move rear scraper along current heading
-                Lat = RearScraperFix.Latitude;
-                Lon = RearScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref Lat, ref Lon, RearScraperHeading(), DistanceMovedM);
-                RearScraperFix.Latitude = Lat;
-                RearScraperFix.Longitude = Lon;
-                SetRearScraper(RearScraperFix);
-            }
-        }
-
         public void ShowField
             (
             Field Field
@@ -225,20 +152,7 @@ namespace AgGrade.Controls
                     {
                         TractorLocationHistory.RemoveAt(0);
                     }
-
-                    // start dead reckoning
-                    if (!DeadReckoningTimer.Enabled)
-                    {
-                        DeadReckoningTimer.Start();
-                    }
                 }
-                else
-                {
-                    // not moving, stop dead reckoning
-                    DeadReckoningTimer.Stop();
-                }
-
-                PrecisionTractorFixTimer.Restart();
 
                 double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
                 if (TrueHeading >= 359.5) TrueHeading = 0;
