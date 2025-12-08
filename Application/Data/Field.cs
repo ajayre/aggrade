@@ -24,11 +24,13 @@ namespace AgGrade.Data
         public bool IsNorthernHemisphere;
         public double TotalCutBCY;
         public double TotalFillBCY;
+        public List<Benchmark> Benchmarks;
 
         public Field()
         {
             TopologyPoints = new List<TopologyPoint>();
             Bins = new List<Bin>();
+            Benchmarks = new List<Benchmark>();
         }
     }
 }

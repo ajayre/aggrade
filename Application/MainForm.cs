@@ -27,6 +27,7 @@ namespace AgGrade
         private Timer ControllerConnectTimer;
         private BladeController BladeCtrl;
         private DeadReckoner DeadReckoner;
+        private Field? CurrentField;
 
         public MainForm
             (
@@ -90,6 +91,8 @@ namespace AgGrade
             DeadReckoner = new DeadReckoner();
             DeadReckoner.SetApplicationSettings(CurrentAppSettings);
             DeadReckoner.OnNewLocations += DeadReckoner_OnNewLocations;
+
+            CurrentField = null;
 
             ShowMap();
         }
@@ -331,13 +334,10 @@ namespace AgGrade
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
 
-            // fixme - allow user to choose file
-            AGDLoader Loader = new AGDLoader();
-            //Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
-            Field NewField = Loader.Load(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
-            NewField.Name = "ShopB4";
-
-            map.ShowField(NewField);
+            if (CurrentField != null)
+            {
+                map.ShowField(CurrentField);
+            }
 
             // give map initial conditions
             map.SetTractor(CurrentEquipmentStatus.TractorFix);
@@ -345,6 +345,26 @@ namespace AgGrade
             map.SetRearScraper(CurrentEquipmentStatus.RearPan.Fix);
 
             map.Show();
+        }
+
+        /// <summary>
+        /// Loads an AGD file
+        /// </summary>
+        /// <param name="FileName">Path and name of AGD file to load</param>
+        private void LoadField
+            (
+            string FileName
+            )
+        {
+            AGDLoader Loader = new AGDLoader();
+            CurrentField = Loader.Load(FileName); 
+            
+            CurrentField.Name = Path.GetFileNameWithoutExtension(FileName);
+
+            BladeCtrl.SetField(CurrentField);
+
+            // if showing map then update to show field
+            GetMap()?.ShowField(CurrentField);
         }
 
         /// <summary>
@@ -587,6 +607,10 @@ namespace AgGrade
             UpdateIMULeds();
             UpdateHeightLeds();
             UpdateRTKLeds();
+
+            // fixme - allow user to choose file to load
+            //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
+            LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
         }
 
         private void Controller_OnRearSlaveOffsetChanged(int Offset)

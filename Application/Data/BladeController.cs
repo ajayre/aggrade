@@ -17,6 +17,7 @@ namespace AgGrade.Data
         private GNSSFix FrontFix;
         private GNSSFix RearFix;
         private Timer CalcTimer;
+        private Field? Field;
 
         public BladeController
             (
@@ -30,9 +31,21 @@ namespace AgGrade.Data
             CalcTimer.Tick += CalcTimer_Tick;
         }
 
+        /// <summary>
+        /// Sets the field to cut
+        /// </summary>
+        /// <param name="NewField">Field to cut</param>
+        public void SetField
+            (
+            Field NewField
+            )
+        {
+            this.Field = NewField;
+        }
+
         private void CalcTimer_Tick(object? sender, EventArgs e)
         {
-
+            if (Field == null) return;
         }
 
         /// <summary>

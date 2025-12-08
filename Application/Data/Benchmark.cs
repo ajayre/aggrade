@@ -10,23 +10,27 @@ namespace AgGrade.Data
     {
         public Coordinate Location;
         public string Name;
+        public double Elevation;
 
         public Benchmark
             (
             Coordinate Location,
-            string Name
+            string Name,
+            double Elevation
             )
         {
             this.Location = Location;
             this.Name = Name;
+            this.Elevation = Elevation;
         }
 
         public Benchmark
             (
             double Latitude,
             double Longitude,
-            string Name
-            ) : this(new Coordinate(Latitude, Longitude), Name)
+            string Name,
+            double Elevation
+            ) : this(new Coordinate(Latitude, Longitude), Name, Elevation)
         {
         }
     }

@@ -384,8 +384,15 @@ namespace AgGrade.Data
 						point.ExistingElevation = double.Parse(fields[2].Trim(), CultureInfo.InvariantCulture);
 					}
 
-					// Parse proposed elevation if available
-					if (!string.IsNullOrEmpty(fields[3].Trim()))
+                    // is this a benchmark?
+                    if (point.Code.ToUpper().Contains("MB") || point.Code.ToUpper().Contains("BM"))
+                    {
+                        Field.Benchmarks.Add(new Benchmark(new Coordinate(point.Latitude, point.Longitude), point.Code, point.ExistingElevation));
+                        continue;
+                    }
+
+                    // Parse proposed elevation if available
+                    if (!string.IsNullOrEmpty(fields[3].Trim()))
 					{
 						point.ProposedElevation = double.Parse(fields[3].Trim(), CultureInfo.InvariantCulture);
 					}

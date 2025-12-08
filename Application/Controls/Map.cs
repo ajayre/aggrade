@@ -110,6 +110,10 @@ namespace AgGrade.Controls
             return TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
         }
 
+        /// <summary>
+        /// Shows a field on the map
+        /// </summary>
+        /// <param name="Field">Field to show</param>
         public void ShowField
             (
             Field Field
@@ -204,16 +208,12 @@ namespace AgGrade.Controls
             (
             )
         {
-            // fixme - remove
-            List<Benchmark> Benchmarks = new List<Benchmark>();
-            Benchmarks.Add(new Benchmark(36.446857119955279, -90.72280187456794, "B1"));
-
             // fixme - remove debug code
             //Stopwatch sw = new Stopwatch();
             //sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
-                Benchmarks, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
+                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
