@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Timer = System.Windows.Forms.Timer;
+using Timer = System.Timers.Timer;
 
 namespace AgGrade.Data
 {
@@ -18,6 +18,9 @@ namespace AgGrade.Data
         private GNSSFix RearFix;
         private Timer CalcTimer;
         private Field? Field;
+        private EquipmentSettings? CurrentEquipmentSettings;
+        private List<Bin> FrontCutBins;
+        private List<Bin> RearCutBins;
 
         public BladeController
             (
@@ -28,7 +31,50 @@ namespace AgGrade.Data
 
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
-            CalcTimer.Tick += CalcTimer_Tick;
+            CalcTimer.Elapsed += CalcTimer_Elapsed;
+
+            FrontCutBins = new List<Bin>();
+            RearCutBins = new List<Bin>();
+        }
+
+        /// <summary>
+        /// Perform the cutting calculations
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CalcTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if ((Field == null) || (CurrentEquipmentSettings == null)) return;
+
+            // front blade cutting
+            if (FrontBladeAuto)
+            {
+                double LCYCut = 0;
+
+                Bin? CurrentBin = Field.LatLonToBin(FrontFix.Latitude, FrontFix.Longitude);
+                if (CurrentBin != null)
+                {
+                    // if we haven't already cut from this bin then cut now
+                    if (!FrontCutBins.Contains(CurrentBin))
+                    {
+                        // get depth of cut, use max cut depth unless the target elevation is shallower
+                        double CutDepthM = CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
+                        if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
+                        {
+                            CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
+                        }
+
+                        // perform the cut
+                        CurrentBin.ExistingElevationM -= CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
+
+                        // calculate volume cut
+                        LCYCut = ?;
+
+                        // don't cut this bin again
+                        FrontCutBins.Add(CurrentBin);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -43,9 +89,16 @@ namespace AgGrade.Data
             this.Field = NewField;
         }
 
-        private void CalcTimer_Tick(object? sender, EventArgs e)
+        /// <summary>
+        /// Sets the equipment settings
+        /// </summary>
+        /// <param name="EquipmentSettings">New equipment settings</param>
+        public void SetEquipmentSettings
+            (
+            EquipmentSettings EquipmentSettings
+            )
         {
-            if (Field == null) return;
+            CurrentEquipmentSettings = EquipmentSettings;
         }
 
         /// <summary>
@@ -56,6 +109,9 @@ namespace AgGrade.Data
             )
         {
             FrontBladeAuto = true;
+
+            FrontCutBins.Clear();
+
             if (!CalcTimer.Enabled)
             {
                 CalcTimer.Start();
@@ -70,6 +126,7 @@ namespace AgGrade.Data
             )
         {
             FrontBladeAuto = false;
+
             if (!RearBladeAuto)
             {
                 CalcTimer.Stop();

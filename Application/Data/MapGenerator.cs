@@ -1037,24 +1037,6 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Convert field coordinate in meters to bin grid indices
-        /// </summary>
-        /// <param name="FieldX">Field X coordinate in meters</param>
-        /// <param name="FieldY">Field Y coordinate in meters</param>
-        /// <returns>Bin grid X and Y</returns>
-        private Point FieldMToBin
-            (
-            double FieldX,
-            double FieldY
-            )
-        {
-            int binGridX = (int)Math.Floor((FieldX - CurrentField.FieldMinX) / Field.BIN_SIZE_M);
-            int binGridY = (int)Math.Floor((FieldY - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
-
-            return new Point(binGridX, binGridY);
-        }
-
-        /// <summary>
         /// Converts pixel coordinates to bin grid indices
         /// </summary>
         /// <param name="PixelX">Pixel X coordinate</param>
@@ -1069,7 +1051,7 @@ namespace AgGrade.Data
             )
         {
             PointD FieldPoint = PixelToFieldM(PixelX, PixelY, Heading);
-            return FieldMToBin(FieldPoint.X, FieldPoint.Y);
+            return CurrentField.FieldMToBin(FieldPoint.X, FieldPoint.Y);
         }
 
         /// <summary>
@@ -1129,24 +1111,6 @@ namespace AgGrade.Data
             int finalY = (int)Math.Round(rotatedY + rotatedCenterY);
 
             return new Point(finalX, finalY);
-        }
-
-        /// <summary>
-        /// Convert bin grid indices to field coordinate in meters
-        /// </summary>
-        /// <param name="BinGridX">Bin grid X index</param>
-        /// <param name="BinGridY">Bin grid Y index</param>
-        /// <returns>Field X and Y coordinates in meters</returns>
-        private PointD BinToFieldM
-            (
-            int BinGridX,
-            int BinGridY
-            )
-        {
-            double FieldX = CurrentField.FieldMinX + (BinGridX * Field.BIN_SIZE_M);
-            double FieldY = CurrentField.FieldMinY + (BinGridY * Field.BIN_SIZE_M);
-
-            return new PointD(FieldX, FieldY);
         }
 
         // Calculate and set the initial elevation range (ignoring zero elevations)

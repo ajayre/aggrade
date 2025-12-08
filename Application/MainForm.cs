@@ -424,6 +424,8 @@ namespace AgGrade
             Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
 
+            BladeCtrl.SetEquipmentSettings(EquipmentSettings);
+
             UpdateEnabledLeds();
             UpdateIMULeds();
             UpdateHeightLeds();
@@ -602,6 +604,7 @@ namespace AgGrade
             ControllerConnectTimer.Start();
 
             Controller.SetEquipmentSettings(CurrentEquipmentSettings);
+            BladeCtrl.SetEquipmentSettings(CurrentEquipmentSettings);
 
             UpdateEnabledLeds();
             UpdateIMULeds();
