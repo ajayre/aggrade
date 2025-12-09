@@ -7,6 +7,7 @@ using AgGrade.Properties;
 using AgGrade.Controller;
 
 using Timer = System.Windows.Forms.Timer;
+using System.IO.MemoryMappedFiles;
 
 namespace AgGrade
 {
@@ -79,6 +80,8 @@ namespace AgGrade
 
             CurrentEquipmentStatus = new EquipmentStatus();
 
+            Controller = new OGController();
+
             TractorIMUFound = false;
             FrontIMUFound = false;
             RearIMUFound = false;
@@ -86,7 +89,7 @@ namespace AgGrade
             FrontHeightFound = false;
             RearHeightFound = false;
 
-            BladeCtrl = new BladeController();
+            BladeCtrl = new BladeController(Controller);
 
             DeadReckoner = new DeadReckoner();
             DeadReckoner.SetApplicationSettings(CurrentAppSettings);
@@ -330,6 +333,7 @@ namespace AgGrade
             map.Dock = DockStyle.Fill;
             map.SetEquipmentSettings(CurrentEquipmentSettings);
             map.SetApplicationSettings(CurrentAppSettings);
+            map.SetEquipmentStatus(CurrentEquipmentStatus);
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
@@ -562,7 +566,6 @@ namespace AgGrade
         /// <param name="e"></param>
         private void MainForm_Load(object sender, EventArgs e)
         {
-            Controller = new OGController();
             Controller.OnEmergencyStop += Controller_OnEmergencyStop;
             Controller.OnEmergencyStopCleared += Controller_OnEmergencyStopCleared;
 
@@ -593,6 +596,8 @@ namespace AgGrade
             Controller.OnRearBladeHeightChanged += Controller_OnRearBladeHeightChanged;
             Controller.OnRearSlaveOffsetChanged += Controller_OnRearSlaveOffsetChanged;
 
+            Controller.OnFrontBladeCommandSent += Controller_OnFrontBladeCommandSent;
+
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
@@ -616,14 +621,25 @@ namespace AgGrade
             LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
         }
 
+        /// <summary>
+        /// Called when a new front blade height command has been sent to the controller
+        /// Doesn't mean the blade is moving, only that the height has been requested
+        /// </summary>
+        /// <param name="Value">Blade height command 0 -> 200</param>
+        private void Controller_OnFrontBladeCommandSent(uint Value)
+        {
+            // fixme - to do - show requested height
+        }
+
         private void Controller_OnRearSlaveOffsetChanged(int Offset)
         {
             CurrentEquipmentStatus.RearPan.BladeOffset = Offset;
         }
 
-        private void Controller_OnRearBladeHeightChanged(int Height)
+        private void Controller_OnRearBladeHeightChanged(uint Height)
         {
-            CurrentEquipmentStatus.RearPan.BladeHeight = Height;
+            // convert to signed millimeters
+            CurrentEquipmentStatus.RearPan.BladeHeight = (int)Height - 100;
         }
 
         private void Controller_OnRearBladePWMChanged(byte PWMValue)
@@ -648,9 +664,10 @@ namespace AgGrade
             CurrentEquipmentStatus.RearPan.BladeAuto = IsAuto;
         }
 
-        private void Controller_OnFrontBladeHeightChanged(int Height)
+        private void Controller_OnFrontBladeHeightChanged(uint Height)
         {
-            CurrentEquipmentStatus.FrontPan.BladeHeight = Height;
+            // convert to signed millimeters
+            CurrentEquipmentStatus.FrontPan.BladeHeight = (int)Height - 100;
         }
 
         private void Controller_OnFrontSlaveOffsetChanged(int Offset)

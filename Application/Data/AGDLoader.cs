@@ -225,6 +225,13 @@ namespace AgGrade.Data
             double MinY = Field.TopologyPoints.Min(p => p.Y);
             double MaxY = Field.TopologyPoints.Max(p => p.Y);
 
+            // Update Field bounds to match the actual UTM coordinate bounds used for binning
+            // This ensures FieldMinX/FieldMinY match the MinX/MinY used in bin calculations
+            Field.FieldMinX = MinX;
+            Field.FieldMinY = MinY;
+            Field.FieldMaxX = MaxX;
+            Field.FieldMaxY = MaxY;
+
             // get size of field in bins
             int BinWidth = (int)Math.Ceiling((MaxX - MinX) / BinSizeM);
             int BinHeight = (int)Math.Ceiling((MaxY - MinY) / BinSizeM);

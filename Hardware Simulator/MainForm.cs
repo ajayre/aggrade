@@ -124,25 +124,37 @@ namespace HardwareSim
             PGNPacket Command
             )
         {
-            if (Command.PGN == PGNValues.PGN_AGGRADE_STARTED)
+            switch (Command.PGN)
             {
-                double Lat = DEFAULT_LATITUDE;
-                double Lon = DEFAULT_LONGITUDE;
-                GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix, true);
+                case PGNValues.PGN_AGGRADE_STARTED:
+                    double Lat = DEFAULT_LATITUDE;
+                    double Lon = DEFAULT_LONGITUDE;
+                    GNSSSim.SetTractorLocation(Lat, Lon, DEFAULT_ALTITUDE, RTKQuality.RTKFix, true);
 
-                SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
-                SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_HEIGHT_FOUND));
-                SendStatus(new PGNPacket(PGNValues.PGN_REAR_HEIGHT_FOUND));
+                    SendStatus(new PGNPacket(PGNValues.PGN_TRACTOR_IMU_FOUND));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_IMU_FOUND));
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_IMU_FOUND));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_HEIGHT_FOUND));
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_HEIGHT_FOUND));
 
-                /*SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, 5));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE, 6));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_PWMVALUE, 127));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_DIRECTION, 1));
-                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, 1));*/
+                    /*SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, 5));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE, 6));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_PWMVALUE, 127));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_DIRECTION, 1));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, 1));*/
 
-                GNSSSim.Start();
+                    GNSSSim.Start();
+                    break;
+
+                case PGNValues.PGN_FRONT_CUT_VALVE:
+                    // we send back the new blade height
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, Command.GetUInt32()));
+                    break;
+
+                case PGNValues.PGN_REAR_CUT_VALVE:
+                    // we send back the new blade height
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, Command.GetUInt32()));
+                    break;
             }
         }
 

@@ -44,6 +44,7 @@ namespace AgGrade.Controls
 
         private EquipmentSettings _CurrentEquipmentSettings;
         private AppSettings _CurrentAppSettings;
+        private EquipmentStatus _CurrentEquipmentStatus;
 
         public Map()
         {
@@ -59,8 +60,8 @@ namespace AgGrade.Controls
 
             ScaleFactor = DEFAULT_SCALE_FACTOR;
 
-            FrontBladeDepthLabel.Text = "X mm";
-            RearBladeDepthLabel.Text = "X mm";
+            FrontBladeHeightLabel.Text = "X mm";
+            RearBladeHeightLabel.Text = "X mm";
             FrontLoadLabel.Text = "0 LCY";
             RearLoadLabel.Text = "0 LCY";
             HeadingLabel.Text = "0" + DegreeSymbol;
@@ -97,6 +98,14 @@ namespace AgGrade.Controls
             )
         {
             _CurrentAppSettings = Settings;
+        }
+
+        public void SetEquipmentStatus
+            (
+            EquipmentStatus Status
+            )
+        {
+            _CurrentEquipmentStatus = Status;
         }
 
         /// <summary>
@@ -202,6 +211,7 @@ namespace AgGrade.Controls
             }
         }
 
+        // fixme - remove
         private long LastPerf = 0;
 
         private void RefreshMap
@@ -217,6 +227,9 @@ namespace AgGrade.Controls
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
+
+            FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
+            RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
         }
 
         private void ShowPerf()

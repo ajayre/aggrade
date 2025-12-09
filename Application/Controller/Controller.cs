@@ -60,9 +60,12 @@ namespace AgGrade.Controller
         public event LocationChanged OnFrontLocationChanged = null;
         public event LocationChanged OnRearLocationChanged = null;
 
-        public delegate void BladeHeightChanged(int Height);
+        public delegate void BladeHeightChanged(uint Height);
         public event BladeHeightChanged OnFrontBladeHeightChanged = null;
         public event BladeHeightChanged OnRearBladeHeightChanged = null;
+
+        public delegate void FrontBladeCommandSent(uint Value);
+        public event FrontBladeCommandSent OnFrontBladeCommandSent = null;
 
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
@@ -313,11 +316,11 @@ namespace AgGrade.Controller
 
                         // blade heights
                         case PGNValues.PGN_FRONT_BLADE_HEIGHT:
-                            OnFrontBladeHeightChanged?.Invoke((int)Stat.GetUInt32());
+                            OnFrontBladeHeightChanged?.Invoke(Stat.GetUInt32());
                             break;
 
                         case PGNValues.PGN_REAR_BLADE_HEIGHT:
-                            OnRearBladeHeightChanged?.Invoke((int)Stat.GetUInt32());
+                            OnRearBladeHeightChanged?.Invoke(Stat.GetUInt32());
                             break;
 
                         // IMU
@@ -502,6 +505,8 @@ namespace AgGrade.Controller
 
             PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_CUT_VALVE, Value);
             SendControllerCommand(TxCmd);
+
+            OnFrontBladeCommandSent?.Invoke(Value);
         }
 
         /// <summary>

@@ -30,8 +30,8 @@
         {
             MapCanvas = new PictureBox();
             panel1 = new Panel();
-            FrontBladeDepthLabel = new Label();
-            RearBladeDepthLabel = new Label();
+            FrontBladeHeightLabel = new Label();
+            RearBladeHeightLabel = new Label();
             FrontLoadLabel = new Label();
             RearLoadLabel = new Label();
             HeadingLabel = new Label();
@@ -56,8 +56,8 @@
             // panel1
             // 
             panel1.BackColor = Color.PaleGoldenrod;
-            panel1.Controls.Add(FrontBladeDepthLabel);
-            panel1.Controls.Add(RearBladeDepthLabel);
+            panel1.Controls.Add(FrontBladeHeightLabel);
+            panel1.Controls.Add(RearBladeHeightLabel);
             panel1.Controls.Add(FrontLoadLabel);
             panel1.Controls.Add(RearLoadLabel);
             panel1.Controls.Add(HeadingLabel);
@@ -69,31 +69,31 @@
             panel1.Size = new Size(862, 45);
             panel1.TabIndex = 1;
             // 
-            // FrontBladeDepthLabel
+            // FrontBladeHeightLabel
             // 
-            FrontBladeDepthLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            FrontBladeDepthLabel.AutoSize = true;
-            FrontBladeDepthLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            FrontBladeDepthLabel.ForeColor = Color.RoyalBlue;
-            FrontBladeDepthLabel.Location = new Point(340, 10);
-            FrontBladeDepthLabel.Name = "FrontBladeDepthLabel";
-            FrontBladeDepthLabel.Size = new Size(73, 25);
-            FrontBladeDepthLabel.TabIndex = 6;
-            FrontBladeDepthLabel.Text = "10 mm";
-            FrontBladeDepthLabel.TextAlign = ContentAlignment.MiddleRight;
+            FrontBladeHeightLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            FrontBladeHeightLabel.AutoSize = true;
+            FrontBladeHeightLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            FrontBladeHeightLabel.ForeColor = Color.RoyalBlue;
+            FrontBladeHeightLabel.Location = new Point(340, 10);
+            FrontBladeHeightLabel.Name = "FrontBladeHeightLabel";
+            FrontBladeHeightLabel.Size = new Size(73, 25);
+            FrontBladeHeightLabel.TabIndex = 6;
+            FrontBladeHeightLabel.Text = "10 mm";
+            FrontBladeHeightLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
-            // RearBladeDepthLabel
+            // RearBladeHeightLabel
             // 
-            RearBladeDepthLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            RearBladeDepthLabel.AutoSize = true;
-            RearBladeDepthLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            RearBladeDepthLabel.ForeColor = Color.DarkGoldenrod;
-            RearBladeDepthLabel.Location = new Point(503, 10);
-            RearBladeDepthLabel.Name = "RearBladeDepthLabel";
-            RearBladeDepthLabel.Size = new Size(73, 25);
-            RearBladeDepthLabel.TabIndex = 5;
-            RearBladeDepthLabel.Text = "10 mm";
-            RearBladeDepthLabel.TextAlign = ContentAlignment.MiddleRight;
+            RearBladeHeightLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            RearBladeHeightLabel.AutoSize = true;
+            RearBladeHeightLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            RearBladeHeightLabel.ForeColor = Color.DarkGoldenrod;
+            RearBladeHeightLabel.Location = new Point(503, 10);
+            RearBladeHeightLabel.Name = "RearBladeHeightLabel";
+            RearBladeHeightLabel.Size = new Size(73, 25);
+            RearBladeHeightLabel.TabIndex = 5;
+            RearBladeHeightLabel.Text = "10 mm";
+            RearBladeHeightLabel.TextAlign = ContentAlignment.MiddleRight;
             // 
             // FrontLoadLabel
             // 
@@ -190,7 +190,7 @@
         private Label SpeedLabel;
         private Label FrontLoadLabel;
         private Label RearLoadLabel;
-        private Label FrontBladeDepthLabel;
-        private Label RearBladeDepthLabel;
+        private Label FrontBladeHeightLabel;
+        private Label RearBladeHeightLabel;
     }
 }

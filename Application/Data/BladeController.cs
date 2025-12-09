@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
@@ -12,6 +13,9 @@ namespace AgGrade.Data
     {
         private const int CALC_PERIOD_MS = 50;
 
+        // height to place blade at when not cutting, e.g. going outside of field
+        private const int MAX_BLADE_HEIGHT_MM = 80;
+
         private bool FrontBladeAuto;
         private bool RearBladeAuto;
         private GNSSFix FrontFix;
@@ -19,22 +23,21 @@ namespace AgGrade.Data
         private Timer CalcTimer;
         private Field? Field;
         private EquipmentSettings? CurrentEquipmentSettings;
-        private List<Bin> FrontCutBins;
-        private List<Bin> RearCutBins;
+        private OGController Controller;
 
         public BladeController
             (
+            OGController Controller
             )
         {
+            this.Controller = Controller;
+
             FrontBladeAuto = false;
             RearBladeAuto = false;
 
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Elapsed += CalcTimer_Elapsed;
-
-            FrontCutBins = new List<Bin>();
-            RearCutBins = new List<Bin>();
         }
 
         /// <summary>
@@ -46,17 +49,21 @@ namespace AgGrade.Data
         {
             if ((Field == null) || (CurrentEquipmentSettings == null)) return;
 
-            // front blade cutting
+            // front blade cutting depth
             if (FrontBladeAuto)
             {
-                double LCYCut = 0;
-
                 Bin? CurrentBin = Field.LatLonToBin(FrontFix.Latitude, FrontFix.Longitude);
                 if (CurrentBin != null)
                 {
-                    // if we haven't already cut from this bin then cut now
-                    if (!FrontCutBins.Contains(CurrentBin))
+                    // no data for this bin
+                    if (CurrentBin.ExistingElevationM == 0)
                     {
+                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    }
+                    // need to cut
+                    else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
+                    {
+
                         // get depth of cut, use max cut depth unless the target elevation is shallower
                         double CutDepthM = CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
                         if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
@@ -64,15 +71,21 @@ namespace AgGrade.Data
                             CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
                         }
 
-                        // perform the cut
-                        CurrentBin.ExistingElevationM -= CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
-
-                        // calculate volume cut
-                        LCYCut = ?;
-
-                        // don't cut this bin again
-                        FrontCutBins.Add(CurrentBin);
+                        // convert to command for controller
+                        uint Value = 100 - (uint)(CutDepthM * 1000.0);
+                        Controller.SetFrontCutValve(Value);
                     }
+                    // need to fill, but we are cutting
+                    else
+                    {
+                        // float on surface
+                        Controller.SetFrontCutValve(100);
+                    }
+                }
+                // no bin - outside of field
+                else
+                {
+                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
                 }
             }
         }
@@ -109,8 +122,6 @@ namespace AgGrade.Data
             )
         {
             FrontBladeAuto = true;
-
-            FrontCutBins.Clear();
 
             if (!CalcTimer.Enabled)
             {
