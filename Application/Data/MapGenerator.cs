@@ -343,14 +343,27 @@ namespace AgGrade.Data
                             {
                                 // look in cache for tile
                                 bool InCache = false;
+                                MapTile? CachedTile = null;
                                 foreach (MapTile CTile in Cache.Tiles)
                                 {
                                     if ((CTile.TileGridX == tileX) && (CTile.TileGridY == tileY))
                                     {
+                                        CachedTile = CTile;
                                         Tiles.Add(CTile);
                                         InCache = true;
                                         break;
                                     }
+                                }
+
+                                // check if any of the bins in the cached tile are marked as dirty
+                                // if they are then remove tile from cache
+                                if (InCache && IsTileDirty(CachedTile!))
+                                {
+                                    // remove tile from display
+                                    Tiles.Remove(CachedTile!);
+                                    // remove tile from cache to force a re-render
+                                    Cache.Tiles.Remove(CachedTile!);
+                                    InCache = false;
                                 }
 
                                 if (!InCache)
@@ -491,6 +504,66 @@ namespace AgGrade.Data
             Decorate(bitmap, Benchmarks, TractorLocationHistory);
 
             return bitmap;
+        }
+
+        /// <summary>
+        /// Checks if any of the bins in a tile are dirty
+        /// If they are then marks the bins as not dirty and returns true
+        /// otherwise returns false
+        /// </summary>
+        /// <param name="tile">The tile to check for dirty bins</param>
+        /// <returns>true if any bins in the tile were dirty, false otherwise</returns>
+        private bool IsTileDirty
+            (
+            MapTile tile
+            )
+        {
+            if (CurrentField == null || CurrentField.Bins == null || CurrentField.Bins.Count == 0)
+            {
+                return false;
+            }
+
+            // Convert tile pixel bounds to bin grid coordinates
+            // The tile coordinates are in unrotated map pixel space
+            // We need to check all four corners and the area in between to find all bins
+            
+            // Get bin coordinates for the four corners of the tile
+            Point topLeftBin = PixelToBin(tile.StartX, tile.StartY, 0);
+            Point topRightBin = PixelToBin(tile.StartX + tile.Width, tile.StartY, 0);
+            Point bottomLeftBin = PixelToBin(tile.StartX, tile.StartY + tile.Height, 0);
+            Point bottomRightBin = PixelToBin(tile.StartX + tile.Width, tile.StartY + tile.Height, 0);
+
+            // Find the range of bin coordinates that could be in this tile
+            int minBinX = Math.Min(Math.Min(topLeftBin.X, topRightBin.X), Math.Min(bottomLeftBin.X, bottomRightBin.X));
+            int maxBinX = Math.Max(Math.Max(topLeftBin.X, topRightBin.X), Math.Max(bottomLeftBin.X, bottomRightBin.X));
+            int minBinY = Math.Min(Math.Min(topLeftBin.Y, topRightBin.Y), Math.Min(bottomLeftBin.Y, bottomRightBin.Y));
+            int maxBinY = Math.Max(Math.Max(topLeftBin.Y, topRightBin.Y), Math.Max(bottomLeftBin.Y, bottomRightBin.Y));
+
+            // Find all bins within this range and check if they're dirty
+            bool anyDirty = false;
+            foreach (Bin bin in CurrentField.Bins)
+            {
+                if (bin.X >= minBinX && bin.X <= maxBinX && bin.Y >= minBinY && bin.Y <= maxBinY)
+                {
+                    // Check if this bin is actually within the tile bounds
+                    // Convert bin center to pixel coordinates to verify
+                    PointD binFieldM = CurrentField.BinToFieldM(bin.X, bin.Y);
+                    Point binPixel = FieldMToPixel(binFieldM.X, binFieldM.Y, 0);
+                    
+                    // Check if bin pixel is within tile bounds (with some tolerance for bin size)
+                    if (binPixel.X >= tile.StartX && binPixel.X < tile.StartX + tile.Width &&
+                        binPixel.Y >= tile.StartY && binPixel.Y < tile.StartY + tile.Height)
+                    {
+                        if (bin.Dirty)
+                        {
+                            anyDirty = true;
+                        }
+                        bin.Dirty = false;
+                    }
+                }
+            }
+
+            return anyDirty;
         }
 
         private void Decorate

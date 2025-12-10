@@ -12,6 +12,7 @@ public class Bin
     public double FillAmountM { get; set; }
     public double ExistingElevationM { get; set; }
     public double TargetElevationM { get; set; }
+    public bool Dirty { get; set; }
 
     public override string ToString()
     {

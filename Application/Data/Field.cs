@@ -92,5 +92,67 @@ namespace AgGrade.Data
             // Find and return the bin with matching X and Y coordinates
             return Bins.FirstOrDefault(bin => bin.X == binGridX && bin.Y == binGridY);
         }
+
+        /// <summary>
+        /// Gets all of the bins in a straight line from a start bin to an end bin
+        /// </summary>
+        /// <param name="StartBin">Start bin</param>
+        /// <param name="EndBin">End bin</param>
+        /// <returns></returns>
+        public List<Bin> GetBinsBetween
+            (
+            Bin? StartBin,
+            Bin? EndBin
+            )
+        {
+            List<Bin> result = new List<Bin>();
+
+            if ((StartBin == null) || (EndBin == null)) return result;
+
+            int x0 = StartBin.X;
+            int y0 = StartBin.Y;
+            int x1 = EndBin.X;
+            int y1 = EndBin.Y;
+
+            // Use Bresenham's line algorithm to find all bins on the line
+            int dx = Math.Abs(x1 - x0);
+            int dy = Math.Abs(y1 - y0);
+            int sx = x0 < x1 ? 1 : -1;
+            int sy = y0 < y1 ? 1 : -1;
+            int err = dx - dy;
+
+            int x = x0;
+            int y = y0;
+
+            while (true)
+            {
+                // Find the bin at this grid position
+                Bin? bin = Bins.FirstOrDefault(b => b.X == x && b.Y == y);
+                if (bin != null)
+                {
+                    result.Add(bin);
+                }
+
+                // Check if we've reached the end bin
+                if (x == x1 && y == y1)
+                {
+                    break;
+                }
+
+                int e2 = 2 * err;
+                if (e2 > -dy)
+                {
+                    err -= dy;
+                    x += sx;
+                }
+                if (e2 < dx)
+                {
+                    err += dx;
+                    y += sy;
+                }
+            }
+
+            return result;
+        }
     }
 }

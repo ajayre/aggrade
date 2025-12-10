@@ -13,16 +13,14 @@ namespace AgGrade.Data
     {
         private const int CALC_PERIOD_MS = 50;
 
+        // fixme - this needs to go into the settings
         // height to place blade at when not cutting, e.g. going outside of field
         private const int MAX_BLADE_HEIGHT_MM = 80;
 
-        private bool FrontBladeAuto;
-        private bool RearBladeAuto;
-        private GNSSFix FrontFix;
-        private GNSSFix RearFix;
         private Timer CalcTimer;
         private Field? Field;
         private EquipmentSettings? CurrentEquipmentSettings;
+        private EquipmentStatus? CurrentEquipmentStatus;
         private OGController Controller;
 
         public BladeController
@@ -32,12 +30,10 @@ namespace AgGrade.Data
         {
             this.Controller = Controller;
 
-            FrontBladeAuto = false;
-            RearBladeAuto = false;
-
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Elapsed += CalcTimer_Elapsed;
+            CalcTimer.Start();
         }
 
         /// <summary>
@@ -47,12 +43,12 @@ namespace AgGrade.Data
         /// <param name="e"></param>
         private void CalcTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
-            if ((Field == null) || (CurrentEquipmentSettings == null)) return;
+            if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
 
-            // front blade cutting depth
-            if (FrontBladeAuto)
+            // front blade is set to auto cutting
+            if (CurrentEquipmentStatus.FrontPan.BladeAuto)
             {
-                Bin? CurrentBin = Field.LatLonToBin(FrontFix.Latitude, FrontFix.Longitude);
+                Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
                 if (CurrentBin != null)
                 {
                     // no data for this bin
@@ -105,67 +101,25 @@ namespace AgGrade.Data
         /// <summary>
         /// Sets the equipment settings
         /// </summary>
-        /// <param name="EquipmentSettings">New equipment settings</param>
+        /// <param name="Settings">New settings</param>
         public void SetEquipmentSettings
             (
-            EquipmentSettings EquipmentSettings
+            EquipmentSettings Settings
             )
         {
-            CurrentEquipmentSettings = EquipmentSettings;
+            CurrentEquipmentSettings = Settings;
         }
 
         /// <summary>
-        /// Start automatic front blade control
+        /// Sets the equipment status
         /// </summary>
-        public void StartFront
+        /// <param name="Status">New status</param>
+        public void SetEquipmentStatus
             (
+            EquipmentStatus Status
             )
         {
-            FrontBladeAuto = true;
-
-            if (!CalcTimer.Enabled)
-            {
-                CalcTimer.Start();
-            }
-        }
-
-        /// <summary>
-        /// Stop automatic front blade control
-        /// </summary>
-        public void StopFront
-            (
-            )
-        {
-            FrontBladeAuto = false;
-
-            if (!RearBladeAuto)
-            {
-                CalcTimer.Stop();
-            }
-        }
-
-        /// <summary>
-        /// Sets the current fix of the front blade
-        /// </summary>
-        /// <param name="Fix">Current fix</param>
-        public void SetFrontFix
-            (
-            GNSSFix Fix
-            )
-        {
-            FrontFix = Fix;
-        }
-
-        /// <summary>
-        /// Sets the current fix of the rear blade
-        /// </summary>
-        /// <param name="Fix">Current fix</param>
-        public void SetRearFix
-            (
-            GNSSFix Fix
-            )
-        {
-            RearFix = Fix;
+            CurrentEquipmentStatus = Status;
         }
     }
 }

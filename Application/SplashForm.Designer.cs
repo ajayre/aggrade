@@ -29,26 +29,40 @@
         private void InitializeComponent()
         {
             label1 = new Label();
+            VersionLabel = new Label();
             SuspendLayout();
             // 
             // label1
             // 
-            label1.Dock = DockStyle.Top;
+            label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             label1.Font = new Font("Segoe UI", 80F);
             label1.ForeColor = SystemColors.Control;
-            label1.Location = new Point(0, 0);
+            label1.Location = new Point(0, 170);
             label1.Name = "label1";
-            label1.Size = new Size(872, 468);
+            label1.Size = new Size(964, 182);
             label1.TabIndex = 0;
             label1.Text = "AgGrade";
             label1.TextAlign = ContentAlignment.MiddleCenter;
+            // 
+            // VersionLabel
+            // 
+            VersionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            VersionLabel.Font = new Font("Segoe UI", 30F);
+            VersionLabel.ForeColor = SystemColors.Control;
+            VersionLabel.Location = new Point(0, 334);
+            VersionLabel.Name = "VersionLabel";
+            VersionLabel.Size = new Size(964, 69);
+            VersionLabel.TabIndex = 1;
+            VersionLabel.Text = "Version X.X.X";
+            VersionLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // SplashForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Green;
-            ClientSize = new Size(872, 467);
+            ClientSize = new Size(964, 510);
+            Controls.Add(VersionLabel);
             Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.None;
             MaximizeBox = false;
@@ -66,5 +80,6 @@
         #endregion
 
         private Label label1;
+        private Label VersionLabel;
     }
 }

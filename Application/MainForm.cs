@@ -29,6 +29,7 @@ namespace AgGrade
         private BladeController BladeCtrl;
         private DeadReckoner DeadReckoner;
         private Field? CurrentField;
+        private FieldUpdater FieldUpdater;
 
         public MainForm
             (
@@ -82,18 +83,23 @@ namespace AgGrade
 
             Controller = new OGController();
 
+            FieldUpdater = new FieldUpdater();
+            FieldUpdater.SetEquipmentStatus(CurrentEquipmentStatus);
+            FieldUpdater.SetApplicationSettings(CurrentAppSettings);
+
+            BladeCtrl = new BladeController(Controller);
+            BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
+
+            DeadReckoner = new DeadReckoner();
+            DeadReckoner.SetApplicationSettings(CurrentAppSettings);
+            DeadReckoner.OnNewLocations += DeadReckoner_OnNewLocations;
+
             TractorIMUFound = false;
             FrontIMUFound = false;
             RearIMUFound = false;
 
             FrontHeightFound = false;
             RearHeightFound = false;
-
-            BladeCtrl = new BladeController(Controller);
-
-            DeadReckoner = new DeadReckoner();
-            DeadReckoner.SetApplicationSettings(CurrentAppSettings);
-            DeadReckoner.OnNewLocations += DeadReckoner_OnNewLocations;
 
             CurrentField = null;
 
@@ -117,10 +123,6 @@ namespace AgGrade
             GetMap()?.SetTractor(TractorFix);
             GetMap()?.SetFrontScraper(FrontScraperFix);
             GetMap()?.SetRearScraper(RearScraperFix);
-
-            // update blade controller
-            BladeCtrl.SetFrontFix(FrontScraperFix);
-            BladeCtrl.SetRearFix(RearScraperFix);
         }
 
         /// <summary>
@@ -366,6 +368,7 @@ namespace AgGrade
             CurrentField.Name = Path.GetFileNameWithoutExtension(FileName);
 
             BladeCtrl.SetField(CurrentField);
+            FieldUpdater.SetField(CurrentField);
 
             // if showing map then update to show field
             GetMap()?.ShowField(CurrentField);
@@ -404,6 +407,7 @@ namespace AgGrade
             GetMap()?.SetApplicationSettings(AppSettings);
 
             DeadReckoner.SetApplicationSettings(CurrentAppSettings);
+            FieldUpdater.SetApplicationSettings(CurrentAppSettings);
 
             ConnectToController();
             ConfigureController();
@@ -423,12 +427,12 @@ namespace AgGrade
             CurrentEquipmentSettings = EquipmentSettings;
 
             GetMap()?.SetEquipmentSettings(EquipmentSettings);
-            Controller?.SetEquipmentSettings(CurrentEquipmentSettings);
+            Controller?.SetEquipmentSettings(EquipmentSettings);
+            FieldUpdater.SetEquipmentSettings(EquipmentSettings);
+            BladeCtrl.SetEquipmentSettings(EquipmentSettings);
 
             Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
-
-            BladeCtrl.SetEquipmentSettings(EquipmentSettings);
 
             UpdateEnabledLeds();
             UpdateIMULeds();
@@ -609,6 +613,7 @@ namespace AgGrade
             ControllerConnectTimer.Start();
 
             Controller.SetEquipmentSettings(CurrentEquipmentSettings);
+            FieldUpdater.SetEquipmentSettings(CurrentEquipmentSettings);
             BladeCtrl.SetEquipmentSettings(CurrentEquipmentSettings);
 
             UpdateEnabledLeds();
@@ -662,6 +667,15 @@ namespace AgGrade
         private void Controller_OnRearBladeAutoChanged(bool IsAuto)
         {
             CurrentEquipmentStatus.RearPan.BladeAuto = IsAuto;
+
+            if (IsAuto)
+            {
+                FieldUpdater.Start();
+            }
+            else if (!CurrentEquipmentStatus.FrontPan.BladeAuto)
+            {
+                FieldUpdater.Stop();
+            }
         }
 
         private void Controller_OnFrontBladeHeightChanged(uint Height)
@@ -695,13 +709,14 @@ namespace AgGrade
         private void Controller_OnFrontBladeAutoChanged(bool IsAuto)
         {
             CurrentEquipmentStatus.FrontPan.BladeAuto = IsAuto;
+
             if (IsAuto)
             {
-                BladeCtrl.StartFront();
+                FieldUpdater.Start();
             }
-            else
+            else if (!CurrentEquipmentStatus.RearPan.BladeAuto)
             {
-                BladeCtrl.StopFront();
+                FieldUpdater.Stop();
             }
         }
 
@@ -779,8 +794,6 @@ namespace AgGrade
 
             GetMap()?.SetRearScraper(Fix);
 
-            BladeCtrl.SetRearFix(Fix);
-
             DeadReckoner.SetRearScraper(Fix);
 
             UpdateRTKLeds();
@@ -797,8 +810,6 @@ namespace AgGrade
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
             GetMap()?.SetFrontScraper(Fix);
-
-            BladeCtrl.SetFrontFix(Fix);
 
             DeadReckoner.SetFrontScraper(Fix);
 

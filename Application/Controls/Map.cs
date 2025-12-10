@@ -52,7 +52,7 @@ namespace AgGrade.Controls
 
             MapGen = new MapGenerator();
             MapGen.TractorColor = MapGenerator.TractorColors.Red;
-            MapGen.TractorYOffset = 7;
+            MapGen.TractorYOffset = 3;
 
             TractorFix = new GNSSFix();
             FrontScraperFix = new GNSSFix();

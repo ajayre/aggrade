@@ -541,16 +541,19 @@ namespace AgGrade.Controller
             PGNPacket Cmd
             )
         {
-            ControllerChannel.Packet.TxBuff[0] = (byte)((UInt16)Cmd.PGN & 0xFF);
-            ControllerChannel.Packet.TxBuff[1] = (byte)(((UInt16)Cmd.PGN >> 8) & 0xFF);
-
-            for (int b = 0; b < PGNPacket.MAX_LEN; b++)
+            if (ControllerChannel != null)
             {
-                ControllerChannel.Packet.TxBuff[2 + b] = Cmd.Data[b];
-            }
+                ControllerChannel.Packet.TxBuff[0] = (byte)((UInt16)Cmd.PGN & 0xFF);
+                ControllerChannel.Packet.TxBuff[1] = (byte)(((UInt16)Cmd.PGN >> 8) & 0xFF);
 
-            ControllerChannel.SendData(PGNPacket.MAX_LEN + 2);
-            //Console.WriteLine(string.Format("Tx: {0}:0x{1:X8}", Cmd.PGN, Cmd.Value));
+                for (int b = 0; b < PGNPacket.MAX_LEN; b++)
+                {
+                    ControllerChannel.Packet.TxBuff[2 + b] = Cmd.Data[b];
+                }
+
+                ControllerChannel.SendData(PGNPacket.MAX_LEN + 2);
+                //Console.WriteLine(string.Format("Tx: {0}:0x{1:X8}", Cmd.PGN, Cmd.Value));
+            }
         }
 
         private PGNPacket GetControllerStatus

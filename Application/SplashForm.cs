@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -34,6 +35,8 @@ namespace AgGrade
                 // Set the form's size to the full resolution of the primary screen
                 this.Size = Screen.PrimaryScreen.Bounds.Size;
             }
+
+            VersionLabel.Text = "Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         private void SplashForm_Shown(object sender, EventArgs e)
