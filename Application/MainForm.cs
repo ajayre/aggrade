@@ -788,7 +788,7 @@ namespace AgGrade
         /// <param name="Fix">New scraper location</param>
         private void Controller_OnRearLocationChanged(GNSSFix Fix)
         {
-            CurrentEquipmentStatus.FrontPan.Fix = Fix;
+            CurrentEquipmentStatus.RearPan.Fix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
@@ -805,7 +805,7 @@ namespace AgGrade
         /// <param name="Fix">New scraper location</param>
         private void Controller_OnFrontLocationChanged(GNSSFix Fix)
         {
-            CurrentEquipmentStatus.RearPan.Fix = Fix;
+            CurrentEquipmentStatus.FrontPan.Fix = Fix;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 

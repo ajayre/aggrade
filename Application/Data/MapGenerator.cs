@@ -32,6 +32,61 @@ namespace AgGrade.Data
             public int StartY;
             public int Width;
             public int Height;
+            public int MinBinX;
+            public int MaxBinX;
+            public int MinBinY;
+            public int MaxBinY;
+            public List<Bin> AssociatedBins;
+
+            public MapTile
+                (
+                int TileGridX,
+                int TileGridY,
+                int StartX,
+                int StartY,
+                int Width,
+                int Height
+                )
+            {
+                this.TileGridX = TileGridX;
+                this.TileGridY = TileGridY;
+                this.StartX = StartX;
+                this.StartY = StartY;
+                this.Width = Width;
+                this.Height = Height;
+                this.AssociatedBins = new List<Bin>();
+            }
+
+            /// <summary>
+            /// Checks if any of the bins in this tile are dirty
+            /// If they are then marks the bins as not dirty and returns true
+            /// otherwise returns false
+            /// </summary>
+            /// <param name="field">The field containing the bins to check (unused, kept for compatibility)</param>
+            /// <returns>true if any bins in the tile were dirty, false otherwise</returns>
+            public bool IsDirty
+                (
+                Field field
+                )
+            {
+                if (AssociatedBins == null || AssociatedBins.Count == 0)
+                {
+                    return false;
+                }
+
+                // Only check the bins associated with this tile
+                bool anyDirty = false;
+                foreach (Bin bin in AssociatedBins)
+                {
+                    if (bin.Dirty)
+                    {
+                        anyDirty = true;
+                    }
+                    bin.Dirty = false;
+                }
+
+                return anyDirty;
+            }
         }
 
         private class TileCache
@@ -357,7 +412,7 @@ namespace AgGrade.Data
 
                                 // check if any of the bins in the cached tile are marked as dirty
                                 // if they are then remove tile from cache
-                                if (InCache && IsTileDirty(CachedTile!))
+                                if (InCache && CachedTile!.IsDirty(CurrentField))
                                 {
                                     // remove tile from display
                                     Tiles.Remove(CachedTile!);
@@ -368,13 +423,13 @@ namespace AgGrade.Data
 
                                 if (!InCache)
                                 {
-                                    MapTile NewTile = new MapTile();
-                                    NewTile.TileGridX = tileX;
-                                    NewTile.TileGridY = tileY;
-                                    NewTile.StartX = tileStartX;
-                                    NewTile.StartY = tileStartY;
-                                    NewTile.Width = tileWidth;
-                                    NewTile.Height = tileHeight;
+                                    MapTile NewTile = new MapTile(tileX, tileY, tileStartX, tileStartY, tileWidth, tileHeight);
+
+                                    // Calculate and store the bin coordinate range for this tile
+                                    CalculateTileBinRange(NewTile);
+
+                                    // Populate the list of bins associated with this tile
+                                    PopulateTileBins(NewTile, CurrentField);
 
                                     // Render this tile with extended bounds to include overlap
                                     NewTile.Bitmap = RenderTile(
@@ -507,20 +562,17 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Checks if any of the bins in a tile are dirty
-        /// If they are then marks the bins as not dirty and returns true
-        /// otherwise returns false
+        /// Calculates and stores the bin coordinate range for a tile
         /// </summary>
-        /// <param name="tile">The tile to check for dirty bins</param>
-        /// <returns>true if any bins in the tile were dirty, false otherwise</returns>
-        private bool IsTileDirty
+        /// <param name="tile">The tile to calculate bin range for</param>
+        private void CalculateTileBinRange
             (
             MapTile tile
             )
         {
-            if (CurrentField == null || CurrentField.Bins == null || CurrentField.Bins.Count == 0)
+            if (CurrentField == null)
             {
-                return false;
+                return;
             }
 
             // Convert tile pixel bounds to bin grid coordinates
@@ -534,37 +586,41 @@ namespace AgGrade.Data
             Point bottomRightBin = PixelToBin(tile.StartX + tile.Width, tile.StartY + tile.Height, 0);
 
             // Find the range of bin coordinates that could be in this tile
-            int minBinX = Math.Min(Math.Min(topLeftBin.X, topRightBin.X), Math.Min(bottomLeftBin.X, bottomRightBin.X));
-            int maxBinX = Math.Max(Math.Max(topLeftBin.X, topRightBin.X), Math.Max(bottomLeftBin.X, bottomRightBin.X));
-            int minBinY = Math.Min(Math.Min(topLeftBin.Y, topRightBin.Y), Math.Min(bottomLeftBin.Y, bottomRightBin.Y));
-            int maxBinY = Math.Max(Math.Max(topLeftBin.Y, topRightBin.Y), Math.Max(bottomLeftBin.Y, bottomRightBin.Y));
+            tile.MinBinX = Math.Min(Math.Min(topLeftBin.X, topRightBin.X), Math.Min(bottomLeftBin.X, bottomRightBin.X));
+            tile.MaxBinX = Math.Max(Math.Max(topLeftBin.X, topRightBin.X), Math.Max(bottomLeftBin.X, bottomRightBin.X));
+            tile.MinBinY = Math.Min(Math.Min(topLeftBin.Y, topRightBin.Y), Math.Min(bottomLeftBin.Y, bottomRightBin.Y));
+            tile.MaxBinY = Math.Max(Math.Max(topLeftBin.Y, topRightBin.Y), Math.Max(bottomLeftBin.Y, bottomRightBin.Y));
+        }
 
-            // Find all bins within this range and check if they're dirty
-            bool anyDirty = false;
-            foreach (Bin bin in CurrentField.Bins)
+        /// <summary>
+        /// Populates the list of bins associated with a tile based on the tile's bin coordinate range
+        /// </summary>
+        /// <param name="tile">The tile to populate bins for</param>
+        /// <param name="field">The field containing the bins</param>
+        private void PopulateTileBins
+            (
+            MapTile tile,
+            Field field
+            )
+        {
+            if (field == null || field.Bins == null || field.Bins.Count == 0)
             {
-                if (bin.X >= minBinX && bin.X <= maxBinX && bin.Y >= minBinY && bin.Y <= maxBinY)
-                {
-                    // Check if this bin is actually within the tile bounds
-                    // Convert bin center to pixel coordinates to verify
-                    PointD binFieldM = CurrentField.BinToFieldM(bin.X, bin.Y);
-                    Point binPixel = FieldMToPixel(binFieldM.X, binFieldM.Y, 0);
-                    
-                    // Check if bin pixel is within tile bounds (with some tolerance for bin size)
-                    if (binPixel.X >= tile.StartX && binPixel.X < tile.StartX + tile.Width &&
-                        binPixel.Y >= tile.StartY && binPixel.Y < tile.StartY + tile.Height)
-                    {
-                        if (bin.Dirty)
-                        {
-                            anyDirty = true;
-                        }
-                        bin.Dirty = false;
-                    }
-                }
+                return;
             }
 
-            return anyDirty;
+            // Clear any existing bins
+            tile.AssociatedBins.Clear();
+
+            // Filter bins that fall within the tile's bin coordinate range
+            foreach (Bin bin in field.Bins)
+            {
+                if (bin.X >= tile.MinBinX && bin.X <= tile.MaxBinX && bin.Y >= tile.MinBinY && bin.Y <= tile.MaxBinY)
+                {
+                    tile.AssociatedBins.Add(bin);
+                }
+            }
         }
+
 
         private void Decorate
             (
@@ -920,7 +976,9 @@ namespace AgGrade.Data
         /// <summary>
         /// Rotates the map so heading is up
         /// </summary>
+        /// <param name="Map">Bitmap to rotate</param>
         /// <param name="Heading">Heading</param>
+        /// <returns>Rotated bitmap</returns>
         private Bitmap Rotate
             (
             Bitmap Map,
@@ -949,6 +1007,191 @@ namespace AgGrade.Data
                 g.DrawImage(Map, new Point(0, 0)); // Draw the original bitmap
             }
             
+            return rotatedBitmap;
+        }
+
+        /// <summary>
+        /// Rotates the bitmap so the heading is up
+        /// Optimized version using lockbits for direct memory access
+        /// </summary>
+        /// <param name="Map">Bitmap to rotate</param>
+        /// <param name="Heading">Heading</param>
+        /// <returns>Rotated bitmap</returns>
+        private Bitmap FastRotate
+            (
+            Bitmap Map,
+            double Heading
+            )
+        {
+            if (Heading == 0.0)
+            {
+                // No rotation needed, return a copy
+                return new Bitmap(Map);
+            }
+
+            Point RotatedSize = GetRotatedSize(Map.Width, Map.Height, Heading);
+            Bitmap rotatedBitmap = new Bitmap(RotatedSize.X, RotatedSize.Y, PixelFormat.Format32bppArgb);
+
+            // Pre-calculate rotation values
+            double radians = -Heading * Math.PI / 180.0; // Negative for counter-clockwise rotation
+            double cosAngle = Math.Cos(radians);
+            double sinAngle = Math.Sin(radians);
+
+            // Center points
+            double srcCenterX = Map.Width / 2.0;
+            double srcCenterY = Map.Height / 2.0;
+            double dstCenterX = RotatedSize.X / 2.0;
+            double dstCenterY = RotatedSize.Y / 2.0;
+
+            // Lock source bitmap
+            BitmapData srcData = Map.LockBits(
+                new Rectangle(0, 0, Map.Width, Map.Height),
+                ImageLockMode.ReadOnly,
+                PixelFormat.Format32bppArgb);
+
+            // Lock destination bitmap
+            BitmapData dstData = rotatedBitmap.LockBits(
+                new Rectangle(0, 0, RotatedSize.X, RotatedSize.Y),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+
+            try
+            {
+                int srcStride = srcData.Stride;
+                int dstStride = dstData.Stride;
+                int bytesPerPixel = 4; // BGRA
+
+                // Get pointers to pixel data
+                IntPtr srcPtr = srcData.Scan0;
+                IntPtr dstPtr = dstData.Scan0;
+
+                // Read entire source bitmap into memory for fast access
+                int srcBytesTotal = srcStride * Map.Height;
+                byte[] srcBuffer = new byte[srcBytesTotal];
+                Marshal.Copy(srcPtr, srcBuffer, 0, srcBytesTotal);
+
+                // Pre-allocate destination row buffer
+                byte[] dstRow = new byte[RotatedSize.X * bytesPerPixel];
+
+                // Process each destination pixel
+                for (int dstY = 0; dstY < RotatedSize.Y; dstY++)
+                {
+                    IntPtr dstRowPtr = new IntPtr(dstPtr.ToInt64() + dstY * dstStride);
+
+                    for (int dstX = 0; dstX < RotatedSize.X; dstX++)
+                    {
+                        // Calculate source coordinates using inverse rotation
+                        // Translate destination point relative to destination center
+                        double relX = dstX - dstCenterX;
+                        double relY = dstY - dstCenterY;
+
+                        // Apply inverse rotation (opposite direction)
+                        double srcRelX = relX * cosAngle + relY * sinAngle;
+                        double srcRelY = -relX * sinAngle + relY * cosAngle;
+
+                        // Translate relative to source center
+                        double srcX = srcRelX + srcCenterX;
+                        double srcY = srcRelY + srcCenterY;
+
+                        // Bilinear interpolation for better quality
+                        int x0 = (int)Math.Floor(srcX);
+                        int y0 = (int)Math.Floor(srcY);
+                        int x1 = x0 + 1;
+                        int y1 = y0 + 1;
+
+                        double fx = srcX - x0;
+                        double fy = srcY - y0;
+
+                        // Bounds checking
+                        bool valid00 = (x0 >= 0 && x0 < Map.Width && y0 >= 0 && y0 < Map.Height);
+                        bool valid01 = (x0 >= 0 && x0 < Map.Width && y1 >= 0 && y1 < Map.Height);
+                        bool valid10 = (x1 >= 0 && x1 < Map.Width && y0 >= 0 && y0 < Map.Height);
+                        bool valid11 = (x1 >= 0 && x1 < Map.Width && y1 >= 0 && y1 < Map.Height);
+
+                        byte b = 0, g = 0, r = 0, a = 0;
+
+                        if (valid00 || valid01 || valid10 || valid11)
+                        {
+                            // Bilinear interpolation weights
+                            double w00 = (1.0 - fx) * (1.0 - fy);
+                            double w01 = (1.0 - fx) * fy;
+                            double w10 = fx * (1.0 - fy);
+                            double w11 = fx * fy;
+
+                            double sumB = 0, sumG = 0, sumR = 0, sumA = 0, sumWeight = 0;
+
+                            // Access pixels directly from source buffer
+                            if (valid00)
+                            {
+                                int offset = y0 * srcStride + x0 * bytesPerPixel;
+                                double weight = w00;
+                                sumB += srcBuffer[offset + 0] * weight;
+                                sumG += srcBuffer[offset + 1] * weight;
+                                sumR += srcBuffer[offset + 2] * weight;
+                                sumA += srcBuffer[offset + 3] * weight;
+                                sumWeight += weight;
+                            }
+
+                            if (valid01)
+                            {
+                                int offset = y1 * srcStride + x0 * bytesPerPixel;
+                                double weight = w01;
+                                sumB += srcBuffer[offset + 0] * weight;
+                                sumG += srcBuffer[offset + 1] * weight;
+                                sumR += srcBuffer[offset + 2] * weight;
+                                sumA += srcBuffer[offset + 3] * weight;
+                                sumWeight += weight;
+                            }
+
+                            if (valid10)
+                            {
+                                int offset = y0 * srcStride + x1 * bytesPerPixel;
+                                double weight = w10;
+                                sumB += srcBuffer[offset + 0] * weight;
+                                sumG += srcBuffer[offset + 1] * weight;
+                                sumR += srcBuffer[offset + 2] * weight;
+                                sumA += srcBuffer[offset + 3] * weight;
+                                sumWeight += weight;
+                            }
+
+                            if (valid11)
+                            {
+                                int offset = y1 * srcStride + x1 * bytesPerPixel;
+                                double weight = w11;
+                                sumB += srcBuffer[offset + 0] * weight;
+                                sumG += srcBuffer[offset + 1] * weight;
+                                sumR += srcBuffer[offset + 2] * weight;
+                                sumA += srcBuffer[offset + 3] * weight;
+                                sumWeight += weight;
+                            }
+
+                            if (sumWeight > 0)
+                            {
+                                b = (byte)Math.Round(sumB / sumWeight);
+                                g = (byte)Math.Round(sumG / sumWeight);
+                                r = (byte)Math.Round(sumR / sumWeight);
+                                a = (byte)Math.Round(sumA / sumWeight);
+                            }
+                        }
+
+                        // Write BGRA pixel to destination buffer
+                        int pixelOffset = dstX * bytesPerPixel;
+                        dstRow[pixelOffset + 0] = b; // Blue
+                        dstRow[pixelOffset + 1] = g; // Green
+                        dstRow[pixelOffset + 2] = r; // Red
+                        dstRow[pixelOffset + 3] = a; // Alpha
+                    }
+
+                    // Copy entire destination row to bitmap at once
+                    Marshal.Copy(dstRow, 0, dstRowPtr, RotatedSize.X * bytesPerPixel);
+                }
+            }
+            finally
+            {
+                Map.UnlockBits(srcData);
+                rotatedBitmap.UnlockBits(dstData);
+            }
+
             return rotatedBitmap;
         }
 
