@@ -86,6 +86,8 @@ namespace AgGrade
             FieldUpdater = new FieldUpdater();
             FieldUpdater.SetEquipmentStatus(CurrentEquipmentStatus);
             FieldUpdater.SetApplicationSettings(CurrentAppSettings);
+            FieldUpdater.OnFrontVolumeCutUpdated += FieldUpdater_OnFrontVolumeCutUpdated;
+            FieldUpdater.OnRearVolumeCutUpdated += FieldUpdater_OnRearVolumeCutUpdated;
 
             BladeCtrl = new BladeController(Controller);
             BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
@@ -104,6 +106,25 @@ namespace AgGrade
             CurrentField = null;
 
             ShowMap();
+        }
+
+        /// <summary>
+        /// Called when the amount of soil cut by rear scraper has been updated
+        /// </summary>
+        /// <param name="VolumeBCY">Total soil cut in BCY</param>
+        private void FieldUpdater_OnRearVolumeCutUpdated(double VolumeBCY)
+        {
+            GetMap()?.SetRearCutVolume(VolumeBCY);
+        }
+
+
+        /// <summary>
+        /// Called when the amount of soil cut by front scraper has been updated
+        /// </summary>
+        /// <param name="VolumeBCY">Total soil cut in BCY</param>
+        private void FieldUpdater_OnFrontVolumeCutUpdated(double VolumeBCY)
+        {
+            GetMap()?.SetFrontCutVolume(VolumeBCY);
         }
 
         /// <summary>

@@ -23,6 +23,7 @@ namespace AgGrade.Controls
         private const int DEFAULT_SCALE_FACTOR = 8;
         private const double ZOOM_FACTOR = 1.3;
         private const int MAX_NAME_LENGTH = 20;
+        private const double SOIL_SWELL_FACTOR = 1.3;
 
         private const string DegreeSymbol = "°";
 
@@ -62,8 +63,8 @@ namespace AgGrade.Controls
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
-            FrontLoadLabel.Text = "0 LCY";
-            RearLoadLabel.Text = "0 LCY";
+            FrontLoadLabel.Text = "0.0 LCY";
+            RearLoadLabel.Text = "0.0 LCY";
             HeadingLabel.Text = "0" + DegreeSymbol;
             SpeedLabel.Text = "0 MPH";
             FieldNameLabel.Text = "No Field";
@@ -133,6 +134,44 @@ namespace AgGrade.Controls
             ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
 
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
+        }
+
+        /// <summary>
+        /// Updates the amount of soil cut by the front scraper
+        /// </summary>
+        /// <param name="VolumeBCY">Soil volume in BCY</param>
+        public void SetFrontCutVolume
+            (
+            double VolumeBCY
+            )
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<double>(SetFrontCutVolume), VolumeBCY);
+                return;
+            }
+
+            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            FrontLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";
+        }
+
+        /// <summary>
+        /// Updates the amount of soil cut by the rear scraper
+        /// </summary>
+        /// <param name="VolumeBCY">Soil volume in BCY</param>
+        public void SetRearCutVolume
+            (
+            double VolumeBCY
+            )
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<double>(SetRearCutVolume), VolumeBCY);
+                return;
+            }
+
+            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            RearLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";
         }
 
         /// <summary>

@@ -33,6 +33,7 @@
   - toggle guidance line to nearest lowest area
   - toggle tractor in center or bottom center
   - areas where the topo won't change much (locations for top soil)
+  - markers at start and end of last cut and last fill
 
 11. Turn guidance - at current point for tractor show how a turn could be completed to double-back on a parallel path, e.g. omega. Continually update this until edge of field reached at which point it turns red for last chance turn, then turns into a turn to travel down edge of field
 
@@ -42,6 +43,7 @@
   - enable/disable pans - disable when doing survey work without them - changes map edge buffer/clearance if a pan is wider than the tractor
   - float blade on surface when disabling cutting mode (per pan setting)
   - raise blade to x cm above surface when disabling cutting mode (per pan setting)
+  - scraper capacities in LCY
 
 13. Map edge buffer/clearance - using equipment width show closest centerline to edges of field
 
@@ -84,3 +86,10 @@
 24. Manual slope entry and calculate for cut/fill ratio and import/export
 
 25. Don't allow dead reckoning to run for more than two seconds
+
+26. Sound alarm when scraper capacity reached
+
+27. Log total amount of cut and fill for field (save between runs) and show percentage complete for field
+  - keep track of time operating?
+  - give prediction on remaining hours?
+  - show on secondary tablet?
