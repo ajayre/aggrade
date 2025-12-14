@@ -89,6 +89,9 @@ namespace AgGrade
             FieldUpdater.OnFrontVolumeCutUpdated += FieldUpdater_OnFrontVolumeCutUpdated;
             FieldUpdater.OnRearVolumeCutUpdated += FieldUpdater_OnRearVolumeCutUpdated;
 
+            // fixme - remove
+            FieldUpdater.OnCutPolygon += FieldUpdater_OnCutPolygon;
+
             BladeCtrl = new BladeController(Controller);
             BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
 
@@ -106,6 +109,12 @@ namespace AgGrade
             CurrentField = null;
 
             ShowMap();
+        }
+
+        // fixme - remove
+        private void FieldUpdater_OnCutPolygon(List<Coordinate> Polygon)
+        {
+            GetMap()?.AddPolygon(Polygon);
         }
 
         /// <summary>

@@ -34,6 +34,7 @@
   - toggle tractor in center or bottom center
   - areas where the topo won't change much (locations for top soil)
   - markers at start and end of last cut and last fill
+  - stripping map - red = bin at original height, orange = bin between original and target height, green = bin at target height
 
 11. Turn guidance - at current point for tractor show how a turn could be completed to double-back on a parallel path, e.g. omega. Continually update this until edge of field reached at which point it turns red for last chance turn, then turns into a turn to travel down edge of field
 

@@ -82,10 +82,22 @@ namespace AgGrade.Data
                     {
                         anyDirty = true;
                     }
-                    bin.Dirty = false;
                 }
 
                 return anyDirty;
+            }
+
+            /// <summary>
+            /// Resets all dirty flags
+            /// </summary>
+            public void ClearDirty
+                (
+                )
+            {
+                foreach (Bin bin in AssociatedBins)
+                {
+                    bin.Dirty = false;
+                }
             }
         }
 
@@ -224,7 +236,9 @@ namespace AgGrade.Data
             List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory,
             EquipmentSettings CurrentEquipmentSettings,
-            AppSettings CurrentAppSettings
+            AppSettings CurrentAppSettings,
+            // fixme - remove
+            List<List<Coordinate>> Polygons
             )
         {
             CurrentField = Field;
@@ -447,6 +461,12 @@ namespace AgGrade.Data
                             }
                         }
                     }
+
+                    // clear all dirty flags
+                    foreach (MapTile Tile in Cache.Tiles)
+                    {
+                        Tile.ClearDirty();
+                    }
                 }
 
                 // rotate tiles
@@ -555,6 +575,29 @@ namespace AgGrade.Data
                     }
                 }
             }
+
+            /*// fixme - remove
+            // draw polygons
+            foreach (List<Coordinate> Polygon in Polygons.ToList())
+            {
+                Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
+
+                Point Pix;
+                Point Pix2;
+
+                using (Graphics g = Graphics.FromImage(bitmap))
+                {
+                    for (int p = 1; p < Polygon.Count; p++)
+                    {
+                        Pix = LatLonToWorld(Polygon[p - 1]);
+                        Pix2 = LatLonToWorld(Polygon[p]);
+                        g.DrawLine(TractorPen, Pix.X, Pix.Y, Pix2.X, Pix2.Y);
+                    }
+                    Pix = LatLonToWorld(Polygon[Polygon.Count - 1]);
+                    Pix2 = LatLonToWorld(Polygon[0]);
+                    g.DrawLine(TractorPen, Pix.X, Pix.Y, Pix2.X, Pix2.Y);
+                }
+            }*/
 
             Decorate(bitmap, Benchmarks, TractorLocationHistory);
 

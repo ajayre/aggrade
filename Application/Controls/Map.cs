@@ -35,6 +35,9 @@ namespace AgGrade.Controls
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Timer RefreshTimer;
 
+        // fixme - remove
+        private List<List<Coordinate>> Polygons = new List<List<Coordinate>>();
+
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
 
@@ -73,6 +76,15 @@ namespace AgGrade.Controls
             RefreshTimer.Interval = 250;
             RefreshTimer.Tick += RefreshTimer_Tick;
             RefreshTimer.Start();
+        }
+
+        // fixme - remove
+        public void AddPolygon
+            (
+            List<Coordinate> Polygon
+            )
+        {
+            Polygons.Add(Polygon);
         }
 
         /// <summary>
@@ -262,7 +274,8 @@ namespace AgGrade.Controls
             //sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
-                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
+                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
+                Polygons);
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
