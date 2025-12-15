@@ -52,8 +52,6 @@ namespace AgGrade.Data
         public event VolumeCutUpdated OnFrontVolumeCutUpdated = null;
         public event VolumeCutUpdated OnRearVolumeCutUpdated = null;
 
-        public event Action<List<Coordinate>> OnCutPolygon = null;
-
         public FieldUpdater
             (
             )
@@ -169,8 +167,6 @@ namespace AgGrade.Data
                         {
                             FrontCutBin(B);
                         }
-
-                        OnCutPolygon?.Invoke(SweptPolygon);
                     }
 
                     LastFrontBladeLeft = FrontBladeLeft;

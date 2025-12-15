@@ -573,53 +573,6 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Gets a set of bins inside a rectangle
-        /// </summary>
-        /// <param name="BottomLeft">Bottom left coordinate</param>
-        /// <param name="TopRight">Top right coordinate</param>
-        /// <returns>Set of bins</returns>
-        public List<Bin> GetBinsInside
-            (
-            Coordinate BottomLeft,
-            Coordinate TopRight
-            )
-        {
-            List<Bin> result = new List<Bin>();
-
-            // Convert coordinates to UTM
-            UTM.UTMCoordinate bottomLeftUTM = UTM.FromLatLon(BottomLeft.Latitude, BottomLeft.Longitude);
-            UTM.UTMCoordinate topRightUTM = UTM.FromLatLon(TopRight.Latitude, TopRight.Longitude);
-
-            // Convert UTM coordinates to bin grid indices
-            int minBinX = (int)Math.Floor((bottomLeftUTM.Easting - FieldMinX) / BIN_SIZE_M);
-            int minBinY = (int)Math.Floor((bottomLeftUTM.Northing - FieldMinY) / BIN_SIZE_M);
-            int maxBinX = (int)Math.Floor((topRightUTM.Easting - FieldMinX) / BIN_SIZE_M);
-            int maxBinY = (int)Math.Floor((topRightUTM.Northing - FieldMinY) / BIN_SIZE_M);
-
-            // Ensure we iterate in the correct direction (handle cases where coordinates might be swapped)
-            int startX = Math.Min(minBinX, maxBinX);
-            int endX = Math.Max(minBinX, maxBinX);
-            int startY = Math.Min(minBinY, maxBinY);
-            int endY = Math.Max(minBinY, maxBinY);
-
-            // Iterate through all bins in the rectangular range
-            for (int x = startX; x <= endX; x++)
-            {
-                for (int y = startY; y <= endY; y++)
-                {
-                    // Find the bin at this grid position
-                    Bin? bin = Bins.FirstOrDefault(b => b.X == x && b.Y == y);
-                    if (bin != null)
-                    {
-                        result.Add(bin);
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Gets all of the bins in a straight line from a start bin to an end bin
         /// </summary>
         /// <param name="StartBin">Start bin</param>

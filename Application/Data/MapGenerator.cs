@@ -236,9 +236,7 @@ namespace AgGrade.Data
             List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory,
             EquipmentSettings CurrentEquipmentSettings,
-            AppSettings CurrentAppSettings,
-            // fixme - remove
-            List<List<Coordinate>> Polygons
+            AppSettings CurrentAppSettings
             )
         {
             CurrentField = Field;
@@ -576,29 +574,6 @@ namespace AgGrade.Data
                 }
             }
 
-            /*// fixme - remove
-            // draw polygons
-            foreach (List<Coordinate> Polygon in Polygons.ToList())
-            {
-                Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
-
-                Point Pix;
-                Point Pix2;
-
-                using (Graphics g = Graphics.FromImage(bitmap))
-                {
-                    for (int p = 1; p < Polygon.Count; p++)
-                    {
-                        Pix = LatLonToWorld(Polygon[p - 1]);
-                        Pix2 = LatLonToWorld(Polygon[p]);
-                        g.DrawLine(TractorPen, Pix.X, Pix.Y, Pix2.X, Pix2.Y);
-                    }
-                    Pix = LatLonToWorld(Polygon[Polygon.Count - 1]);
-                    Pix2 = LatLonToWorld(Polygon[0]);
-                    g.DrawLine(TractorPen, Pix.X, Pix.Y, Pix2.X, Pix2.Y);
-                }
-            }*/
-
             Decorate(bitmap, Benchmarks, TractorLocationHistory);
 
             return bitmap;
@@ -694,7 +669,7 @@ namespace AgGrade.Data
                     g.DrawString(bmark.Name, BenchmarkFont, new SolidBrush(Color.Black), Pix.X + 12, Pix.Y - 6);
                 }
 
-                // draw tractor trail
+                /*// draw tractor trail
                 Point? LastLocpx = null;
                 foreach (Coordinate TractorLocation in TractorLocationHistory.ToList())
                 {
@@ -706,7 +681,7 @@ namespace AgGrade.Data
                     }
 
                     LastLocpx = Pix;
-                }
+                }*/
 
                 // draw tractor heading
                 double Lat = TractorFix.Latitude;
@@ -731,6 +706,18 @@ namespace AgGrade.Data
                 // get tractor pixel location - always fixed
                 int TractorXpx = Map.Width / 2;
                 int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
+
+                // get front scraper location
+                Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
+
+                // get rear scraper location
+                Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
+
+                // draw connector between tractor and front scraper
+                g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
+                // draw connector between front scraper to rear scraper
+                g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
+
                 // scale tractor so the width of the symbol matches the tractor width
                 int TractorWidthpx = (int)(CurrentEquipmentSettings.TractorWidthMm / 1000.0 * CurrentScaleFactor);
                 if (TractorWidthpx < 16) TractorWidthpx = 16;
@@ -738,7 +725,6 @@ namespace AgGrade.Data
                 g.DrawImage(TractorImage, TractorXpx - (TractorWidthpx / 2), TractorYpx - (TractorWidthpx / 2), TractorWidthpx, TractorWidthpx);
 
                 // draw front scraper
-                Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
                 double PerpAngle = (FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
                 double BladeEndALat = FrontScraperFix.Latitude;
                 double BladeEndALon = FrontScraperFix.Longitude;
@@ -748,10 +734,10 @@ namespace AgGrade.Data
                 double BladeEndBLon = FrontScraperFix.Longitude;
                 Haversine.MoveDistanceBearing(ref BladeEndBLat, ref BladeEndBLon, PerpAngle, -(CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0));
                 Point BladeEndB = LatLonToWorld(new Coordinate(BladeEndBLat, BladeEndBLon));
+                g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
                 g.DrawLine(new Pen(TractorYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
 
                 // draw rear scraper
-                Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
                 double RearPerpAngle = (RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
                 double RearBladeEndALat = RearScraperFix.Latitude;
                 double RearBladeEndALon = RearScraperFix.Longitude;
@@ -761,6 +747,7 @@ namespace AgGrade.Data
                 double RearBladeEndBLon = RearScraperFix.Longitude;
                 Haversine.MoveDistanceBearing(ref RearBladeEndBLat, ref RearBladeEndBLon, RearPerpAngle, -(CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0));
                 Point RearBladeEndB = LatLonToWorld(new Coordinate(RearBladeEndBLat, RearBladeEndBLon));
+                g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
                 g.DrawLine(new Pen(TractorYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
             }
         }

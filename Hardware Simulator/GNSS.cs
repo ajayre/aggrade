@@ -61,6 +61,8 @@ namespace HardwareSim
         private const double TRACTOR_TO_FRONT_SCRAPER_M = 5.0;
         private const double FRONT_SCRAPER_TO_REAR_SCRAPER_M = 5.0;
 
+        private const int STEERING_DAMPENING = 1;
+
         // the distance moved in meters at one MPH in the calc period
         /*
             1 mile = 1,609.34 meters
@@ -86,9 +88,12 @@ namespace HardwareSim
         private Timer GNSSUpdateTimer;
         private Timer IMUUpdateTimer;
         private Timer CalcTimer;
+        private Timer TurnTimer;
         private IMUValue TractorIMU;
         private IMUValue FrontIMU;
         private IMUValue RearIMU;
+        private int TurnHeadingChange;
+        private int StraightenSteeringCounter;
 
         private List<PathPoint> TractorPath = new List<PathPoint> ();
         private int FrontScraperPathPointIndex;
@@ -109,6 +114,10 @@ namespace HardwareSim
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Tick += CalcTimer_Tick;
+
+            TurnTimer = new Timer();
+            TurnTimer.Interval = 500;
+            TurnTimer.Tick += TurnTimer_Tick;
 
             TractorIMU = new IMUValue();
 
@@ -137,6 +146,8 @@ namespace HardwareSim
 
             TractorGNSS.SpeedMPH = 0;
             TractorGNSS.TrueHeading = 0;
+
+            TurnHeadingChange = 0;
 
             TractorPath.Clear();
         }
@@ -462,6 +473,7 @@ namespace HardwareSim
             GNSSUpdateTimer.Start();
             IMUUpdateTimer.Start();
             CalcTimer.Start();
+            TurnTimer.Start();
         }
 
         public void IncreaseSpeed
@@ -496,20 +508,46 @@ namespace HardwareSim
             (
             )
         {
-            // turn tractor - we will work out how the front and rear scrapers turn based on this
-            TractorGNSS.TrueHeading -= 2;
-            if (TractorGNSS.TrueHeading < 0) TractorGNSS.TrueHeading += 360;
-            if (TractorGNSS.TrueHeading > 360) TractorGNSS.TrueHeading -= 360;
+            if (TurnHeadingChange > 0)
+            {
+                TurnHeadingChange = 0;
+            }
+            else
+            {
+                TurnHeadingChange -= 3;
+            }
+            StraightenSteeringCounter = STEERING_DAMPENING;
         }
 
         public void TurnRight
             (
             )
         {
+            if (TurnHeadingChange < 0)
+            {
+                TurnHeadingChange = 0;
+            }
+            else
+            {
+                TurnHeadingChange += 3;
+            }
+            StraightenSteeringCounter = STEERING_DAMPENING;
+        }
+
+        private void TurnTimer_Tick(object? sender, EventArgs e)
+        {
             // turn tractor - we will work out how the front and rear scrapers turn based on this
-            TractorGNSS.TrueHeading += 2;
+            TractorGNSS.TrueHeading += TurnHeadingChange;
             if (TractorGNSS.TrueHeading < 0) TractorGNSS.TrueHeading += 360;
             if (TractorGNSS.TrueHeading > 360) TractorGNSS.TrueHeading -= 360;
+
+            if (--StraightenSteeringCounter == 0)
+            {
+                if (TurnHeadingChange > 0) TurnHeadingChange -= 1;
+                if (TurnHeadingChange < 0) TurnHeadingChange += 1;
+
+                StraightenSteeringCounter = STEERING_DAMPENING;
+            }
         }
     }
 }
