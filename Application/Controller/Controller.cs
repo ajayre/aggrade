@@ -494,6 +494,32 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
+        /// Tell the controller we have changed the blade auto state
+        /// </summary>
+        /// <param name="IsAuto">New blade auto state</param>
+        public void SetFrontBladeAutoState
+            (
+            bool IsAuto
+            )
+        {
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, new byte[] { (byte)(IsAuto ? 1 : 0) });
+            SendControllerCommand(TxCmd);
+        }
+
+        /// <summary>
+        /// Tell the controller we have changed the blade auto state
+        /// </summary>
+        /// <param name="IsAuto">New blade auto state</param>
+        public void SetRearBladeAutoState
+            (
+            bool IsAuto
+            )
+        {
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, new byte[] { (byte)(IsAuto ? 1 : 0) });
+            SendControllerCommand(TxCmd);
+        }
+
+        /// <summary>
         /// Sets the front cut valve
         /// </summary>
         /// <param name="Value">CUTVALVE_MIN -> CUTVALVE_MAX with 100 = at target height</param>

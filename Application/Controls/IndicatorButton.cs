@@ -12,6 +12,9 @@ namespace AgGrade.Controls
 {
     public partial class IndicatorButton : UserControl
     {
+        public delegate void ButtonClicked(object sender, EventArgs e);
+        public event ButtonClicked OnButtonClicked = null;
+
         public enum IndicatorColor
         {
             Red,
@@ -72,6 +75,11 @@ namespace AgGrade.Controls
                 Bitmap scaledImage = new Bitmap(Btn.Image!, new Size((int)(Btn.Image!.Width * ScalingFactor), (int)(Btn.Image!.Height * ScalingFactor)));
                 Btn.Image = scaledImage;
             }
+        }
+
+        private void Btn_Click(object sender, EventArgs e)
+        {
+            OnButtonClicked?.Invoke(sender, e);
         }
     }
 }

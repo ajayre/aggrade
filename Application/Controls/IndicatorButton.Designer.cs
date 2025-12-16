@@ -51,6 +51,7 @@
             Btn.Size = new Size(60, 50);
             Btn.TabIndex = 1;
             Btn.UseVisualStyleBackColor = true;
+            Btn.Click += Btn_Click;
             // 
             // IndicatorButton
             // 

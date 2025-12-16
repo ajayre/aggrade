@@ -414,8 +414,8 @@ namespace AgGrade
             )
         {
             AGDLoader Loader = new AGDLoader();
-            CurrentField = Loader.Load(FileName); 
-            
+            CurrentField = Loader.Load(FileName);
+
             CurrentField.Name = Path.GetFileNameWithoutExtension(FileName);
 
             BladeCtrl.SetField(CurrentField);
@@ -719,14 +719,28 @@ namespace AgGrade
         {
             CurrentEquipmentStatus.RearPan.BladeAuto = IsAuto;
 
+            UpdateRearBlade(IsAuto);
+        }
+
+        /// <summary>
+        /// Updates the UI and manages the field updater based on the new rear blade auto state
+        /// </summary>
+        /// <param name="IsAuto">New rear blade auto state</param>
+        private void UpdateRearBlade
+            (
+            bool IsAuto
+            )
+        {
             if (IsAuto)
             {
                 FieldUpdater.StartRear();
+                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
             else
             {
                 FieldUpdater.StopRear();
                 CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
+                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }
 
@@ -762,14 +776,28 @@ namespace AgGrade
         {
             CurrentEquipmentStatus.FrontPan.BladeAuto = IsAuto;
 
+            UpdateFrontBlade(IsAuto);
+        }
+
+        /// <summary>
+        /// Updates the UI and manages the field updater based on the new front blade auto state
+        /// </summary>
+        /// <param name="IsAuto">New front blade auto state</param>
+        private void UpdateFrontBlade
+            (
+            bool IsAuto
+            )
+        {
             if (IsAuto)
             {
                 FieldUpdater.StartFront();
+                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
             else
             {
                 FieldUpdater.StopFront();
                 CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
+                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }
 
@@ -1248,6 +1276,50 @@ namespace AgGrade
         private void ZoomFitBtn_Click(object sender, EventArgs e)
         {
             GetMap()?.ZoomToFit();
+        }
+
+        /// <summary>
+        /// Called when user taps on the front blade control button
+        /// Toggles auto on/off
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FrontBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
+        {
+            if (CurrentEquipmentStatus.FrontPan.BladeAuto)
+            {
+                CurrentEquipmentStatus.FrontPan.BladeAuto = false;
+            }
+            else
+            {
+                CurrentEquipmentStatus.FrontPan.BladeAuto = true;
+            }
+
+            Controller.SetFrontBladeAutoState(CurrentEquipmentStatus.FrontPan.BladeAuto);
+
+            UpdateFrontBlade(CurrentEquipmentStatus.FrontPan.BladeAuto);
+        }
+
+        /// <summary>
+        /// Called when user taps on the rear blade control button
+        /// Toggles auto on/off
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RearBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
+        {
+            if (CurrentEquipmentStatus.RearPan.BladeAuto)
+            {
+                CurrentEquipmentStatus.RearPan.BladeAuto = false;
+            }
+            else
+            {
+                CurrentEquipmentStatus.RearPan.BladeAuto = true;
+            }
+
+            Controller.SetRearBladeAutoState(CurrentEquipmentStatus.RearPan.BladeAuto);
+
+            UpdateRearBlade(CurrentEquipmentStatus.RearPan.BladeAuto);
         }
     }
 }

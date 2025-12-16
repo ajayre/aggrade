@@ -33,8 +33,8 @@
             ZoomFitBtn = new Button();
             ZoomInBtn = new Button();
             ZoomOutBtn = new Button();
-            indicatorButton2 = new AgGrade.Controls.IndicatorButton();
-            indicatorButton1 = new AgGrade.Controls.IndicatorButton();
+            RearBladeControlBtn = new AgGrade.Controls.IndicatorButton();
+            FrontBladeControlBtn = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
             StatusBtn = new Button();
             MapBtn = new Button();
@@ -55,8 +55,8 @@
             panel3.Controls.Add(ZoomFitBtn);
             panel3.Controls.Add(ZoomInBtn);
             panel3.Controls.Add(ZoomOutBtn);
-            panel3.Controls.Add(indicatorButton2);
-            panel3.Controls.Add(indicatorButton1);
+            panel3.Controls.Add(RearBladeControlBtn);
+            panel3.Controls.Add(FrontBladeControlBtn);
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 0);
             panel3.Name = "panel3";
@@ -96,23 +96,25 @@
             ZoomOutBtn.UseVisualStyleBackColor = true;
             ZoomOutBtn.Click += ZoomOutBtn_Click;
             // 
-            // indicatorButton2
+            // RearBladeControlBtn
             // 
-            indicatorButton2.Image = (Image)resources.GetObject("indicatorButton2.Image");
-            indicatorButton2.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
-            indicatorButton2.Location = new Point(8, 90);
-            indicatorButton2.Name = "indicatorButton2";
-            indicatorButton2.Size = new Size(60, 78);
-            indicatorButton2.TabIndex = 1;
+            RearBladeControlBtn.Image = (Image)resources.GetObject("RearBladeControlBtn.Image");
+            RearBladeControlBtn.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
+            RearBladeControlBtn.Location = new Point(8, 90);
+            RearBladeControlBtn.Name = "RearBladeControlBtn";
+            RearBladeControlBtn.Size = new Size(60, 78);
+            RearBladeControlBtn.TabIndex = 1;
+            RearBladeControlBtn.OnButtonClicked += RearBladeControlBtn_OnButtonClicked;
             // 
-            // indicatorButton1
+            // FrontBladeControlBtn
             // 
-            indicatorButton1.Image = (Image)resources.GetObject("indicatorButton1.Image");
-            indicatorButton1.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
-            indicatorButton1.Location = new Point(8, 6);
-            indicatorButton1.Name = "indicatorButton1";
-            indicatorButton1.Size = new Size(60, 78);
-            indicatorButton1.TabIndex = 0;
+            FrontBladeControlBtn.Image = (Image)resources.GetObject("FrontBladeControlBtn.Image");
+            FrontBladeControlBtn.Indicator = AgGrade.Controls.IndicatorButton.IndicatorColor.Red;
+            FrontBladeControlBtn.Location = new Point(8, 6);
+            FrontBladeControlBtn.Name = "FrontBladeControlBtn";
+            FrontBladeControlBtn.Size = new Size(60, 78);
+            FrontBladeControlBtn.TabIndex = 0;
+            FrontBladeControlBtn.OnButtonClicked += FrontBladeControlBtn_OnButtonClicked;
             // 
             // panel1
             // 
@@ -251,8 +253,8 @@
         private Panel StatusPanel;
         private Button EditEquipmentBtn;
         private Button EditSettingsBtn;
-        private Controls.IndicatorButton indicatorButton1;
-        private Controls.IndicatorButton indicatorButton2;
+        private Controls.IndicatorButton FrontBladeControlBtn;
+        private Controls.IndicatorButton RearBladeControlBtn;
         private Button CalibrationBtn;
         private Button SurveyBtn;
         private Button MapBtn;

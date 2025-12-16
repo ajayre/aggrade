@@ -127,7 +127,7 @@
         g+kfnPzBasYyhOXlhIzsovpdj/eSgJabiotvkdmMTYwRotKLMYYYJEI3/bJG6KCHTtnxR3xXIX6SvMSq
         sposY7FAmgwOYVEXJbsmXhddk5Fl2ev/777aem9PMXsgChUPrvvSCpUb8Lnuuu/7rvt5AGX3cJYrxef3
         oO9V9PWSFtqFulU4OS9pyS04XYOmO1OxlIJUJtOv6/B8BLUz0HAJ1XPFnn2fc3gLiRX5qgvY3oE2uV83
-        /wVnE2fmxYuE4gAAAAlwSFlzAAALEgAACxIB0t1+/AAABOhJREFUaEPlmWmotVMUx3/mIdOLMs/e15wk
+        /wVnE2fmxYuE4gAAAAlwSFlzAAALDAAACwwBP0AiyAAABOhJREFUaEPlmWmotVMUx3/mIdOLMs/e15wk
         RIQMoYwpXmWeQxkiQxQh33ygRAoh+YBSIhKhzJmLhMxT5nnWr9au1e45557nnH2u9+Zfq3tbz/OsvfZe
         017rwP8YywDzgC2A44ArgRuA64HLgSOA9YGVgaXqj/9LrA1cAjwGfAL8M4T+At4DHgROB1aohc0WFgPW
         AS4GfuxQ9Gfgi9jQp8DXwG8d730OHBOWm1UcDrxbKaOCd8WzbYFNgA2ADYEFwPbACcAjHVZ5DtiyXmQa
@@ -221,7 +221,7 @@
         NWeHIhUuIgAAAABJRU5ErkJggg==
 </value>
   </data>
-  <data name="indicatorButton2.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="RearBladeControlBtn.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAADAAAAA8CAYAAAAgwDn8AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
         YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAZmSURBVGhD7Zp1yGxVFMWX3Ql2YGKhqAgqJraiYisWWJh/
@@ -255,7 +255,7 @@
         RK5CYII=
 </value>
   </data>
-  <data name="indicatorButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+  <data name="FrontBladeControlBtn.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAAADAAAAA8CAYAAAAgwDn8AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
         YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAZzSURBVGhD7Zp1qGxVFMY/uxPsQOxAURFsxW6xFUXBwvzD
