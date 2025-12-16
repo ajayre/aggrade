@@ -16,6 +16,8 @@ namespace AgGrade
         // how often to attempt to connect to the controller
         private const int CONTROLLER_TRY_CONNECT_PERIOD_MS = 200;
 
+        private const double SOIL_SWELL_FACTOR = 1.3;
+
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
         private EquipmentStatus CurrentEquipmentStatus;
@@ -115,8 +117,16 @@ namespace AgGrade
         private void FieldUpdater_OnRearVolumeCutUpdated(double VolumeBCY)
         {
             GetMap()?.SetRearCutVolume(VolumeBCY);
-        }
 
+            // check if rear scraper has reached capacity
+            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            if (VolumeLCY >= CurrentEquipmentSettings.RearPan.CapacityCY && !CurrentEquipmentStatus.RearPan.CapacityWarningOccurred)
+            {
+                CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = true;
+
+                SoundCapacityAlarm();
+            }
+        }
 
         /// <summary>
         /// Called when the amount of soil cut by front scraper has been updated
@@ -125,6 +135,15 @@ namespace AgGrade
         private void FieldUpdater_OnFrontVolumeCutUpdated(double VolumeBCY)
         {
             GetMap()?.SetFrontCutVolume(VolumeBCY);
+
+            // check if front scraper has reached capacity
+            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            if (VolumeLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY && !CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred)
+            {
+                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = true;
+
+                SoundCapacityAlarm();
+            }
         }
 
         /// <summary>
@@ -147,13 +166,24 @@ namespace AgGrade
         }
 
         /// <summary>
-        /// Sounds an alarm to alert the operator
+        /// Sounds an alarm to alert the operator that something has happened with the controller
         /// </summary>
-        private void SoundAlarm
+        private void SoundControllerAlarm
             (
             )
         {
             SoundPlayer player = new SoundPlayer(Resources.mixkit_street_public_alarm_997);
+            player.Play();
+        }
+
+        /// <summary>
+        /// Sounds an alarm to alert the operator that scraper has reached capacity
+        /// </summary>
+        private void SoundCapacityAlarm
+            (
+            )
+        {
+            SoundPlayer player = new SoundPlayer(Resources.public_domain_beep_sound_100267);
             player.Play();
         }
 
@@ -186,7 +216,7 @@ namespace AgGrade
 
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
 
-            SoundAlarm();
+            SoundControllerAlarm();
 
             // no longer have RTK
             CurrentEquipmentStatus.TractorFix.RTK = RTKStatus.None;
@@ -234,7 +264,7 @@ namespace AgGrade
 
             StatusBar.ShowEStop = true;
 
-            SoundAlarm();
+            SoundControllerAlarm();
         }
 
         private void Controller_OnEmergencyStopCleared()
@@ -691,11 +721,12 @@ namespace AgGrade
 
             if (IsAuto)
             {
-                FieldUpdater.Start();
+                FieldUpdater.StartRear();
             }
-            else if (!CurrentEquipmentStatus.FrontPan.BladeAuto)
+            else
             {
-                FieldUpdater.Stop();
+                FieldUpdater.StopRear();
+                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
             }
         }
 
@@ -733,11 +764,12 @@ namespace AgGrade
 
             if (IsAuto)
             {
-                FieldUpdater.Start();
+                FieldUpdater.StartFront();
             }
-            else if (!CurrentEquipmentStatus.RearPan.BladeAuto)
+            else
             {
-                FieldUpdater.Stop();
+                FieldUpdater.StopFront();
+                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
             }
         }
 

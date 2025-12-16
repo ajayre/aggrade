@@ -47,6 +47,10 @@ namespace AgGrade.Data
         private double RearCutVolumeBCY;
         private Coordinate? LastFrontBladeLeft;
         private Coordinate? LastFrontBladeRight;
+        private Coordinate? LastRearBladeLeft;
+        private Coordinate? LastRearBladeRight;
+        private bool FrontOperating;
+        private bool RearOperating;
 
         public delegate void VolumeCutUpdated(double VolumeBCY);
         public event VolumeCutUpdated OnFrontVolumeCutUpdated = null;
@@ -56,6 +60,9 @@ namespace AgGrade.Data
             (
             )
         {
+            FrontOperating = false;
+            RearOperating = false;
+
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Elapsed += CalcTimer_Elapsed;
@@ -63,32 +70,66 @@ namespace AgGrade.Data
             ElapsedTimer = new Stopwatch();
         }
 
-        /// <summary>
-        /// Start processing of the blades
-        /// </summary>
-        public void Start
+        public void StartFront
             (
             )
         {
+            LastFrontBladeLeft = null;
+            LastFrontBladeRight = null;
+
+            FrontOperating = true;
+
             FrontCutVolumeBCY = 0;
-            RearCutVolumeBCY = 0;
-
             OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
-            OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
 
-            CalcTimer.Start();
-            ElapsedTimer.Start();
+            if (!RearOperating)
+            {
+                CalcTimer.Start();
+                ElapsedTimer.Start();
+            }
         }
 
-        /// <summary>
-        /// Stop processing of the blades
-        /// </summary>
-        public void Stop
+        public void StopFront
             (
             )
         {
-            CalcTimer.Stop();
-            ElapsedTimer.Stop();
+            FrontOperating = false;
+            if (!RearOperating)
+            {
+                CalcTimer.Stop();
+                ElapsedTimer.Stop();
+            }
+        }
+
+        public void StartRear
+            (
+            )
+        {
+            LastRearBladeLeft = null;
+            LastRearBladeRight = null;
+
+            RearOperating = true;
+
+            RearCutVolumeBCY = 0;
+            OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
+
+            if (!FrontOperating)
+            {
+                CalcTimer.Start();
+                ElapsedTimer.Start();
+            }
+        }
+
+        public void StopRear
+            (
+            )
+        {
+            RearOperating = false;
+            if (!FrontOperating)
+            {
+                CalcTimer.Stop();
+                ElapsedTimer.Stop();
+            }
         }
 
         /// <summary>
@@ -174,6 +215,56 @@ namespace AgGrade.Data
 
                     OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
                 }
+
+                // rear blade is set to auto cutting
+                if (CurrentEquipmentStatus.RearPan.BladeAuto)
+                {
+                    // get angle perpendicular to heading
+                    double BladeHeading;
+                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    double BladePerp = BladeHeading + 90;
+                    if (BladePerp > 360) BladePerp -= 360;
+                    if (BladePerp < 0) BladePerp += 360;
+
+                    // get length of blade
+                    double BladeLengthM = (double)CurrentEquipmentSettings.RearPan.WidthMm / 1000.0;
+
+                    // get blade location
+                    double Lat = CurrentEquipmentStatus.RearPan.Fix.Latitude;
+                    double Lon = CurrentEquipmentStatus.RearPan.Fix.Longitude;
+
+                    // get left end of blade
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, BladeLengthM / 2);
+                    Coordinate RearBladeLeft = new Coordinate(Lat, Lon);
+                    Bin? StartBin = Field.LatLonToBin(RearBladeLeft);
+
+                    // get right end of blade
+                    Lat = CurrentEquipmentStatus.RearPan.Fix.Latitude;
+                    Lon = CurrentEquipmentStatus.RearPan.Fix.Longitude;
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, -(BladeLengthM / 2));
+                    Coordinate RearBladeRight = new Coordinate(Lat, Lon);
+                    Bin? EndBin = Field.LatLonToBin(RearBladeRight);
+
+                    // we have a previous location
+                    if ((LastRearBladeLeft != null) && (LastRearBladeRight != null))
+                    {
+                        List<Coordinate> SweptPolygon = new List<Coordinate>();
+                        SweptPolygon.Add(LastRearBladeLeft);
+                        SweptPolygon.Add(LastRearBladeRight);
+                        SweptPolygon.Add(RearBladeRight);
+                        SweptPolygon.Add(RearBladeLeft);
+                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon);
+                        foreach (Bin B in BinsToCut)
+                        {
+                            RearCutBin(B);
+                        }
+                    }
+
+                    LastRearBladeLeft = RearBladeLeft;
+                    LastRearBladeRight = RearBladeRight;
+
+                    OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
+                }
             }
         }
 
@@ -212,6 +303,40 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Remove material from the bin
+        /// </summary>
+        /// <param name="BinToCut">Bin to cut from or null for no bin</param>
+        private void RearCutBin
+            (
+            Bin? BinToCut
+            )
+        {
+            // if bin is specified and has valid data then process it
+            if ((BinToCut != null) && (BinToCut.ExistingElevationM > 0))
+            {
+                // if we haven't already seen this bin
+                if (!RearProcessedBins.Contains(BinToCut))
+                {
+                    // blade is below the surface
+                    if (CurrentEquipmentStatus!.RearPan.BladeHeight < 0)
+                    {
+                        double CutHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
+
+                        // reduce bin height (adding because the cut height is negative)
+                        BinToCut.ExistingElevationM += CutHeightM;
+                        BinToCut.Dirty = true;
+
+                        // update volume
+                        RearCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
+
+                        // remember this bin so we don't process it more than one this pass of the blade
+                        RearProcessedBins.Add(BinToCut);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Removes all processed bins that are too old (i.e. have passed under the blade and can now be cut again)
         /// </summary>
         private void CullProcessedBins
@@ -238,7 +363,7 @@ namespace AgGrade.Data
                 for (int b = RearProcessedBins.Count - 1; b >= 0; b--)
                 {
                     double d = Haversine.Distance(RearProcessedBins[b].Centroid.Latitude, RearProcessedBins[b].Centroid.Longitude,
-                        CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                        CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
                     if (d > RECUT_MIN_BLADE_BIN_DISTANCE_M)
                     {
                         RearProcessedBins.RemoveAt(b);

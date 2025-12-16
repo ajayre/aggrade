@@ -168,5 +168,14 @@ namespace AgGrade.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream public_domain_beep_sound_100267 {
+            get {
+                return ResourceManager.GetStream("public-domain-beep-sound-100267", resourceCulture);
+            }
+        }
     }
 }

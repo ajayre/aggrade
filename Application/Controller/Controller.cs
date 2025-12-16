@@ -64,8 +64,9 @@ namespace AgGrade.Controller
         public event BladeHeightChanged OnFrontBladeHeightChanged = null;
         public event BladeHeightChanged OnRearBladeHeightChanged = null;
 
-        public delegate void FrontBladeCommandSent(uint Value);
-        public event FrontBladeCommandSent OnFrontBladeCommandSent = null;
+        public delegate void BladeCommandSent(uint Value);
+        public event BladeCommandSent OnFrontBladeCommandSent = null;
+        public event BladeCommandSent OnRearBladeCommandSent = null;
 
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
@@ -521,8 +522,9 @@ namespace AgGrade.Controller
             if (Value > CUTVALVE_MAX) Value = CUTVALVE_MAX;
 
             PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_CUT_VALVE, Value);
-            TxCmd.PGN = PGNValues.PGN_REAR_CUT_VALVE;
             SendControllerCommand(TxCmd);
+
+            OnRearBladeCommandSent?.Invoke(Value);
         }
 
         /// <summary>

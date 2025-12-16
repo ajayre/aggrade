@@ -18,6 +18,7 @@ namespace HardwareSim
         private Timer PingTimer;
         private GNSS GNSSSim;
         private bool FrontBladeAuto = false;
+        private bool RearBladeAuto = false;
 
         public MainForm()
         {
@@ -253,6 +254,15 @@ namespace HardwareSim
             byte[] Data = new byte[1];
             Data[0] = (byte)(FrontBladeAuto ? 1 : 0);
             SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, Data));
+        }
+
+        private void RearToggleCuttingBtn_Click(object sender, EventArgs e)
+        {
+            RearBladeAuto = !RearBladeAuto;
+
+            byte[] Data = new byte[1];
+            Data[0] = (byte)(RearBladeAuto ? 1 : 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, Data));
         }
     }
 }

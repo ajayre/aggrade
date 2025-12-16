@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -23,6 +24,7 @@ namespace AgGrade.Data
         public bool BladeAuto;
         public byte BladePWM;
         public BladeDirection Direction;
+        public bool CapacityWarningOccurred;
 
         public PanStatus
             (
@@ -30,6 +32,8 @@ namespace AgGrade.Data
         {
             IMU = new IMUValue();
             Fix = new GNSSFix();
+
+            CapacityWarningOccurred = false;
         }
     }
 

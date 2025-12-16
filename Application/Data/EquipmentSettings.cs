@@ -24,6 +24,7 @@ namespace AgGrade.Data
         public EndOfCuttingOptions EndofCutting;
         public uint RaiseHeightMm;
         public uint MaxCutDepthMm;
+        public uint CapacityCY;
 
         public PanSettings
             (
@@ -34,7 +35,8 @@ namespace AgGrade.Data
             WidthMm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
             RaiseHeightMm = 0;
-            MaxCutDepthMm = 6;
+            MaxCutDepthMm = 61;
+            CapacityCY = 8;
         }
 
         public XElement ToXml
@@ -47,7 +49,8 @@ namespace AgGrade.Data
                 new XElement("WidthMm", WidthMm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
                 new XElement("RaiseHeightMm", RaiseHeightMm),
-                new XElement("MaxCutDepthMm", MaxCutDepthMm)
+                new XElement("MaxCutDepthMm", MaxCutDepthMm),
+                new XElement("CapacityCY", CapacityCY)
             );
         }
 
@@ -104,6 +107,13 @@ namespace AgGrade.Data
             if (maxCutDepthElement != null && uint.TryParse(maxCutDepthElement.Value, out uint maxCutDepth))
             {
                 MaxCutDepthMm = maxCutDepth;
+            }
+
+            // Parse CapacityCY
+            XElement? capacityCYElement = xml.Element("CapacityCY");
+            if (capacityCYElement != null && uint.TryParse(capacityCYElement.Value, out uint capacityCY))
+            {
+                CapacityCY = capacityCY;
             }
         }
     }
