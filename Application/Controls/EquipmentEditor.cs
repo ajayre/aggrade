@@ -77,6 +77,7 @@ namespace AgGrade.Controls
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.FrontPan.RaiseHeightMm = ValidateUInt(FrontPanRaiseHeight.Value, "Front Pan Raise Height");
             Settings.FrontPan.MaxCutDepthMm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
+            Settings.FrontPan.CapacityCY = ValidateUInt(FrontPanCapacity.Value, "Front Pan Capacity");
 
             // Parse Rear Pan Settings
             Settings.RearPan.Equipped = RearPanEquipped.SelectedIndex == 1;
@@ -87,6 +88,7 @@ namespace AgGrade.Controls
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.RearPan.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
             Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
+            Settings.RearPan.CapacityCY = ValidateUInt(RearPanCapacity.Value, "Rear Pan Capacity");
 
             // Parse Front Blade PWM Settings
             Settings.FrontBlade.PWMGainUp = ValidateUInt(FrontBladePWMGainUp.Value, "Front Blade PWM Gain Up");
@@ -134,6 +136,7 @@ namespace AgGrade.Controls
             FrontPanEndofCutting.SelectedIndex = Settings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             FrontPanRaiseHeight.Value = (int)Settings.FrontPan.RaiseHeightMm;
             FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthMm;
+            FrontPanCapacity.Value = (int)Settings.FrontPan.CapacityCY;
 
             // Display Rear Pan Settings
             // Enforce constraint: if front pan is not equipped, rear pan must not be equipped
@@ -144,6 +147,7 @@ namespace AgGrade.Controls
             RearPanEndofCutting.SelectedIndex = Settings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             RearPanRaiseHeight.Value = (int)Settings.RearPan.RaiseHeightMm;
             RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
+            RearPanCapacity.Value = (int)Settings.RearPan.CapacityCY;
 
             // Display Front Blade PWM Settings
             FrontBladePWMGainUp.Value = (int)Settings.FrontBlade.PWMGainUp;

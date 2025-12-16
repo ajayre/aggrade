@@ -726,7 +726,7 @@ namespace AgGrade
             else
             {
                 FieldUpdater.StopRear();
-                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
+                CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
             }
         }
 

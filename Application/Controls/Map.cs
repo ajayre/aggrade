@@ -20,7 +20,7 @@ namespace AgGrade.Controls
         private const double MIN_SCALE_FACTOR = 0.5;
         private const double MAX_SCALE_FACTOR = 750.0;
         private const int DEAD_RECKONING_PERIOD_MS = 50;
-        private const int DEFAULT_SCALE_FACTOR = 8;
+        private const int DEFAULT_SCALE_FACTOR = 13;
         private const double ZOOM_FACTOR = 1.3;
         private const int MAX_NAME_LENGTH = 20;
         private const double SOIL_SWELL_FACTOR = 1.3;
@@ -53,7 +53,7 @@ namespace AgGrade.Controls
 
             MapGen = new MapGenerator();
             MapGen.TractorColor = MapGenerator.TractorColors.Red;
-            MapGen.TractorYOffset = 3;
+            MapGen.TractorYOffset = 5;
 
             TractorFix = new GNSSFix();
             FrontScraperFix = new GNSSFix();
@@ -131,7 +131,8 @@ namespace AgGrade.Controls
         {
             CurrentField = Field;
 
-            ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
+            //ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
+            ScaleFactor = DEFAULT_SCALE_FACTOR;
 
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
         }

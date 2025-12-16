@@ -120,6 +120,12 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
+            label8 = new Label();
+            FrontPanCapacity = new NumericInput();
+            label10 = new Label();
+            label17 = new Label();
+            RearPanCapacity = new NumericInput();
+            label18 = new Label();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -360,6 +366,9 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
+            tabPage2.Controls.Add(label8);
+            tabPage2.Controls.Add(FrontPanCapacity);
+            tabPage2.Controls.Add(label10);
             tabPage2.Controls.Add(groupBox3);
             tabPage2.Controls.Add(groupBox2);
             tabPage2.Controls.Add(groupBox1);
@@ -392,7 +401,7 @@
             groupBox3.Controls.Add(FrontBladeIntegralMulLabel);
             groupBox3.Controls.Add(FrontBladeIntegralMultiplier);
             groupBox3.Controls.Add(FrontBladeDeadbandLabel);
-            groupBox3.Location = new Point(6, 352);
+            groupBox3.Location = new Point(3, 401);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(970, 79);
             groupBox3.TabIndex = 92;
@@ -446,7 +455,7 @@
             groupBox2.Controls.Add(FrontBladePWMMinDown);
             groupBox2.Controls.Add(FrontBladePWMMaxDownLabel);
             groupBox2.Controls.Add(FrontBladePWMMaxDown);
-            groupBox2.Location = new Point(6, 267);
+            groupBox2.Location = new Point(6, 316);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(970, 79);
             groupBox2.TabIndex = 91;
@@ -519,7 +528,7 @@
             groupBox1.Controls.Add(FrontBladePWMMinUp);
             groupBox1.Controls.Add(FrontBladePWMMaxUpLabel);
             groupBox1.Controls.Add(FrontBladePWMMaxUp);
-            groupBox1.Location = new Point(6, 182);
+            groupBox1.Location = new Point(6, 231);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(970, 79);
             groupBox1.TabIndex = 90;
@@ -734,6 +743,9 @@
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
+            tabPage1.Controls.Add(label17);
+            tabPage1.Controls.Add(RearPanCapacity);
+            tabPage1.Controls.Add(label18);
             tabPage1.Controls.Add(groupBox6);
             tabPage1.Controls.Add(groupBox5);
             tabPage1.Controls.Add(groupBox4);
@@ -765,7 +777,7 @@
             groupBox6.Controls.Add(RearBladeIntegralMulLabel);
             groupBox6.Controls.Add(RearBladeIntegralMultiplier);
             groupBox6.Controls.Add(RearBladeDeadbandLabel);
-            groupBox6.Location = new Point(6, 352);
+            groupBox6.Location = new Point(3, 401);
             groupBox6.Name = "groupBox6";
             groupBox6.Size = new Size(970, 79);
             groupBox6.TabIndex = 92;
@@ -818,7 +830,7 @@
             groupBox5.Controls.Add(RearBladePWMMinDown);
             groupBox5.Controls.Add(RearBladePWMMaxDownLabel);
             groupBox5.Controls.Add(RearBladePWMMaxDown);
-            groupBox5.Location = new Point(6, 267);
+            groupBox5.Location = new Point(6, 316);
             groupBox5.Name = "groupBox5";
             groupBox5.Size = new Size(970, 79);
             groupBox5.TabIndex = 91;
@@ -890,7 +902,7 @@
             groupBox4.Controls.Add(RearBladePWMMinUp);
             groupBox4.Controls.Add(RearBladePWMMaxUpLabel);
             groupBox4.Controls.Add(RearBladePWMMaxUp);
-            groupBox4.Location = new Point(6, 182);
+            groupBox4.Location = new Point(6, 231);
             groupBox4.Name = "groupBox4";
             groupBox4.Size = new Size(970, 79);
             groupBox4.TabIndex = 90;
@@ -1102,6 +1114,64 @@
             RearPanAntennaHeightLabel.TabIndex = 75;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 14F);
+            label8.Location = new Point(415, 190);
+            label8.Name = "label8";
+            label8.Size = new Size(35, 25);
+            label8.TabIndex = 95;
+            label8.Text = "CY";
+            // 
+            // FrontPanCapacity
+            // 
+            FrontPanCapacity.Location = new Point(239, 182);
+            FrontPanCapacity.Name = "FrontPanCapacity";
+            FrontPanCapacity.Size = new Size(167, 43);
+            FrontPanCapacity.TabIndex = 94;
+            FrontPanCapacity.Unsigned = true;
+            FrontPanCapacity.Value = 0;
+            // 
+            // label10
+            // 
+            label10.AutoSize = true;
+            label10.Font = new Font("Segoe UI", 14F);
+            label10.Location = new Point(145, 190);
+            label10.Name = "label10";
+            label10.Size = new Size(88, 25);
+            label10.TabIndex = 93;
+            label10.Text = "Capacity:";
+            // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Font = new Font("Segoe UI", 14F);
+            label17.Location = new Point(415, 190);
+            label17.Name = "label17";
+            label17.Size = new Size(35, 25);
+            label17.TabIndex = 98;
+            label17.Text = "CY";
+            // 
+            // RearPanCapacity
+            // 
+            RearPanCapacity.Location = new Point(239, 182);
+            RearPanCapacity.Name = "RearPanCapacity";
+            RearPanCapacity.Size = new Size(167, 43);
+            RearPanCapacity.TabIndex = 97;
+            RearPanCapacity.Unsigned = true;
+            RearPanCapacity.Value = 0;
+            // 
+            // label18
+            // 
+            label18.AutoSize = true;
+            label18.Font = new Font("Segoe UI", 14F);
+            label18.Location = new Point(145, 190);
+            label18.Name = "label18";
+            label18.Size = new Size(88, 25);
+            label18.TabIndex = 96;
+            label18.Text = "Capacity:";
+            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1227,5 +1297,11 @@
         private NumericInput RearBladePWMMinUp;
         private Label RearBladePWMMaxUpLabel;
         private NumericInput RearBladePWMMaxUp;
+        private Label label8;
+        private NumericInput FrontPanCapacity;
+        private Label label10;
+        private Label label17;
+        private NumericInput RearPanCapacity;
+        private Label label18;
     }
 }
