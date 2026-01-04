@@ -49,8 +49,6 @@ namespace AgGrade.Data
         private Coordinate? LastFrontBladeRight;
         private Coordinate? LastRearBladeLeft;
         private Coordinate? LastRearBladeRight;
-        private bool FrontOperating;
-        private bool RearOperating;
 
         public delegate void VolumeCutUpdated(double VolumeBCY);
         public event VolumeCutUpdated OnFrontVolumeCutUpdated = null;
@@ -60,76 +58,36 @@ namespace AgGrade.Data
             (
             )
         {
-            FrontOperating = false;
-            RearOperating = false;
-
             CalcTimer = new Timer();
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Elapsed += CalcTimer_Elapsed;
 
             ElapsedTimer = new Stopwatch();
+
+            CalcTimer.Start();
+            ElapsedTimer.Start();
         }
 
-        public void StartFront
+        public void StartFrontCutting
             (
             )
         {
             LastFrontBladeLeft = null;
             LastFrontBladeRight = null;
 
-            FrontOperating = true;
-
             FrontCutVolumeBCY = 0;
             OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
-
-            if (!RearOperating)
-            {
-                CalcTimer.Start();
-                ElapsedTimer.Start();
-            }
         }
 
-        public void StopFront
-            (
-            )
-        {
-            FrontOperating = false;
-            if (!RearOperating)
-            {
-                CalcTimer.Stop();
-                ElapsedTimer.Stop();
-            }
-        }
-
-        public void StartRear
+        public void StartRearCutting
             (
             )
         {
             LastRearBladeLeft = null;
             LastRearBladeRight = null;
 
-            RearOperating = true;
-
             RearCutVolumeBCY = 0;
             OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
-
-            if (!FrontOperating)
-            {
-                CalcTimer.Start();
-                ElapsedTimer.Start();
-            }
-        }
-
-        public void StopRear
-            (
-            )
-        {
-            RearOperating = false;
-            if (!FrontOperating)
-            {
-                CalcTimer.Stop();
-                ElapsedTimer.Stop();
-            }
         }
 
         /// <summary>

@@ -39,9 +39,9 @@ namespace AgGrade.Controller
         public event SlaveOffsetChanged OnFrontSlaveOffsetChanged = null;
         public event SlaveOffsetChanged OnRearSlaveOffsetChanged = null;
 
-        public delegate void BladeAutoChanged(bool IsAuto);
-        public event BladeAutoChanged OnFrontBladeAutoChanged = null;
-        public event BladeAutoChanged OnRearBladeAutoChanged = null;
+        public delegate void BladeCuttingChanged(bool IsCutting);
+        public event BladeCuttingChanged OnFrontBladeCuttingChanged = null;
+        public event BladeCuttingChanged OnRearBladeCuttingChanged = null;
 
         public delegate void DumpingChanged(bool IsDumping);
         public event DumpingChanged OnFrontDumpingChanged = null;
@@ -369,14 +369,14 @@ namespace AgGrade.Controller
                             break;
 
                         // blade auto flags
-                        case PGNValues.PGN_FRONT_BLADE_AUTO:
-                            bool Auto = Stat.GetByte() == 1 ? true : false;
-                            OnFrontBladeAutoChanged?.Invoke(Auto);
+                        case PGNValues.PGN_FRONT_CUTTING:
+                            bool Cutting = Stat.GetByte() == 1 ? true : false;
+                            OnFrontBladeCuttingChanged?.Invoke(Cutting);
                             break;
 
-                        case PGNValues.PGN_REAR_BLADE_AUTO:
-                            Auto = Stat.GetByte() == 1 ? true : false;
-                            OnRearBladeAutoChanged?.Invoke(Auto);
+                        case PGNValues.PGN_REAR_CUTTING:
+                            Cutting = Stat.GetByte() == 1 ? true : false;
+                            OnRearBladeCuttingChanged?.Invoke(Cutting);
                             break;
 
                         // blade direction
@@ -513,7 +513,7 @@ namespace AgGrade.Controller
         /// Tell the controller we have changed the blade mode
         /// </summary>
         /// <param name="Mode">New blade mode</param>
-        public void SetFrontBladeAutoState
+        public void SetFrontBladeMode
             (
             PanStatus.BladeMode Mode
             )
@@ -522,7 +522,7 @@ namespace AgGrade.Controller
 
             if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_CUTTING, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 
@@ -530,7 +530,7 @@ namespace AgGrade.Controller
         /// Tell the controller we have changed the blade mode
         /// </summary>
         /// <param name="Mode">New blade mode</param>
-        public void SetRearBladeAutoState
+        public void SetRearBladeMode
             (
             PanStatus.BladeMode Mode
             )
@@ -539,7 +539,7 @@ namespace AgGrade.Controller
 
             if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_CUTTING, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 

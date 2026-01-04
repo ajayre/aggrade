@@ -21,7 +21,7 @@ namespace AgGrade.Data
         {
             None,
             AutoCutting,
-            AutoFloating
+            AutoFilling
         }
 
         public IMUValue IMU; 

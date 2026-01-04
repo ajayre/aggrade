@@ -639,13 +639,13 @@ namespace AgGrade
             Controller.OnFrontIMUChanged += Controller_OnFrontIMUChanged;
             Controller.OnRearIMUChanged += Controller_OnRearIMUChanged;
 
-            Controller.OnFrontBladeAutoChanged += Controller_OnFrontBladeAutoChanged;
+            Controller.OnFrontBladeCuttingChanged += Controller_OnFrontBladeCuttingChanged;
             Controller.OnFrontBladeDirectionChanged += Controller_OnFrontBladeDirectionChanged;
             Controller.OnFrontBladePWMChanged += Controller_OnFrontBladePWMChanged;
             Controller.OnFrontBladeHeightChanged += Controller_OnFrontBladeHeightChanged;
             Controller.OnFrontSlaveOffsetChanged += Controller_OnFrontSlaveOffsetChanged;
 
-            Controller.OnRearBladeAutoChanged += Controller_OnRearBladeAutoChanged;
+            Controller.OnRearBladeCuttingChanged += Controller_OnRearBladeCuttingChanged;
             Controller.OnRearBladeDirectionChanged += Controller_OnRearBladeDirectionChanged;
             Controller.OnRearBladePWMChanged += Controller_OnRearBladePWMChanged;
             Controller.OnRearBladeHeightChanged += Controller_OnRearBladeHeightChanged;
@@ -686,12 +686,16 @@ namespace AgGrade
         /// <param name="IsDumping">true if dumping</param>
         private void Controller_OnRearDumpingChanged(bool IsDumping)
         {
-            // if we have started dumping then stop cutting
             if (IsDumping)
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
-                UpdateRearBlade(CurrentEquipmentStatus.RearPan.Mode);
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoFilling;
             }
+            else
+            {
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+            }
+
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
         }
 
         /// <summary>
@@ -700,12 +704,16 @@ namespace AgGrade
         /// <param name="IsDumping">true if dumping</param>
         private void Controller_OnFrontDumpingChanged(bool IsDumping)
         {
-            // if we have started dumping then stop cutting
             if (IsDumping)
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
-                UpdateFrontBlade(CurrentEquipmentStatus.FrontPan.Mode);
+                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoFilling;
             }
+            else
+            {
+                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+            }
+
+            UpdateRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
         }
 
         /// <summary>
@@ -746,9 +754,9 @@ namespace AgGrade
             }
         }
 
-        private void Controller_OnRearBladeAutoChanged(bool IsAuto)
+        private void Controller_OnRearBladeCuttingChanged(bool IsCutting)
         {
-            if (IsAuto)
+            if (IsCutting)
             {
                 CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
             }
@@ -757,26 +765,25 @@ namespace AgGrade
                 CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
             }
 
-            UpdateRearBlade(CurrentEquipmentStatus.RearPan.Mode);
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
         }
 
         /// <summary>
         /// Updates the UI and manages the field updater based on the new rear blade mode
         /// </summary>
         /// <param name="Mode">New rear blade mode</param>
-        private void UpdateRearBlade
+        private void UpdateRearBladeMode
             (
             PanStatus.BladeMode Mode
             )
         {
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
-                FieldUpdater.StartRear();
+                FieldUpdater.StartRearCutting();
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
             else
             {
-                FieldUpdater.StopRear();
                 CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
@@ -810,9 +817,9 @@ namespace AgGrade
             }
         }
 
-        private void Controller_OnFrontBladeAutoChanged(bool IsAuto)
+        private void Controller_OnFrontBladeCuttingChanged(bool IsCutting)
         {
-            if (IsAuto)
+            if (IsCutting)
             {
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
             }
@@ -821,26 +828,25 @@ namespace AgGrade
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
             }
 
-            UpdateFrontBlade(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
         }
 
         /// <summary>
         /// Updates the UI and manages the field updater based on the new front blade mode
         /// </summary>
         /// <param name="Mode">New front blade mode</param>
-        private void UpdateFrontBlade
+        private void UpdateFrontBladeMode
             (
             PanStatus.BladeMode Mode
             )
         {
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
-                FieldUpdater.StartFront();
+                FieldUpdater.StartFrontCutting();
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
             else
             {
-                FieldUpdater.StopFront();
                 CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
@@ -1340,9 +1346,9 @@ namespace AgGrade
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
             }
 
-            Controller.SetFrontBladeAutoState(CurrentEquipmentStatus.FrontPan.Mode);
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
 
-            UpdateFrontBlade(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
         }
 
         /// <summary>
@@ -1362,9 +1368,9 @@ namespace AgGrade
                 CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
             }
 
-            Controller.SetRearBladeAutoState(CurrentEquipmentStatus.RearPan.Mode);
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
-            UpdateRearBlade(CurrentEquipmentStatus.RearPan.Mode);
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
         }
     }
 }
