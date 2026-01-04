@@ -161,13 +161,13 @@ namespace AgGrade.Data
                 ElapsedTimer.Restart();
 
                 // remove bins that were processed in the past
-                if (CurrentEquipmentStatus.FrontPan.BladeAuto || CurrentEquipmentStatus.RearPan.BladeAuto)
+                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting || CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
                 {
                     CullProcessedBins();
                 }
 
                 // front blade is set to auto cutting
-                if (CurrentEquipmentStatus.FrontPan.BladeAuto)
+                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting)
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
@@ -217,7 +217,7 @@ namespace AgGrade.Data
                 }
 
                 // rear blade is set to auto cutting
-                if (CurrentEquipmentStatus.RearPan.BladeAuto)
+                if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;

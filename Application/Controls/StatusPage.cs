@@ -59,7 +59,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(FrontPanHeading, FormatDouble(Status.FrontPan.IMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.IMU.Heading != Status.FrontPan.IMU.Heading);
             UpdateTextBoxIfChanged(FrontPanBladeHeight, Status.FrontPan.BladeHeight.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladeHeight != Status.FrontPan.BladeHeight);
             UpdateTextBoxIfChanged(FrontPanBladeOffset, Status.FrontPan.BladeOffset.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladeOffset != Status.FrontPan.BladeOffset);
-            UpdateTextBoxIfChanged(FrontPanBladeAuto, Status.FrontPan.BladeAuto ? "Yes" : "No", PreviousStatus == null || PreviousStatus.FrontPan.BladeAuto != Status.FrontPan.BladeAuto);
+            UpdateTextBoxIfChanged(FrontPanBladeAuto, Status.FrontPan.Mode == PanStatus.BladeMode.AutoCutting ? "Yes" : "No", PreviousStatus == null || PreviousStatus.FrontPan.Mode != Status.FrontPan.Mode);
             UpdateTextBoxIfChanged(FrontPanBladePWM, Status.FrontPan.BladePWM.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.BladePWM != Status.FrontPan.BladePWM);
             UpdateTextBoxIfChanged(FrontPanBladeDirection, Status.FrontPan.Direction.ToString(), PreviousStatus == null || PreviousStatus.FrontPan.Direction != Status.FrontPan.Direction);
             UpdateTextBoxIfChanged(FrontPanSpeed, FormatDouble(Status.FrontPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.Speedkph != Status.FrontPan.Fix.Vector.Speedkph);
@@ -76,7 +76,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanHeading, FormatDouble(Status.RearPan.IMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.IMU.Heading != Status.RearPan.IMU.Heading);
             UpdateTextBoxIfChanged(RearPanBladeHeight, Status.RearPan.BladeHeight.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladeHeight != Status.RearPan.BladeHeight);
             UpdateTextBoxIfChanged(RearPanBladeOffset, Status.RearPan.BladeOffset.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladeOffset != Status.RearPan.BladeOffset);
-            UpdateTextBoxIfChanged(RearPanBladeAuto, Status.RearPan.BladeAuto ? "Yes" : "No", PreviousStatus == null || PreviousStatus.RearPan.BladeAuto != Status.RearPan.BladeAuto);
+            UpdateTextBoxIfChanged(RearPanBladeAuto, Status.RearPan.Mode == PanStatus.BladeMode.AutoCutting ? "Yes" : "No", PreviousStatus == null || PreviousStatus.RearPan.Mode != Status.RearPan.Mode);
             UpdateTextBoxIfChanged(RearPanBladePWM, Status.RearPan.BladePWM.ToString(), PreviousStatus == null || PreviousStatus.RearPan.BladePWM != Status.RearPan.BladePWM);
             UpdateTextBoxIfChanged(RearPanBladeDirection, Status.RearPan.Direction.ToString(), PreviousStatus == null || PreviousStatus.RearPan.Direction != Status.RearPan.Direction);
             UpdateTextBoxIfChanged(RearPanSpeed, FormatDouble(Status.RearPan.Fix.Vector.SpeedMph), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.Speedkph != Status.RearPan.Fix.Vector.Speedkph);
@@ -115,7 +115,7 @@ namespace AgGrade.Controls
                     },
                     BladeHeight = Status.FrontPan.BladeHeight,
                     BladeOffset = Status.FrontPan.BladeOffset,
-                    BladeAuto = Status.FrontPan.BladeAuto,
+                    Mode = Status.FrontPan.Mode,
                     BladePWM = Status.FrontPan.BladePWM,
                     Direction = Status.FrontPan.Direction,
                     Fix = new GNSSFix
@@ -139,7 +139,7 @@ namespace AgGrade.Controls
                     },
                     BladeHeight = Status.RearPan.BladeHeight,
                     BladeOffset = Status.RearPan.BladeOffset,
-                    BladeAuto = Status.RearPan.BladeAuto,
+                    Mode = Status.RearPan.Mode,
                     BladePWM = Status.RearPan.BladePWM,
                     Direction = Status.RearPan.Direction,
                     Fix = new GNSSFix

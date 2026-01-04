@@ -1,4 +1,5 @@
 ﻿using AgGrade.Data;
+using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Text;
 using static System.Windows.Forms.AxHost;
@@ -41,6 +42,10 @@ namespace AgGrade.Controller
         public delegate void BladeAutoChanged(bool IsAuto);
         public event BladeAutoChanged OnFrontBladeAutoChanged = null;
         public event BladeAutoChanged OnRearBladeAutoChanged = null;
+
+        public delegate void DumpingChanged(bool IsDumping);
+        public event DumpingChanged OnFrontDumpingChanged = null;
+        public event DumpingChanged OnRearDumpingChanged = null;
 
         public delegate void BladeDirectionChanged(bool IsMovingUp);
         public event BladeDirectionChanged OnFrontBladeDirectionChanged = null;
@@ -352,6 +357,17 @@ namespace AgGrade.Controller
                             OnRearIMUChanged?.Invoke(RearScraperIMU);
                             break;
 
+                        // scraper dumping flags
+                        case PGNValues.PGN_FRONT_DUMPING:
+                            bool Dumping = Stat.GetByte() == 1 ? true : false;
+                            OnFrontDumpingChanged?.Invoke(Dumping);
+                            break;
+
+                        case PGNValues.PGN_REAR_DUMPING:
+                            Dumping = Stat.GetByte() == 1 ? true : false;
+                            OnRearDumpingChanged?.Invoke(Dumping);
+                            break;
+
                         // blade auto flags
                         case PGNValues.PGN_FRONT_BLADE_AUTO:
                             bool Auto = Stat.GetByte() == 1 ? true : false;
@@ -494,28 +510,36 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
-        /// Tell the controller we have changed the blade auto state
+        /// Tell the controller we have changed the blade mode
         /// </summary>
-        /// <param name="IsAuto">New blade auto state</param>
+        /// <param name="Mode">New blade mode</param>
         public void SetFrontBladeAutoState
             (
-            bool IsAuto
+            PanStatus.BladeMode Mode
             )
         {
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, new byte[] { (byte)(IsAuto ? 1 : 0) });
+            byte State = 0;
+
+            if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
+
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_BLADE_AUTO, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 
         /// <summary>
-        /// Tell the controller we have changed the blade auto state
+        /// Tell the controller we have changed the blade mode
         /// </summary>
-        /// <param name="IsAuto">New blade auto state</param>
+        /// <param name="Mode">New blade mode</param>
         public void SetRearBladeAutoState
             (
-            bool IsAuto
+            PanStatus.BladeMode Mode
             )
         {
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, new byte[] { (byte)(IsAuto ? 1 : 0) });
+            byte State = 0;
+
+            if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
+
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 

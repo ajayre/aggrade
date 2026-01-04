@@ -19,6 +19,8 @@ namespace HardwareSim
         private GNSS GNSSSim;
         private bool FrontBladeAuto = false;
         private bool RearBladeAuto = false;
+        private bool FrontDumping = false;
+        private bool RearDumping = false;
 
         public MainForm()
         {
@@ -263,6 +265,24 @@ namespace HardwareSim
             byte[] Data = new byte[1];
             Data[0] = (byte)(RearBladeAuto ? 1 : 0);
             SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_AUTO, Data));
+        }
+
+        private void FrontToggleDumpingBtn_Click(object sender, EventArgs e)
+        {
+            FrontDumping = !FrontDumping;
+
+            byte[] Data = new byte[1];
+            Data[0] = (byte)(FrontDumping ? 1 : 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_DUMPING, Data));
+        }
+
+        private void RearToggleDumpingBtn_Click(object sender, EventArgs e)
+        {
+            RearDumping = !RearDumping;
+
+            byte[] Data = new byte[1];
+            Data[0] = (byte)(RearDumping ? 1 : 0);
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_DUMPING, Data));
         }
     }
 }

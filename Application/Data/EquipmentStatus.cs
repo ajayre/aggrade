@@ -17,11 +17,18 @@ namespace AgGrade.Data
             Down
         }
 
+        public enum BladeMode
+        {
+            None,
+            AutoCutting,
+            AutoFloating
+        }
+
         public IMUValue IMU; 
         public GNSSFix Fix;
         public int BladeHeight;
         public int BladeOffset;
-        public bool BladeAuto;
+        public BladeMode Mode;
         public byte BladePWM;
         public BladeDirection Direction;
         public bool CapacityWarningOccurred;
@@ -34,6 +41,7 @@ namespace AgGrade.Data
             Fix = new GNSSFix();
 
             CapacityWarningOccurred = false;
+            Mode = BladeMode.None;
         }
     }
 

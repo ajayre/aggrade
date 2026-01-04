@@ -54,7 +54,8 @@
             label1 = new Label();
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
-            FrontPage = new TabPage();
+            FrontToggleDumpingBtn = new Button();
+            RearToggleDumpingBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -144,7 +145,6 @@
             // 
             tabControl1.Controls.Add(MiscPage);
             tabControl1.Controls.Add(GNSSPage);
-            tabControl1.Controls.Add(FrontPage);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
@@ -216,6 +216,8 @@
             // 
             // GNSSPage
             // 
+            GNSSPage.Controls.Add(RearToggleDumpingBtn);
+            GNSSPage.Controls.Add(FrontToggleDumpingBtn);
             GNSSPage.Controls.Add(RearToggleCuttingBtn);
             GNSSPage.Controls.Add(FrontToggleCuttingBtn);
             GNSSPage.Controls.Add(SteerLeftBtn);
@@ -239,7 +241,7 @@
             // 
             RearToggleCuttingBtn.Location = new Point(8, 202);
             RearToggleCuttingBtn.Name = "RearToggleCuttingBtn";
-            RearToggleCuttingBtn.Size = new Size(75, 23);
+            RearToggleCuttingBtn.Size = new Size(148, 23);
             RearToggleCuttingBtn.TabIndex = 10;
             RearToggleCuttingBtn.Text = "Rear Toggle Cutting";
             RearToggleCuttingBtn.UseVisualStyleBackColor = true;
@@ -249,7 +251,7 @@
             // 
             FrontToggleCuttingBtn.Location = new Point(8, 173);
             FrontToggleCuttingBtn.Name = "FrontToggleCuttingBtn";
-            FrontToggleCuttingBtn.Size = new Size(75, 23);
+            FrontToggleCuttingBtn.Size = new Size(148, 23);
             FrontToggleCuttingBtn.TabIndex = 9;
             FrontToggleCuttingBtn.Text = "Front Toggle Cutting";
             FrontToggleCuttingBtn.UseVisualStyleBackColor = true;
@@ -337,15 +339,25 @@
             LatitudeInput.Size = new Size(127, 23);
             LatitudeInput.TabIndex = 0;
             // 
-            // FrontPage
+            // FrontToggleDumpingBtn
             // 
-            FrontPage.Location = new Point(4, 24);
-            FrontPage.Name = "FrontPage";
-            FrontPage.Padding = new Padding(3);
-            FrontPage.Size = new Size(597, 422);
-            FrontPage.TabIndex = 2;
-            FrontPage.Text = "Front Pan";
-            FrontPage.UseVisualStyleBackColor = true;
+            FrontToggleDumpingBtn.Location = new Point(193, 173);
+            FrontToggleDumpingBtn.Name = "FrontToggleDumpingBtn";
+            FrontToggleDumpingBtn.Size = new Size(148, 23);
+            FrontToggleDumpingBtn.TabIndex = 11;
+            FrontToggleDumpingBtn.Text = "Front Toggle Dumping";
+            FrontToggleDumpingBtn.UseVisualStyleBackColor = true;
+            FrontToggleDumpingBtn.Click += FrontToggleDumpingBtn_Click;
+            // 
+            // RearToggleDumpingBtn
+            // 
+            RearToggleDumpingBtn.Location = new Point(193, 202);
+            RearToggleDumpingBtn.Name = "RearToggleDumpingBtn";
+            RearToggleDumpingBtn.Size = new Size(148, 23);
+            RearToggleDumpingBtn.TabIndex = 12;
+            RearToggleDumpingBtn.Text = "Rear Toggle Dumping";
+            RearToggleDumpingBtn.UseVisualStyleBackColor = true;
+            RearToggleDumpingBtn.Click += RearToggleDumpingBtn_Click;
             // 
             // MainForm
             // 
@@ -388,8 +400,9 @@
         private Button ReverseBtn;
         private Button SteerLeftBtn;
         private Button SteerRightBtn;
-        private TabPage FrontPage;
         private Button FrontToggleCuttingBtn;
         private Button RearToggleCuttingBtn;
+        private Button RearToggleDumpingBtn;
+        private Button FrontToggleDumpingBtn;
     }
 }

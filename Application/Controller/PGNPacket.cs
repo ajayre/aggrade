@@ -65,7 +65,7 @@ namespace AgGrade.Controller
         PGN_AUTOSTEER_MAX_INTEGRAL = 0x4006,
         PGN_AUTOSTEER_COUNTS_PER_DEG = 0x4007,
 
-        // blade status
+        // scraper status
         PGN_FRONT_BLADE_OFFSET_SLAVE = 0x5000,
         PGN_FRONT_BLADE_PWMVALUE = 0x5001,
         PGN_FRONT_BLADE_DIRECTION = 0x5002,
@@ -76,6 +76,8 @@ namespace AgGrade.Controller
         PGN_REAR_BLADE_AUTO = 0x5007,
         PGN_FRONT_BLADE_HEIGHT = 0x5008,
         PGN_REAR_BLADE_HEIGHT = 0x5009,
+        PGN_FRONT_DUMPING = 0x500A,
+        PGN_REAR_DUMPING = 0x500B,
 
         // IMU
         PGN_TRACTOR_IMU = 0x6000,

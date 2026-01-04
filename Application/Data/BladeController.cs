@@ -46,7 +46,7 @@ namespace AgGrade.Data
             if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
 
             // front blade is set to auto cutting
-            if (CurrentEquipmentStatus.FrontPan.BladeAuto)
+            if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting)
             {
                 Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
                 if (CurrentBin != null)
@@ -85,7 +85,7 @@ namespace AgGrade.Data
             }
 
             // rear blade is set to auto cutting
-            if (CurrentEquipmentStatus.RearPan.BladeAuto)
+            if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
             {
                 Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
                 if (CurrentBin != null)
