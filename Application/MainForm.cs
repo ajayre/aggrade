@@ -713,7 +713,7 @@ namespace AgGrade
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
             }
 
-            UpdateRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
         }
 
         /// <summary>
@@ -782,6 +782,11 @@ namespace AgGrade
                 FieldUpdater.StartRearCutting();
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
+            else if (Mode == PanStatus.BladeMode.AutoFilling)
+            {
+                FieldUpdater.StartRearFilling();
+                // fixme - what to show on button indicator?
+            }
             else
             {
                 CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
@@ -844,6 +849,11 @@ namespace AgGrade
             {
                 FieldUpdater.StartFrontCutting();
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
+            }
+            else if (Mode == PanStatus.BladeMode.AutoFilling)
+            {
+                FieldUpdater.StartFrontFilling();
+                // fixme - what to show on button indicator?
             }
             else
             {

@@ -51,6 +51,12 @@
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             tabPage2 = new TabPage();
+            FrontPanMaxFillDepthUnitsLabel = new Label();
+            FrontPanMaxFillDepth = new NumericInput();
+            FrontPanMaxFillDepthLabel = new Label();
+            FrontPanCapacityUnitsLabel = new Label();
+            FrontPanCapacity = new NumericInput();
+            FrontPanCapacityLabel = new Label();
             groupBox3 = new GroupBox();
             FrontBladeDeadband = new NumericInput();
             FrontBladeIntegralMulLabel = new Label();
@@ -70,7 +76,7 @@
             FrontBladePWMMinUp = new NumericInput();
             FrontBladePWMMaxUpLabel = new Label();
             FrontBladePWMMaxUp = new NumericInput();
-            label7 = new Label();
+            FrontPanMaxCutDepthUnitsLabel = new Label();
             FrontPanMaxCutDepth = new NumericInput();
             FrontPanMaxCutDepthLabel = new Label();
             FrontPanEquippedLabel = new Label();
@@ -86,6 +92,12 @@
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             tabPage1 = new TabPage();
+            RearPanMaxFillDepthUnitsLabel = new Label();
+            RearPanMaxFillDepth = new NumericInput();
+            RearPanMaxFillDepthLabel = new Label();
+            RearPanCapacityUnitsLabel = new Label();
+            RearPanCapacity = new NumericInput();
+            RearPanCapacityLabel = new Label();
             groupBox6 = new GroupBox();
             RearBladeDeadband = new NumericInput();
             RearBladeIntegralMulLabel = new Label();
@@ -105,7 +117,7 @@
             RearBladePWMMinUp = new NumericInput();
             RearBladePWMMaxUpLabel = new Label();
             RearBladePWMMaxUp = new NumericInput();
-            label9 = new Label();
+            RearPanMaxCutDepthUnitsLabel = new Label();
             RearPanEquippedLabel = new Label();
             RearPanMaxCutDepth = new NumericInput();
             RearPanMaxCutDepthLabel = new Label();
@@ -120,12 +132,6 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
-            label8 = new Label();
-            FrontPanCapacity = new NumericInput();
-            label10 = new Label();
-            label17 = new Label();
-            RearPanCapacity = new NumericInput();
-            label18 = new Label();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -366,13 +372,16 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
-            tabPage2.Controls.Add(label8);
+            tabPage2.Controls.Add(FrontPanMaxFillDepthUnitsLabel);
+            tabPage2.Controls.Add(FrontPanMaxFillDepth);
+            tabPage2.Controls.Add(FrontPanMaxFillDepthLabel);
+            tabPage2.Controls.Add(FrontPanCapacityUnitsLabel);
             tabPage2.Controls.Add(FrontPanCapacity);
-            tabPage2.Controls.Add(label10);
+            tabPage2.Controls.Add(FrontPanCapacityLabel);
             tabPage2.Controls.Add(groupBox3);
             tabPage2.Controls.Add(groupBox2);
             tabPage2.Controls.Add(groupBox1);
-            tabPage2.Controls.Add(label7);
+            tabPage2.Controls.Add(FrontPanMaxCutDepthUnitsLabel);
             tabPage2.Controls.Add(FrontPanMaxCutDepth);
             tabPage2.Controls.Add(FrontPanMaxCutDepthLabel);
             tabPage2.Controls.Add(FrontPanEquippedLabel);
@@ -393,6 +402,64 @@
             tabPage2.Size = new Size(982, 939);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Front Pan";
+            // 
+            // FrontPanMaxFillDepthUnitsLabel
+            // 
+            FrontPanMaxFillDepthUnitsLabel.AutoSize = true;
+            FrontPanMaxFillDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxFillDepthUnitsLabel.Location = new Point(784, 141);
+            FrontPanMaxFillDepthUnitsLabel.Name = "FrontPanMaxFillDepthUnitsLabel";
+            FrontPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
+            FrontPanMaxFillDepthUnitsLabel.TabIndex = 98;
+            FrontPanMaxFillDepthUnitsLabel.Text = "mm";
+            // 
+            // FrontPanMaxFillDepth
+            // 
+            FrontPanMaxFillDepth.Location = new Point(611, 133);
+            FrontPanMaxFillDepth.Name = "FrontPanMaxFillDepth";
+            FrontPanMaxFillDepth.Size = new Size(167, 43);
+            FrontPanMaxFillDepth.TabIndex = 97;
+            FrontPanMaxFillDepth.Unsigned = true;
+            FrontPanMaxFillDepth.Value = 0;
+            // 
+            // FrontPanMaxFillDepthLabel
+            // 
+            FrontPanMaxFillDepthLabel.AutoSize = true;
+            FrontPanMaxFillDepthLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxFillDepthLabel.Location = new Point(468, 141);
+            FrontPanMaxFillDepthLabel.Name = "FrontPanMaxFillDepthLabel";
+            FrontPanMaxFillDepthLabel.Size = new Size(137, 25);
+            FrontPanMaxFillDepthLabel.TabIndex = 96;
+            FrontPanMaxFillDepthLabel.Text = "Max Fill Depth:";
+            // 
+            // FrontPanCapacityUnitsLabel
+            // 
+            FrontPanCapacityUnitsLabel.AutoSize = true;
+            FrontPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanCapacityUnitsLabel.Location = new Point(415, 190);
+            FrontPanCapacityUnitsLabel.Name = "FrontPanCapacityUnitsLabel";
+            FrontPanCapacityUnitsLabel.Size = new Size(35, 25);
+            FrontPanCapacityUnitsLabel.TabIndex = 95;
+            FrontPanCapacityUnitsLabel.Text = "CY";
+            // 
+            // FrontPanCapacity
+            // 
+            FrontPanCapacity.Location = new Point(239, 182);
+            FrontPanCapacity.Name = "FrontPanCapacity";
+            FrontPanCapacity.Size = new Size(167, 43);
+            FrontPanCapacity.TabIndex = 94;
+            FrontPanCapacity.Unsigned = true;
+            FrontPanCapacity.Value = 0;
+            // 
+            // FrontPanCapacityLabel
+            // 
+            FrontPanCapacityLabel.AutoSize = true;
+            FrontPanCapacityLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanCapacityLabel.Location = new Point(145, 190);
+            FrontPanCapacityLabel.Name = "FrontPanCapacityLabel";
+            FrontPanCapacityLabel.Size = new Size(88, 25);
+            FrontPanCapacityLabel.TabIndex = 93;
+            FrontPanCapacityLabel.Text = "Capacity:";
             // 
             // groupBox3
             // 
@@ -592,15 +659,15 @@
             FrontBladePWMMaxUp.Unsigned = true;
             FrontBladePWMMaxUp.Value = 0;
             // 
-            // label7
+            // FrontPanMaxCutDepthUnitsLabel
             // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Segoe UI", 14F);
-            label7.Location = new Point(414, 141);
-            label7.Name = "label7";
-            label7.Size = new Size(44, 25);
-            label7.TabIndex = 71;
-            label7.Text = "mm";
+            FrontPanMaxCutDepthUnitsLabel.AutoSize = true;
+            FrontPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxCutDepthUnitsLabel.Location = new Point(414, 141);
+            FrontPanMaxCutDepthUnitsLabel.Name = "FrontPanMaxCutDepthUnitsLabel";
+            FrontPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
+            FrontPanMaxCutDepthUnitsLabel.TabIndex = 71;
+            FrontPanMaxCutDepthUnitsLabel.Text = "mm";
             // 
             // FrontPanMaxCutDepth
             // 
@@ -743,13 +810,16 @@
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
-            tabPage1.Controls.Add(label17);
+            tabPage1.Controls.Add(RearPanMaxFillDepthUnitsLabel);
+            tabPage1.Controls.Add(RearPanMaxFillDepth);
+            tabPage1.Controls.Add(RearPanMaxFillDepthLabel);
+            tabPage1.Controls.Add(RearPanCapacityUnitsLabel);
             tabPage1.Controls.Add(RearPanCapacity);
-            tabPage1.Controls.Add(label18);
+            tabPage1.Controls.Add(RearPanCapacityLabel);
             tabPage1.Controls.Add(groupBox6);
             tabPage1.Controls.Add(groupBox5);
             tabPage1.Controls.Add(groupBox4);
-            tabPage1.Controls.Add(label9);
+            tabPage1.Controls.Add(RearPanMaxCutDepthUnitsLabel);
             tabPage1.Controls.Add(RearPanEquippedLabel);
             tabPage1.Controls.Add(RearPanMaxCutDepth);
             tabPage1.Controls.Add(RearPanMaxCutDepthLabel);
@@ -770,6 +840,64 @@
             tabPage1.Size = new Size(982, 939);
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
+            // 
+            // RearPanMaxFillDepthUnitsLabel
+            // 
+            RearPanMaxFillDepthUnitsLabel.AutoSize = true;
+            RearPanMaxFillDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxFillDepthUnitsLabel.Location = new Point(784, 141);
+            RearPanMaxFillDepthUnitsLabel.Name = "RearPanMaxFillDepthUnitsLabel";
+            RearPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
+            RearPanMaxFillDepthUnitsLabel.TabIndex = 101;
+            RearPanMaxFillDepthUnitsLabel.Text = "mm";
+            // 
+            // RearPanMaxFillDepth
+            // 
+            RearPanMaxFillDepth.Location = new Point(611, 133);
+            RearPanMaxFillDepth.Name = "RearPanMaxFillDepth";
+            RearPanMaxFillDepth.Size = new Size(167, 43);
+            RearPanMaxFillDepth.TabIndex = 100;
+            RearPanMaxFillDepth.Unsigned = true;
+            RearPanMaxFillDepth.Value = 0;
+            // 
+            // RearPanMaxFillDepthLabel
+            // 
+            RearPanMaxFillDepthLabel.AutoSize = true;
+            RearPanMaxFillDepthLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxFillDepthLabel.Location = new Point(468, 141);
+            RearPanMaxFillDepthLabel.Name = "RearPanMaxFillDepthLabel";
+            RearPanMaxFillDepthLabel.Size = new Size(137, 25);
+            RearPanMaxFillDepthLabel.TabIndex = 99;
+            RearPanMaxFillDepthLabel.Text = "Max Fill Depth:";
+            // 
+            // RearPanCapacityUnitsLabel
+            // 
+            RearPanCapacityUnitsLabel.AutoSize = true;
+            RearPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanCapacityUnitsLabel.Location = new Point(415, 190);
+            RearPanCapacityUnitsLabel.Name = "RearPanCapacityUnitsLabel";
+            RearPanCapacityUnitsLabel.Size = new Size(35, 25);
+            RearPanCapacityUnitsLabel.TabIndex = 98;
+            RearPanCapacityUnitsLabel.Text = "CY";
+            // 
+            // RearPanCapacity
+            // 
+            RearPanCapacity.Location = new Point(239, 182);
+            RearPanCapacity.Name = "RearPanCapacity";
+            RearPanCapacity.Size = new Size(167, 43);
+            RearPanCapacity.TabIndex = 97;
+            RearPanCapacity.Unsigned = true;
+            RearPanCapacity.Value = 0;
+            // 
+            // RearPanCapacityLabel
+            // 
+            RearPanCapacityLabel.AutoSize = true;
+            RearPanCapacityLabel.Font = new Font("Segoe UI", 14F);
+            RearPanCapacityLabel.Location = new Point(145, 190);
+            RearPanCapacityLabel.Name = "RearPanCapacityLabel";
+            RearPanCapacityLabel.Size = new Size(88, 25);
+            RearPanCapacityLabel.TabIndex = 96;
+            RearPanCapacityLabel.Text = "Capacity:";
             // 
             // groupBox6
             // 
@@ -966,15 +1094,15 @@
             RearBladePWMMaxUp.Unsigned = true;
             RearBladePWMMaxUp.Value = 0;
             // 
-            // label9
+            // RearPanMaxCutDepthUnitsLabel
             // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(414, 141);
-            label9.Name = "label9";
-            label9.Size = new Size(44, 25);
-            label9.TabIndex = 89;
-            label9.Text = "mm";
+            RearPanMaxCutDepthUnitsLabel.AutoSize = true;
+            RearPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxCutDepthUnitsLabel.Location = new Point(414, 141);
+            RearPanMaxCutDepthUnitsLabel.Name = "RearPanMaxCutDepthUnitsLabel";
+            RearPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
+            RearPanMaxCutDepthUnitsLabel.TabIndex = 89;
+            RearPanMaxCutDepthUnitsLabel.Text = "mm";
             // 
             // RearPanEquippedLabel
             // 
@@ -1114,64 +1242,6 @@
             RearPanAntennaHeightLabel.TabIndex = 75;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
-            // label8
-            // 
-            label8.AutoSize = true;
-            label8.Font = new Font("Segoe UI", 14F);
-            label8.Location = new Point(415, 190);
-            label8.Name = "label8";
-            label8.Size = new Size(35, 25);
-            label8.TabIndex = 95;
-            label8.Text = "CY";
-            // 
-            // FrontPanCapacity
-            // 
-            FrontPanCapacity.Location = new Point(239, 182);
-            FrontPanCapacity.Name = "FrontPanCapacity";
-            FrontPanCapacity.Size = new Size(167, 43);
-            FrontPanCapacity.TabIndex = 94;
-            FrontPanCapacity.Unsigned = true;
-            FrontPanCapacity.Value = 0;
-            // 
-            // label10
-            // 
-            label10.AutoSize = true;
-            label10.Font = new Font("Segoe UI", 14F);
-            label10.Location = new Point(145, 190);
-            label10.Name = "label10";
-            label10.Size = new Size(88, 25);
-            label10.TabIndex = 93;
-            label10.Text = "Capacity:";
-            // 
-            // label17
-            // 
-            label17.AutoSize = true;
-            label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(415, 190);
-            label17.Name = "label17";
-            label17.Size = new Size(35, 25);
-            label17.TabIndex = 98;
-            label17.Text = "CY";
-            // 
-            // RearPanCapacity
-            // 
-            RearPanCapacity.Location = new Point(239, 182);
-            RearPanCapacity.Name = "RearPanCapacity";
-            RearPanCapacity.Size = new Size(167, 43);
-            RearPanCapacity.TabIndex = 97;
-            RearPanCapacity.Unsigned = true;
-            RearPanCapacity.Value = 0;
-            // 
-            // label18
-            // 
-            label18.AutoSize = true;
-            label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(145, 190);
-            label18.Name = "label18";
-            label18.Size = new Size(88, 25);
-            label18.TabIndex = 96;
-            label18.Text = "Capacity:";
-            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1239,7 +1309,7 @@
         private Label FrontBladePWMMinUpLabel;
         private NumericInput FrontBladePWMGainUp;
         private Label FrontBladePWMGainUpLabel;
-        private Label label7;
+        private Label FrontPanMaxCutDepthUnitsLabel;
         private NumericInput FrontPanMaxCutDepth;
         private Label FrontPanMaxCutDepthLabel;
         private Label FrontPanEquippedLabel;
@@ -1254,7 +1324,7 @@
         private Label FrontPanAntennaHeightUnitsLabel;
         private NumericInput FrontPanAntennaHeight;
         private Label FrontPanAntennaHeightLabel;
-        private Label label9;
+        private Label RearPanMaxCutDepthUnitsLabel;
         private Label RearPanEquippedLabel;
         private NumericInput RearPanMaxCutDepth;
         private Label RearPanMaxCutDepthLabel;
@@ -1297,11 +1367,17 @@
         private NumericInput RearBladePWMMinUp;
         private Label RearBladePWMMaxUpLabel;
         private NumericInput RearBladePWMMaxUp;
-        private Label label8;
+        private Label FrontPanCapacityUnitsLabel;
         private NumericInput FrontPanCapacity;
-        private Label label10;
-        private Label label17;
+        private Label FrontPanCapacityLabel;
+        private Label RearPanCapacityUnitsLabel;
         private NumericInput RearPanCapacity;
-        private Label label18;
+        private Label RearPanCapacityLabel;
+        private Label FrontPanMaxFillDepthUnitsLabel;
+        private NumericInput FrontPanMaxFillDepth;
+        private Label FrontPanMaxFillDepthLabel;
+        private Label RearPanMaxFillDepthUnitsLabel;
+        private NumericInput RearPanMaxFillDepth;
+        private Label RearPanMaxFillDepthLabel;
     }
 }

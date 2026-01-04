@@ -79,6 +79,16 @@ namespace AgGrade.Data
             OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
         }
 
+        public void StartFrontFilling
+            (
+            )
+        {
+            LastFrontBladeLeft = null;
+            LastFrontBladeRight = null;
+
+            OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
+        }
+
         public void StartRearCutting
             (
             )
@@ -87,6 +97,16 @@ namespace AgGrade.Data
             LastRearBladeRight = null;
 
             RearCutVolumeBCY = 0;
+            OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
+        }
+
+        public void StartRearFilling
+            (
+            )
+        {
+            LastRearBladeLeft = null;
+            LastRearBladeRight = null;
+
             OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
         }
 

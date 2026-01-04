@@ -77,6 +77,7 @@ namespace AgGrade.Controls
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.FrontPan.RaiseHeightMm = ValidateUInt(FrontPanRaiseHeight.Value, "Front Pan Raise Height");
             Settings.FrontPan.MaxCutDepthMm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
+            Settings.FrontPan.MaxFillDepthMm = ValidateUInt(FrontPanMaxFillDepth.Value, "Front Pan Max Fill Depth");
             Settings.FrontPan.CapacityCY = ValidateUInt(FrontPanCapacity.Value, "Front Pan Capacity");
 
             // Parse Rear Pan Settings
@@ -88,6 +89,7 @@ namespace AgGrade.Controls
                 : PanSettings.EndOfCuttingOptions.Raise;
             Settings.RearPan.RaiseHeightMm = ValidateUInt(RearPanRaiseHeight.Value, "Rear Pan Raise Height");
             Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
+            Settings.RearPan.MaxFillDepthMm = ValidateUInt(RearPanMaxFillDepth.Value, "Rear Pan Max Fill Depth");
             Settings.RearPan.CapacityCY = ValidateUInt(RearPanCapacity.Value, "Rear Pan Capacity");
 
             // Parse Front Blade PWM Settings
@@ -136,6 +138,7 @@ namespace AgGrade.Controls
             FrontPanEndofCutting.SelectedIndex = Settings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             FrontPanRaiseHeight.Value = (int)Settings.FrontPan.RaiseHeightMm;
             FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthMm;
+            FrontPanMaxFillDepth.Value = (int)Settings.FrontPan.MaxFillDepthMm;
             FrontPanCapacity.Value = (int)Settings.FrontPan.CapacityCY;
 
             // Display Rear Pan Settings
@@ -147,6 +150,7 @@ namespace AgGrade.Controls
             RearPanEndofCutting.SelectedIndex = Settings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             RearPanRaiseHeight.Value = (int)Settings.RearPan.RaiseHeightMm;
             RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
+            RearPanMaxFillDepth.Value = (int)Settings.RearPan.MaxFillDepthMm;
             RearPanCapacity.Value = (int)Settings.RearPan.CapacityCY;
 
             // Display Front Blade PWM Settings
@@ -188,6 +192,8 @@ namespace AgGrade.Controls
             FrontPanEndofCutting.Enabled = isEquipped;
             FrontPanRaiseHeight.Enabled = isEquipped && isRaise;
             FrontPanMaxCutDepth.Enabled = isEquipped;
+            FrontPanMaxFillDepth.Enabled = isEquipped;
+            FrontPanCapacity.Enabled = isEquipped;
 
             // Enable/disable associated labels
             FrontPanAntennaHeightUnitsLabel.Enabled = isEquipped;
@@ -197,6 +203,11 @@ namespace AgGrade.Controls
             FrontPanEndofCuttingLabel.Enabled = isEquipped;
             FrontPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
             FrontPanMaxCutDepthLabel.Enabled = isEquipped;
+            FrontPanMaxFillDepthLabel.Enabled = isEquipped;
+            FrontPanMaxCutDepthUnitsLabel.Enabled = isEquipped;
+            FrontPanMaxFillDepthUnitsLabel.Enabled = isEquipped;
+            FrontPanCapacityLabel.Enabled = isEquipped;
+            FrontPanCapacityUnitsLabel.Enabled = isEquipped;
 
             // Enable/disable Front Blade PWM controls based on equipped status
             FrontBladePWMGainUp.Enabled = isEquipped;
@@ -236,6 +247,8 @@ namespace AgGrade.Controls
             RearPanEndofCutting.Enabled = isEquipped;
             RearPanRaiseHeight.Enabled = isEquipped && isRaise;
             RearPanMaxCutDepth.Enabled = isEquipped;
+            RearPanMaxFillDepth.Enabled = isEquipped;
+            RearPanCapacity.Enabled = isEquipped;
 
             // Enable/disable associated labels
             RearPanAntennaHeightUnitsLabel.Enabled = isEquipped;
@@ -245,6 +258,11 @@ namespace AgGrade.Controls
             RearPanEndofCuttingLabel.Enabled = isEquipped;
             RearPanRaiseUnitsLabel.Enabled = isEquipped && isRaise;
             RearPanMaxCutDepthLabel.Enabled = isEquipped;
+            RearPanMaxFillDepthLabel.Enabled = isEquipped;
+            RearPanMaxCutDepthUnitsLabel.Enabled = isEquipped;
+            RearPanMaxFillDepthUnitsLabel.Enabled = isEquipped;
+            RearPanCapacityLabel.Enabled = isEquipped;
+            RearPanCapacityUnitsLabel.Enabled = isEquipped;
 
             // Enable/disable Rear Blade PWM controls based on equipped status
             RearBladePWMGainUp.Enabled = isEquipped;
