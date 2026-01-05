@@ -364,17 +364,26 @@ namespace AgGrade.Data
                 // if we haven't already seen this bin
                 if (!FrontProcessedBins.Contains(BinToFill))
                 {
-                    // blade is above the surface
-                    if (CurrentEquipmentStatus!.FrontPan.BladeHeight > 0)
+                    // blade is above the surface and we have soil to deposit
+                    if ((CurrentEquipmentStatus!.FrontPan.BladeHeight > 0) && (FrontCutVolumeBCY > 0))
                     {
-                        double FillHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
+                        // get height change for bin based on how much we have left in the scraper
+                        double FillHeightM = FrontCutVolumeBCY / 1.30795 / BIN_SIZE_M / BIN_SIZE_M;
+                        if (FillHeightM > CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0)
+                        {
+                            FillHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
+                        }
 
                         // increase bin height
                         BinToFill.ExistingElevationM += FillHeightM;
                         BinToFill.Dirty = true;
 
-                        // update volume
+                        // update volume, can't go negative
                         FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                        if (FrontCutVolumeBCY < 0)
+                        {
+                            FrontCutVolumeBCY = 0;
+                        }
 
                         // remember this bin so we don't process it more than one this pass of the blade
                         FrontProcessedBins.Add(BinToFill);
@@ -401,14 +410,23 @@ namespace AgGrade.Data
                     // blade is above the surface
                     if (CurrentEquipmentStatus!.RearPan.BladeHeight > 0)
                     {
-                        double FillHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
+                        // get height change for bin based on how much we have left in the scraper
+                        double FillHeightM = RearCutVolumeBCY / 1.30795 / BIN_SIZE_M / BIN_SIZE_M;
+                        if (FillHeightM > CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0)
+                        {
+                            FillHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
+                        }
 
                         // increase bin height
                         BinToFill.ExistingElevationM += FillHeightM;
                         BinToFill.Dirty = true;
 
-                        // update volume
+                        // update volume, can't go negative
                         RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                        if (RearCutVolumeBCY < 0)
+                        {
+                            RearCutVolumeBCY = 0;
+                        }
 
                         // remember this bin so we don't process it more than one this pass of the blade
                         RearProcessedBins.Add(BinToFill);
