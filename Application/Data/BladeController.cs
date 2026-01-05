@@ -122,6 +122,84 @@ namespace AgGrade.Data
                     Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
                 }
             }
+
+            // front blade is set to auto filling
+            if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoFilling)
+            {
+                Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                if (CurrentBin != null)
+                {
+                    // no data for this bin
+                    if (CurrentBin.ExistingElevationM == 0)
+                    {
+                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    }
+                    // need to fill
+                    else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
+                    {
+                        // get depth of fill, use max fill depth unless the target elevation is shallower
+                        double FillDepthM = CurrentEquipmentSettings.FrontPan.MaxFillDepthMm / 1000.0;
+                        if ((CurrentBin.ExistingElevationM + FillDepthM) > CurrentBin.TargetElevationM)
+                        {
+                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.ExistingElevationM;
+                        }
+
+                        // convert to command for controller
+                        uint Value = 100 + (uint)(FillDepthM * 1000.0);
+                        Controller.SetFrontCutValve(Value);
+                    }
+                    // need to cut, but we are filling
+                    else
+                    {
+                        // float on surface
+                        Controller.SetFrontCutValve(100);
+                    }
+                }
+                // no bin - outside of field
+                else
+                {
+                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                }
+            }
+
+            // rear blade is set to auto filling
+            if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoFilling)
+            {
+                Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
+                if (CurrentBin != null)
+                {
+                    // no data for this bin
+                    if (CurrentBin.ExistingElevationM == 0)
+                    {
+                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    }
+                    // need to fill
+                    else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
+                    {
+                        // get depth of fill, use max fill depth unless the target elevation is shallower
+                        double FillDepthM = CurrentEquipmentSettings.RearPan.MaxFillDepthMm / 1000.0;
+                        if ((CurrentBin.ExistingElevationM + FillDepthM) > CurrentBin.TargetElevationM)
+                        {
+                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.ExistingElevationM;
+                        }
+
+                        // convert to command for controller
+                        uint Value = 100 + (uint)(FillDepthM * 1000.0);
+                        Controller.SetRearCutValve(Value);
+                    }
+                    // need to cut, but we are filling
+                    else
+                    {
+                        // float on surface
+                        Controller.SetRearCutValve(100);
+                    }
+                }
+                // no bin - outside of field
+                else
+                {
+                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                }
+            }
         }
 
         /// <summary>

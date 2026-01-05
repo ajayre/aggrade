@@ -139,7 +139,10 @@ namespace AgGrade.Data
                 ElapsedTimer.Restart();
 
                 // remove bins that were processed in the past
-                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting || CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
+                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting ||
+                    CurrentEquipmentStatus.RearPan.Mode  == PanStatus.BladeMode.AutoCutting ||
+                    CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoFilling ||
+                    CurrentEquipmentStatus.RearPan.Mode  == PanStatus.BladeMode.AutoFilling)
                 {
                     CullProcessedBins();
                 }
@@ -242,6 +245,174 @@ namespace AgGrade.Data
                     LastRearBladeRight = RearBladeRight;
 
                     OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
+                }
+
+                // front blade is set to auto filling
+                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoFilling)
+                {
+                    // get angle perpendicular to heading
+                    double BladeHeading;
+                    BladeHeading = CurrentEquipmentStatus.FrontPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    double BladePerp = BladeHeading + 90;
+                    if (BladePerp > 360) BladePerp -= 360;
+                    if (BladePerp < 0) BladePerp += 360;
+
+                    // get length of blade
+                    double BladeLengthM = (double)CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0;
+
+                    // get blade location
+                    double Lat = CurrentEquipmentStatus.FrontPan.Fix.Latitude;
+                    double Lon = CurrentEquipmentStatus.FrontPan.Fix.Longitude;
+
+                    // get left end of blade
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, BladeLengthM / 2);
+                    Coordinate FrontBladeLeft = new Coordinate(Lat, Lon);
+                    Bin? StartBin = Field.LatLonToBin(FrontBladeLeft);
+
+                    // get right end of blade
+                    Lat = CurrentEquipmentStatus.FrontPan.Fix.Latitude;
+                    Lon = CurrentEquipmentStatus.FrontPan.Fix.Longitude;
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, -(BladeLengthM / 2));
+                    Coordinate FrontBladeRight = new Coordinate(Lat, Lon);
+                    Bin? EndBin = Field.LatLonToBin(FrontBladeRight);
+
+                    // we have a previous location
+                    if ((LastFrontBladeLeft != null) && (LastFrontBladeRight != null))
+                    {
+                        List<Coordinate> SweptPolygon = new List<Coordinate>();
+                        SweptPolygon.Add(LastFrontBladeLeft);
+                        SweptPolygon.Add(LastFrontBladeRight);
+                        SweptPolygon.Add(FrontBladeRight);
+                        SweptPolygon.Add(FrontBladeLeft);
+                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon);
+                        foreach (Bin B in BinsToFill)
+                        {
+                            FrontFillBin(B);
+                        }
+                    }
+
+                    LastFrontBladeLeft = FrontBladeLeft;
+                    LastFrontBladeRight = FrontBladeRight;
+
+                    OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
+                }
+
+                // rear blade is set to auto filling
+                if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoFilling)
+                {
+                    // get angle perpendicular to heading
+                    double BladeHeading;
+                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    double BladePerp = BladeHeading + 90;
+                    if (BladePerp > 360) BladePerp -= 360;
+                    if (BladePerp < 0) BladePerp += 360;
+
+                    // get length of blade
+                    double BladeLengthM = (double)CurrentEquipmentSettings.RearPan.WidthMm / 1000.0;
+
+                    // get blade location
+                    double Lat = CurrentEquipmentStatus.RearPan.Fix.Latitude;
+                    double Lon = CurrentEquipmentStatus.RearPan.Fix.Longitude;
+
+                    // get left end of blade
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, BladeLengthM / 2);
+                    Coordinate RearBladeLeft = new Coordinate(Lat, Lon);
+                    Bin? StartBin = Field.LatLonToBin(RearBladeLeft);
+
+                    // get right end of blade
+                    Lat = CurrentEquipmentStatus.RearPan.Fix.Latitude;
+                    Lon = CurrentEquipmentStatus.RearPan.Fix.Longitude;
+                    Haversine.MoveDistanceBearing(ref Lat, ref Lon, BladePerp, -(BladeLengthM / 2));
+                    Coordinate RearBladeRight = new Coordinate(Lat, Lon);
+                    Bin? EndBin = Field.LatLonToBin(RearBladeRight);
+
+                    // we have a previous location
+                    if ((LastRearBladeLeft != null) && (LastRearBladeRight != null))
+                    {
+                        List<Coordinate> SweptPolygon = new List<Coordinate>();
+                        SweptPolygon.Add(LastRearBladeLeft);
+                        SweptPolygon.Add(LastRearBladeRight);
+                        SweptPolygon.Add(RearBladeRight);
+                        SweptPolygon.Add(RearBladeLeft);
+                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon);
+                        foreach (Bin B in BinsToFill)
+                        {
+                            RearFillBin(B);
+                        }
+                    }
+
+                    LastRearBladeLeft = RearBladeLeft;
+                    LastRearBladeRight = RearBladeRight;
+
+                    OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds material to a bin
+        /// </summary>
+        /// <param name="BinToFill">Bill to add to or null for no bin</param>
+        private void FrontFillBin
+            (
+            Bin? BinToFill
+            )
+        {
+            // if bin is specified and has valid data then process it
+            if ((BinToFill != null) && (BinToFill.ExistingElevationM > 0))
+            {
+                // if we haven't already seen this bin
+                if (!FrontProcessedBins.Contains(BinToFill))
+                {
+                    // blade is above the surface
+                    if (CurrentEquipmentStatus!.FrontPan.BladeHeight > 0)
+                    {
+                        double FillHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
+
+                        // increase bin height
+                        BinToFill.ExistingElevationM += FillHeightM;
+                        BinToFill.Dirty = true;
+
+                        // update volume
+                        FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+
+                        // remember this bin so we don't process it more than one this pass of the blade
+                        FrontProcessedBins.Add(BinToFill);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Adds material to a bin
+        /// </summary>
+        /// <param name="BinToFill">Bill to add to or null for no bin</param>
+        private void RearFillBin
+            (
+            Bin? BinToFill
+            )
+        {
+            // if bin is specified and has valid data then process it
+            if ((BinToFill != null) && (BinToFill.ExistingElevationM > 0))
+            {
+                // if we haven't already seen this bin
+                if (!RearProcessedBins.Contains(BinToFill))
+                {
+                    // blade is above the surface
+                    if (CurrentEquipmentStatus!.RearPan.BladeHeight > 0)
+                    {
+                        double FillHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
+
+                        // increase bin height
+                        BinToFill.ExistingElevationM += FillHeightM;
+                        BinToFill.Dirty = true;
+
+                        // update volume
+                        RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+
+                        // remember this bin so we don't process it more than one this pass of the blade
+                        RearProcessedBins.Add(BinToFill);
+                    }
                 }
             }
         }
