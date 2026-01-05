@@ -93,6 +93,8 @@ namespace AgGrade
 
             BladeCtrl = new BladeController(Controller);
             BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
+            BladeCtrl.OnFrontStoppedCutting += BladeCtrl_OnFrontStoppedCutting;
+            BladeCtrl.OnRearStoppedCutting += BladeCtrl_OnRearStoppedCutting;
 
             DeadReckoner = new DeadReckoner();
             DeadReckoner.SetApplicationSettings(CurrentAppSettings);
@@ -116,8 +118,6 @@ namespace AgGrade
         /// <param name="VolumeBCY">Total soil cut in BCY</param>
         private void FieldUpdater_OnRearVolumeCutUpdated(double VolumeBCY)
         {
-            GetMap()?.SetRearCutVolume(VolumeBCY);
-
             // calculate LCY
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
 
@@ -139,8 +139,6 @@ namespace AgGrade
         /// <param name="VolumeBCY">Total soil cut in BCY</param>
         private void FieldUpdater_OnFrontVolumeCutUpdated(double VolumeBCY)
         {
-            GetMap()?.SetFrontCutVolume(VolumeBCY);
-
             // calculate LCY
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
 
@@ -1347,6 +1345,30 @@ namespace AgGrade
         private void ZoomFitBtn_Click(object sender, EventArgs e)
         {
             GetMap()?.ZoomToFit();
+        }
+
+        /// <summary>
+        /// Called when the blade controller has stopped the rear blade from cutting
+        /// </summary>
+        private void BladeCtrl_OnRearStoppedCutting()
+        {
+            // make sure controller and UI match current state
+
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+
+            UpdateRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+        }
+
+        /// <summary>
+        /// Called when the blade controller has stopped the front blade from cutting
+        /// </summary>
+        private void BladeCtrl_OnFrontStoppedCutting()
+        {
+            // make sure controller and UI match current state
+
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+
+            UpdateFrontBladeMode(CurrentEquipmentStatus.RearPan.Mode);
         }
 
         /// <summary>

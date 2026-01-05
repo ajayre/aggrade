@@ -137,46 +137,6 @@ namespace AgGrade.Controls
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
         }
 
-        // fixme - remove
-        /// <summary>
-        /// Updates the amount of soil cut by the front scraper
-        /// </summary>
-        /// <param name="VolumeBCY">Soil volume in BCY</param>
-        public void SetFrontCutVolume
-            (
-            double VolumeBCY
-            )
-        {
-            /*if (InvokeRequired)
-            {
-                BeginInvoke(new Action<double>(SetFrontCutVolume), VolumeBCY);
-                return;
-            }
-
-            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
-            FrontLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";*/
-        }
-
-        // fixme - remove
-        /// <summary>
-        /// Updates the amount of soil cut by the rear scraper
-        /// </summary>
-        /// <param name="VolumeBCY">Soil volume in BCY</param>
-        public void SetRearCutVolume
-            (
-            double VolumeBCY
-            )
-        {
-            /*if (InvokeRequired)
-            {
-                BeginInvoke(new Action<double>(SetRearCutVolume), VolumeBCY);
-                return;
-            }
-
-            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
-            RearLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";*/
-        }
-
         /// <summary>
         /// Sets the tractor location and heading
         /// </summary>

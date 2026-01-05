@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,10 @@ namespace AgGrade.Data
         private EquipmentSettings? CurrentEquipmentSettings;
         private EquipmentStatus? CurrentEquipmentStatus;
         private OGController Controller;
+
+        public delegate void StoppedCutting();
+        public event StoppedCutting OnFrontStoppedCutting = null;
+        public event StoppedCutting OnRearStoppedCutting = null;
 
         public BladeController
             (
@@ -55,7 +60,8 @@ namespace AgGrade.Data
                     // raise blade
                     Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
                     CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
-                    // fixme - to do - need to report change to UI and controller
+
+                    OnFrontStoppedCutting?.Invoke();
                 }
                 else
                 {
@@ -106,7 +112,8 @@ namespace AgGrade.Data
                     // raise blade
                     Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
                     CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
-                    // fixme - to do - need to report change to UI and controller
+
+                    OnRearStoppedCutting?.Invoke();
                 }
                 else
                 {
