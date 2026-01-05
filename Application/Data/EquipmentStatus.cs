@@ -32,6 +32,7 @@ namespace AgGrade.Data
         public byte BladePWM;
         public BladeDirection Direction;
         public bool CapacityWarningOccurred;
+        public double LoadLCY;
 
         public PanStatus
             (
@@ -42,6 +43,7 @@ namespace AgGrade.Data
 
             CapacityWarningOccurred = false;
             Mode = BladeMode.None;
+            LoadLCY = 0;
         }
     }
 

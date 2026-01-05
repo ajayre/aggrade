@@ -132,6 +132,10 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
+            FrontPanStopCuttingWhenFullLabel = new Label();
+            FrontPanStopCuttingWhenFull = new ComboBox();
+            RearPanStopCuttingWhenFullLabel = new Label();
+            RearPanStopCuttingWhenFull = new ComboBox();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -372,6 +376,8 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
+            tabPage2.Controls.Add(FrontPanStopCuttingWhenFullLabel);
+            tabPage2.Controls.Add(FrontPanStopCuttingWhenFull);
             tabPage2.Controls.Add(FrontPanMaxFillDepthUnitsLabel);
             tabPage2.Controls.Add(FrontPanMaxFillDepth);
             tabPage2.Controls.Add(FrontPanMaxFillDepthLabel);
@@ -468,7 +474,7 @@
             groupBox3.Controls.Add(FrontBladeIntegralMulLabel);
             groupBox3.Controls.Add(FrontBladeIntegralMultiplier);
             groupBox3.Controls.Add(FrontBladeDeadbandLabel);
-            groupBox3.Location = new Point(3, 401);
+            groupBox3.Location = new Point(3, 440);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(970, 79);
             groupBox3.TabIndex = 92;
@@ -522,7 +528,7 @@
             groupBox2.Controls.Add(FrontBladePWMMinDown);
             groupBox2.Controls.Add(FrontBladePWMMaxDownLabel);
             groupBox2.Controls.Add(FrontBladePWMMaxDown);
-            groupBox2.Location = new Point(6, 316);
+            groupBox2.Location = new Point(6, 355);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(970, 79);
             groupBox2.TabIndex = 91;
@@ -595,7 +601,7 @@
             groupBox1.Controls.Add(FrontBladePWMMinUp);
             groupBox1.Controls.Add(FrontBladePWMMaxUpLabel);
             groupBox1.Controls.Add(FrontBladePWMMaxUp);
-            groupBox1.Location = new Point(6, 231);
+            groupBox1.Location = new Point(6, 270);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(970, 79);
             groupBox1.TabIndex = 90;
@@ -810,6 +816,8 @@
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
+            tabPage1.Controls.Add(RearPanStopCuttingWhenFullLabel);
+            tabPage1.Controls.Add(RearPanStopCuttingWhenFull);
             tabPage1.Controls.Add(RearPanMaxFillDepthUnitsLabel);
             tabPage1.Controls.Add(RearPanMaxFillDepth);
             tabPage1.Controls.Add(RearPanMaxFillDepthLabel);
@@ -905,7 +913,7 @@
             groupBox6.Controls.Add(RearBladeIntegralMulLabel);
             groupBox6.Controls.Add(RearBladeIntegralMultiplier);
             groupBox6.Controls.Add(RearBladeDeadbandLabel);
-            groupBox6.Location = new Point(3, 401);
+            groupBox6.Location = new Point(3, 440);
             groupBox6.Name = "groupBox6";
             groupBox6.Size = new Size(970, 79);
             groupBox6.TabIndex = 92;
@@ -958,7 +966,7 @@
             groupBox5.Controls.Add(RearBladePWMMinDown);
             groupBox5.Controls.Add(RearBladePWMMaxDownLabel);
             groupBox5.Controls.Add(RearBladePWMMaxDown);
-            groupBox5.Location = new Point(6, 316);
+            groupBox5.Location = new Point(6, 355);
             groupBox5.Name = "groupBox5";
             groupBox5.Size = new Size(970, 79);
             groupBox5.TabIndex = 91;
@@ -1030,7 +1038,7 @@
             groupBox4.Controls.Add(RearBladePWMMinUp);
             groupBox4.Controls.Add(RearBladePWMMaxUpLabel);
             groupBox4.Controls.Add(RearBladePWMMaxUp);
-            groupBox4.Location = new Point(6, 231);
+            groupBox4.Location = new Point(6, 270);
             groupBox4.Name = "groupBox4";
             groupBox4.Size = new Size(970, 79);
             groupBox4.TabIndex = 90;
@@ -1242,6 +1250,48 @@
             RearPanAntennaHeightLabel.TabIndex = 75;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
+            // FrontPanStopCuttingWhenFullLabel
+            // 
+            FrontPanStopCuttingWhenFullLabel.AutoSize = true;
+            FrontPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            FrontPanStopCuttingWhenFullLabel.Name = "FrontPanStopCuttingWhenFullLabel";
+            FrontPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
+            FrontPanStopCuttingWhenFullLabel.TabIndex = 100;
+            FrontPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
+            // 
+            // FrontPanStopCuttingWhenFull
+            // 
+            FrontPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
+            FrontPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
+            FrontPanStopCuttingWhenFull.FormattingEnabled = true;
+            FrontPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
+            FrontPanStopCuttingWhenFull.Location = new Point(242, 231);
+            FrontPanStopCuttingWhenFull.Name = "FrontPanStopCuttingWhenFull";
+            FrontPanStopCuttingWhenFull.Size = new Size(74, 33);
+            FrontPanStopCuttingWhenFull.TabIndex = 99;
+            // 
+            // RearPanStopCuttingWhenFullLabel
+            // 
+            RearPanStopCuttingWhenFullLabel.AutoSize = true;
+            RearPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
+            RearPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            RearPanStopCuttingWhenFullLabel.Name = "RearPanStopCuttingWhenFullLabel";
+            RearPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
+            RearPanStopCuttingWhenFullLabel.TabIndex = 103;
+            RearPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
+            // 
+            // RearPanStopCuttingWhenFull
+            // 
+            RearPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
+            RearPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
+            RearPanStopCuttingWhenFull.FormattingEnabled = true;
+            RearPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
+            RearPanStopCuttingWhenFull.Location = new Point(242, 231);
+            RearPanStopCuttingWhenFull.Name = "RearPanStopCuttingWhenFull";
+            RearPanStopCuttingWhenFull.Size = new Size(74, 33);
+            RearPanStopCuttingWhenFull.TabIndex = 102;
+            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1379,5 +1429,9 @@
         private Label RearPanMaxFillDepthUnitsLabel;
         private NumericInput RearPanMaxFillDepth;
         private Label RearPanMaxFillDepthLabel;
+        private Label FrontPanStopCuttingWhenFullLabel;
+        private ComboBox FrontPanStopCuttingWhenFull;
+        private Label RearPanStopCuttingWhenFullLabel;
+        private ComboBox RearPanStopCuttingWhenFull;
     }
 }

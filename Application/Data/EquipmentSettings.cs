@@ -26,6 +26,7 @@ namespace AgGrade.Data
         public uint MaxCutDepthMm;
         public uint MaxFillDepthMm;
         public uint CapacityCY;
+        public bool StopCuttingWhenFull;
 
         public PanSettings
             (
@@ -39,6 +40,7 @@ namespace AgGrade.Data
             MaxCutDepthMm = 61;
             MaxFillDepthMm = 152;
             CapacityCY = 8;
+            StopCuttingWhenFull = false;
         }
 
         public XElement ToXml
@@ -53,7 +55,8 @@ namespace AgGrade.Data
                 new XElement("RaiseHeightMm", RaiseHeightMm),
                 new XElement("MaxCutDepthMm", MaxCutDepthMm),
                 new XElement("MaxFillDepthMm", MaxFillDepthMm),
-                new XElement("CapacityCY", CapacityCY)
+                new XElement("CapacityCY", CapacityCY),
+                new XElement("StopCuttingWhenFull", StopCuttingWhenFull)
             );
         }
 
@@ -124,6 +127,13 @@ namespace AgGrade.Data
             if (capacityCYElement != null && uint.TryParse(capacityCYElement.Value, out uint capacityCY))
             {
                 CapacityCY = capacityCY;
+            }
+
+            // Parse StopCuttingWhenFull
+            XElement? stopCuttingWhenFullElement = xml.Element("StopCuttingWhenFull");
+            if (stopCuttingWhenFullElement != null && bool.TryParse(stopCuttingWhenFullElement.Value, out bool stopCuttingWhenFull))
+            {
+                StopCuttingWhenFull = stopCuttingWhenFull;
             }
         }
     }

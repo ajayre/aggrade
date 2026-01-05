@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -79,6 +80,7 @@ namespace AgGrade.Controls
             Settings.FrontPan.MaxCutDepthMm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
             Settings.FrontPan.MaxFillDepthMm = ValidateUInt(FrontPanMaxFillDepth.Value, "Front Pan Max Fill Depth");
             Settings.FrontPan.CapacityCY = ValidateUInt(FrontPanCapacity.Value, "Front Pan Capacity");
+            Settings.FrontPan.StopCuttingWhenFull = FrontPanStopCuttingWhenFull.SelectedIndex == 1;
 
             // Parse Rear Pan Settings
             Settings.RearPan.Equipped = RearPanEquipped.SelectedIndex == 1;
@@ -91,6 +93,7 @@ namespace AgGrade.Controls
             Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
             Settings.RearPan.MaxFillDepthMm = ValidateUInt(RearPanMaxFillDepth.Value, "Rear Pan Max Fill Depth");
             Settings.RearPan.CapacityCY = ValidateUInt(RearPanCapacity.Value, "Rear Pan Capacity");
+            Settings.RearPan.StopCuttingWhenFull = RearPanStopCuttingWhenFull.SelectedIndex == 1;
 
             // Parse Front Blade PWM Settings
             Settings.FrontBlade.PWMGainUp = ValidateUInt(FrontBladePWMGainUp.Value, "Front Blade PWM Gain Up");
@@ -140,6 +143,7 @@ namespace AgGrade.Controls
             FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthMm;
             FrontPanMaxFillDepth.Value = (int)Settings.FrontPan.MaxFillDepthMm;
             FrontPanCapacity.Value = (int)Settings.FrontPan.CapacityCY;
+            FrontPanStopCuttingWhenFull.SelectedIndex = Settings.FrontPan.StopCuttingWhenFull ? 1 : 0;
 
             // Display Rear Pan Settings
             // Enforce constraint: if front pan is not equipped, rear pan must not be equipped
@@ -152,6 +156,7 @@ namespace AgGrade.Controls
             RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
             RearPanMaxFillDepth.Value = (int)Settings.RearPan.MaxFillDepthMm;
             RearPanCapacity.Value = (int)Settings.RearPan.CapacityCY;
+            RearPanStopCuttingWhenFull.SelectedIndex = Settings.RearPan.StopCuttingWhenFull ? 1 : 0;
 
             // Display Front Blade PWM Settings
             FrontBladePWMGainUp.Value = (int)Settings.FrontBlade.PWMGainUp;
@@ -194,6 +199,7 @@ namespace AgGrade.Controls
             FrontPanMaxCutDepth.Enabled = isEquipped;
             FrontPanMaxFillDepth.Enabled = isEquipped;
             FrontPanCapacity.Enabled = isEquipped;
+            FrontPanStopCuttingWhenFull.Enabled = isEquipped;
 
             // Enable/disable associated labels
             FrontPanAntennaHeightUnitsLabel.Enabled = isEquipped;
@@ -208,6 +214,7 @@ namespace AgGrade.Controls
             FrontPanMaxFillDepthUnitsLabel.Enabled = isEquipped;
             FrontPanCapacityLabel.Enabled = isEquipped;
             FrontPanCapacityUnitsLabel.Enabled = isEquipped;
+            FrontPanStopCuttingWhenFullLabel.Enabled = isEquipped;
 
             // Enable/disable Front Blade PWM controls based on equipped status
             FrontBladePWMGainUp.Enabled = isEquipped;
@@ -249,6 +256,7 @@ namespace AgGrade.Controls
             RearPanMaxCutDepth.Enabled = isEquipped;
             RearPanMaxFillDepth.Enabled = isEquipped;
             RearPanCapacity.Enabled = isEquipped;
+            RearPanStopCuttingWhenFull.Enabled = isEquipped;
 
             // Enable/disable associated labels
             RearPanAntennaHeightUnitsLabel.Enabled = isEquipped;
@@ -263,6 +271,7 @@ namespace AgGrade.Controls
             RearPanMaxFillDepthUnitsLabel.Enabled = isEquipped;
             RearPanCapacityLabel.Enabled = isEquipped;
             RearPanCapacityUnitsLabel.Enabled = isEquipped;
+            RearPanStopCuttingWhenFullLabel.Enabled = isEquipped;
 
             // Enable/disable Rear Blade PWM controls based on equipped status
             RearBladePWMGainUp.Enabled = isEquipped;

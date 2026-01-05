@@ -137,6 +137,7 @@ namespace AgGrade.Controls
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
         }
 
+        // fixme - remove
         /// <summary>
         /// Updates the amount of soil cut by the front scraper
         /// </summary>
@@ -146,16 +147,17 @@ namespace AgGrade.Controls
             double VolumeBCY
             )
         {
-            if (InvokeRequired)
+            /*if (InvokeRequired)
             {
                 BeginInvoke(new Action<double>(SetFrontCutVolume), VolumeBCY);
                 return;
             }
 
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
-            FrontLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";
+            FrontLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";*/
         }
 
+        // fixme - remove
         /// <summary>
         /// Updates the amount of soil cut by the rear scraper
         /// </summary>
@@ -165,14 +167,14 @@ namespace AgGrade.Controls
             double VolumeBCY
             )
         {
-            if (InvokeRequired)
+            /*if (InvokeRequired)
             {
                 BeginInvoke(new Action<double>(SetRearCutVolume), VolumeBCY);
                 return;
             }
 
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
-            RearLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";
+            RearLoadLabel.Text = VolumeLCY.ToString("F1") + " LCY";*/
         }
 
         /// <summary>
@@ -252,7 +254,7 @@ namespace AgGrade.Controls
         }
 
         // fixme - remove
-        private long LastPerf = 0;
+        //private long LastPerf = 0;
 
         private void RefreshMap
             (
@@ -270,9 +272,13 @@ namespace AgGrade.Controls
 
             FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
             RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
+
+            FrontLoadLabel.Text = _CurrentEquipmentStatus.FrontPan.LoadLCY.ToString("F1") + " LCY";
+            RearLoadLabel.Text = _CurrentEquipmentStatus.RearPan.LoadLCY.ToString("F1") + " LCY";
         }
 
-        private void ShowPerf()
+        // fixme - remove
+        /*private void ShowPerf()
         {
             if (InvokeRequired)
             {
@@ -280,7 +286,7 @@ namespace AgGrade.Controls
                 return;
             }
             FieldNameLabel.Text = LastPerf.ToString();
-        }
+        }*/
 
         /// <summary>
         /// Zooms the map to fit

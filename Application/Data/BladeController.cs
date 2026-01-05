@@ -48,78 +48,102 @@ namespace AgGrade.Data
             // front blade is set to auto cutting
             if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting)
             {
-                Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
-                if (CurrentBin != null)
+                // if we need to stop cutting when scraper is full and scraper is full, then stop cutting
+                if (CurrentEquipmentSettings.FrontPan.StopCuttingWhenFull &&
+                    (CurrentEquipmentStatus.FrontPan.LoadLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY))
                 {
-                    // no data for this bin
-                    if (CurrentBin.ExistingElevationM == 0)
+                    // raise blade
+                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                    // fixme - to do - need to report change to UI and controller
+                }
+                else
+                {
+                    Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                    if (CurrentBin != null)
+                    {
+                        // no data for this bin
+                        if (CurrentBin.ExistingElevationM == 0)
+                        {
+                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        }
+                        // need to cut
+                        else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
+                        {
+                            // get depth of cut, use max cut depth unless the target elevation is shallower
+                            double CutDepthM = CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
+                            if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
+                            {
+                                CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
+                            }
+
+                            // convert to command for controller
+                            uint Value = 100 - (uint)(CutDepthM * 1000.0);
+                            Controller.SetFrontCutValve(Value);
+                        }
+                        // need to fill, but we are cutting
+                        else
+                        {
+                            // float on surface
+                            Controller.SetFrontCutValve(100);
+                        }
+                    }
+                    // no bin - outside of field
+                    else
                     {
                         Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
                     }
-                    // need to cut
-                    else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
-                    {
-                        // get depth of cut, use max cut depth unless the target elevation is shallower
-                        double CutDepthM = CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
-                        if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
-                        {
-                            CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
-                        }
-
-                        // convert to command for controller
-                        uint Value = 100 - (uint)(CutDepthM * 1000.0);
-                        Controller.SetFrontCutValve(Value);
-                    }
-                    // need to fill, but we are cutting
-                    else
-                    {
-                        // float on surface
-                        Controller.SetFrontCutValve(100);
-                    }
-                }
-                // no bin - outside of field
-                else
-                {
-                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
                 }
             }
 
             // rear blade is set to auto cutting
             if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
             {
-                Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
-                if (CurrentBin != null)
+                // if we need to stop cutting when scraper is full and scraper is full, then stop cutting
+                if (CurrentEquipmentSettings.RearPan.StopCuttingWhenFull &&
+                    (CurrentEquipmentStatus.RearPan.LoadLCY >= CurrentEquipmentSettings.RearPan.CapacityCY))
                 {
-                    // no data for this bin
-                    if (CurrentBin.ExistingElevationM == 0)
-                    {
-                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
-                    }
-                    // need to cut
-                    else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
-                    {
-                        // get depth of cut, use max cut depth unless the target elevation is shallower
-                        double CutDepthM = CurrentEquipmentSettings.RearPan.MaxCutDepthMm / 1000.0;
-                        if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
-                        {
-                            CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
-                        }
-
-                        // convert to command for controller
-                        uint Value = 100 - (uint)(CutDepthM * 1000.0);
-                        Controller.SetRearCutValve(Value);
-                    }
-                    // need to fill, but we are cutting
-                    else
-                    {
-                        // float on surface
-                        Controller.SetRearCutValve(100);
-                    }
+                    // raise blade
+                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                    // fixme - to do - need to report change to UI and controller
                 }
-                // no bin - outside of field
                 else
                 {
-                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    Bin? CurrentBin = Field.LatLonToBin(CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
+                    if (CurrentBin != null)
+                    {
+                        // no data for this bin
+                        if (CurrentBin.ExistingElevationM == 0)
+                        {
+                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        }
+                        // need to cut
+                        else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
+                        {
+                            // get depth of cut, use max cut depth unless the target elevation is shallower
+                            double CutDepthM = CurrentEquipmentSettings.RearPan.MaxCutDepthMm / 1000.0;
+                            if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
+                            {
+                                CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
+                            }
+
+                            // convert to command for controller
+                            uint Value = 100 - (uint)(CutDepthM * 1000.0);
+                            Controller.SetRearCutValve(Value);
+                        }
+                        // need to fill, but we are cutting
+                        else
+                        {
+                            // float on surface
+                            Controller.SetRearCutValve(100);
+                        }
+                    }
+                    // no bin - outside of field
+                    else
+                    {
+                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    }
                 }
             }
 

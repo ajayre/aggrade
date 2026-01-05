@@ -118,8 +118,13 @@ namespace AgGrade
         {
             GetMap()?.SetRearCutVolume(VolumeBCY);
 
-            // check if rear scraper has reached capacity
+            // calculate LCY
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+
+            // update in equipment status
+            CurrentEquipmentStatus.RearPan.LoadLCY = VolumeBCY;
+
+            // check if rear scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.RearPan.CapacityCY && !CurrentEquipmentStatus.RearPan.CapacityWarningOccurred)
             {
                 CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = true;
@@ -136,8 +141,13 @@ namespace AgGrade
         {
             GetMap()?.SetFrontCutVolume(VolumeBCY);
 
-            // check if front scraper has reached capacity
+            // calculate LCY
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+
+            // update in equipment status
+            CurrentEquipmentStatus.FrontPan.LoadLCY = VolumeBCY;
+
+            // check if front scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY && !CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred)
             {
                 CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = true;
