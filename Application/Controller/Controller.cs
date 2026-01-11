@@ -16,7 +16,7 @@ namespace AgGrade.Controller
     public class OGController
     {
         public const uint CUTVALVE_MIN = 0;
-        public const uint CUTVALVE_MAX = 200;
+        public const uint CUTVALVE_MAX = 400;
 
         private const Int64 LOCATION_SCALE_FACTOR = 1000000000;
 
@@ -546,7 +546,7 @@ namespace AgGrade.Controller
         /// <summary>
         /// Sets the front cut valve
         /// </summary>
-        /// <param name="Value">CUTVALVE_MIN -> CUTVALVE_MAX with 100 = at target height</param>
+        /// <param name="Value">CUTVALVE_MIN -> CUTVALVE_MAX with 200 = at target height</param>
         public void SetFrontCutValve
             (
             uint Value
@@ -563,7 +563,7 @@ namespace AgGrade.Controller
         /// <summary>
         /// Sets the rear cut valve
         /// </summary>
-        /// <param name="Value">CUTVALVE_MIN -> CUTVALVE_MAX with 100 = at target height</param>
+        /// <param name="Value">CUTVALVE_MIN -> CUTVALVE_MAX with 200 = at target height</param>
         public void SetRearCutValve
             (
             uint Value

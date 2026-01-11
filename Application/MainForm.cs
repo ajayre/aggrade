@@ -746,7 +746,7 @@ namespace AgGrade
         private void Controller_OnRearBladeHeightChanged(uint Height)
         {
             // convert to signed millimeters
-            CurrentEquipmentStatus.RearPan.BladeHeight = (int)Height - 100;
+            CurrentEquipmentStatus.RearPan.BladeHeight = (int)Height - BladeController.BLADE_HEIGHT_GROUND_LEVEL;
         }
 
         private void Controller_OnRearBladePWMChanged(byte PWMValue)
@@ -809,7 +809,7 @@ namespace AgGrade
         private void Controller_OnFrontBladeHeightChanged(uint Height)
         {
             // convert to signed millimeters
-            CurrentEquipmentStatus.FrontPan.BladeHeight = (int)Height - 100;
+            CurrentEquipmentStatus.FrontPan.BladeHeight = (int)Height - BladeController.BLADE_HEIGHT_GROUND_LEVEL;
         }
 
         private void Controller_OnFrontSlaveOffsetChanged(int Offset)

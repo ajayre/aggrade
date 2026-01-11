@@ -14,6 +14,8 @@ namespace AgGrade.Data
     {
         private const int CALC_PERIOD_MS = 50;
 
+        public const int BLADE_HEIGHT_GROUND_LEVEL = 200;
+
         // fixme - this needs to go into the settings
         // height to place blade at when not cutting, e.g. going outside of field
         private const int MAX_BLADE_HEIGHT_MM = 80;
@@ -56,13 +58,13 @@ namespace AgGrade.Data
                 if (CurrentEquipmentSettings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
                 {
                     // float blade
-                    Controller.SetFrontCutValve(100);
+                    Controller.SetFrontCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                     CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Floating;
                 }
                 else
                 {
                     // raise blade
-                    Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + 100);
+                    Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
                 }
             }
@@ -70,7 +72,7 @@ namespace AgGrade.Data
             else
             {
                 // raise blade
-                Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + 100);
+                Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
             }
         }
@@ -90,13 +92,13 @@ namespace AgGrade.Data
                 if (CurrentEquipmentSettings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
                 {
                     // float blade
-                    Controller.SetRearCutValve(100);
+                    Controller.SetRearCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                     CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Floating;
                 }
                 else
                 {
                     // raise blade
-                    Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + 100);
+                    Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
                 }
             }
@@ -104,7 +106,7 @@ namespace AgGrade.Data
             else
             {
                 // raise blade
-                Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + 100);
+                Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                 CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
             }
         }
@@ -137,7 +139,7 @@ namespace AgGrade.Data
                         // no data for this bin
                         if (CurrentBin.ExistingElevationM == 0)
                         {
-                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
                         else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
@@ -150,20 +152,20 @@ namespace AgGrade.Data
                             }
 
                             // convert to command for controller
-                            uint Value = 100 - (uint)(CutDepthM * 1000.0);
+                            uint Value = BLADE_HEIGHT_GROUND_LEVEL - (uint)(CutDepthM * 1000.0);
                             Controller.SetFrontCutValve(Value);
                         }
                         // need to fill, but we are cutting
                         else
                         {
                             // float on surface
-                            Controller.SetFrontCutValve(100);
+                            Controller.SetFrontCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                         }
                     }
                     // no bin - outside of field
                     else
                     {
-                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
             }
@@ -187,7 +189,7 @@ namespace AgGrade.Data
                         // no data for this bin
                         if (CurrentBin.ExistingElevationM == 0)
                         {
-                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
                         else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
@@ -200,20 +202,20 @@ namespace AgGrade.Data
                             }
 
                             // convert to command for controller
-                            uint Value = 100 - (uint)(CutDepthM * 1000.0);
+                            uint Value = BLADE_HEIGHT_GROUND_LEVEL - (uint)(CutDepthM * 1000.0);
                             Controller.SetRearCutValve(Value);
                         }
                         // need to fill, but we are cutting
                         else
                         {
                             // float on surface
-                            Controller.SetRearCutValve(100);
+                            Controller.SetRearCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                         }
                     }
                     // no bin - outside of field
                     else
                     {
-                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
             }
@@ -227,7 +229,7 @@ namespace AgGrade.Data
                     // no data for this bin
                     if (CurrentBin.ExistingElevationM == 0)
                     {
-                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
                     else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
@@ -240,7 +242,7 @@ namespace AgGrade.Data
                         }
 
                         // convert to command for controller
-                        uint Value = 100 + (uint)(FillDepthM * 1000.0);
+                        uint Value = BLADE_HEIGHT_GROUND_LEVEL + (uint)(FillDepthM * 1000.0);
                         Controller.SetFrontCutValve(Value);
                         // rear scraper mirrors height
                         Controller.SetRearCutValve(Value);
@@ -249,13 +251,13 @@ namespace AgGrade.Data
                     else
                     {
                         // float on surface
-                        Controller.SetFrontCutValve(100);
+                        Controller.SetFrontCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
                 // no bin - outside of field
                 else
                 {
-                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                 }
             }
 
@@ -268,7 +270,7 @@ namespace AgGrade.Data
                     // no data for this bin
                     if (CurrentBin.ExistingElevationM == 0)
                     {
-                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
                     else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
@@ -281,20 +283,20 @@ namespace AgGrade.Data
                         }
 
                         // convert to command for controller
-                        uint Value = 100 + (uint)(FillDepthM * 1000.0);
+                        uint Value = BLADE_HEIGHT_GROUND_LEVEL + (uint)(FillDepthM * 1000.0);
                         Controller.SetRearCutValve(Value);
                     }
                     // need to cut, but we are filling
                     else
                     {
                         // float on surface
-                        Controller.SetRearCutValve(100);
+                        Controller.SetRearCutValve(BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
                 // no bin - outside of field
                 else
                 {
-                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
+                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                 }
             }
         }
