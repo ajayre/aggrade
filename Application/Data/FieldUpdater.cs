@@ -22,19 +22,6 @@ namespace AgGrade.Data
         /// </summary>
         private const double RECUT_MIN_BLADE_BIN_DISTANCE_M = 3.0;
 
-        // max time before we can process a bin for cutting again
-        // this avoids processing a bin more than once if the blade is moving slowly
-        // specified in seconds
-        // for a value of 1.0s the cutting speed must be a minimum of 1.4 MPH to avoid
-        // double cutting a bin
-        // but at the same time this value cannot be so low than a bin could be processed by the
-        // front blade but skipped by the rear blade which is 5m behind, if both blades are cutting
-        // at the same time (unlikely)
-        // minimum cutting speed: Speed (mph) = 7200 / (5280 × MAX_BIN_AGE_S)
-        // maximum cutting speed: Speed (mph) = (5 × 3.28084 × 3600) / (5280 × MAX_BIN_AGE_S)
-        // for a value of 1.4: min speed = 1 mph, max speed = 8 mph
-        private const double MAX_BIN_AGE_S = 6.0;
-
         private Field Field;
         private Timer CalcTimer;
         private AppSettings? CurrentAppSettings;
@@ -184,7 +171,7 @@ namespace AgGrade.Data
                         SweptPolygon.Add(LastFrontBladeRight);
                         SweptPolygon.Add(FrontBladeRight);
                         SweptPolygon.Add(FrontBladeLeft);
-                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon);
+                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToCut)
                         {
                             FrontCutBin(B);
@@ -234,7 +221,7 @@ namespace AgGrade.Data
                         SweptPolygon.Add(LastRearBladeRight);
                         SweptPolygon.Add(RearBladeRight);
                         SweptPolygon.Add(RearBladeLeft);
-                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon);
+                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToCut)
                         {
                             RearCutBin(B);
@@ -284,7 +271,7 @@ namespace AgGrade.Data
                         SweptPolygon.Add(LastFrontBladeRight);
                         SweptPolygon.Add(FrontBladeRight);
                         SweptPolygon.Add(FrontBladeLeft);
-                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon);
+                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToFill)
                         {
                             FrontFillBin(B);
@@ -334,7 +321,7 @@ namespace AgGrade.Data
                         SweptPolygon.Add(LastRearBladeRight);
                         SweptPolygon.Add(RearBladeRight);
                         SweptPolygon.Add(RearBladeLeft);
-                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon);
+                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToFill)
                         {
                             RearFillBin(B);

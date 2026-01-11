@@ -110,10 +110,12 @@ namespace AgGrade.Data
         /// Gets a set of bins inside a polygon
         /// </summary>
         /// <param name="Vertices">Vertices of polygon</param>
+        /// <param name="MinCoverage">Minimum bin coverage percentage to be included 0 -> 100</param>
         /// <returns>Set of bins</returns>
         public List<Bin> GetBinsInside
             (
-            List<Coordinate> Vertices
+            List<Coordinate> Vertices,
+            uint MinCoverage
             )
         {
             List<Bin> result = new List<Bin>();
@@ -122,9 +124,6 @@ namespace AgGrade.Data
             {
                 return result; // Need at least 3 vertices for a polygon
             }
-
-            // Minimum percentage of bin area that must be covered by polygon (30%)
-            const double MIN_COVERAGE_PERCENT = 0.30;
 
             // Convert polygon vertices from lat/lon to UTM coordinates
             List<PointD> polygonUTM = new List<PointD>();
@@ -156,7 +155,7 @@ namespace AgGrade.Data
 
             // Bin area in square meters
             double binArea = BIN_SIZE_M * BIN_SIZE_M;
-            double minRequiredArea = binArea * MIN_COVERAGE_PERCENT;
+            double minRequiredArea = binArea * (double)MinCoverage / 100.0;
 
             // Iterate through all bins in the bounding box
             for (int x = minBinX; x <= maxBinX; x++)

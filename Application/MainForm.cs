@@ -683,6 +683,10 @@ namespace AgGrade
             UpdateHeightLeds();
             UpdateRTKLeds();
 
+            // set initial blade states
+            BladeCtrl.SetFrontToTransportState();
+            BladeCtrl.SetRearToTransportState();
+
             // fixme - allow user to choose file to load
             //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
             LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
@@ -700,7 +704,7 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetRearToTransportState();
             }
 
             UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
@@ -718,7 +722,7 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetFrontToTransportState();
             }
 
             UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
@@ -770,7 +774,7 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetRearToTransportState();
             }
 
             UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
@@ -838,7 +842,7 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetFrontToTransportState();
             }
 
             UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);

@@ -42,6 +42,74 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Sets the front blade to transportation state
+        /// </summary>
+        public void SetFrontToTransportState
+            (
+            )
+        {
+            if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
+
+            // carrying a load
+            if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
+            {
+                if (CurrentEquipmentSettings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
+                {
+                    // float blade
+                    Controller.SetFrontCutValve(100);
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Floating;
+                }
+                else
+                {
+                    // raise blade
+                    Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + 100);
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                }
+            }
+            // empty
+            else
+            {
+                // raise blade
+                Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + 100);
+                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+            }
+        }
+
+        /// <summary>
+        /// Sets the rear blade to it's transportation state
+        /// </summary>
+        public void SetRearToTransportState
+            (
+            )
+        {
+            if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
+
+            // carrying a load
+            if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
+            {
+                if (CurrentEquipmentSettings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
+                {
+                    // float blade
+                    Controller.SetRearCutValve(100);
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Floating;
+                }
+                else
+                {
+                    // raise blade
+                    Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + 100);
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                }
+            }
+            // empty
+            else
+            {
+                // raise blade
+                Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + 100);
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+            }
+        }
+
+        /// <summary>
         /// Perform the cutting calculations
         /// </summary>
         /// <param name="sender"></param>
@@ -57,9 +125,7 @@ namespace AgGrade.Data
                 if (CurrentEquipmentSettings.FrontPan.StopCuttingWhenFull &&
                     (CurrentEquipmentStatus.FrontPan.LoadLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY))
                 {
-                    // raise blade
-                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + 100);
-                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                    SetFrontToTransportState();
 
                     OnFrontStoppedCutting?.Invoke();
                 }
@@ -109,9 +175,7 @@ namespace AgGrade.Data
                 if (CurrentEquipmentSettings.RearPan.StopCuttingWhenFull &&
                     (CurrentEquipmentStatus.RearPan.LoadLCY >= CurrentEquipmentSettings.RearPan.CapacityCY))
                 {
-                    // raise blade
-                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + 100);
-                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                    SetRearToTransportState();
 
                     OnRearStoppedCutting?.Invoke();
                 }
@@ -178,6 +242,8 @@ namespace AgGrade.Data
                         // convert to command for controller
                         uint Value = 100 + (uint)(FillDepthM * 1000.0);
                         Controller.SetFrontCutValve(Value);
+                        // rear scraper mirrors height
+                        Controller.SetRearCutValve(Value);
                     }
                     // need to cut, but we are filling
                     else

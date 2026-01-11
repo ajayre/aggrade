@@ -51,6 +51,9 @@
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             tabPage2 = new TabPage();
+            FrontPanMaxHeightLabel = new Label();
+            FrontPanStopCuttingWhenFullLabel = new Label();
+            FrontPanStopCuttingWhenFull = new ComboBox();
             FrontPanMaxFillDepthUnitsLabel = new Label();
             FrontPanMaxFillDepth = new NumericInput();
             FrontPanMaxFillDepthLabel = new Label();
@@ -81,8 +84,8 @@
             FrontPanMaxCutDepthLabel = new Label();
             FrontPanEquippedLabel = new Label();
             FrontPanEquipped = new ComboBox();
-            FrontPanRaiseUnitsLabel = new Label();
-            FrontPanRaiseHeight = new NumericInput();
+            FrontPanMaxHeightUnitsLabel = new Label();
+            FrontPanMaxHeight = new NumericInput();
             FrontPanEndofCutting = new ComboBox();
             FrontPanEndofCuttingLabel = new Label();
             FrontPanWidthUnitsLabel = new Label();
@@ -92,6 +95,9 @@
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             tabPage1 = new TabPage();
+            RearPanMaxHeightLabel = new Label();
+            RearPanStopCuttingWhenFullLabel = new Label();
+            RearPanStopCuttingWhenFull = new ComboBox();
             RearPanMaxFillDepthUnitsLabel = new Label();
             RearPanMaxFillDepth = new NumericInput();
             RearPanMaxFillDepthLabel = new Label();
@@ -122,8 +128,8 @@
             RearPanMaxCutDepth = new NumericInput();
             RearPanMaxCutDepthLabel = new Label();
             RearPanEquipped = new ComboBox();
-            RearPanRaiseUnitsLabel = new Label();
-            RearPanRaiseHeight = new NumericInput();
+            RearPanMaxHeightUnitsLabel = new Label();
+            RearPanMaxHeight = new NumericInput();
             RearPanEndofCutting = new ComboBox();
             RearPanEndofCuttingLabel = new Label();
             RearPanWidthUnitsLabel = new Label();
@@ -132,10 +138,6 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
-            FrontPanStopCuttingWhenFullLabel = new Label();
-            FrontPanStopCuttingWhenFull = new ComboBox();
-            RearPanStopCuttingWhenFullLabel = new Label();
-            RearPanStopCuttingWhenFull = new ComboBox();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -376,6 +378,7 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
+            tabPage2.Controls.Add(FrontPanMaxHeightLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFullLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFull);
             tabPage2.Controls.Add(FrontPanMaxFillDepthUnitsLabel);
@@ -392,8 +395,8 @@
             tabPage2.Controls.Add(FrontPanMaxCutDepthLabel);
             tabPage2.Controls.Add(FrontPanEquippedLabel);
             tabPage2.Controls.Add(FrontPanEquipped);
-            tabPage2.Controls.Add(FrontPanRaiseUnitsLabel);
-            tabPage2.Controls.Add(FrontPanRaiseHeight);
+            tabPage2.Controls.Add(FrontPanMaxHeightUnitsLabel);
+            tabPage2.Controls.Add(FrontPanMaxHeight);
             tabPage2.Controls.Add(FrontPanEndofCutting);
             tabPage2.Controls.Add(FrontPanEndofCuttingLabel);
             tabPage2.Controls.Add(FrontPanWidthUnitsLabel);
@@ -408,6 +411,37 @@
             tabPage2.Size = new Size(982, 939);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Front Pan";
+            // 
+            // FrontPanMaxHeightLabel
+            // 
+            FrontPanMaxHeightLabel.AutoSize = true;
+            FrontPanMaxHeightLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxHeightLabel.Location = new Point(492, 190);
+            FrontPanMaxHeightLabel.Name = "FrontPanMaxHeightLabel";
+            FrontPanMaxHeightLabel.Size = new Size(113, 25);
+            FrontPanMaxHeightLabel.TabIndex = 101;
+            FrontPanMaxHeightLabel.Text = "Max Height:";
+            // 
+            // FrontPanStopCuttingWhenFullLabel
+            // 
+            FrontPanStopCuttingWhenFullLabel.AutoSize = true;
+            FrontPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            FrontPanStopCuttingWhenFullLabel.Name = "FrontPanStopCuttingWhenFullLabel";
+            FrontPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
+            FrontPanStopCuttingWhenFullLabel.TabIndex = 100;
+            FrontPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
+            // 
+            // FrontPanStopCuttingWhenFull
+            // 
+            FrontPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
+            FrontPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
+            FrontPanStopCuttingWhenFull.FormattingEnabled = true;
+            FrontPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
+            FrontPanStopCuttingWhenFull.Location = new Point(242, 231);
+            FrontPanStopCuttingWhenFull.Name = "FrontPanStopCuttingWhenFull";
+            FrontPanStopCuttingWhenFull.Size = new Size(74, 33);
+            FrontPanStopCuttingWhenFull.TabIndex = 99;
             // 
             // FrontPanMaxFillDepthUnitsLabel
             // 
@@ -715,31 +749,31 @@
             FrontPanEquipped.Size = new Size(74, 33);
             FrontPanEquipped.TabIndex = 67;
             // 
-            // FrontPanRaiseUnitsLabel
+            // FrontPanMaxHeightUnitsLabel
             // 
-            FrontPanRaiseUnitsLabel.AutoSize = true;
-            FrontPanRaiseUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanRaiseUnitsLabel.Location = new Point(784, 98);
-            FrontPanRaiseUnitsLabel.Name = "FrontPanRaiseUnitsLabel";
-            FrontPanRaiseUnitsLabel.Size = new Size(44, 25);
-            FrontPanRaiseUnitsLabel.TabIndex = 66;
-            FrontPanRaiseUnitsLabel.Text = "mm";
+            FrontPanMaxHeightUnitsLabel.AutoSize = true;
+            FrontPanMaxHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMaxHeightUnitsLabel.Location = new Point(784, 190);
+            FrontPanMaxHeightUnitsLabel.Name = "FrontPanMaxHeightUnitsLabel";
+            FrontPanMaxHeightUnitsLabel.Size = new Size(44, 25);
+            FrontPanMaxHeightUnitsLabel.TabIndex = 66;
+            FrontPanMaxHeightUnitsLabel.Text = "mm";
             // 
-            // FrontPanRaiseHeight
+            // FrontPanMaxHeight
             // 
-            FrontPanRaiseHeight.Location = new Point(611, 90);
-            FrontPanRaiseHeight.Name = "FrontPanRaiseHeight";
-            FrontPanRaiseHeight.Size = new Size(167, 43);
-            FrontPanRaiseHeight.TabIndex = 65;
-            FrontPanRaiseHeight.Unsigned = true;
-            FrontPanRaiseHeight.Value = 0;
+            FrontPanMaxHeight.Location = new Point(611, 182);
+            FrontPanMaxHeight.Name = "FrontPanMaxHeight";
+            FrontPanMaxHeight.Size = new Size(167, 43);
+            FrontPanMaxHeight.TabIndex = 65;
+            FrontPanMaxHeight.Unsigned = true;
+            FrontPanMaxHeight.Value = 0;
             // 
             // FrontPanEndofCutting
             // 
             FrontPanEndofCutting.DropDownStyle = ComboBoxStyle.DropDownList;
             FrontPanEndofCutting.Font = new Font("Segoe UI", 14F);
             FrontPanEndofCutting.FormattingEnabled = true;
-            FrontPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
+            FrontPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
             FrontPanEndofCutting.Location = new Point(239, 94);
             FrontPanEndofCutting.Name = "FrontPanEndofCutting";
             FrontPanEndofCutting.Size = new Size(366, 33);
@@ -816,6 +850,7 @@
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
+            tabPage1.Controls.Add(RearPanMaxHeightLabel);
             tabPage1.Controls.Add(RearPanStopCuttingWhenFullLabel);
             tabPage1.Controls.Add(RearPanStopCuttingWhenFull);
             tabPage1.Controls.Add(RearPanMaxFillDepthUnitsLabel);
@@ -832,8 +867,8 @@
             tabPage1.Controls.Add(RearPanMaxCutDepth);
             tabPage1.Controls.Add(RearPanMaxCutDepthLabel);
             tabPage1.Controls.Add(RearPanEquipped);
-            tabPage1.Controls.Add(RearPanRaiseUnitsLabel);
-            tabPage1.Controls.Add(RearPanRaiseHeight);
+            tabPage1.Controls.Add(RearPanMaxHeightUnitsLabel);
+            tabPage1.Controls.Add(RearPanMaxHeight);
             tabPage1.Controls.Add(RearPanEndofCutting);
             tabPage1.Controls.Add(RearPanEndofCuttingLabel);
             tabPage1.Controls.Add(RearPanWidthUnitsLabel);
@@ -848,6 +883,37 @@
             tabPage1.Size = new Size(982, 939);
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
+            // 
+            // RearPanMaxHeightLabel
+            // 
+            RearPanMaxHeightLabel.AutoSize = true;
+            RearPanMaxHeightLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxHeightLabel.Location = new Point(492, 190);
+            RearPanMaxHeightLabel.Name = "RearPanMaxHeightLabel";
+            RearPanMaxHeightLabel.Size = new Size(113, 25);
+            RearPanMaxHeightLabel.TabIndex = 104;
+            RearPanMaxHeightLabel.Text = "Max Height:";
+            // 
+            // RearPanStopCuttingWhenFullLabel
+            // 
+            RearPanStopCuttingWhenFullLabel.AutoSize = true;
+            RearPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
+            RearPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            RearPanStopCuttingWhenFullLabel.Name = "RearPanStopCuttingWhenFullLabel";
+            RearPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
+            RearPanStopCuttingWhenFullLabel.TabIndex = 103;
+            RearPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
+            // 
+            // RearPanStopCuttingWhenFull
+            // 
+            RearPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
+            RearPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
+            RearPanStopCuttingWhenFull.FormattingEnabled = true;
+            RearPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
+            RearPanStopCuttingWhenFull.Location = new Point(242, 231);
+            RearPanStopCuttingWhenFull.Name = "RearPanStopCuttingWhenFull";
+            RearPanStopCuttingWhenFull.Size = new Size(74, 33);
+            RearPanStopCuttingWhenFull.TabIndex = 102;
             // 
             // RearPanMaxFillDepthUnitsLabel
             // 
@@ -1152,31 +1218,31 @@
             RearPanEquipped.Size = new Size(74, 33);
             RearPanEquipped.TabIndex = 85;
             // 
-            // RearPanRaiseUnitsLabel
+            // RearPanMaxHeightUnitsLabel
             // 
-            RearPanRaiseUnitsLabel.AutoSize = true;
-            RearPanRaiseUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanRaiseUnitsLabel.Location = new Point(784, 98);
-            RearPanRaiseUnitsLabel.Name = "RearPanRaiseUnitsLabel";
-            RearPanRaiseUnitsLabel.Size = new Size(44, 25);
-            RearPanRaiseUnitsLabel.TabIndex = 84;
-            RearPanRaiseUnitsLabel.Text = "mm";
+            RearPanMaxHeightUnitsLabel.AutoSize = true;
+            RearPanMaxHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMaxHeightUnitsLabel.Location = new Point(784, 190);
+            RearPanMaxHeightUnitsLabel.Name = "RearPanMaxHeightUnitsLabel";
+            RearPanMaxHeightUnitsLabel.Size = new Size(44, 25);
+            RearPanMaxHeightUnitsLabel.TabIndex = 84;
+            RearPanMaxHeightUnitsLabel.Text = "mm";
             // 
-            // RearPanRaiseHeight
+            // RearPanMaxHeight
             // 
-            RearPanRaiseHeight.Location = new Point(611, 90);
-            RearPanRaiseHeight.Name = "RearPanRaiseHeight";
-            RearPanRaiseHeight.Size = new Size(167, 43);
-            RearPanRaiseHeight.TabIndex = 83;
-            RearPanRaiseHeight.Unsigned = true;
-            RearPanRaiseHeight.Value = 0;
+            RearPanMaxHeight.Location = new Point(611, 182);
+            RearPanMaxHeight.Name = "RearPanMaxHeight";
+            RearPanMaxHeight.Size = new Size(167, 43);
+            RearPanMaxHeight.TabIndex = 83;
+            RearPanMaxHeight.Unsigned = true;
+            RearPanMaxHeight.Value = 0;
             // 
             // RearPanEndofCutting
             // 
             RearPanEndofCutting.DropDownStyle = ComboBoxStyle.DropDownList;
             RearPanEndofCutting.Font = new Font("Segoe UI", 14F);
             RearPanEndofCutting.FormattingEnabled = true;
-            RearPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise above surface" });
+            RearPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
             RearPanEndofCutting.Location = new Point(239, 94);
             RearPanEndofCutting.Name = "RearPanEndofCutting";
             RearPanEndofCutting.Size = new Size(366, 33);
@@ -1250,48 +1316,6 @@
             RearPanAntennaHeightLabel.TabIndex = 75;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
-            // FrontPanStopCuttingWhenFullLabel
-            // 
-            FrontPanStopCuttingWhenFullLabel.AutoSize = true;
-            FrontPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
-            FrontPanStopCuttingWhenFullLabel.Name = "FrontPanStopCuttingWhenFullLabel";
-            FrontPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
-            FrontPanStopCuttingWhenFullLabel.TabIndex = 100;
-            FrontPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
-            // 
-            // FrontPanStopCuttingWhenFull
-            // 
-            FrontPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
-            FrontPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
-            FrontPanStopCuttingWhenFull.FormattingEnabled = true;
-            FrontPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
-            FrontPanStopCuttingWhenFull.Location = new Point(242, 231);
-            FrontPanStopCuttingWhenFull.Name = "FrontPanStopCuttingWhenFull";
-            FrontPanStopCuttingWhenFull.Size = new Size(74, 33);
-            FrontPanStopCuttingWhenFull.TabIndex = 99;
-            // 
-            // RearPanStopCuttingWhenFullLabel
-            // 
-            RearPanStopCuttingWhenFullLabel.AutoSize = true;
-            RearPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
-            RearPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
-            RearPanStopCuttingWhenFullLabel.Name = "RearPanStopCuttingWhenFullLabel";
-            RearPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
-            RearPanStopCuttingWhenFullLabel.TabIndex = 103;
-            RearPanStopCuttingWhenFullLabel.Text = "Stop Cutting When Full:";
-            // 
-            // RearPanStopCuttingWhenFull
-            // 
-            RearPanStopCuttingWhenFull.DropDownStyle = ComboBoxStyle.DropDownList;
-            RearPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
-            RearPanStopCuttingWhenFull.FormattingEnabled = true;
-            RearPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
-            RearPanStopCuttingWhenFull.Location = new Point(242, 231);
-            RearPanStopCuttingWhenFull.Name = "RearPanStopCuttingWhenFull";
-            RearPanStopCuttingWhenFull.Size = new Size(74, 33);
-            RearPanStopCuttingWhenFull.TabIndex = 102;
-            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1364,8 +1388,8 @@
         private Label FrontPanMaxCutDepthLabel;
         private Label FrontPanEquippedLabel;
         private ComboBox FrontPanEquipped;
-        private Label FrontPanRaiseUnitsLabel;
-        private NumericInput FrontPanRaiseHeight;
+        private Label FrontPanMaxHeightUnitsLabel;
+        private NumericInput FrontPanMaxHeight;
         private ComboBox FrontPanEndofCutting;
         private Label FrontPanEndofCuttingLabel;
         private Label FrontPanWidthUnitsLabel;
@@ -1379,8 +1403,8 @@
         private NumericInput RearPanMaxCutDepth;
         private Label RearPanMaxCutDepthLabel;
         private ComboBox RearPanEquipped;
-        private Label RearPanRaiseUnitsLabel;
-        private NumericInput RearPanRaiseHeight;
+        private Label RearPanMaxHeightUnitsLabel;
+        private NumericInput RearPanMaxHeight;
         private ComboBox RearPanEndofCutting;
         private Label RearPanEndofCuttingLabel;
         private Label RearPanWidthUnitsLabel;
@@ -1433,5 +1457,7 @@
         private ComboBox FrontPanStopCuttingWhenFull;
         private Label RearPanStopCuttingWhenFullLabel;
         private ComboBox RearPanStopCuttingWhenFull;
+        private Label FrontPanMaxHeightLabel;
+        private Label RearPanMaxHeightLabel;
     }
 }

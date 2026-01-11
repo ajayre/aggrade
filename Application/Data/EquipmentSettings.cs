@@ -22,7 +22,7 @@ namespace AgGrade.Data
         public uint AntennaHeightMm;
         public uint WidthMm;
         public EndOfCuttingOptions EndofCutting;
-        public uint RaiseHeightMm;
+        public uint MaxHeightMm;
         public uint MaxCutDepthMm;
         public uint MaxFillDepthMm;
         public uint CapacityCY;
@@ -36,7 +36,7 @@ namespace AgGrade.Data
             AntennaHeightMm = 0;
             WidthMm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
-            RaiseHeightMm = 0;
+            MaxHeightMm = 80;
             MaxCutDepthMm = 61;
             MaxFillDepthMm = 152;
             CapacityCY = 8;
@@ -52,7 +52,7 @@ namespace AgGrade.Data
                 new XElement("AntennaHeightMm", AntennaHeightMm),
                 new XElement("WidthMm", WidthMm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
-                new XElement("RaiseHeightMm", RaiseHeightMm),
+                new XElement("MaxHeightMm", MaxHeightMm),
                 new XElement("MaxCutDepthMm", MaxCutDepthMm),
                 new XElement("MaxFillDepthMm", MaxFillDepthMm),
                 new XElement("CapacityCY", CapacityCY),
@@ -101,11 +101,11 @@ namespace AgGrade.Data
                 }
             }
 
-            // Parse RaiseHeightMm
-            XElement? raiseHeightElement = xml.Element("RaiseHeightMm");
-            if (raiseHeightElement != null && uint.TryParse(raiseHeightElement.Value, out uint raiseHeight))
+            // Parse MaxHeightMm
+            XElement? maxHeightElement = xml.Element("MaxHeightMm");
+            if (maxHeightElement != null && uint.TryParse(maxHeightElement.Value, out uint maxHeight))
             {
-                RaiseHeightMm = raiseHeight;
+                MaxHeightMm = maxHeight;
             }
 
             // Parse MaxCutDepthMm
@@ -149,6 +149,7 @@ namespace AgGrade.Data
         public PanSettings RearPan;
         public BladeConfiguration FrontBlade;
         public BladeConfiguration RearBlade;
+        public uint MinBinCoveragePcent;
 
         public EquipmentSettings
             (
@@ -159,6 +160,8 @@ namespace AgGrade.Data
             TractorAntennaForwardOffsetMm = 0;
             TractorTurningCircleM = 0;
             TractorWidthMm = 0;
+
+            MinBinCoveragePcent = 30;
 
             FrontPan = new PanSettings();
             RearPan = new PanSettings();
@@ -205,7 +208,8 @@ namespace AgGrade.Data
                         new XElement("FrontPanSettings", FrontPan.ToXml().Elements()),
                         new XElement("RearPanSettings", RearPan.ToXml().Elements()),
                         new XElement("FrontBladeSettings", FrontBlade.ToXml().Elements()),
-                        new XElement("RearBladeSettings", RearBlade.ToXml().Elements())
+                        new XElement("RearBladeSettings", RearBlade.ToXml().Elements()),
+                        new XElement("MinBinCoveragePcent", MinBinCoveragePcent)
                     )
                 );
                 
@@ -276,7 +280,14 @@ namespace AgGrade.Data
                 {
                     TractorWidthMm = tractorWidth;
                 }
-                
+
+                // Parse MinBinCoveragePcent
+                XElement? minBinCoveragePcentElement = root.Element("MinBinCoveragePcent");
+                if (minBinCoveragePcentElement != null && uint.TryParse(minBinCoveragePcentElement.Value, out uint minBinCoveragePcent))
+                {
+                    MinBinCoveragePcent = minBinCoveragePcent;
+                }
+
                 // Parse FrontPanSettings
                 XElement? frontPanSettingsElement = root.Element("FrontPanSettings");
                 if (frontPanSettingsElement != null)

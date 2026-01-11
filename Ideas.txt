@@ -94,3 +94,6 @@
   - keep track of time operating?
   - give prediction on remaining hours?
   - show on secondary tablet?
+
+28. Calibrate field height
+  - drive to benchmark, capture GPS height, correct survey data to match new benchmark height
