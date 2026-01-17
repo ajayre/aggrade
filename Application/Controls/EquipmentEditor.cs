@@ -115,6 +115,10 @@ namespace AgGrade.Controls
             Settings.RearBlade.IntegralMultiplier = ValidateUInt(RearBladeIntegralMultiplier.Value, "Rear Blade Integral Multiplier");
             Settings.RearBlade.Deadband = ValidateUInt(RearBladeDeadband.Value, "Rear Blade Deadband");
 
+            // parse misc settings
+            Settings.MinBinCoveragePcent = ValidateUInt(MinBinCoveragePcent.Value, "Minimum Bin Coverage");
+            if (Settings.MinBinCoveragePcent > 100) Settings.MinBinCoveragePcent = 100;
+
             return Settings;
         }
 
@@ -177,6 +181,9 @@ namespace AgGrade.Controls
             RearBladePWMMaxDown.Value = (int)Settings.RearBlade.PWMMaxDown;
             RearBladeIntegralMultiplier.Value = (int)Settings.RearBlade.IntegralMultiplier;
             RearBladeDeadband.Value = (int)Settings.RearBlade.Deadband;
+
+            // Display misc settings
+            MinBinCoveragePcent.Value = (int)Settings.MinBinCoveragePcent;
 
             // Update UI state after displaying settings
             UpdateFrontPanUI();

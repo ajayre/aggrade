@@ -138,6 +138,10 @@
             RearPanAntennaHeightUnitsLabel = new Label();
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
+            tabPage3 = new TabPage();
+            label7 = new Label();
+            MinBinCoveragePcent = new NumericInput();
+            label8 = new Label();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -148,6 +152,7 @@
             groupBox6.SuspendLayout();
             groupBox5.SuspendLayout();
             groupBox4.SuspendLayout();
+            tabPage3.SuspendLayout();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -174,6 +179,7 @@
             Pages.Controls.Add(TractorPage);
             Pages.Controls.Add(tabPage2);
             Pages.Controls.Add(tabPage1);
+            Pages.Controls.Add(tabPage3);
             Pages.Dock = DockStyle.Fill;
             Pages.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             Pages.Location = new Point(0, 48);
@@ -1316,6 +1322,48 @@
             RearPanAntennaHeightLabel.TabIndex = 75;
             RearPanAntennaHeightLabel.Text = "Antenna Height to Blade:";
             // 
+            // tabPage3
+            // 
+            tabPage3.BackColor = SystemColors.Control;
+            tabPage3.Controls.Add(label7);
+            tabPage3.Controls.Add(MinBinCoveragePcent);
+            tabPage3.Controls.Add(label8);
+            tabPage3.Location = new Point(4, 48);
+            tabPage3.Name = "tabPage3";
+            tabPage3.Padding = new Padding(3);
+            tabPage3.Size = new Size(982, 939);
+            tabPage3.TabIndex = 3;
+            tabPage3.Text = "Miscellaneous";
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 14F);
+            label7.Location = new Point(484, 15);
+            label7.Name = "label7";
+            label7.Size = new Size(28, 25);
+            label7.TabIndex = 59;
+            label7.Text = "%";
+            // 
+            // MinBinCoveragePcent
+            // 
+            MinBinCoveragePcent.Location = new Point(311, 6);
+            MinBinCoveragePcent.Name = "MinBinCoveragePcent";
+            MinBinCoveragePcent.Size = new Size(167, 43);
+            MinBinCoveragePcent.TabIndex = 58;
+            MinBinCoveragePcent.Unsigned = true;
+            MinBinCoveragePcent.Value = 0;
+            // 
+            // label8
+            // 
+            label8.AutoSize = true;
+            label8.Font = new Font("Segoe UI", 14F);
+            label8.Location = new Point(14, 15);
+            label8.Name = "label8";
+            label8.Size = new Size(291, 25);
+            label8.TabIndex = 57;
+            label8.Text = "Cutting/Filling Min Bin Coverage:";
+            // 
             // EquipmentEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -1346,6 +1394,8 @@
             groupBox5.PerformLayout();
             groupBox4.ResumeLayout(false);
             groupBox4.PerformLayout();
+            tabPage3.ResumeLayout(false);
+            tabPage3.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1459,5 +1509,9 @@
         private ComboBox RearPanStopCuttingWhenFull;
         private Label FrontPanMaxHeightLabel;
         private Label RearPanMaxHeightLabel;
+        private TabPage tabPage3;
+        private Label label7;
+        private NumericInput MinBinCoveragePcent;
+        private Label label8;
     }
 }
