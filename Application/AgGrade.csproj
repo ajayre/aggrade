@@ -17,6 +17,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="OpenCvSharp">
+      <HintPath>DLLs\OpenCvSharp.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Controls\StatusPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

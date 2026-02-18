@@ -27,6 +27,8 @@ namespace AgGrade.Data
         public uint MaxFillDepthMm;
         public uint CapacityCY;
         public bool StopCuttingWhenFull;
+        public bool AutoCutWhenFrontStops;
+        public uint BladeDistanceToFrontBladeMm;
 
         public PanSettings
             (
@@ -41,6 +43,8 @@ namespace AgGrade.Data
             MaxFillDepthMm = 152;
             CapacityCY = 8;
             StopCuttingWhenFull = false;
+            AutoCutWhenFrontStops = false;
+            BladeDistanceToFrontBladeMm = 0;
         }
 
         public XElement ToXml
@@ -56,7 +60,9 @@ namespace AgGrade.Data
                 new XElement("MaxCutDepthMm", MaxCutDepthMm),
                 new XElement("MaxFillDepthMm", MaxFillDepthMm),
                 new XElement("CapacityCY", CapacityCY),
-                new XElement("StopCuttingWhenFull", StopCuttingWhenFull)
+                new XElement("StopCuttingWhenFull", StopCuttingWhenFull),
+                new XElement("AutoCutWhenFrontStops", AutoCutWhenFrontStops),
+                new XElement("BladeDistanceToFrontBladeMm", BladeDistanceToFrontBladeMm)
             );
         }
 
@@ -134,6 +140,20 @@ namespace AgGrade.Data
             if (stopCuttingWhenFullElement != null && bool.TryParse(stopCuttingWhenFullElement.Value, out bool stopCuttingWhenFull))
             {
                 StopCuttingWhenFull = stopCuttingWhenFull;
+            }
+
+            // Parse AutoCutWhenFrontStops
+            XElement? autoCutWhenFrontStopsElement = xml.Element("AutoCutWhenFrontStops");
+            if (autoCutWhenFrontStopsElement != null && bool.TryParse(autoCutWhenFrontStopsElement.Value, out bool autoCutWhenFrontStops))
+            {
+                AutoCutWhenFrontStops = autoCutWhenFrontStops;
+            }
+
+            // Parse BladeDistanceToFrontBladeMm
+            XElement? bladeDistanceToFrontBladeMmElement = xml.Element("BladeDistanceToFrontBladeMm");
+            if (bladeDistanceToFrontBladeMmElement != null && uint.TryParse(bladeDistanceToFrontBladeMmElement.Value, out uint bladeDistanceToFrontBladeMm))
+            {
+                BladeDistanceToFrontBladeMm = bladeDistanceToFrontBladeMm;
             }
         }
     }

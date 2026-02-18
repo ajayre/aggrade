@@ -461,7 +461,7 @@ namespace AgGrade.Controller
             int AntennaForwardOffsetMm
             )
         {
-            if (Sentence.StartsWith("$GNGGA"))
+            if (Sentence.StartsWith("$GPGGA") || Sentence.StartsWith("$GNGGA"))
             {
                 try
                 {

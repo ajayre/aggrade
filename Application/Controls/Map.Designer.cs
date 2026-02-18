@@ -107,6 +107,7 @@
             FrontLoadLabel.TabIndex = 4;
             FrontLoadLabel.Text = "8.0 LCY";
             FrontLoadLabel.TextAlign = ContentAlignment.MiddleRight;
+            FrontLoadLabel.Click += FrontLoadLabel_Click;
             // 
             // RearLoadLabel
             // 
@@ -120,6 +121,7 @@
             RearLoadLabel.TabIndex = 3;
             RearLoadLabel.Text = "12.0 LCY";
             RearLoadLabel.TextAlign = ContentAlignment.MiddleRight;
+            RearLoadLabel.Click += RearLoadLabel_Click;
             // 
             // HeadingLabel
             // 

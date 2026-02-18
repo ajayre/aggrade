@@ -94,6 +94,8 @@ namespace AgGrade.Controls
             Settings.RearPan.MaxFillDepthMm = ValidateUInt(RearPanMaxFillDepth.Value, "Rear Pan Max Fill Depth");
             Settings.RearPan.CapacityCY = ValidateUInt(RearPanCapacity.Value, "Rear Pan Capacity");
             Settings.RearPan.StopCuttingWhenFull = RearPanStopCuttingWhenFull.SelectedIndex == 1;
+            Settings.RearPan.AutoCutWhenFrontStops = RearPanAutoCutWhenFrontStops.SelectedIndex == 1;
+            Settings.RearPan.BladeDistanceToFrontBladeMm = ValidateUInt(RearPanBladeDistanceToFrontBlade.Value, "Rear Pan Blade Dist to Front Blade");
 
             // Parse Front Blade PWM Settings
             Settings.FrontBlade.PWMGainUp = ValidateUInt(FrontBladePWMGainUp.Value, "Front Blade PWM Gain Up");
@@ -161,6 +163,8 @@ namespace AgGrade.Controls
             RearPanMaxFillDepth.Value = (int)Settings.RearPan.MaxFillDepthMm;
             RearPanCapacity.Value = (int)Settings.RearPan.CapacityCY;
             RearPanStopCuttingWhenFull.SelectedIndex = Settings.RearPan.StopCuttingWhenFull ? 1 : 0;
+            RearPanAutoCutWhenFrontStops.SelectedIndex = Settings.RearPan.AutoCutWhenFrontStops ? 1 : 0;
+            RearPanBladeDistanceToFrontBlade.Value = (int)Settings.RearPan.BladeDistanceToFrontBladeMm;
 
             // Display Front Blade PWM Settings
             FrontBladePWMGainUp.Value = (int)Settings.FrontBlade.PWMGainUp;
@@ -265,6 +269,8 @@ namespace AgGrade.Controls
             RearPanMaxFillDepth.Enabled = isEquipped;
             RearPanCapacity.Enabled = isEquipped;
             RearPanStopCuttingWhenFull.Enabled = isEquipped;
+            RearPanAutoCutWhenFrontStops.Enabled = isEquipped;
+            RearPanBladeDistanceToFrontBlade.Enabled = isEquipped;
 
             // Enable/disable associated labels
             RearPanAntennaHeightUnitsLabel.Enabled = isEquipped;
@@ -281,6 +287,8 @@ namespace AgGrade.Controls
             RearPanCapacityUnitsLabel.Enabled = isEquipped;
             RearPanStopCuttingWhenFullLabel.Enabled = isEquipped;
             RearPanMaxHeightLabel.Enabled = isEquipped;
+            RearPanAutoCutWhenFrontStopsLabel.Enabled = isEquipped;
+            RearPanBladeDistanceToFrontBladeLabel.Enabled = isEquipped;
 
             // Enable/disable Rear Blade PWM controls based on equipped status
             RearBladePWMGainUp.Enabled = isEquipped;

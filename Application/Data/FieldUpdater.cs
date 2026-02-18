@@ -135,7 +135,7 @@ namespace AgGrade.Data
                 }
 
                 // front blade is set to auto cutting
-                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting)
+                if (CurrentEquipmentSettings.FrontPan.Equipped && (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoCutting))
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
@@ -185,7 +185,7 @@ namespace AgGrade.Data
                 }
 
                 // rear blade is set to auto cutting
-                if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting)
+                if (CurrentEquipmentSettings.RearPan.Equipped && (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoCutting))
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
@@ -235,7 +235,7 @@ namespace AgGrade.Data
                 }
 
                 // front blade is set to auto filling
-                if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoFilling)
+                if (CurrentEquipmentSettings.FrontPan.Equipped && (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.AutoFilling))
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
@@ -285,7 +285,7 @@ namespace AgGrade.Data
                 }
 
                 // rear blade is set to auto filling
-                if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoFilling)
+                if (CurrentEquipmentSettings.RearPan.Equipped && (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.AutoFilling))
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;

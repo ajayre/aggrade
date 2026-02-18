@@ -47,6 +47,9 @@ namespace AgGrade.Controls
         private AppSettings _CurrentAppSettings;
         private EquipmentStatus _CurrentEquipmentStatus;
 
+        public delegate void ResetPanLoad(bool Front);
+        public event ResetPanLoad OnResetPanLoad = null;
+
         public Map()
         {
             InitializeComponent();
@@ -293,6 +296,26 @@ namespace AgGrade.Controls
                     ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
                 }
             }
+        }
+
+        /// <summary>
+        /// Called when the user taps on the front load
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FrontLoadLabel_Click(object sender, EventArgs e)
+        {
+            OnResetPanLoad?.Invoke(true);
+        }
+
+        /// <summary>
+        /// Called when the user taps on the rear load
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RearLoadLabel_Click(object sender, EventArgs e)
+        {
+            OnResetPanLoad?.Invoke(false);
         }
     }
 }

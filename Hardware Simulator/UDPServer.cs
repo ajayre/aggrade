@@ -14,8 +14,8 @@ namespace HardwareSim
 {
     internal class UDPServer
     {
-        private const int ListenPort = 5000;
-        private const int RemotePort = 5001;
+        private const int ListenPort = 8888;
+        private const int RemotePort = 6000;
 
         private IPEndPoint? RemoteEP = null;
         private UdpClient? listener = null;

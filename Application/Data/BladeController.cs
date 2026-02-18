@@ -1,4 +1,4 @@
-﻿using AgGrade.Controller;
+using AgGrade.Controller;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static AgGrade.Data.BladeController;
 using Timer = System.Timers.Timer;
 
 namespace AgGrade.Data
@@ -25,10 +26,14 @@ namespace AgGrade.Data
         private EquipmentSettings? CurrentEquipmentSettings;
         private EquipmentStatus? CurrentEquipmentStatus;
         private OGController Controller;
+        private Timer RearBladeCuttingTimer;
 
         public delegate void StoppedCutting();
         public event StoppedCutting OnFrontStoppedCutting = null;
         public event StoppedCutting OnRearStoppedCutting = null;
+
+        public delegate void RequestRearBladeStartCutting();
+        public event RequestRearBladeStartCutting OnRequestRearBladeStartCutting = null;
 
         public BladeController
             (
@@ -41,6 +46,22 @@ namespace AgGrade.Data
             CalcTimer.Interval = CALC_PERIOD_MS;
             CalcTimer.Elapsed += CalcTimer_Elapsed;
             CalcTimer.Start();
+
+            RearBladeCuttingTimer = new Timer();
+            RearBladeCuttingTimer.Elapsed += RearBladeCuttingTimer_Elapsed;
+        }
+
+        /// <summary>
+        /// Called when the rear blade has reached the location that the front blade stopped cutting
+        /// Requests to start cutting with the rear blade
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RearBladeCuttingTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            RearBladeCuttingTimer.Stop();
+
+            OnRequestRearBladeStartCutting?.Invoke();
         }
 
         /// <summary>
@@ -130,6 +151,18 @@ namespace AgGrade.Data
                     SetFrontToTransportState();
 
                     OnFrontStoppedCutting?.Invoke();
+
+                    // if we need to arm the rear blade to start cutting
+                    if (CurrentEquipmentSettings.RearPan.Equipped && CurrentEquipmentSettings.RearPan.AutoCutWhenFrontStops)
+                    {
+                        // work out how long at the current speed before the rear blade reaches the current
+                        // location of the front blade
+                        // Time (ms) = Distance (mm) / Speed (mm/ms)
+                        // Speed (mm/ms) = Speed (mph) * 1609344 (mm/mile) / 3600000 (ms/hour)
+                        int RearBladeCuttingArmPeriodMs = (int)(CurrentEquipmentSettings.RearPan.BladeDistanceToFrontBladeMm * 3600000.0 / (CurrentEquipmentStatus.TractorFix.Vector.SpeedMph * 1609344.0));
+                        RearBladeCuttingTimer.Interval = (double)RearBladeCuttingArmPeriodMs;
+                        RearBladeCuttingTimer.Start();
+                    }
                 }
                 else
                 {

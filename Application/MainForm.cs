@@ -95,6 +95,7 @@ namespace AgGrade
             BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
             BladeCtrl.OnFrontStoppedCutting += BladeCtrl_OnFrontStoppedCutting;
             BladeCtrl.OnRearStoppedCutting += BladeCtrl_OnRearStoppedCutting;
+            BladeCtrl.OnRequestRearBladeStartCutting += BladeCtrl_OnRequestRearBladeStartCutting;
 
             DeadReckoner = new DeadReckoner();
             DeadReckoner.SetApplicationSettings(CurrentAppSettings);
@@ -409,22 +410,39 @@ namespace AgGrade
             map.SetFrontScraper(CurrentEquipmentStatus.FrontPan.Fix);
             map.SetRearScraper(CurrentEquipmentStatus.RearPan.Fix);
 
+            // connect events
+            map.OnResetPanLoad += Map_OnResetPanLoad;
+
             map.Show();
         }
 
         /// <summary>
-        /// Loads an AGD file
+        /// Called when user wishes to reset the load of a pan
         /// </summary>
-        /// <param name="FileName">Path and name of AGD file to load</param>
+        /// <param name="Front">true for front pan, false for rear pan</param>
+        private void Map_OnResetPanLoad(bool Front)
+        {
+            if (Front)
+            {
+                CurrentEquipmentStatus.FrontPan.LoadLCY = 0;
+            }
+            else
+            {
+                CurrentEquipmentStatus.RearPan.LoadLCY = 0;
+            }
+        }
+
+        /// <summary>
+        /// Loads a field
+        /// </summary>
+        /// <param name="Folder">Path of the field data</param>
         private void LoadField
             (
-            string FileName
+            string Folder
             )
         {
-            AGDLoader Loader = new AGDLoader();
-            CurrentField = Loader.Load(FileName);
-
-            CurrentField.Name = Path.GetFileNameWithoutExtension(FileName);
+            CurrentField = new Field();
+            CurrentField.Load(Folder);
 
             BladeCtrl.SetField(CurrentField);
             FieldUpdater.SetField(CurrentField);
@@ -532,6 +550,11 @@ namespace AgGrade
                         MessageBox.Show($"Validation error: {ex.Message}", "Invalid Input", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         return false;
                     }
+                }
+                else if (Ctrl is Map)
+                {
+                    // remove event handlers
+                    (Ctrl as Map)!.OnResetPanLoad -= Map_OnResetPanLoad;
                 }
             }
 
@@ -683,13 +706,13 @@ namespace AgGrade
             UpdateHeightLeds();
             UpdateRTKLeds();
 
+            // fixme - allow user to choose file to load
+            //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4");
+            LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft");
+
             // set initial blade states
             BladeCtrl.SetFrontToTransportState();
             BladeCtrl.SetRearToTransportState();
-
-            // fixme - allow user to choose file to load
-            //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4.agd");
-            LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft.agd");
         }
 
         /// <summary>
@@ -1383,13 +1406,13 @@ namespace AgGrade
         /// <param name="e"></param>
         private void FrontBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.None)
+            if (CurrentEquipmentStatus.FrontPan.Mode != PanStatus.BladeMode.AutoCutting)
             {
                 CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
             }
             else
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetFrontToTransportState();
             }
 
             Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
@@ -1405,14 +1428,26 @@ namespace AgGrade
         /// <param name="e"></param>
         private void RearBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.None)
+            if (CurrentEquipmentStatus.RearPan.Mode != PanStatus.BladeMode.AutoCutting)
             {
                 CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
             }
             else
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                BladeCtrl.SetRearToTransportState();
             }
+
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+        }
+
+        /// <summary>
+        /// Called when the blade controller wants to request that the rear blade start cutting
+        /// </summary>
+        private void BladeCtrl_OnRequestRearBladeStartCutting()
+        {
+            CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
 
             Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 

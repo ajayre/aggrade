@@ -1,8 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace AgGrade.Data
 {
@@ -25,12 +28,27 @@ namespace AgGrade.Data
         public double TotalCutBCY;
         public double TotalFillBCY;
         public List<Benchmark> Benchmarks;
+        public List<HaulDirection> HaulDirections;
 
         public Field()
         {
             TopologyPoints = new List<TopologyPoint>();
             Bins = new List<Bin>();
             Benchmarks = new List<Benchmark>();
+            HaulDirections = new List<HaulDirection>();
+        }
+
+        /// <summary>
+        /// Clears the data from the field
+        /// </summary>
+        public void Clear
+            (
+            )
+        {
+            TopologyPoints.Clear();
+            Bins.Clear();
+            Benchmarks.Clear();
+            HaulDirections.Clear();
         }
 
         /// <summary>
@@ -631,6 +649,90 @@ namespace AgGrade.Data
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Loads a field from a folder containing field data
+        /// </summary>
+        /// <param name="Folder">Path of folder to load from</param>
+        public void Load
+            (
+            string Folder
+            )
+        {
+            // get first AGD file in folder
+            string[] AGDFiles = Directory.GetFiles(Folder, "*.agd");
+            if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
+            string AGDFile = AGDFiles[0];
+
+            Clear();
+
+            // load AGD file
+            AGDLoader Loader = new AGDLoader();
+            Loader.Load(this, AGDFile);
+
+            // set field name using AGD file name
+            Name = Path.GetFileNameWithoutExtension(AGDFile);
+
+            // if haul directions do not exist, then create them now
+            string HaulDirectionsCSV = Folder + Path.DirectorySeparatorChar + "HaulDirections.csv";
+            if (!File.Exists(HaulDirectionsCSV))
+            {
+                CreateHaulDirections(Folder, HaulDirectionsCSV);
+            }
+
+            LoadHaulDirections(HaulDirectionsCSV);
+        }
+
+        /// <summary>
+        /// Creates a CSV of haul directions from a set of georeferenced images
+        /// </summary>
+        /// <param name="Folder">Folder containing images to process</param>
+        /// <param name="OutputFileName">CSV file to generate</param>
+        private void CreateHaulDirections
+            (
+            string Folder,
+            string OutputFileName
+            )
+        {
+            HaulImageProcessor Processor = new HaulImageProcessor();
+            Processor.Process(Folder, OutputFileName);
+        }
+
+        /// <summary>
+        /// Loads in the haul directions from a CSV file
+        /// </summary>
+        /// <param name="FileName">Path and name of CSV file</param>
+        private void LoadHaulDirections
+            (
+            string FileName
+            )
+        {
+            if (!File.Exists(FileName))
+                return;
+
+            HaulDirections.Clear();
+            using (StreamReader reader = new StreamReader(FileName))
+            {
+                // Skip header: lat,lon,direction_degrees,source
+                string? header = reader.ReadLine();
+                if (header == null)
+                    return;
+
+                while ((header = reader.ReadLine()) != null)
+                {
+                    string[] parts = header.Split(',');
+                    if (parts.Length < 3)
+                        continue;
+
+                    if (double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double lat) &&
+                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double lon) &&
+                        double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out double directionDeg))
+                    {
+                        HaulDirections.Add(new HaulDirection(lat, lon, directionDeg));
+                    }
+                }
+            }
         }
     }
 }

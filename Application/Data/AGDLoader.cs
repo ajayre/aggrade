@@ -27,29 +27,27 @@ namespace AgGrade.Data
 		}
 
         /// <summary>
-        /// Loads in an AGD (Optisurface) file
+        /// Loads in an AGD (Optisurface) file into a field
         /// </summary>
+        /// <param name="field">Field to load into</param>
         /// <param name="FileName">Path and name of file to load</param>
         /// <returns>New field</returns>
-        public Field Load
+        public void Load
 			(
+            Field Field,
 			string FileName
 			)
 		{
-            Field NewField = new Field();
+			LoadTopologyData(FileName, Field);
 
-			LoadTopologyData(FileName, NewField);
-
-            CalculateSiteCentroid(NewField);
+            CalculateSiteCentroid(Field);
             
-			ConvertToLocalCoordinates(NewField);
+			ConvertToLocalCoordinates(Field);
 			
 			// create 2ft x 2ft bins
-            CalculateCutFillVolumesWithBinning(NewField);
+            CalculateCutFillVolumesWithBinning(Field);
 
-            FillEmptyBins(NewField);
-
-            return NewField;
+            FillEmptyBins(Field);
         }
 
         /// <summary>

@@ -574,7 +574,7 @@ namespace AgGrade.Data
                 }
             }
 
-            Decorate(bitmap, Benchmarks, TractorLocationHistory);
+            Decorate(bitmap, Benchmarks, TractorLocationHistory, CurrentEquipmentSettings);
 
             return bitmap;
         }
@@ -644,10 +644,12 @@ namespace AgGrade.Data
             (
             Bitmap Map,
             List<Benchmark> Benchmarks,
-            List<Coordinate> TractorLocationHistory
+            List<Coordinate> TractorLocationHistory,
+            EquipmentSettings CurrentEquipmentSettings
             )
         {
             Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowPen = new Pen(Color.FromArgb(0x50, 0x00, 0x00, 0x00), 2);
 
             var BenchmarkFontFamily = new FontFamily("Arial");
             var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -683,6 +685,14 @@ namespace AgGrade.Data
                     LastLocpx = Pix;
                 }*/
 
+                // draw haul arrows
+                foreach (HaulDirection HaulDir in CurrentField.HaulDirections)
+                {
+                    Point ArrowPix = LatLonToWorld(HaulDir.Location);
+                    Point[] Vertices = ArrowOutlineTriangle(ArrowPix.X, ArrowPix.Y, HaulDir.DirectionDeg - _tractorHeading, CurrentScaleFactor);
+                    g.DrawPolygon(HaulArrowPen, Vertices);
+                }
+
                 // draw tractor heading
                 double Lat = TractorFix.Latitude;
                 double Lon = TractorFix.Longitude;
@@ -707,16 +717,22 @@ namespace AgGrade.Data
                 int TractorXpx = Map.Width / 2;
                 int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
 
-                // get front scraper location
-                Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
+                if (CurrentEquipmentSettings.FrontPan.Equipped)
+                {
+                    // get front scraper location
+                    Point FrontScraperCenter = LatLonToWorld(new Coordinate(FrontScraperFix.Latitude, FrontScraperFix.Longitude));
 
-                // get rear scraper location
-                Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
-
-                // draw connector between tractor and front scraper
-                g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
-                // draw connector between front scraper to rear scraper
-                g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
+                    // draw connector between tractor and front scraper
+                    g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
+                    
+                    if (CurrentEquipmentSettings.RearPan.Equipped)
+                    {
+                        // get rear scraper location
+                        Point RearScraperCenter = LatLonToWorld(new Coordinate(RearScraperFix.Latitude, RearScraperFix.Longitude));
+                        // draw connector between front scraper to rear scraper
+                        g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
+                    }
+                }
 
                 // scale tractor so the width of the symbol matches the tractor width
                 int TractorWidthpx = (int)(CurrentEquipmentSettings.TractorWidthMm / 1000.0 * CurrentScaleFactor);
@@ -724,32 +740,87 @@ namespace AgGrade.Data
                 // draw
                 g.DrawImage(TractorImage, TractorXpx - (TractorWidthpx / 2), TractorYpx - (TractorWidthpx / 2), TractorWidthpx, TractorWidthpx);
 
-                // draw front scraper
-                double PerpAngle = (FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
-                double BladeEndALat = FrontScraperFix.Latitude;
-                double BladeEndALon = FrontScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref BladeEndALat, ref BladeEndALon, PerpAngle, CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0);
-                Point BladeEndA = LatLonToWorld(new Coordinate(BladeEndALat, BladeEndALon));
-                double BladeEndBLat = FrontScraperFix.Latitude;
-                double BladeEndBLon = FrontScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref BladeEndBLat, ref BladeEndBLon, PerpAngle, -(CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0));
-                Point BladeEndB = LatLonToWorld(new Coordinate(BladeEndBLat, BladeEndBLon));
-                g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
-                g.DrawLine(new Pen(TractorYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
+                if (CurrentEquipmentSettings.FrontPan.Equipped)
+                {
+                    // draw front scraper
+                    double PerpAngle = (FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                    double BladeEndALat = FrontScraperFix.Latitude;
+                    double BladeEndALon = FrontScraperFix.Longitude;
+                    Haversine.MoveDistanceBearing(ref BladeEndALat, ref BladeEndALon, PerpAngle, CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0);
+                    Point BladeEndA = LatLonToWorld(new Coordinate(BladeEndALat, BladeEndALon));
+                    double BladeEndBLat = FrontScraperFix.Latitude;
+                    double BladeEndBLon = FrontScraperFix.Longitude;
+                    Haversine.MoveDistanceBearing(ref BladeEndBLat, ref BladeEndBLon, PerpAngle, -(CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0));
+                    Point BladeEndB = LatLonToWorld(new Coordinate(BladeEndBLat, BladeEndBLon));
+                    g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
+                    g.DrawLine(new Pen(TractorYellow, 4), BladeEndA.X, BladeEndA.Y, BladeEndB.X, BladeEndB.Y);
 
-                // draw rear scraper
-                double RearPerpAngle = (RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
-                double RearBladeEndALat = RearScraperFix.Latitude;
-                double RearBladeEndALon = RearScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref RearBladeEndALat, ref RearBladeEndALon, RearPerpAngle, CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0);
-                Point RearBladeEndA = LatLonToWorld(new Coordinate(RearBladeEndALat, RearBladeEndALon));
-                double RearBladeEndBLat = RearScraperFix.Latitude;
-                double RearBladeEndBLon = RearScraperFix.Longitude;
-                Haversine.MoveDistanceBearing(ref RearBladeEndBLat, ref RearBladeEndBLon, RearPerpAngle, -(CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0));
-                Point RearBladeEndB = LatLonToWorld(new Coordinate(RearBladeEndBLat, RearBladeEndBLon));
-                g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
-                g.DrawLine(new Pen(TractorYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
+                    if (CurrentEquipmentSettings.RearPan.Equipped)
+                    {
+                        // draw rear scraper
+                        double RearPerpAngle = (RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                        double RearBladeEndALat = RearScraperFix.Latitude;
+                        double RearBladeEndALon = RearScraperFix.Longitude;
+                        Haversine.MoveDistanceBearing(ref RearBladeEndALat, ref RearBladeEndALon, RearPerpAngle, CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0);
+                        Point RearBladeEndA = LatLonToWorld(new Coordinate(RearBladeEndALat, RearBladeEndALon));
+                        double RearBladeEndBLat = RearScraperFix.Latitude;
+                        double RearBladeEndBLon = RearScraperFix.Longitude;
+                        Haversine.MoveDistanceBearing(ref RearBladeEndBLat, ref RearBladeEndBLon, RearPerpAngle, -(CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0));
+                        Point RearBladeEndB = LatLonToWorld(new Coordinate(RearBladeEndBLat, RearBladeEndBLon));
+                        g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
+                        g.DrawLine(new Pen(TractorYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
+                    }
+                }
             }
+        }
+
+        /// <summary>Convert direction (0 = North/up) to unit (dx, dy) in image coords (y down).</summary>
+        private (double dx, double dy) DirectionDegreesToVector(double degrees)
+        {
+            double rad = degrees * Math.PI / 180.0;
+            double dx = Math.Sin(rad);
+            double dy = -Math.Cos(rad);
+            return (dx, dy);
+        }
+
+        /// <summary>
+        /// Returns three vertices for an arrow outline triangle
+        /// Tip points in directionDegrees (0 = North/up). Scale is distance from center to tip in pixels.
+        /// </summary>
+        /// <param name="centerX">Center X in pixel coordinates.</param>
+        /// <param name="centerY">Center Y in pixel coordinates.</param>
+        /// <param name="directionDegrees">Compass direction in degrees (0 = North).</param>
+        /// <param name="scale">Distance from center to tip in pixels.</param>
+        /// <param name="baseFraction">How far back the base is from center (relative to scale).</param>
+        /// <param name="baseWidthFraction">Half-width of base relative to scale.</param>
+        private Point[] ArrowOutlineTriangle
+            (
+            double centerX,
+            double centerY,
+            double directionDegrees,
+            double scale,
+            double baseFraction = 0.6,
+            double baseWidthFraction = 0.5
+            )
+        {
+            (double dx, double dy) = DirectionDegreesToVector(directionDegrees);
+
+            double tipX = centerX + scale * dx;
+            double tipY = centerY + scale * dy;
+            double backX = centerX - scale * baseFraction * dx;
+            double backY = centerY - scale * baseFraction * dy;
+            double half = scale * baseWidthFraction;
+            double leftX = backX - half * dy;
+            double leftY = backY + half * dx;
+            double rightX = backX + half * dy;
+            double rightY = backY - half * dx;
+
+            return new Point[]
+            {
+                new Point((int)tipX, (int)tipY),
+                new Point((int)leftX, (int)leftY),
+                new Point((int)rightX, (int)rightY)
+            };
         }
 
         /// <summary>
