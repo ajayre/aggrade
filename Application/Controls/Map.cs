@@ -34,6 +34,7 @@ namespace AgGrade.Controls
         private GNSSFix RearScraperFix;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Timer RefreshTimer;
+        private bool ShowHaulArrows;
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
@@ -63,6 +64,8 @@ namespace AgGrade.Controls
             RearScraperFix = new GNSSFix();
 
             ScaleFactor = DEFAULT_SCALE_FACTOR;
+
+            ShowHaulArrows = true;
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";

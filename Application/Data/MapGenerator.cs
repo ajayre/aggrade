@@ -1,4 +1,4 @@
-﻿using AgGrade.Controller;
+using AgGrade.Controller;
 using AgGrade.Controls;
 using System;
 using System.Collections;
@@ -649,7 +649,8 @@ namespace AgGrade.Data
             )
         {
             Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
-            Pen HaulArrowPen = new Pen(Color.FromArgb(0x50, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowPen = new Pen(Color.FromArgb(0x20, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowTipPen = new Pen(Color.FromArgb(0x20, 0x00, 0x00, 0x00), 2);
 
             var BenchmarkFontFamily = new FontFamily("Arial");
             var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -691,6 +692,11 @@ namespace AgGrade.Data
                     Point ArrowPix = LatLonToWorld(HaulDir.Location);
                     Point[] Vertices = ArrowOutlineTriangle(ArrowPix.X, ArrowPix.Y, HaulDir.DirectionDeg - _tractorHeading, CurrentScaleFactor);
                     g.DrawPolygon(HaulArrowPen, Vertices);
+                    double lineDirDeg = HaulDir.DirectionDeg - _tractorHeading;
+                    (double ldx, double ldy) = DirectionDegreesToVector(lineDirDeg);
+                    int TipLength = 40;
+                    Point lineEnd = new Point(Vertices[0].X + (int)(TipLength * ldx), Vertices[0].Y + (int)(TipLength * ldy));
+                    g.DrawLine(HaulArrowTipPen, Vertices[0], lineEnd);
                 }
 
                 // draw tractor heading

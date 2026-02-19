@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Map));
             MapCanvas = new PictureBox();
             panel1 = new Panel();
             FrontBladeHeightLabel = new Label();
@@ -38,6 +39,7 @@
             SpeedLabel = new Label();
             FieldNameLabel = new Label();
             panel2 = new Panel();
+            MapBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -47,7 +49,7 @@
             MapCanvas.Dock = DockStyle.Fill;
             MapCanvas.Location = new Point(0, 49);
             MapCanvas.Name = "MapCanvas";
-            MapCanvas.Size = new Size(862, 307);
+            MapCanvas.Size = new Size(881, 421);
             MapCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             MapCanvas.TabIndex = 0;
             MapCanvas.TabStop = false;
@@ -66,7 +68,7 @@
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
-            panel1.Size = new Size(862, 45);
+            panel1.Size = new Size(881, 45);
             panel1.TabIndex = 1;
             // 
             // FrontBladeHeightLabel
@@ -75,7 +77,7 @@
             FrontBladeHeightLabel.AutoSize = true;
             FrontBladeHeightLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             FrontBladeHeightLabel.ForeColor = Color.RoyalBlue;
-            FrontBladeHeightLabel.Location = new Point(340, 10);
+            FrontBladeHeightLabel.Location = new Point(359, 10);
             FrontBladeHeightLabel.Name = "FrontBladeHeightLabel";
             FrontBladeHeightLabel.Size = new Size(73, 25);
             FrontBladeHeightLabel.TabIndex = 6;
@@ -88,7 +90,7 @@
             RearBladeHeightLabel.AutoSize = true;
             RearBladeHeightLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             RearBladeHeightLabel.ForeColor = Color.DarkGoldenrod;
-            RearBladeHeightLabel.Location = new Point(503, 10);
+            RearBladeHeightLabel.Location = new Point(522, 10);
             RearBladeHeightLabel.Name = "RearBladeHeightLabel";
             RearBladeHeightLabel.Size = new Size(73, 25);
             RearBladeHeightLabel.TabIndex = 5;
@@ -101,7 +103,7 @@
             FrontLoadLabel.AutoSize = true;
             FrontLoadLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             FrontLoadLabel.ForeColor = Color.RoyalBlue;
-            FrontLoadLabel.Location = new Point(419, 10);
+            FrontLoadLabel.Location = new Point(438, 10);
             FrontLoadLabel.Name = "FrontLoadLabel";
             FrontLoadLabel.Size = new Size(78, 25);
             FrontLoadLabel.TabIndex = 4;
@@ -115,7 +117,7 @@
             RearLoadLabel.AutoSize = true;
             RearLoadLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             RearLoadLabel.ForeColor = Color.DarkGoldenrod;
-            RearLoadLabel.Location = new Point(582, 10);
+            RearLoadLabel.Location = new Point(601, 10);
             RearLoadLabel.Name = "RearLoadLabel";
             RearLoadLabel.Size = new Size(89, 25);
             RearLoadLabel.TabIndex = 3;
@@ -128,7 +130,7 @@
             HeadingLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             HeadingLabel.AutoSize = true;
             HeadingLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            HeadingLabel.Location = new Point(677, 10);
+            HeadingLabel.Location = new Point(696, 10);
             HeadingLabel.Name = "HeadingLabel";
             HeadingLabel.Size = new Size(68, 25);
             HeadingLabel.TabIndex = 2;
@@ -140,7 +142,7 @@
             SpeedLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             SpeedLabel.AutoSize = true;
             SpeedLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            SpeedLabel.Location = new Point(751, 10);
+            SpeedLabel.Location = new Point(770, 10);
             SpeedLabel.Name = "SpeedLabel";
             SpeedLabel.Size = new Size(100, 25);
             SpeedLabel.TabIndex = 1;
@@ -163,19 +165,30 @@
             panel2.Dock = DockStyle.Top;
             panel2.Location = new Point(0, 45);
             panel2.Name = "panel2";
-            panel2.Size = new Size(862, 4);
+            panel2.Size = new Size(881, 4);
             panel2.TabIndex = 2;
+            // 
+            // MapBtn
+            // 
+            MapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            MapBtn.Image = (Image)resources.GetObject("MapBtn.Image");
+            MapBtn.Location = new Point(810, 55);
+            MapBtn.Name = "MapBtn";
+            MapBtn.Size = new Size(60, 60);
+            MapBtn.TabIndex = 8;
+            MapBtn.UseVisualStyleBackColor = true;
             // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(MapBtn);
             Controls.Add(MapCanvas);
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "Map";
-            Size = new Size(862, 356);
+            Size = new Size(881, 470);
             ((System.ComponentModel.ISupportInitialize)MapCanvas).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -194,5 +207,6 @@
         private Label RearLoadLabel;
         private Label FrontBladeHeightLabel;
         private Label RearBladeHeightLabel;
+        private Button MapBtn;
     }
 }
