@@ -129,6 +129,12 @@ namespace AgGrade.Data
             Yellow
         }
 
+        public enum MapTypes
+        {
+            Elevation,
+            NoChange
+        }
+
         /// <summary>
         /// The current scaling in pixels per meter
         /// </summary>
@@ -159,6 +165,8 @@ namespace AgGrade.Data
         private GNSSFix RearScraperFix;
         private EquipmentSettings CurrentEquipmentSettings;
         private AppSettings CurrentAppSettings;
+        private bool ShowHaulArrows;
+        private MapTypes MapType;
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -222,6 +230,8 @@ namespace AgGrade.Data
         /// <param name="TractorLocationHistory">Locations where the tractor has been</param>
         /// <param name="CurrentEquipmentSettings">The current equipment settings</param>
         /// <param name="CurrentAppSettings">The current application settings</param>
+        /// <param name="ShowHaulArrows">true to show the haul arrows</param>
+        /// <param name="MapType">The type of map to generate</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -236,7 +246,9 @@ namespace AgGrade.Data
             List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory,
             EquipmentSettings CurrentEquipmentSettings,
-            AppSettings CurrentAppSettings
+            AppSettings CurrentAppSettings,
+            bool ShowHaulArrows,
+            MapTypes MapType
             )
         {
             CurrentField = Field;
@@ -248,6 +260,17 @@ namespace AgGrade.Data
 
             this.CurrentEquipmentSettings = CurrentEquipmentSettings;
             this.CurrentAppSettings = CurrentAppSettings;
+
+            this.ShowHaulArrows = ShowHaulArrows;
+
+            // has the type of map changed?
+            bool MapTypeChanged = false;
+            if (MapType != this.MapType)
+            {
+                MapTypeChanged = true;
+            }
+
+            this.MapType = MapType;
 
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
@@ -274,7 +297,7 @@ namespace AgGrade.Data
             else
             {
                 // if anything that affects the cache has changed then empty it and set up
-                if ((ScaleFactor != Cache.ScaleFactor) || (ImageHeightpx != Cache.ImageHeightpx) || (ImageWidthpx != Cache.ImageWidthpx))
+                if ((ScaleFactor != Cache.ScaleFactor) || (ImageHeightpx != Cache.ImageHeightpx) || (ImageWidthpx != Cache.ImageWidthpx) || MapTypeChanged)
                 {
                     Cache.Tiles.Clear();
                     Cache.ScaleFactor = ScaleFactor;
@@ -331,7 +354,8 @@ namespace AgGrade.Data
                 var gridWidth = maxX - minX + 1;
                 var gridHeight = maxY - minY + 1;
 
-                var elevationGrid = CreateElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
+                var ExistingElevationGrid = CreateExistingElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
+                var TargetElevationGrid = CreateTargetElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
 
                 // The bin origin is the field coordinate that corresponds to bin grid index 0
                 // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
@@ -443,13 +467,27 @@ namespace AgGrade.Data
                                     // Populate the list of bins associated with this tile
                                     PopulateTileBins(NewTile, CurrentField);
 
-                                    // Render this tile with extended bounds to include overlap
-                                    NewTile.Bitmap = RenderTile(
-                                        extendedStartX, extendedStartY, extendedWidth, extendedHeight,
-                                        MapWidthpx, MapHeightpx,
-                                        elevationGrid, minX, minY, gridWidth, gridHeight,
-                                        minElevation, maxElevation,
-                                        colorPalette, ShowGrid, ScaleFactor);
+                                    switch (MapType)
+                                    {
+                                        case MapTypes.Elevation:
+                                            // Render this tile with extended bounds to include overlap
+                                            NewTile.Bitmap = RenderElevationTile(
+                                                extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                                MapWidthpx, MapHeightpx,
+                                                ExistingElevationGrid, minX, minY, gridWidth, gridHeight,
+                                                minElevation, maxElevation,
+                                                colorPalette, ShowGrid, ScaleFactor);
+                                            break;
+
+                                        case MapTypes.NoChange:
+                                            NewTile.Bitmap = RenderNoChangeTile(
+                                                extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                                MapWidthpx, MapHeightpx,
+                                                ExistingElevationGrid, TargetElevationGrid,
+                                                minX, minY, gridWidth, gridHeight,
+                                                ShowGrid, ScaleFactor);
+                                            break;
+                                    }
 
                                     // cache it
                                     Cache.Tiles.Add(NewTile);
@@ -639,7 +677,6 @@ namespace AgGrade.Data
             }
         }
 
-
         private void Decorate
             (
             Bitmap Map,
@@ -686,17 +723,20 @@ namespace AgGrade.Data
                     LastLocpx = Pix;
                 }*/
 
-                // draw haul arrows
-                foreach (HaulDirection HaulDir in CurrentField.HaulDirections)
+                if (ShowHaulArrows)
                 {
-                    Point ArrowPix = LatLonToWorld(HaulDir.Location);
-                    Point[] Vertices = ArrowOutlineTriangle(ArrowPix.X, ArrowPix.Y, HaulDir.DirectionDeg - _tractorHeading, CurrentScaleFactor);
-                    g.DrawPolygon(HaulArrowPen, Vertices);
-                    double lineDirDeg = HaulDir.DirectionDeg - _tractorHeading;
-                    (double ldx, double ldy) = DirectionDegreesToVector(lineDirDeg);
-                    int TipLength = 40;
-                    Point lineEnd = new Point(Vertices[0].X + (int)(TipLength * ldx), Vertices[0].Y + (int)(TipLength * ldy));
-                    g.DrawLine(HaulArrowTipPen, Vertices[0], lineEnd);
+                    // draw haul arrows
+                    foreach (HaulDirection HaulDir in CurrentField.HaulDirections)
+                    {
+                        Point ArrowPix = LatLonToWorld(HaulDir.Location);
+                        Point[] Vertices = ArrowOutlineTriangle(ArrowPix.X, ArrowPix.Y, HaulDir.DirectionDeg - _tractorHeading, CurrentScaleFactor);
+                        g.DrawPolygon(HaulArrowPen, Vertices);
+                        double lineDirDeg = HaulDir.DirectionDeg - _tractorHeading;
+                        (double ldx, double ldy) = DirectionDegreesToVector(lineDirDeg);
+                        int TipLength = 40;
+                        Point lineEnd = new Point(Vertices[0].X + (int)(TipLength * ldx), Vertices[0].Y + (int)(TipLength * ldy));
+                        g.DrawLine(HaulArrowTipPen, Vertices[0], lineEnd);
+                    }
                 }
 
                 // draw tractor heading
@@ -1620,7 +1660,18 @@ namespace AgGrade.Data
             return new double[] { r + m, g + m, b + m };
         }
 
-        private double?[,] CreateElevationGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
+        /// <summary>
+        /// Gets the existing elevations of a set of bins
+        /// </summary>
+        /// <param name="bins"></param>
+        /// <param name="minX"></param>
+        /// <param name="maxX"></param>
+        /// <param name="minY"></param>
+        /// <param name="maxY"></param>
+        /// <param name="gridWidth"></param>
+        /// <param name="gridHeight"></param>
+        /// <returns></returns>
+        private double?[,] CreateExistingElevationGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
         {
             var elevationGrid = new double?[gridHeight, gridWidth];
 
@@ -1644,7 +1695,41 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Renders a single tile of the map
+        /// Gets the target elevations of a set of bins
+        /// </summary>
+        /// <param name="bins"></param>
+        /// <param name="minX"></param>
+        /// <param name="maxX"></param>
+        /// <param name="minY"></param>
+        /// <param name="maxY"></param>
+        /// <param name="gridWidth"></param>
+        /// <param name="gridHeight"></param>
+        /// <returns></returns>
+        private double?[,] CreateTargetElevationGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
+        {
+            var elevationGrid = new double?[gridHeight, gridWidth];
+
+            foreach (var bin in bins)
+            {
+                if (bin.TargetElevationM == 0 && bin.X > 5)
+                {
+                    bin.TargetElevationM = 0;
+                }
+
+                var x = bin.X - minX;
+                var y = bin.Y - minY;
+
+                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+                {
+                    elevationGrid[y, x] = bin.TargetElevationM;
+                }
+            }
+
+            return elevationGrid;
+        }
+
+        /// <summary>
+        /// Renders a single tile of the 'np change elevation' map
         /// </summary>
         /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
         /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
@@ -1652,23 +1737,32 @@ namespace AgGrade.Data
         /// <param name="tileHeight">Height of tile in pixels</param>
         /// <param name="mapWidthpx">Total map width in pixels</param>
         /// <param name="mapHeightpx">Total map height in pixels</param>
-        /// <param name="elevationGrid">Elevation grid data</param>
+        /// <param name="ExistingElevationGrid">Existing elevation grid data</param>
+        /// <param name="TargetElevationGrid">Target elevation grid data</param>
         /// <param name="minX">Minimum X bin index</param>
         /// <param name="minY">Minimum Y bin index</param>
         /// <param name="gridWidth">Width of elevation grid</param>
         /// <param name="gridHeight">Height of elevation grid</param>
-        /// <param name="minElevation">Minimum elevation value</param>
-        /// <param name="maxElevation">Maximum elevation value</param>
-        /// <param name="colorPalette">Color palette for elevation mapping</param>
         /// <param name="showGrid">Whether to show grid lines</param>
         /// <param name="scaleFactor">Scale factor in pixels per meter</param>
         /// <returns>Rendered tile bitmap</returns>
-        private Bitmap RenderTile(
-            int tileStartX, int tileStartY, int tileWidth, int tileHeight,
-            int mapWidthpx, int mapHeightpx,
-            double?[,] elevationGrid, int minX, int minY, int gridWidth, int gridHeight,
-            double minElevation, double maxElevation,
-            int[,] colorPalette, bool showGrid, double scaleFactor)
+        private Bitmap RenderNoChangeTile
+            (
+            int tileStartX,
+            int tileStartY,
+            int tileWidth,
+            int tileHeight,
+            int mapWidthpx,
+            int mapHeightpx,
+            double?[,] ExistingElevationGrid,
+            double?[,] TargetElevationGrid,
+            int minX,
+            int minY,
+            int gridWidth,
+            int gridHeight,
+            bool showGrid,
+            double scaleFactor
+            )
         {
             Bitmap tile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
 
@@ -1712,7 +1806,153 @@ namespace AgGrade.Data
 
                         if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
                         {
-                            var elevation = elevationGrid[gridY, gridX];
+                            var ExistingElevation = ExistingElevationGrid[gridY, gridX];
+                            var TargetElevation = TargetElevationGrid[gridY, gridX];
+
+                            if (ExistingElevation.HasValue && TargetElevation.HasValue && (ExistingElevation.Value != 0.0) && (TargetElevation.Value != 0.0))
+                            {
+                                if (Math.Abs(ExistingElevation.Value - TargetElevation.Value) <= 0.01)
+                                {
+                                    r = 0x80;
+                                    g = 0xFF;
+                                    b = 0x80;
+                                    a = 255;
+                                }
+                                else
+                                {
+                                    r = 0x80;
+                                    g = 0x80;
+                                    b = 0x80;
+                                    a = 255;
+                                }
+                            }
+                            else
+                            {
+                                // No data - make transparent
+                                r = g = b = 0;
+                                a = 0; // Transparent
+                            }
+                        }
+                        else
+                        {
+                            // Outside grid - make transparent
+                            r = g = b = 0;
+                            a = 0; // Transparent
+                        }
+
+                        // Draw grid lines (using map coordinates)
+                        if (showGrid && a > 0)
+                        {
+                            if ((mapX % scaleFactor == 0) || (mapY % scaleFactor == 0))
+                            {
+                                r = g = b = 0x40; // Dark gray
+                            }
+                        }
+
+                        // Write BGRA (bitmap format with alpha)
+                        rowData[rowOffset + 0] = b; // Blue
+                        rowData[rowOffset + 1] = g; // Green
+                        rowData[rowOffset + 2] = r; // Red
+                        rowData[rowOffset + 3] = a; // Alpha
+                        rowOffset += 4;
+                    }
+
+                    // Copy row data to bitmap memory
+                    IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
+                    Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
+                }
+            }
+            finally
+            {
+                tile.UnlockBits(bitmapData);
+            }
+
+            return tile;
+        }
+
+        /// <summary>
+        /// Renders a single tile of the elevation map
+        /// </summary>
+        /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
+        /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
+        /// <param name="tileWidth">Width of tile in pixels</param>
+        /// <param name="tileHeight">Height of tile in pixels</param>
+        /// <param name="mapWidthpx">Total map width in pixels</param>
+        /// <param name="mapHeightpx">Total map height in pixels</param>
+        /// <param name="ExistingElevationGrid">Existing elevation grid data</param>
+        /// <param name="minX">Minimum X bin index</param>
+        /// <param name="minY">Minimum Y bin index</param>
+        /// <param name="gridWidth">Width of elevation grid</param>
+        /// <param name="gridHeight">Height of elevation grid</param>
+        /// <param name="minElevation">Minimum elevation value</param>
+        /// <param name="maxElevation">Maximum elevation value</param>
+        /// <param name="colorPalette">Color palette for elevation mapping</param>
+        /// <param name="showGrid">Whether to show grid lines</param>
+        /// <param name="scaleFactor">Scale factor in pixels per meter</param>
+        /// <returns>Rendered tile bitmap</returns>
+        private Bitmap RenderElevationTile
+            (
+            int tileStartX,
+            int tileStartY,
+            int tileWidth,
+            int tileHeight,
+            int mapWidthpx,
+            int mapHeightpx,
+            double?[,] ExistingElevationGrid,
+            int minX,
+            int minY,
+            int gridWidth,
+            int gridHeight,
+            double minElevation,
+            double maxElevation,
+            int[,] colorPalette,
+            bool showGrid,
+            double scaleFactor
+            )
+        {
+            Bitmap tile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
+
+            // Lock bitmap data for direct memory access
+            BitmapData bitmapData = tile.LockBits(
+                new Rectangle(0, 0, tileWidth, tileHeight),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+
+            try
+            {
+                int stride = bitmapData.Stride;
+                int bytesPerRow = tileWidth * 4; // Actual bytes needed for one row (BGRA format)
+
+                // Allocate buffer for one row of pixel data (BGRA format)
+                byte[] rowData = new byte[bytesPerRow];
+
+                // Write pixel data directly to bitmap memory
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    int rowOffset = 0;
+                    int bmpY = y;
+
+                    // Map Y coordinate (relative to map origin)
+                    int mapY = tileStartY + y;
+
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        // Map X coordinate (relative to map origin)
+                        int mapX = tileStartX + x;
+
+                        // Convert pixel coordinates to bin grid indices (using map coordinates)
+                        // No rotation here because we haven't rotated the map yet
+                        Point BinPoint = PixelToBin(mapX, mapY, 0);
+
+                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
+                        int gridX = BinPoint.X - minX;
+                        int gridY = BinPoint.Y - minY;
+
+                        byte r, g, b, a;
+
+                        if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
+                        {
+                            var elevation = ExistingElevationGrid[gridY, gridX];
 
                             if (elevation.HasValue && elevation.Value != 0.0)
                             {

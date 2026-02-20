@@ -39,7 +39,9 @@
             SpeedLabel = new Label();
             FieldNameLabel = new Label();
             panel2 = new Panel();
-            MapBtn = new Button();
+            ToggleHaulArrowsBtn = new Button();
+            ElevationMapBtn = new Button();
+            NoChangeMapBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -168,22 +170,47 @@
             panel2.Size = new Size(881, 4);
             panel2.TabIndex = 2;
             // 
-            // MapBtn
+            // ToggleHaulArrowsBtn
             // 
-            MapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            MapBtn.Image = (Image)resources.GetObject("MapBtn.Image");
-            MapBtn.Location = new Point(810, 55);
-            MapBtn.Name = "MapBtn";
-            MapBtn.Size = new Size(60, 60);
-            MapBtn.TabIndex = 8;
-            MapBtn.UseVisualStyleBackColor = true;
+            ToggleHaulArrowsBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ToggleHaulArrowsBtn.Image = (Image)resources.GetObject("ToggleHaulArrowsBtn.Image");
+            ToggleHaulArrowsBtn.Location = new Point(810, 55);
+            ToggleHaulArrowsBtn.Name = "ToggleHaulArrowsBtn";
+            ToggleHaulArrowsBtn.Size = new Size(60, 60);
+            ToggleHaulArrowsBtn.TabIndex = 8;
+            ToggleHaulArrowsBtn.UseVisualStyleBackColor = true;
+            ToggleHaulArrowsBtn.Click += ToggleHaulArrowsBtn_Click;
+            // 
+            // ElevationMapBtn
+            // 
+            ElevationMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ElevationMapBtn.Image = (Image)resources.GetObject("ElevationMapBtn.Image");
+            ElevationMapBtn.Location = new Point(810, 121);
+            ElevationMapBtn.Name = "ElevationMapBtn";
+            ElevationMapBtn.Size = new Size(60, 60);
+            ElevationMapBtn.TabIndex = 9;
+            ElevationMapBtn.UseVisualStyleBackColor = true;
+            ElevationMapBtn.Click += ElevationMapBtn_Click;
+            // 
+            // NoChangeMapBtn
+            // 
+            NoChangeMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            NoChangeMapBtn.Image = (Image)resources.GetObject("NoChangeMapBtn.Image");
+            NoChangeMapBtn.Location = new Point(810, 187);
+            NoChangeMapBtn.Name = "NoChangeMapBtn";
+            NoChangeMapBtn.Size = new Size(60, 60);
+            NoChangeMapBtn.TabIndex = 10;
+            NoChangeMapBtn.UseVisualStyleBackColor = true;
+            NoChangeMapBtn.Click += NoChangeMapBtn_Click;
             // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
-            Controls.Add(MapBtn);
+            Controls.Add(NoChangeMapBtn);
+            Controls.Add(ElevationMapBtn);
+            Controls.Add(ToggleHaulArrowsBtn);
             Controls.Add(MapCanvas);
             Controls.Add(panel2);
             Controls.Add(panel1);
@@ -207,6 +234,8 @@
         private Label RearLoadLabel;
         private Label FrontBladeHeightLabel;
         private Label RearBladeHeightLabel;
-        private Button MapBtn;
+        private Button ToggleHaulArrowsBtn;
+        private Button ElevationMapBtn;
+        private Button NoChangeMapBtn;
     }
 }

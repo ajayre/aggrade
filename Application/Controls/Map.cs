@@ -35,6 +35,7 @@ namespace AgGrade.Controls
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Timer RefreshTimer;
         private bool ShowHaulArrows;
+        private MapGenerator.MapTypes MapType;
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
@@ -66,6 +67,7 @@ namespace AgGrade.Controls
             ScaleFactor = DEFAULT_SCALE_FACTOR;
 
             ShowHaulArrows = true;
+            MapType = MapGenerator.MapTypes.Elevation;
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
@@ -231,7 +233,8 @@ namespace AgGrade.Controls
             //sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
-                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings);
+                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
+                ShowHaulArrows, MapType);
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
@@ -319,6 +322,36 @@ namespace AgGrade.Controls
         private void RearLoadLabel_Click(object sender, EventArgs e)
         {
             OnResetPanLoad?.Invoke(false);
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to toggle display of the haul arrows
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ToggleHaulArrowsBtn_Click(object sender, EventArgs e)
+        {
+            ShowHaulArrows = !ShowHaulArrows;
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to show the 'no elevation change' map
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NoChangeMapBtn_Click(object sender, EventArgs e)
+        {
+            MapType = MapGenerator.MapTypes.NoChange;
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to show the elevation map
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ElevationMapBtn_Click(object sender, EventArgs e)
+        {
+            MapType = MapGenerator.MapTypes.Elevation;
         }
     }
 }
