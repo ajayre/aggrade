@@ -1,5 +1,3 @@
-1. Close button that closes the app and shuts down the tablet
-
 2. Key press that closes app
 
 3. Show keyboard button - osk.exe?
@@ -13,8 +11,6 @@
 7. Calibration button - set blade zero heights, set GNSS antenna location from driving?
 
 8. Settings screen:
-  - COM ports
-  - difference between true and magnetic north
   - enable data logging (on by default)
 
 9. When cutting show yellow strip on map indicating cutting length and width. Support turns during cutting
@@ -62,9 +58,7 @@
   - status bar has LEDs: OOO RTK OOO IMU OO HEIGHT - LEDs flash red when data not available and solid green when available. Greyed out if front or rear scraper is disabled (e.g. survey mode)
   - beep if green LED turns red
 
-16. Data logging - create csv file with date/time stamp as filename. Record speed, direction, location, blade status, blade height
-
-17. Simulator - use named pipes so sim runs as a separate process
+16. Data logging - use SQLite database. Record speed, direction, location, blade status, blade height
 
 18. Blades have three states:
   - cutting (active control)
@@ -74,9 +68,6 @@
   - manual
     - enabled by moving joystick or exiting cutting mode if float not enabled
 
-19. Display amount of dirt in each pan as it is scraped
-
-20. When pan is full auto end cutting. Option to automatically switch to rear pan when front pan is full
 
 21. Transparency and color options for tractor display
 
@@ -88,8 +79,6 @@
 
 25. Don't allow dead reckoning to run for more than two seconds
 
-26. Sound alarm when scraper capacity reached
-
 27. Log total amount of cut and fill for field (save between runs) and show percentage complete for field
   - keep track of time operating?
   - give prediction on remaining hours?
@@ -97,3 +86,9 @@
 
 28. Calibrate field height
   - drive to benchmark, capture GPS height, correct survey data to match new benchmark height
+
+29. Option to toggle tractor between scaled arrow and dot
+
+30. Map showing all cuts and fills (colored according to passes?)
+
+31. SQLite database for all field data

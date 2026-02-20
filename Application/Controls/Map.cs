@@ -36,6 +36,7 @@ namespace AgGrade.Controls
         private Timer RefreshTimer;
         private bool ShowHaulArrows;
         private MapGenerator.MapTypes MapType;
+        private MapGenerator.TractorStyles TractorStyle;
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
@@ -59,6 +60,7 @@ namespace AgGrade.Controls
             MapGen = new MapGenerator();
             MapGen.TractorColor = MapGenerator.TractorColors.Red;
             MapGen.TractorYOffset = 5;
+            MapGen.TractorStyle = MapGenerator.TractorStyles.Arrow;
 
             TractorFix = new GNSSFix();
             FrontScraperFix = new GNSSFix();
@@ -68,6 +70,7 @@ namespace AgGrade.Controls
 
             ShowHaulArrows = true;
             MapType = MapGenerator.MapTypes.Elevation;
+            TractorStyle = MapGenerator.TractorStyles.Arrow;
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
@@ -234,7 +237,7 @@ namespace AgGrade.Controls
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType);
+                ShowHaulArrows, MapType, TractorStyle);
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
@@ -352,6 +355,24 @@ namespace AgGrade.Controls
         private void ElevationMapBtn_Click(object sender, EventArgs e)
         {
             MapType = MapGenerator.MapTypes.Elevation;
+        }
+
+        /// <summary>
+        /// Called when user taps on the tractor style button
+        /// Changes the style of the tractor
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TractorStyleBtn_Click(object sender, EventArgs e)
+        {
+            if (TractorStyle == MapGenerator.TractorStyles.Arrow)
+            {
+                TractorStyle = MapGenerator.TractorStyles.Dot;
+            }
+            else
+            {
+                TractorStyle = MapGenerator.TractorStyles.Arrow;
+            }
         }
     }
 }

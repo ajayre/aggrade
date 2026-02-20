@@ -129,6 +129,12 @@ namespace AgGrade.Data
             Yellow
         }
 
+        public enum TractorStyles
+        {
+            Arrow,
+            Dot
+        }
+
         public enum MapTypes
         {
             Elevation,
@@ -150,6 +156,11 @@ namespace AgGrade.Data
         /// The color of the tractor symbol
         /// </summary>
         public TractorColors TractorColor = TractorColors.Red;
+
+        /// <summary>
+        /// The style of the tractor symbol
+        /// </summary>
+        public TractorStyles TractorStyle = TractorStyles.Arrow;
 
         // Transformation parameters for mapping unrotated map pixels to final image pixels
         private int _unrotatedMapWidthpx;
@@ -248,7 +259,8 @@ namespace AgGrade.Data
             EquipmentSettings CurrentEquipmentSettings,
             AppSettings CurrentAppSettings,
             bool ShowHaulArrows,
-            MapTypes MapType
+            MapTypes MapType,
+            TractorStyles TractorStyle
             )
         {
             CurrentField = Field;
@@ -271,6 +283,7 @@ namespace AgGrade.Data
             }
 
             this.MapType = MapType;
+            this.TractorStyle = TractorStyle;
 
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
@@ -686,8 +699,8 @@ namespace AgGrade.Data
             )
         {
             Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
-            Pen HaulArrowPen = new Pen(Color.FromArgb(0x20, 0x00, 0x00, 0x00), 2);
-            Pen HaulArrowTipPen = new Pen(Color.FromArgb(0x20, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowTipPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
 
             var BenchmarkFontFamily = new FontFamily("Arial");
             var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -748,17 +761,6 @@ namespace AgGrade.Data
                 TractorPen.DashPattern = dashValues;
                 g.DrawLine(TractorPen, _tractorXpx, _tractorYpx, DestPix.X, DestPix.Y);
 
-                // draw tractor
-                // get tractor color
-                Bitmap TractorImage;
-                switch (TractorColor)
-                {
-                    default:
-                    case TractorColors.Green: TractorImage = Properties.Resources.navarrow_green_256px; break;
-                    case TractorColors.Red: TractorImage = Properties.Resources.navarrow_red_256px; break;
-                    case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
-                    case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
-                }
                 // get tractor pixel location - always fixed
                 int TractorXpx = Map.Width / 2;
                 int TractorYpx = (int)(Map.Height * TractorYOffset / 10.0);
@@ -770,7 +772,7 @@ namespace AgGrade.Data
 
                     // draw connector between tractor and front scraper
                     g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), TractorXpx, TractorYpx, FrontScraperCenter.X, FrontScraperCenter.Y);
-                    
+
                     if (CurrentEquipmentSettings.RearPan.Equipped)
                     {
                         // get rear scraper location
@@ -779,12 +781,6 @@ namespace AgGrade.Data
                         g.DrawLine(new Pen(new SolidBrush(Color.Black), 2), FrontScraperCenter.X, FrontScraperCenter.Y, RearScraperCenter.X, RearScraperCenter.Y);
                     }
                 }
-
-                // scale tractor so the width of the symbol matches the tractor width
-                int TractorWidthpx = (int)(CurrentEquipmentSettings.TractorWidthMm / 1000.0 * CurrentScaleFactor);
-                if (TractorWidthpx < 16) TractorWidthpx = 16;
-                // draw
-                g.DrawImage(TractorImage, TractorXpx - (TractorWidthpx / 2), TractorYpx - (TractorWidthpx / 2), TractorWidthpx, TractorWidthpx);
 
                 if (CurrentEquipmentSettings.FrontPan.Equipped)
                 {
@@ -816,6 +812,42 @@ namespace AgGrade.Data
                         g.DrawLine(new Pen(new SolidBrush(Color.Black), 8), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
                         g.DrawLine(new Pen(TractorYellow, 4), RearBladeEndA.X, RearBladeEndA.Y, RearBladeEndB.X, RearBladeEndB.Y);
                     }
+                }
+
+                // draw tractor
+                if (TractorStyle == TractorStyles.Arrow)
+                {
+                    // get tractor color
+                    Bitmap TractorImage;
+                    switch (TractorColor)
+                    {
+                        default:
+                        case TractorColors.Green: TractorImage = Properties.Resources.navarrow_green_256px; break;
+                        case TractorColors.Red: TractorImage = Properties.Resources.navarrow_red_256px; break;
+                        case TractorColors.Blue: TractorImage = Properties.Resources.navarrow_blue_256px; break;
+                        case TractorColors.Yellow: TractorImage = Properties.Resources.navarrow_yellow_256px; break;
+                    }
+
+                    // scale tractor so the width of the symbol matches the tractor width
+                    int TractorWidthpx = (int)(CurrentEquipmentSettings.TractorWidthMm / 1000.0 * CurrentScaleFactor);
+                    if (TractorWidthpx < 16) TractorWidthpx = 16;
+                    // draw
+                    g.DrawImage(TractorImage, TractorXpx - (TractorWidthpx / 2), TractorYpx - (TractorWidthpx / 2), TractorWidthpx, TractorWidthpx);
+                }
+                else if (TractorStyle == TractorStyles.Dot)
+                {
+                    Brush TractorBrush;
+                    
+                    switch (TractorColor)
+                    {
+                        default:
+                        case TractorColors.Green: TractorBrush = new SolidBrush(Color.FromArgb(0x36, 0x7C, 0x2B)); break;
+                        case TractorColors.Red: TractorBrush = new SolidBrush(Color.FromArgb(0xC3, 0x1F, 0x17)); break;
+                        case TractorColors.Blue: TractorBrush = new SolidBrush(Color.FromArgb(0x00, 0x3F, 0x7D)); break;
+                        case TractorColors.Yellow: TractorBrush = new SolidBrush(Color.FromArgb(0xFF, 0xC4, 0x00)); break;
+                    }
+
+                    g.FillEllipse(TractorBrush, TractorXpx - 10, TractorYpx - 10, 20, 20);
                 }
             }
         }
@@ -1811,15 +1843,83 @@ namespace AgGrade.Data
 
                             if (ExistingElevation.HasValue && TargetElevation.HasValue && (ExistingElevation.Value != 0.0) && (TargetElevation.Value != 0.0))
                             {
-                                if (Math.Abs(ExistingElevation.Value - TargetElevation.Value) <= 0.01)
+                                double DifferenceM = ExistingElevation.Value - TargetElevation.Value;
+
+                                if (DifferenceM < -0.5)
                                 {
+                                    // violet
                                     r = 0x80;
-                                    g = 0xFF;
+                                    g = 0x00;
                                     b = 0x80;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM >= -0.5) && (DifferenceM < -0.3))
+                                {
+                                    // indigo
+                                    r = 0x9A;
+                                    g = 0x31;
+                                    b = 0xFF;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM >= -0.3) && (DifferenceM < -0.05))
+                                {
+                                    // blue
+                                    r = 0x00;
+                                    g = 0x66;
+                                    b = 0xFF;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM >= -0.05) && (DifferenceM < -0.01))
+                                {
+                                    // cyan
+                                    r = 0x1B;
+                                    g = 0x7F;
+                                    b = 0xC9;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM >= -0.01) && (DifferenceM <= 0.01))
+                                {
+                                    // green
+                                    r = 0x00;
+                                    g = 0xCD;
+                                    b = 0x00;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM > 0.01) && (DifferenceM <= 0.05))
+                                {
+                                    // yellow
+                                    r = 0xFF;
+                                    g = 0xFF;
+                                    b = 0x00;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM > 0.05) && (DifferenceM <= 0.3))
+                                {
+                                    // orange
+                                    r = 0xFF;
+                                    g = 0x80;
+                                    b = 0x00;
+                                    a = 255;
+                                }
+                                else if ((DifferenceM > 0.3) && (DifferenceM <= 0.5))
+                                {
+                                    // red
+                                    r = 0xFF;
+                                    g = 0x00;
+                                    b = 0x00;
+                                    a = 255;
+                                }
+                                else if (DifferenceM > 0.5)
+                                {
+                                    // dark red
+                                    r = 0xB4;
+                                    g = 0x00;
+                                    b = 0x00;
                                     a = 255;
                                 }
                                 else
                                 {
+                                    // grey
                                     r = 0x80;
                                     g = 0x80;
                                     b = 0x80;

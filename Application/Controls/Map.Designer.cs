@@ -42,6 +42,7 @@
             ToggleHaulArrowsBtn = new Button();
             ElevationMapBtn = new Button();
             NoChangeMapBtn = new Button();
+            TractorStyleBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -203,11 +204,23 @@
             NoChangeMapBtn.UseVisualStyleBackColor = true;
             NoChangeMapBtn.Click += NoChangeMapBtn_Click;
             // 
+            // TractorStyleBtn
+            // 
+            TractorStyleBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            TractorStyleBtn.Image = (Image)resources.GetObject("TractorStyleBtn.Image");
+            TractorStyleBtn.Location = new Point(810, 253);
+            TractorStyleBtn.Name = "TractorStyleBtn";
+            TractorStyleBtn.Size = new Size(60, 60);
+            TractorStyleBtn.TabIndex = 11;
+            TractorStyleBtn.UseVisualStyleBackColor = true;
+            TractorStyleBtn.Click += TractorStyleBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(TractorStyleBtn);
             Controls.Add(NoChangeMapBtn);
             Controls.Add(ElevationMapBtn);
             Controls.Add(ToggleHaulArrowsBtn);
@@ -237,5 +250,6 @@
         private Button ToggleHaulArrowsBtn;
         private Button ElevationMapBtn;
         private Button NoChangeMapBtn;
+        private Button TractorStyleBtn;
     }
 }
