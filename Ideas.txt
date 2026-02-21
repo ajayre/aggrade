@@ -87,8 +87,6 @@
 28. Calibrate field height
   - drive to benchmark, capture GPS height, correct survey data to match new benchmark height
 
-29. Option to toggle tractor between scaled arrow and dot
-
 30. Map showing all cuts and fills (colored according to passes?)
 
 31. SQLite database for all field data

@@ -138,7 +138,7 @@ namespace AgGrade.Data
         public enum MapTypes
         {
             Elevation,
-            NoChange
+            CutFill
         }
 
         /// <summary>
@@ -369,6 +369,7 @@ namespace AgGrade.Data
 
                 var ExistingElevationGrid = CreateExistingElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
                 var TargetElevationGrid = CreateTargetElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
+                var BinGrid = CreateBinsGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
 
                 // The bin origin is the field coordinate that corresponds to bin grid index 0
                 // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
@@ -492,8 +493,9 @@ namespace AgGrade.Data
                                                 colorPalette, ShowGrid, ScaleFactor);
                                             break;
 
-                                        case MapTypes.NoChange:
-                                            NewTile.Bitmap = RenderNoChangeTile(
+                                        case MapTypes.CutFill:
+                                            NewTile.Bitmap = RenderCutFillTile(
+                                                BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
                                                 ExistingElevationGrid, TargetElevationGrid,
@@ -1727,6 +1729,35 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Organizes the bins into a grid
+        /// </summary>
+        /// <param name="bins"></param>
+        /// <param name="minX"></param>
+        /// <param name="maxX"></param>
+        /// <param name="minY"></param>
+        /// <param name="maxY"></param>
+        /// <param name="gridWidth"></param>
+        /// <param name="gridHeight"></param>
+        /// <returns></returns>
+        private Bin?[,] CreateBinsGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
+        {
+            var BinGrid = new Bin?[gridHeight, gridWidth];
+
+            foreach (var bin in bins)
+            {
+                var x = bin.X - minX;
+                var y = bin.Y - minY;
+
+                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+                {
+                    BinGrid[y, x] = bin;
+                }
+            }
+
+            return BinGrid;
+        }
+
+        /// <summary>
         /// Gets the target elevations of a set of bins
         /// </summary>
         /// <param name="bins"></param>
@@ -1761,8 +1792,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Renders a single tile of the 'np change elevation' map
+        /// Renders a single tile of the cut/fill map
         /// </summary>
+        /// <param name="BinGrid">2D grid of bins</param>
         /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
         /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
         /// <param name="tileWidth">Width of tile in pixels</param>
@@ -1778,8 +1810,9 @@ namespace AgGrade.Data
         /// <param name="showGrid">Whether to show grid lines</param>
         /// <param name="scaleFactor">Scale factor in pixels per meter</param>
         /// <returns>Rendered tile bitmap</returns>
-        private Bitmap RenderNoChangeTile
+        private Bitmap RenderCutFillTile
             (
+            Bin?[,] BinGrid,
             int tileStartX,
             int tileStartY,
             int tileWidth,
@@ -1841,96 +1874,109 @@ namespace AgGrade.Data
                             var ExistingElevation = ExistingElevationGrid[gridY, gridX];
                             var TargetElevation = TargetElevationGrid[gridY, gridX];
 
-                            if (ExistingElevation.HasValue && TargetElevation.HasValue && (ExistingElevation.Value != 0.0) && (TargetElevation.Value != 0.0))
-                            {
-                                double DifferenceM = ExistingElevation.Value - TargetElevation.Value;
+                            var CutNum = BinGrid[gridY, gridX]?.NumberOfCuts;
+                            var FillNum = BinGrid[gridY, gridX]?.NumberofFills;
 
-                                if (DifferenceM < -0.5)
-                                {
-                                    // violet
-                                    r = 0x80;
-                                    g = 0x00;
-                                    b = 0x80;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM >= -0.5) && (DifferenceM < -0.3))
-                                {
-                                    // indigo
-                                    r = 0x9A;
-                                    g = 0x31;
-                                    b = 0xFF;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM >= -0.3) && (DifferenceM < -0.05))
-                                {
-                                    // blue
-                                    r = 0x00;
-                                    g = 0x66;
-                                    b = 0xFF;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM >= -0.05) && (DifferenceM < -0.01))
-                                {
-                                    // cyan
-                                    r = 0x1B;
-                                    g = 0x7F;
-                                    b = 0xC9;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM >= -0.01) && (DifferenceM <= 0.01))
-                                {
-                                    // green
-                                    r = 0x00;
-                                    g = 0xCD;
-                                    b = 0x00;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM > 0.01) && (DifferenceM <= 0.05))
-                                {
-                                    // yellow
-                                    r = 0xFF;
-                                    g = 0xFF;
-                                    b = 0x00;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM > 0.05) && (DifferenceM <= 0.3))
-                                {
-                                    // orange
-                                    r = 0xFF;
-                                    g = 0x80;
-                                    b = 0x00;
-                                    a = 255;
-                                }
-                                else if ((DifferenceM > 0.3) && (DifferenceM <= 0.5))
-                                {
-                                    // red
-                                    r = 0xFF;
-                                    g = 0x00;
-                                    b = 0x00;
-                                    a = 255;
-                                }
-                                else if (DifferenceM > 0.5)
-                                {
-                                    // dark red
-                                    r = 0xB4;
-                                    g = 0x00;
-                                    b = 0x00;
-                                    a = 255;
-                                }
-                                else
-                                {
-                                    // grey
-                                    r = 0x80;
-                                    g = 0x80;
-                                    b = 0x80;
-                                    a = 255;
-                                }
+                            if (CutNum > 0 || FillNum > 0)
+                            {
+                                r = 0xFF;
+                                g = 0xFF;
+                                b = 0xFF;
+                                a = 255;
                             }
                             else
                             {
-                                // No data - make transparent
-                                r = g = b = 0;
-                                a = 0; // Transparent
+                                if (ExistingElevation.HasValue && TargetElevation.HasValue && (ExistingElevation.Value != 0.0) && (TargetElevation.Value != 0.0))
+                                {
+                                    double DifferenceM = ExistingElevation.Value - TargetElevation.Value;
+
+                                    if (DifferenceM < -0.8)
+                                    {
+                                        // violet
+                                        r = 0x80;
+                                        g = 0x00;
+                                        b = 0x80;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM >= -0.8) && (DifferenceM < -0.5))
+                                    {
+                                        // indigo
+                                        r = 0x9A;
+                                        g = 0x31;
+                                        b = 0xFF;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM >= -0.5) && (DifferenceM < -0.05))
+                                    {
+                                        // blue
+                                        r = 0x00;
+                                        g = 0x66;
+                                        b = 0xFF;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM >= -0.05) && (DifferenceM < -0.01))
+                                    {
+                                        // cyan
+                                        r = 0x1B;
+                                        g = 0x7F;
+                                        b = 0xC9;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM >= -0.01) && (DifferenceM <= 0.01))
+                                    {
+                                        // green
+                                        r = 0x00;
+                                        g = 0xCD;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM > 0.01) && (DifferenceM <= 0.05))
+                                    {
+                                        // yellow
+                                        r = 0xFF;
+                                        g = 0xFF;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM > 0.05) && (DifferenceM <= 0.5))
+                                    {
+                                        // orange
+                                        r = 0xFF;
+                                        g = 0x80;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                    else if ((DifferenceM > 0.5) && (DifferenceM <= 0.8))
+                                    {
+                                        // red
+                                        r = 0xFF;
+                                        g = 0x00;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                    else if (DifferenceM > 0.8)
+                                    {
+                                        // dark red
+                                        r = 0xB4;
+                                        g = 0x00;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                    else
+                                    {
+                                        // grey
+                                        r = 0x80;
+                                        g = 0x80;
+                                        b = 0x80;
+                                        a = 255;
+                                    }
+                                }
+                                else
+                                {
+                                    // No data - make transparent
+                                    r = g = b = 0;
+                                    a = 0; // Transparent
+                                }
                             }
                         }
                         else

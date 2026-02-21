@@ -13,6 +13,8 @@ public class Bin
     public double ExistingElevationM { get; set; }
     public double TargetElevationM { get; set; }
     public bool Dirty { get; set; }
+    public uint NumberOfCuts { get; set; }
+    public uint NumberofFills { get; set; }
 
     public override string ToString()
     {

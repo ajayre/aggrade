@@ -41,7 +41,7 @@
             panel2 = new Panel();
             ToggleHaulArrowsBtn = new Button();
             ElevationMapBtn = new Button();
-            NoChangeMapBtn = new Button();
+            CutFillMapBtn = new Button();
             TractorStyleBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
@@ -193,16 +193,16 @@
             ElevationMapBtn.UseVisualStyleBackColor = true;
             ElevationMapBtn.Click += ElevationMapBtn_Click;
             // 
-            // NoChangeMapBtn
+            // CutFillMapBtn
             // 
-            NoChangeMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            NoChangeMapBtn.Image = (Image)resources.GetObject("NoChangeMapBtn.Image");
-            NoChangeMapBtn.Location = new Point(810, 187);
-            NoChangeMapBtn.Name = "NoChangeMapBtn";
-            NoChangeMapBtn.Size = new Size(60, 60);
-            NoChangeMapBtn.TabIndex = 10;
-            NoChangeMapBtn.UseVisualStyleBackColor = true;
-            NoChangeMapBtn.Click += NoChangeMapBtn_Click;
+            CutFillMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            CutFillMapBtn.Image = (Image)resources.GetObject("CutFillMapBtn.Image");
+            CutFillMapBtn.Location = new Point(810, 187);
+            CutFillMapBtn.Name = "CutFillMapBtn";
+            CutFillMapBtn.Size = new Size(60, 60);
+            CutFillMapBtn.TabIndex = 10;
+            CutFillMapBtn.UseVisualStyleBackColor = true;
+            CutFillMapBtn.Click += CutFillMapBtn_Click;
             // 
             // TractorStyleBtn
             // 
@@ -221,7 +221,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
             Controls.Add(TractorStyleBtn);
-            Controls.Add(NoChangeMapBtn);
+            Controls.Add(CutFillMapBtn);
             Controls.Add(ElevationMapBtn);
             Controls.Add(ToggleHaulArrowsBtn);
             Controls.Add(MapCanvas);
@@ -249,7 +249,7 @@
         private Label RearBladeHeightLabel;
         private Button ToggleHaulArrowsBtn;
         private Button ElevationMapBtn;
-        private Button NoChangeMapBtn;
+        private Button CutFillMapBtn;
         private Button TractorStyleBtn;
     }
 }

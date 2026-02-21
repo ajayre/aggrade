@@ -123,7 +123,7 @@ namespace AgGrade
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
 
             // update in equipment status
-            CurrentEquipmentStatus.RearPan.LoadLCY = VolumeBCY;
+            CurrentEquipmentStatus.RearPan.LoadLCY = VolumeLCY;
 
             // check if rear scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.RearPan.CapacityCY && !CurrentEquipmentStatus.RearPan.CapacityWarningOccurred)
@@ -144,7 +144,7 @@ namespace AgGrade
             double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
 
             // update in equipment status
-            CurrentEquipmentStatus.FrontPan.LoadLCY = VolumeBCY;
+            CurrentEquipmentStatus.FrontPan.LoadLCY = VolumeLCY;
 
             // check if front scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY && !CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred)
@@ -814,6 +814,7 @@ namespace AgGrade
         {
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
+                CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartRearCutting();
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
@@ -824,7 +825,6 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }
@@ -882,6 +882,7 @@ namespace AgGrade
         {
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
+                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartFrontCutting();
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
             }
@@ -892,7 +893,6 @@ namespace AgGrade
             }
             else
             {
-                CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }

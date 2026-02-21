@@ -338,13 +338,13 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
-        /// Called when user taps on the button to show the 'no elevation change' map
+        /// Called when user taps on the button to show the cut/fill map
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void NoChangeMapBtn_Click(object sender, EventArgs e)
+        private void CutFillMapBtn_Click(object sender, EventArgs e)
         {
-            MapType = MapGenerator.MapTypes.NoChange;
+            MapType = MapGenerator.MapTypes.CutFill;
         }
 
         /// <summary>

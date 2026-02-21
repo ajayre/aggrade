@@ -361,19 +361,23 @@ namespace AgGrade.Data
                             FillHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
                         }
 
-                        // increase bin height
-                        BinToFill.ExistingElevationM += FillHeightM;
-                        BinToFill.Dirty = true;
-
-                        // update volume, can't go negative
-                        FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
-                        if (FrontCutVolumeBCY < 0)
+                        if (FillHeightM > 0)
                         {
-                            FrontCutVolumeBCY = 0;
-                        }
+                            // increase bin height
+                            BinToFill.ExistingElevationM += FillHeightM;
+                            BinToFill.Dirty = true;
+                            BinToFill.NumberofFills++;
 
-                        // remember this bin so we don't process it more than one this pass of the blade
-                        FrontProcessedBins.Add(BinToFill);
+                            // update volume, can't go negative
+                            FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                            if (FrontCutVolumeBCY < 0)
+                            {
+                                FrontCutVolumeBCY = 0;
+                            }
+
+                            // remember this bin so we don't process it more than one this pass of the blade
+                            FrontProcessedBins.Add(BinToFill);
+                        }
                     }
                 }
             }
@@ -404,19 +408,23 @@ namespace AgGrade.Data
                             FillHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
                         }
 
-                        // increase bin height
-                        BinToFill.ExistingElevationM += FillHeightM;
-                        BinToFill.Dirty = true;
-
-                        // update volume, can't go negative
-                        RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
-                        if (RearCutVolumeBCY < 0)
+                        if (FillHeightM > 0)
                         {
-                            RearCutVolumeBCY = 0;
-                        }
+                            // increase bin height
+                            BinToFill.ExistingElevationM += FillHeightM;
+                            BinToFill.Dirty = true;
+                            BinToFill.NumberofFills++;
 
-                        // remember this bin so we don't process it more than one this pass of the blade
-                        RearProcessedBins.Add(BinToFill);
+                            // update volume, can't go negative
+                            RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                            if (RearCutVolumeBCY < 0)
+                            {
+                                RearCutVolumeBCY = 0;
+                            }
+
+                            // remember this bin so we don't process it more than one this pass of the blade
+                            RearProcessedBins.Add(BinToFill);
+                        }
                     }
                 }
             }
@@ -442,15 +450,19 @@ namespace AgGrade.Data
                     {
                         double CutHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
 
-                        // reduce bin height (adding because the cut height is negative)
-                        BinToCut.ExistingElevationM += CutHeightM;
-                        BinToCut.Dirty = true;
+                        if (CutHeightM < 0)
+                        {
+                            // reduce bin height (adding because the cut height is negative)
+                            BinToCut.ExistingElevationM += CutHeightM;
+                            BinToCut.Dirty = true;
+                            BinToCut.NumberOfCuts++;
 
-                        // update volume
-                        FrontCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
+                            // update volume
+                            FrontCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
 
-                        // remember this bin so we don't process it more than one this pass of the blade
-                        FrontProcessedBins.Add(BinToCut);
+                            // remember this bin so we don't process it more than one this pass of the blade
+                            FrontProcessedBins.Add(BinToCut);
+                        }
                     }
                 }
             }
@@ -476,15 +488,19 @@ namespace AgGrade.Data
                     {
                         double CutHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
 
-                        // reduce bin height (adding because the cut height is negative)
-                        BinToCut.ExistingElevationM += CutHeightM;
-                        BinToCut.Dirty = true;
+                        if (CutHeightM < 0)
+                        {
+                            // reduce bin height (adding because the cut height is negative)
+                            BinToCut.ExistingElevationM += CutHeightM;
+                            BinToCut.Dirty = true;
+                            BinToCut.NumberOfCuts++;
 
-                        // update volume
-                        RearCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
+                            // update volume
+                            RearCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
 
-                        // remember this bin so we don't process it more than one this pass of the blade
-                        RearProcessedBins.Add(BinToCut);
+                            // remember this bin so we don't process it more than one this pass of the blade
+                            RearProcessedBins.Add(BinToCut);
+                        }
                     }
                 }
             }
