@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -24,6 +24,7 @@ namespace HardwareSim
         public Packet Packet { get; } = new Packet();
 
         public event Action<PGNPacket> OnCommandReceived = null;
+        public event Action OnAgGradeClosed = null;
 
         public async Task Send
             (
@@ -82,8 +83,12 @@ namespace HardwareSim
 
         public async Task StartListener()
         {
-            listener = new UdpClient(ListenPort);
-            IPEndPoint groupEP = new IPEndPoint(IPAddress.Any, ListenPort);
+            // Ensure any previous listener is fully closed before creating a new one
+            Stop();
+
+            listener = new UdpClient();
+            listener.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            listener.Client.Bind(new IPEndPoint(IPAddress.Any, ListenPort));
 
             Packet.Begin(false, null, 50);
 
@@ -158,12 +163,22 @@ namespace HardwareSim
             {
                 lock (lockObject)
                 {
+                    RemoteEP = null;
                     if (listener != null)
                     {
-                        listener.Close();
+                        try
+                        {
+                            listener.Close();
+                        }
+                        catch (SocketException)
+                        {
+                            // Socket may be in error state after remote close; still release reference
+                        }
                         listener = null;
                     }
                 }
+
+                OnAgGradeClosed?.Invoke();
             }
         }
 
@@ -171,9 +186,14 @@ namespace HardwareSim
         {
             lock (lockObject)
             {
+                RemoteEP = null;
                 if (listener != null)
                 {
-                    listener.Close();
+                    try
+                    {
+                        listener.Close();
+                    }
+                    catch (SocketException) { /* ignore */ }
                     listener = null;
                 }
             }

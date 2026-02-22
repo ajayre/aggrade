@@ -21,6 +21,7 @@ namespace HardwareSim
         private bool RearBladeAuto = false;
         private bool FrontDumping = false;
         private bool RearDumping = false;
+        private DateTime? LastRxPingTime = null;
 
         public MainForm()
         {
@@ -36,6 +37,7 @@ namespace HardwareSim
 
             uDPServer = new UDPServer();
             uDPServer.OnCommandReceived += UDPServer_OnCommandReceived;
+            uDPServer.OnAgGradeClosed += UDPServer_OnAgGradeClosed;
             uDPServer.StartListener();
 
             PingTimer = new Timer();
@@ -45,6 +47,14 @@ namespace HardwareSim
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
+        }
+
+        /// <summary>
+        /// AgGrade has closed, start listening for new connection
+        /// </summary>
+        private void UDPServer_OnAgGradeClosed()
+        {
+            uDPServer.StartListener();
         }
 
         private void GNSSSim_OnNewRearIMU(IMUValue Value)
@@ -120,6 +130,12 @@ namespace HardwareSim
         private void PingTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             SendStatus(new PGNPacket(PGNValues.PGN_PING));
+
+            // AgGrade has dissappeared
+            if (LastRxPingTime.HasValue && (DateTime.Now > LastRxPingTime.Value.AddMilliseconds(5000)))
+            {
+                LastRxPingTime = null;
+            }
         }
 
         private void UDPServer_OnCommandReceived
@@ -129,6 +145,10 @@ namespace HardwareSim
         {
             switch (Command.PGN)
             {
+                case PGNValues.PGN_PING:
+                    LastRxPingTime = DateTime.Now;
+                    break;
+
                 case PGNValues.PGN_AGGRADE_STARTED:
                     double Lat = DEFAULT_LATITUDE;
                     double Lon = DEFAULT_LONGITUDE;
