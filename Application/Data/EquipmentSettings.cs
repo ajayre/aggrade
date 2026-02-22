@@ -18,10 +18,17 @@ namespace AgGrade.Data
             Raise
         }
 
+        public enum EndOfFillingOptions
+        {
+            Float,
+            Raise
+        }
+
         public bool Equipped;
         public uint AntennaHeightMm;
         public uint WidthMm;
         public EndOfCuttingOptions EndofCutting;
+        public EndOfFillingOptions EndofFilling;
         public uint MaxHeightMm;
         public uint MaxCutDepthMm;
         public uint MaxFillDepthMm;
@@ -38,6 +45,7 @@ namespace AgGrade.Data
             AntennaHeightMm = 0;
             WidthMm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
+            EndofFilling = EndOfFillingOptions.Raise;
             MaxHeightMm = 80;
             MaxCutDepthMm = 61;
             MaxFillDepthMm = 152;
@@ -56,6 +64,7 @@ namespace AgGrade.Data
                 new XElement("AntennaHeightMm", AntennaHeightMm),
                 new XElement("WidthMm", WidthMm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
+                new XElement("EndofFilling", EndofFilling.ToString()),
                 new XElement("MaxHeightMm", MaxHeightMm),
                 new XElement("MaxCutDepthMm", MaxCutDepthMm),
                 new XElement("MaxFillDepthMm", MaxFillDepthMm),
@@ -104,6 +113,16 @@ namespace AgGrade.Data
                 if (Enum.TryParse<EndOfCuttingOptions>(endOfCuttingElement.Value, out EndOfCuttingOptions endOfCutting))
                 {
                     EndofCutting = endOfCutting;
+                }
+            }
+
+            // Parse EndofFilling
+            XElement? endOfFillingElement = xml.Element("EndofFilling");
+            if (endOfFillingElement != null)
+            {
+                if (Enum.TryParse<EndOfFillingOptions>(endOfFillingElement.Value, out EndOfFillingOptions endOfFilling))
+                {
+                    EndofFilling = endOfFilling;
                 }
             }
 

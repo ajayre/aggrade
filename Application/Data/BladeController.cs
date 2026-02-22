@@ -92,9 +92,18 @@ namespace AgGrade.Data
             // empty
             else
             {
-                // raise blade
-                Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                if (CurrentEquipmentSettings.FrontPan.EndofFilling == PanSettings.EndOfFillingOptions.Float)
+                {
+                    // float blade
+                    Controller.SetFrontCutValve(BLADE_HEIGHT_GROUND_LEVEL);
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Floating;
+                }
+                else
+                {
+                    // raise blade
+                    Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                }
             }
         }
 
@@ -126,9 +135,18 @@ namespace AgGrade.Data
             // empty
             else
             {
-                // raise blade
-                Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                if (CurrentEquipmentSettings.RearPan.EndofFilling == PanSettings.EndOfFillingOptions.Float)
+                {
+                    // float blade
+                    Controller.SetRearCutValve(BLADE_HEIGHT_GROUND_LEVEL);
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Floating;
+                }
+                else
+                {
+                    // raise blade
+                    Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                }
             }
         }
 

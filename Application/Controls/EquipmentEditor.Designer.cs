@@ -51,6 +51,8 @@
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             tabPage2 = new TabPage();
+            FrontPanEndofFilling = new ComboBox();
+            FrontPanEndofFillingLabel = new Label();
             FrontPanMaxHeightLabel = new Label();
             FrontPanStopCuttingWhenFullLabel = new Label();
             FrontPanStopCuttingWhenFull = new ComboBox();
@@ -95,6 +97,11 @@
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             tabPage1 = new TabPage();
+            RearPanEndofFilling = new ComboBox();
+            RearPanEndofFillingLabel = new Label();
+            label9 = new Label();
+            RearPanBladeDistanceToFrontBlade = new NumericInput();
+            RearPanBladeDistanceToFrontBladeLabel = new Label();
             RearPanAutoCutWhenFrontStopsLabel = new Label();
             RearPanAutoCutWhenFrontStops = new ComboBox();
             RearPanMaxHeightLabel = new Label();
@@ -144,9 +151,8 @@
             label7 = new Label();
             MinBinCoveragePcent = new NumericInput();
             label8 = new Label();
-            label9 = new Label();
-            RearPanBladeDistanceToFrontBlade = new NumericInput();
-            RearPanBladeDistanceToFrontBladeLabel = new Label();
+            panel1 = new Panel();
+            panel2 = new Panel();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -389,6 +395,9 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
+            tabPage2.Controls.Add(panel1);
+            tabPage2.Controls.Add(FrontPanEndofFilling);
+            tabPage2.Controls.Add(FrontPanEndofFillingLabel);
             tabPage2.Controls.Add(FrontPanMaxHeightLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFullLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFull);
@@ -423,11 +432,32 @@
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Front Pan";
             // 
+            // FrontPanEndofFilling
+            // 
+            FrontPanEndofFilling.DropDownStyle = ComboBoxStyle.DropDownList;
+            FrontPanEndofFilling.Font = new Font("Segoe UI", 14F);
+            FrontPanEndofFilling.FormattingEnabled = true;
+            FrontPanEndofFilling.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
+            FrontPanEndofFilling.Location = new Point(239, 143);
+            FrontPanEndofFilling.Name = "FrontPanEndofFilling";
+            FrontPanEndofFilling.Size = new Size(366, 33);
+            FrontPanEndofFilling.TabIndex = 103;
+            // 
+            // FrontPanEndofFillingLabel
+            // 
+            FrontPanEndofFillingLabel.AutoSize = true;
+            FrontPanEndofFillingLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanEndofFillingLabel.Location = new Point(107, 146);
+            FrontPanEndofFillingLabel.Name = "FrontPanEndofFillingLabel";
+            FrontPanEndofFillingLabel.Size = new Size(126, 25);
+            FrontPanEndofFillingLabel.TabIndex = 102;
+            FrontPanEndofFillingLabel.Text = "End of Filling:";
+            // 
             // FrontPanMaxHeightLabel
             // 
             FrontPanMaxHeightLabel.AutoSize = true;
             FrontPanMaxHeightLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxHeightLabel.Location = new Point(492, 190);
+            FrontPanMaxHeightLabel.Location = new Point(489, 239);
             FrontPanMaxHeightLabel.Name = "FrontPanMaxHeightLabel";
             FrontPanMaxHeightLabel.Size = new Size(113, 25);
             FrontPanMaxHeightLabel.TabIndex = 101;
@@ -437,7 +467,7 @@
             // 
             FrontPanStopCuttingWhenFullLabel.AutoSize = true;
             FrontPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            FrontPanStopCuttingWhenFullLabel.Location = new Point(18, 283);
             FrontPanStopCuttingWhenFullLabel.Name = "FrontPanStopCuttingWhenFullLabel";
             FrontPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
             FrontPanStopCuttingWhenFullLabel.TabIndex = 100;
@@ -449,7 +479,7 @@
             FrontPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
             FrontPanStopCuttingWhenFull.FormattingEnabled = true;
             FrontPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
-            FrontPanStopCuttingWhenFull.Location = new Point(242, 231);
+            FrontPanStopCuttingWhenFull.Location = new Point(239, 280);
             FrontPanStopCuttingWhenFull.Name = "FrontPanStopCuttingWhenFull";
             FrontPanStopCuttingWhenFull.Size = new Size(74, 33);
             FrontPanStopCuttingWhenFull.TabIndex = 99;
@@ -458,7 +488,7 @@
             // 
             FrontPanMaxFillDepthUnitsLabel.AutoSize = true;
             FrontPanMaxFillDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxFillDepthUnitsLabel.Location = new Point(784, 141);
+            FrontPanMaxFillDepthUnitsLabel.Location = new Point(782, 190);
             FrontPanMaxFillDepthUnitsLabel.Name = "FrontPanMaxFillDepthUnitsLabel";
             FrontPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
             FrontPanMaxFillDepthUnitsLabel.TabIndex = 98;
@@ -466,7 +496,7 @@
             // 
             // FrontPanMaxFillDepth
             // 
-            FrontPanMaxFillDepth.Location = new Point(611, 133);
+            FrontPanMaxFillDepth.Location = new Point(609, 182);
             FrontPanMaxFillDepth.Name = "FrontPanMaxFillDepth";
             FrontPanMaxFillDepth.Size = new Size(167, 43);
             FrontPanMaxFillDepth.TabIndex = 97;
@@ -477,7 +507,7 @@
             // 
             FrontPanMaxFillDepthLabel.AutoSize = true;
             FrontPanMaxFillDepthLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxFillDepthLabel.Location = new Point(468, 141);
+            FrontPanMaxFillDepthLabel.Location = new Point(466, 190);
             FrontPanMaxFillDepthLabel.Name = "FrontPanMaxFillDepthLabel";
             FrontPanMaxFillDepthLabel.Size = new Size(137, 25);
             FrontPanMaxFillDepthLabel.TabIndex = 96;
@@ -487,7 +517,7 @@
             // 
             FrontPanCapacityUnitsLabel.AutoSize = true;
             FrontPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanCapacityUnitsLabel.Location = new Point(415, 190);
+            FrontPanCapacityUnitsLabel.Location = new Point(412, 239);
             FrontPanCapacityUnitsLabel.Name = "FrontPanCapacityUnitsLabel";
             FrontPanCapacityUnitsLabel.Size = new Size(35, 25);
             FrontPanCapacityUnitsLabel.TabIndex = 95;
@@ -495,7 +525,7 @@
             // 
             // FrontPanCapacity
             // 
-            FrontPanCapacity.Location = new Point(239, 182);
+            FrontPanCapacity.Location = new Point(236, 231);
             FrontPanCapacity.Name = "FrontPanCapacity";
             FrontPanCapacity.Size = new Size(167, 43);
             FrontPanCapacity.TabIndex = 94;
@@ -506,7 +536,7 @@
             // 
             FrontPanCapacityLabel.AutoSize = true;
             FrontPanCapacityLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanCapacityLabel.Location = new Point(145, 190);
+            FrontPanCapacityLabel.Location = new Point(142, 239);
             FrontPanCapacityLabel.Name = "FrontPanCapacityLabel";
             FrontPanCapacityLabel.Size = new Size(88, 25);
             FrontPanCapacityLabel.TabIndex = 93;
@@ -519,7 +549,7 @@
             groupBox3.Controls.Add(FrontBladeIntegralMulLabel);
             groupBox3.Controls.Add(FrontBladeIntegralMultiplier);
             groupBox3.Controls.Add(FrontBladeDeadbandLabel);
-            groupBox3.Location = new Point(3, 440);
+            groupBox3.Location = new Point(3, 489);
             groupBox3.Name = "groupBox3";
             groupBox3.Size = new Size(970, 79);
             groupBox3.TabIndex = 92;
@@ -573,7 +603,7 @@
             groupBox2.Controls.Add(FrontBladePWMMinDown);
             groupBox2.Controls.Add(FrontBladePWMMaxDownLabel);
             groupBox2.Controls.Add(FrontBladePWMMaxDown);
-            groupBox2.Location = new Point(6, 355);
+            groupBox2.Location = new Point(6, 404);
             groupBox2.Name = "groupBox2";
             groupBox2.Size = new Size(967, 79);
             groupBox2.TabIndex = 91;
@@ -646,7 +676,7 @@
             groupBox1.Controls.Add(FrontBladePWMMinUp);
             groupBox1.Controls.Add(FrontBladePWMMaxUpLabel);
             groupBox1.Controls.Add(FrontBladePWMMaxUp);
-            groupBox1.Location = new Point(6, 270);
+            groupBox1.Location = new Point(6, 319);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(967, 79);
             groupBox1.TabIndex = 90;
@@ -714,7 +744,7 @@
             // 
             FrontPanMaxCutDepthUnitsLabel.AutoSize = true;
             FrontPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxCutDepthUnitsLabel.Location = new Point(414, 141);
+            FrontPanMaxCutDepthUnitsLabel.Location = new Point(412, 190);
             FrontPanMaxCutDepthUnitsLabel.Name = "FrontPanMaxCutDepthUnitsLabel";
             FrontPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
             FrontPanMaxCutDepthUnitsLabel.TabIndex = 71;
@@ -722,7 +752,7 @@
             // 
             // FrontPanMaxCutDepth
             // 
-            FrontPanMaxCutDepth.Location = new Point(238, 133);
+            FrontPanMaxCutDepth.Location = new Point(236, 182);
             FrontPanMaxCutDepth.Name = "FrontPanMaxCutDepth";
             FrontPanMaxCutDepth.Size = new Size(167, 43);
             FrontPanMaxCutDepth.TabIndex = 70;
@@ -733,7 +763,7 @@
             // 
             FrontPanMaxCutDepthLabel.AutoSize = true;
             FrontPanMaxCutDepthLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxCutDepthLabel.Location = new Point(91, 141);
+            FrontPanMaxCutDepthLabel.Location = new Point(89, 190);
             FrontPanMaxCutDepthLabel.Name = "FrontPanMaxCutDepthLabel";
             FrontPanMaxCutDepthLabel.Size = new Size(142, 25);
             FrontPanMaxCutDepthLabel.TabIndex = 69;
@@ -743,7 +773,7 @@
             // 
             FrontPanEquippedLabel.AutoSize = true;
             FrontPanEquippedLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanEquippedLabel.Location = new Point(137, 10);
+            FrontPanEquippedLabel.Location = new Point(137, 20);
             FrontPanEquippedLabel.Name = "FrontPanEquippedLabel";
             FrontPanEquippedLabel.Size = new Size(96, 25);
             FrontPanEquippedLabel.TabIndex = 68;
@@ -755,7 +785,7 @@
             FrontPanEquipped.Font = new Font("Segoe UI", 14F);
             FrontPanEquipped.FormattingEnabled = true;
             FrontPanEquipped.Items.AddRange(new object[] { "No", "Yes" });
-            FrontPanEquipped.Location = new Point(239, 6);
+            FrontPanEquipped.Location = new Point(239, 16);
             FrontPanEquipped.Name = "FrontPanEquipped";
             FrontPanEquipped.Size = new Size(74, 33);
             FrontPanEquipped.TabIndex = 67;
@@ -764,7 +794,7 @@
             // 
             FrontPanMaxHeightUnitsLabel.AutoSize = true;
             FrontPanMaxHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxHeightUnitsLabel.Location = new Point(784, 190);
+            FrontPanMaxHeightUnitsLabel.Location = new Point(781, 239);
             FrontPanMaxHeightUnitsLabel.Name = "FrontPanMaxHeightUnitsLabel";
             FrontPanMaxHeightUnitsLabel.Size = new Size(44, 25);
             FrontPanMaxHeightUnitsLabel.TabIndex = 66;
@@ -772,7 +802,7 @@
             // 
             // FrontPanMaxHeight
             // 
-            FrontPanMaxHeight.Location = new Point(611, 182);
+            FrontPanMaxHeight.Location = new Point(608, 231);
             FrontPanMaxHeight.Name = "FrontPanMaxHeight";
             FrontPanMaxHeight.Size = new Size(167, 43);
             FrontPanMaxHeight.TabIndex = 65;
@@ -785,7 +815,7 @@
             FrontPanEndofCutting.Font = new Font("Segoe UI", 14F);
             FrontPanEndofCutting.FormattingEnabled = true;
             FrontPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
-            FrontPanEndofCutting.Location = new Point(239, 94);
+            FrontPanEndofCutting.Location = new Point(239, 104);
             FrontPanEndofCutting.Name = "FrontPanEndofCutting";
             FrontPanEndofCutting.Size = new Size(366, 33);
             FrontPanEndofCutting.TabIndex = 64;
@@ -794,7 +824,7 @@
             // 
             FrontPanEndofCuttingLabel.AutoSize = true;
             FrontPanEndofCuttingLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanEndofCuttingLabel.Location = new Point(96, 98);
+            FrontPanEndofCuttingLabel.Location = new Point(96, 108);
             FrontPanEndofCuttingLabel.Name = "FrontPanEndofCuttingLabel";
             FrontPanEndofCuttingLabel.Size = new Size(137, 25);
             FrontPanEndofCuttingLabel.TabIndex = 63;
@@ -804,7 +834,7 @@
             // 
             FrontPanWidthUnitsLabel.AutoSize = true;
             FrontPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanWidthUnitsLabel.Location = new Point(784, 53);
+            FrontPanWidthUnitsLabel.Location = new Point(784, 63);
             FrontPanWidthUnitsLabel.Name = "FrontPanWidthUnitsLabel";
             FrontPanWidthUnitsLabel.Size = new Size(44, 25);
             FrontPanWidthUnitsLabel.TabIndex = 62;
@@ -812,7 +842,7 @@
             // 
             // FrontPanWidth
             // 
-            FrontPanWidth.Location = new Point(611, 45);
+            FrontPanWidth.Location = new Point(611, 55);
             FrontPanWidth.Name = "FrontPanWidth";
             FrontPanWidth.Size = new Size(167, 43);
             FrontPanWidth.TabIndex = 61;
@@ -823,7 +853,7 @@
             // 
             FrontPanWidthLabel.AutoSize = true;
             FrontPanWidthLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanWidthLabel.Location = new Point(538, 53);
+            FrontPanWidthLabel.Location = new Point(538, 63);
             FrontPanWidthLabel.Name = "FrontPanWidthLabel";
             FrontPanWidthLabel.Size = new Size(67, 25);
             FrontPanWidthLabel.TabIndex = 60;
@@ -833,7 +863,7 @@
             // 
             FrontPanAntennaHeightUnitsLabel.AutoSize = true;
             FrontPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanAntennaHeightUnitsLabel.Location = new Point(412, 53);
+            FrontPanAntennaHeightUnitsLabel.Location = new Point(412, 63);
             FrontPanAntennaHeightUnitsLabel.Name = "FrontPanAntennaHeightUnitsLabel";
             FrontPanAntennaHeightUnitsLabel.Size = new Size(44, 25);
             FrontPanAntennaHeightUnitsLabel.TabIndex = 59;
@@ -841,7 +871,7 @@
             // 
             // FrontPanAntennaHeight
             // 
-            FrontPanAntennaHeight.Location = new Point(237, 45);
+            FrontPanAntennaHeight.Location = new Point(237, 55);
             FrontPanAntennaHeight.Name = "FrontPanAntennaHeight";
             FrontPanAntennaHeight.Size = new Size(167, 43);
             FrontPanAntennaHeight.TabIndex = 58;
@@ -852,7 +882,7 @@
             // 
             FrontPanAntennaHeightLabel.AutoSize = true;
             FrontPanAntennaHeightLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanAntennaHeightLabel.Location = new Point(9, 53);
+            FrontPanAntennaHeightLabel.Location = new Point(9, 63);
             FrontPanAntennaHeightLabel.Name = "FrontPanAntennaHeightLabel";
             FrontPanAntennaHeightLabel.Size = new Size(222, 25);
             FrontPanAntennaHeightLabel.TabIndex = 57;
@@ -861,6 +891,9 @@
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
+            tabPage1.Controls.Add(panel2);
+            tabPage1.Controls.Add(RearPanEndofFilling);
+            tabPage1.Controls.Add(RearPanEndofFillingLabel);
             tabPage1.Controls.Add(label9);
             tabPage1.Controls.Add(RearPanBladeDistanceToFrontBlade);
             tabPage1.Controls.Add(RearPanBladeDistanceToFrontBladeLabel);
@@ -900,11 +933,61 @@
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
             // 
+            // RearPanEndofFilling
+            // 
+            RearPanEndofFilling.DropDownStyle = ComboBoxStyle.DropDownList;
+            RearPanEndofFilling.Font = new Font("Segoe UI", 14F);
+            RearPanEndofFilling.FormattingEnabled = true;
+            RearPanEndofFilling.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
+            RearPanEndofFilling.Location = new Point(239, 143);
+            RearPanEndofFilling.Name = "RearPanEndofFilling";
+            RearPanEndofFilling.Size = new Size(366, 33);
+            RearPanEndofFilling.TabIndex = 111;
+            // 
+            // RearPanEndofFillingLabel
+            // 
+            RearPanEndofFillingLabel.AutoSize = true;
+            RearPanEndofFillingLabel.Font = new Font("Segoe UI", 14F);
+            RearPanEndofFillingLabel.Location = new Point(107, 146);
+            RearPanEndofFillingLabel.Name = "RearPanEndofFillingLabel";
+            RearPanEndofFillingLabel.Size = new Size(126, 25);
+            RearPanEndofFillingLabel.TabIndex = 110;
+            RearPanEndofFillingLabel.Text = "End of Filling:";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 14F);
+            label9.Location = new Point(411, 327);
+            label9.Name = "label9";
+            label9.Size = new Size(44, 25);
+            label9.TabIndex = 109;
+            label9.Text = "mm";
+            // 
+            // RearPanBladeDistanceToFrontBlade
+            // 
+            RearPanBladeDistanceToFrontBlade.Location = new Point(236, 319);
+            RearPanBladeDistanceToFrontBlade.Name = "RearPanBladeDistanceToFrontBlade";
+            RearPanBladeDistanceToFrontBlade.Size = new Size(167, 43);
+            RearPanBladeDistanceToFrontBlade.TabIndex = 108;
+            RearPanBladeDistanceToFrontBlade.Unsigned = true;
+            RearPanBladeDistanceToFrontBlade.Value = 0;
+            // 
+            // RearPanBladeDistanceToFrontBladeLabel
+            // 
+            RearPanBladeDistanceToFrontBladeLabel.AutoSize = true;
+            RearPanBladeDistanceToFrontBladeLabel.Font = new Font("Segoe UI", 14F);
+            RearPanBladeDistanceToFrontBladeLabel.Location = new Point(7, 327);
+            RearPanBladeDistanceToFrontBladeLabel.Name = "RearPanBladeDistanceToFrontBladeLabel";
+            RearPanBladeDistanceToFrontBladeLabel.Size = new Size(223, 25);
+            RearPanBladeDistanceToFrontBladeLabel.TabIndex = 107;
+            RearPanBladeDistanceToFrontBladeLabel.Text = "Blade Dist to Front Blade:";
+            // 
             // RearPanAutoCutWhenFrontStopsLabel
             // 
             RearPanAutoCutWhenFrontStopsLabel.AutoSize = true;
             RearPanAutoCutWhenFrontStopsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanAutoCutWhenFrontStopsLabel.Location = new Point(364, 234);
+            RearPanAutoCutWhenFrontStopsLabel.Location = new Point(361, 283);
             RearPanAutoCutWhenFrontStopsLabel.Name = "RearPanAutoCutWhenFrontStopsLabel";
             RearPanAutoCutWhenFrontStopsLabel.Size = new Size(244, 25);
             RearPanAutoCutWhenFrontStopsLabel.TabIndex = 106;
@@ -916,7 +999,7 @@
             RearPanAutoCutWhenFrontStops.Font = new Font("Segoe UI", 14F);
             RearPanAutoCutWhenFrontStops.FormattingEnabled = true;
             RearPanAutoCutWhenFrontStops.Items.AddRange(new object[] { "No", "Yes" });
-            RearPanAutoCutWhenFrontStops.Location = new Point(614, 231);
+            RearPanAutoCutWhenFrontStops.Location = new Point(611, 280);
             RearPanAutoCutWhenFrontStops.Name = "RearPanAutoCutWhenFrontStops";
             RearPanAutoCutWhenFrontStops.Size = new Size(74, 33);
             RearPanAutoCutWhenFrontStops.TabIndex = 105;
@@ -925,7 +1008,7 @@
             // 
             RearPanMaxHeightLabel.AutoSize = true;
             RearPanMaxHeightLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxHeightLabel.Location = new Point(492, 190);
+            RearPanMaxHeightLabel.Location = new Point(489, 239);
             RearPanMaxHeightLabel.Name = "RearPanMaxHeightLabel";
             RearPanMaxHeightLabel.Size = new Size(113, 25);
             RearPanMaxHeightLabel.TabIndex = 104;
@@ -935,7 +1018,7 @@
             // 
             RearPanStopCuttingWhenFullLabel.AutoSize = true;
             RearPanStopCuttingWhenFullLabel.Font = new Font("Segoe UI", 14F);
-            RearPanStopCuttingWhenFullLabel.Location = new Point(21, 234);
+            RearPanStopCuttingWhenFullLabel.Location = new Point(18, 283);
             RearPanStopCuttingWhenFullLabel.Name = "RearPanStopCuttingWhenFullLabel";
             RearPanStopCuttingWhenFullLabel.Size = new Size(210, 25);
             RearPanStopCuttingWhenFullLabel.TabIndex = 103;
@@ -947,7 +1030,7 @@
             RearPanStopCuttingWhenFull.Font = new Font("Segoe UI", 14F);
             RearPanStopCuttingWhenFull.FormattingEnabled = true;
             RearPanStopCuttingWhenFull.Items.AddRange(new object[] { "No", "Yes" });
-            RearPanStopCuttingWhenFull.Location = new Point(242, 231);
+            RearPanStopCuttingWhenFull.Location = new Point(239, 280);
             RearPanStopCuttingWhenFull.Name = "RearPanStopCuttingWhenFull";
             RearPanStopCuttingWhenFull.Size = new Size(74, 33);
             RearPanStopCuttingWhenFull.TabIndex = 102;
@@ -956,7 +1039,7 @@
             // 
             RearPanMaxFillDepthUnitsLabel.AutoSize = true;
             RearPanMaxFillDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxFillDepthUnitsLabel.Location = new Point(784, 141);
+            RearPanMaxFillDepthUnitsLabel.Location = new Point(784, 190);
             RearPanMaxFillDepthUnitsLabel.Name = "RearPanMaxFillDepthUnitsLabel";
             RearPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
             RearPanMaxFillDepthUnitsLabel.TabIndex = 101;
@@ -964,7 +1047,7 @@
             // 
             // RearPanMaxFillDepth
             // 
-            RearPanMaxFillDepth.Location = new Point(611, 133);
+            RearPanMaxFillDepth.Location = new Point(609, 182);
             RearPanMaxFillDepth.Name = "RearPanMaxFillDepth";
             RearPanMaxFillDepth.Size = new Size(167, 43);
             RearPanMaxFillDepth.TabIndex = 100;
@@ -975,7 +1058,7 @@
             // 
             RearPanMaxFillDepthLabel.AutoSize = true;
             RearPanMaxFillDepthLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxFillDepthLabel.Location = new Point(468, 141);
+            RearPanMaxFillDepthLabel.Location = new Point(466, 190);
             RearPanMaxFillDepthLabel.Name = "RearPanMaxFillDepthLabel";
             RearPanMaxFillDepthLabel.Size = new Size(137, 25);
             RearPanMaxFillDepthLabel.TabIndex = 99;
@@ -985,7 +1068,7 @@
             // 
             RearPanCapacityUnitsLabel.AutoSize = true;
             RearPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanCapacityUnitsLabel.Location = new Point(415, 190);
+            RearPanCapacityUnitsLabel.Location = new Point(412, 239);
             RearPanCapacityUnitsLabel.Name = "RearPanCapacityUnitsLabel";
             RearPanCapacityUnitsLabel.Size = new Size(35, 25);
             RearPanCapacityUnitsLabel.TabIndex = 98;
@@ -993,7 +1076,7 @@
             // 
             // RearPanCapacity
             // 
-            RearPanCapacity.Location = new Point(239, 182);
+            RearPanCapacity.Location = new Point(236, 231);
             RearPanCapacity.Name = "RearPanCapacity";
             RearPanCapacity.Size = new Size(167, 43);
             RearPanCapacity.TabIndex = 97;
@@ -1004,7 +1087,7 @@
             // 
             RearPanCapacityLabel.AutoSize = true;
             RearPanCapacityLabel.Font = new Font("Segoe UI", 14F);
-            RearPanCapacityLabel.Location = new Point(145, 190);
+            RearPanCapacityLabel.Location = new Point(142, 239);
             RearPanCapacityLabel.Name = "RearPanCapacityLabel";
             RearPanCapacityLabel.Size = new Size(88, 25);
             RearPanCapacityLabel.TabIndex = 96;
@@ -1016,7 +1099,7 @@
             groupBox6.Controls.Add(RearBladeIntegralMulLabel);
             groupBox6.Controls.Add(RearBladeIntegralMultiplier);
             groupBox6.Controls.Add(RearBladeDeadbandLabel);
-            groupBox6.Location = new Point(6, 489);
+            groupBox6.Location = new Point(6, 538);
             groupBox6.Name = "groupBox6";
             groupBox6.Size = new Size(970, 79);
             groupBox6.TabIndex = 92;
@@ -1069,7 +1152,7 @@
             groupBox5.Controls.Add(RearBladePWMMinDown);
             groupBox5.Controls.Add(RearBladePWMMaxDownLabel);
             groupBox5.Controls.Add(RearBladePWMMaxDown);
-            groupBox5.Location = new Point(9, 404);
+            groupBox5.Location = new Point(9, 453);
             groupBox5.Name = "groupBox5";
             groupBox5.Size = new Size(967, 79);
             groupBox5.TabIndex = 91;
@@ -1141,7 +1224,7 @@
             groupBox4.Controls.Add(RearBladePWMMinUp);
             groupBox4.Controls.Add(RearBladePWMMaxUpLabel);
             groupBox4.Controls.Add(RearBladePWMMaxUp);
-            groupBox4.Location = new Point(9, 319);
+            groupBox4.Location = new Point(9, 368);
             groupBox4.Name = "groupBox4";
             groupBox4.Size = new Size(967, 79);
             groupBox4.TabIndex = 90;
@@ -1209,7 +1292,7 @@
             // 
             RearPanMaxCutDepthUnitsLabel.AutoSize = true;
             RearPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxCutDepthUnitsLabel.Location = new Point(414, 141);
+            RearPanMaxCutDepthUnitsLabel.Location = new Point(412, 190);
             RearPanMaxCutDepthUnitsLabel.Name = "RearPanMaxCutDepthUnitsLabel";
             RearPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
             RearPanMaxCutDepthUnitsLabel.TabIndex = 89;
@@ -1219,7 +1302,7 @@
             // 
             RearPanEquippedLabel.AutoSize = true;
             RearPanEquippedLabel.Font = new Font("Segoe UI", 14F);
-            RearPanEquippedLabel.Location = new Point(137, 10);
+            RearPanEquippedLabel.Location = new Point(137, 20);
             RearPanEquippedLabel.Name = "RearPanEquippedLabel";
             RearPanEquippedLabel.Size = new Size(96, 25);
             RearPanEquippedLabel.TabIndex = 86;
@@ -1227,7 +1310,7 @@
             // 
             // RearPanMaxCutDepth
             // 
-            RearPanMaxCutDepth.Location = new Point(238, 133);
+            RearPanMaxCutDepth.Location = new Point(236, 182);
             RearPanMaxCutDepth.Name = "RearPanMaxCutDepth";
             RearPanMaxCutDepth.Size = new Size(167, 43);
             RearPanMaxCutDepth.TabIndex = 88;
@@ -1238,7 +1321,7 @@
             // 
             RearPanMaxCutDepthLabel.AutoSize = true;
             RearPanMaxCutDepthLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxCutDepthLabel.Location = new Point(91, 141);
+            RearPanMaxCutDepthLabel.Location = new Point(89, 190);
             RearPanMaxCutDepthLabel.Name = "RearPanMaxCutDepthLabel";
             RearPanMaxCutDepthLabel.Size = new Size(142, 25);
             RearPanMaxCutDepthLabel.TabIndex = 87;
@@ -1250,7 +1333,7 @@
             RearPanEquipped.Font = new Font("Segoe UI", 14F);
             RearPanEquipped.FormattingEnabled = true;
             RearPanEquipped.Items.AddRange(new object[] { "No", "Yes" });
-            RearPanEquipped.Location = new Point(239, 6);
+            RearPanEquipped.Location = new Point(239, 16);
             RearPanEquipped.Name = "RearPanEquipped";
             RearPanEquipped.Size = new Size(74, 33);
             RearPanEquipped.TabIndex = 85;
@@ -1259,7 +1342,7 @@
             // 
             RearPanMaxHeightUnitsLabel.AutoSize = true;
             RearPanMaxHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxHeightUnitsLabel.Location = new Point(784, 190);
+            RearPanMaxHeightUnitsLabel.Location = new Point(783, 239);
             RearPanMaxHeightUnitsLabel.Name = "RearPanMaxHeightUnitsLabel";
             RearPanMaxHeightUnitsLabel.Size = new Size(44, 25);
             RearPanMaxHeightUnitsLabel.TabIndex = 84;
@@ -1267,7 +1350,7 @@
             // 
             // RearPanMaxHeight
             // 
-            RearPanMaxHeight.Location = new Point(611, 182);
+            RearPanMaxHeight.Location = new Point(608, 231);
             RearPanMaxHeight.Name = "RearPanMaxHeight";
             RearPanMaxHeight.Size = new Size(167, 43);
             RearPanMaxHeight.TabIndex = 83;
@@ -1280,7 +1363,7 @@
             RearPanEndofCutting.Font = new Font("Segoe UI", 14F);
             RearPanEndofCutting.FormattingEnabled = true;
             RearPanEndofCutting.Items.AddRange(new object[] { "Float on surface", "Raise to max height" });
-            RearPanEndofCutting.Location = new Point(239, 94);
+            RearPanEndofCutting.Location = new Point(239, 104);
             RearPanEndofCutting.Name = "RearPanEndofCutting";
             RearPanEndofCutting.Size = new Size(366, 33);
             RearPanEndofCutting.TabIndex = 82;
@@ -1289,7 +1372,7 @@
             // 
             RearPanEndofCuttingLabel.AutoSize = true;
             RearPanEndofCuttingLabel.Font = new Font("Segoe UI", 14F);
-            RearPanEndofCuttingLabel.Location = new Point(96, 98);
+            RearPanEndofCuttingLabel.Location = new Point(96, 108);
             RearPanEndofCuttingLabel.Name = "RearPanEndofCuttingLabel";
             RearPanEndofCuttingLabel.Size = new Size(137, 25);
             RearPanEndofCuttingLabel.TabIndex = 81;
@@ -1299,7 +1382,7 @@
             // 
             RearPanWidthUnitsLabel.AutoSize = true;
             RearPanWidthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanWidthUnitsLabel.Location = new Point(784, 53);
+            RearPanWidthUnitsLabel.Location = new Point(784, 63);
             RearPanWidthUnitsLabel.Name = "RearPanWidthUnitsLabel";
             RearPanWidthUnitsLabel.Size = new Size(44, 25);
             RearPanWidthUnitsLabel.TabIndex = 80;
@@ -1307,7 +1390,7 @@
             // 
             // RearPanWidth
             // 
-            RearPanWidth.Location = new Point(611, 45);
+            RearPanWidth.Location = new Point(611, 55);
             RearPanWidth.Name = "RearPanWidth";
             RearPanWidth.Size = new Size(167, 43);
             RearPanWidth.TabIndex = 79;
@@ -1318,7 +1401,7 @@
             // 
             RearPanWidthLabel.AutoSize = true;
             RearPanWidthLabel.Font = new Font("Segoe UI", 14F);
-            RearPanWidthLabel.Location = new Point(538, 53);
+            RearPanWidthLabel.Location = new Point(538, 63);
             RearPanWidthLabel.Name = "RearPanWidthLabel";
             RearPanWidthLabel.Size = new Size(67, 25);
             RearPanWidthLabel.TabIndex = 78;
@@ -1328,7 +1411,7 @@
             // 
             RearPanAntennaHeightUnitsLabel.AutoSize = true;
             RearPanAntennaHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanAntennaHeightUnitsLabel.Location = new Point(412, 53);
+            RearPanAntennaHeightUnitsLabel.Location = new Point(412, 63);
             RearPanAntennaHeightUnitsLabel.Name = "RearPanAntennaHeightUnitsLabel";
             RearPanAntennaHeightUnitsLabel.Size = new Size(44, 25);
             RearPanAntennaHeightUnitsLabel.TabIndex = 77;
@@ -1336,7 +1419,7 @@
             // 
             // RearPanAntennaHeight
             // 
-            RearPanAntennaHeight.Location = new Point(237, 45);
+            RearPanAntennaHeight.Location = new Point(237, 55);
             RearPanAntennaHeight.Name = "RearPanAntennaHeight";
             RearPanAntennaHeight.Size = new Size(167, 43);
             RearPanAntennaHeight.TabIndex = 76;
@@ -1347,7 +1430,7 @@
             // 
             RearPanAntennaHeightLabel.AutoSize = true;
             RearPanAntennaHeightLabel.Font = new Font("Segoe UI", 14F);
-            RearPanAntennaHeightLabel.Location = new Point(9, 53);
+            RearPanAntennaHeightLabel.Location = new Point(9, 63);
             RearPanAntennaHeightLabel.Name = "RearPanAntennaHeightLabel";
             RearPanAntennaHeightLabel.Size = new Size(222, 25);
             RearPanAntennaHeightLabel.TabIndex = 75;
@@ -1395,34 +1478,23 @@
             label8.TabIndex = 57;
             label8.Text = "Cutting/Filling Min Bin Coverage:";
             // 
-            // label9
+            // panel1
             // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(414, 278);
-            label9.Name = "label9";
-            label9.Size = new Size(44, 25);
-            label9.TabIndex = 109;
-            label9.Text = "mm";
+            panel1.BackColor = Color.RoyalBlue;
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(976, 7);
+            panel1.TabIndex = 104;
             // 
-            // RearPanBladeDistanceToFrontBlade
+            // panel2
             // 
-            RearPanBladeDistanceToFrontBlade.Location = new Point(239, 270);
-            RearPanBladeDistanceToFrontBlade.Name = "RearPanBladeDistanceToFrontBlade";
-            RearPanBladeDistanceToFrontBlade.Size = new Size(167, 43);
-            RearPanBladeDistanceToFrontBlade.TabIndex = 108;
-            RearPanBladeDistanceToFrontBlade.Unsigned = true;
-            RearPanBladeDistanceToFrontBlade.Value = 0;
-            // 
-            // RearPanBladeDistanceToFrontBladeLabel
-            // 
-            RearPanBladeDistanceToFrontBladeLabel.AutoSize = true;
-            RearPanBladeDistanceToFrontBladeLabel.Font = new Font("Segoe UI", 14F);
-            RearPanBladeDistanceToFrontBladeLabel.Location = new Point(10, 278);
-            RearPanBladeDistanceToFrontBladeLabel.Name = "RearPanBladeDistanceToFrontBladeLabel";
-            RearPanBladeDistanceToFrontBladeLabel.Size = new Size(223, 25);
-            RearPanBladeDistanceToFrontBladeLabel.TabIndex = 107;
-            RearPanBladeDistanceToFrontBladeLabel.Text = "Blade Dist to Front Blade:";
+            panel2.BackColor = Color.DarkGoldenrod;
+            panel2.Dock = DockStyle.Top;
+            panel2.Location = new Point(3, 3);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(976, 7);
+            panel2.TabIndex = 112;
             // 
             // EquipmentEditor
             // 
@@ -1578,5 +1650,11 @@
         private Label label9;
         private NumericInput RearPanBladeDistanceToFrontBlade;
         private Label RearPanBladeDistanceToFrontBladeLabel;
+        private ComboBox FrontPanEndofFilling;
+        private Label FrontPanEndofFillingLabel;
+        private ComboBox RearPanEndofFilling;
+        private Label RearPanEndofFillingLabel;
+        private Panel panel1;
+        private Panel panel2;
     }
 }

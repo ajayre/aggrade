@@ -30,6 +30,8 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             panel3 = new Panel();
+            RearPanIndicator = new Panel();
+            FrontPanIndicator = new Panel();
             ZoomFitBtn = new Button();
             ZoomInBtn = new Button();
             ZoomOutBtn = new Button();
@@ -52,6 +54,8 @@
             // 
             // panel3
             // 
+            panel3.Controls.Add(RearPanIndicator);
+            panel3.Controls.Add(FrontPanIndicator);
             panel3.Controls.Add(ZoomFitBtn);
             panel3.Controls.Add(ZoomInBtn);
             panel3.Controls.Add(ZoomOutBtn);
@@ -62,6 +66,26 @@
             panel3.Name = "panel3";
             panel3.Size = new Size(76, 740);
             panel3.TabIndex = 2;
+            // 
+            // RearPanIndicator
+            // 
+            RearPanIndicator.BackColor = Color.DarkGoldenrod;
+            RearPanIndicator.BackgroundImage = (Image)resources.GetObject("RearPanIndicator.BackgroundImage");
+            RearPanIndicator.BackgroundImageLayout = ImageLayout.Center;
+            RearPanIndicator.Location = new Point(8, 273);
+            RearPanIndicator.Name = "RearPanIndicator";
+            RearPanIndicator.Size = new Size(60, 60);
+            RearPanIndicator.TabIndex = 10;
+            // 
+            // FrontPanIndicator
+            // 
+            FrontPanIndicator.BackColor = Color.RoyalBlue;
+            FrontPanIndicator.BackgroundImage = (Image)resources.GetObject("FrontPanIndicator.BackgroundImage");
+            FrontPanIndicator.BackgroundImageLayout = ImageLayout.Center;
+            FrontPanIndicator.Location = new Point(8, 207);
+            FrontPanIndicator.Name = "FrontPanIndicator";
+            FrontPanIndicator.Size = new Size(60, 60);
+            FrontPanIndicator.TabIndex = 9;
             // 
             // ZoomFitBtn
             // 
@@ -263,5 +287,7 @@
         private Controls.StatusBar StatusBar;
         private Button StatusBtn;
         private Button ZoomFitBtn;
+        private Panel FrontPanIndicator;
+        private Panel RearPanIndicator;
     }
 }

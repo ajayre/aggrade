@@ -748,7 +748,7 @@ namespace AgGrade.Data
                         g.DrawPolygon(HaulArrowPen, Vertices);
                         double lineDirDeg = HaulDir.DirectionDeg - _tractorHeading;
                         (double ldx, double ldy) = DirectionDegreesToVector(lineDirDeg);
-                        int TipLength = 40;
+                        int TipLength = (int)(40 * (CurrentScaleFactor / 13.0));
                         Point lineEnd = new Point(Vertices[0].X + (int)(TipLength * ldx), Vertices[0].Y + (int)(TipLength * ldy));
                         g.DrawLine(HaulArrowTipPen, Vertices[0], lineEnd);
                     }

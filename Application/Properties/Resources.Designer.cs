@@ -63,6 +63,26 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap cut_48px {
+            get {
+                object obj = ResourceManager.GetObject("cut_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap fill_48px {
+            get {
+                object obj = ResourceManager.GetObject("fill_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap led_green_24px {
             get {
                 object obj = ResourceManager.GetObject("led-green_24px", resourceCulture);
