@@ -174,6 +174,16 @@ namespace AgGrade.Controls
             // Parse log data selector (ComboBox: 0 = "No", 1 = "Yes")
             Settings.LogData = LogDataSelector.SelectedIndex == 1;
 
+            // Perse tractor color
+            switch (TractorColorSelector.SelectedIndex)
+            {
+                default:
+                case 0: Settings.TractorColor = AppSettings.TractotColors.Green;  break;
+                case 1: Settings.TractorColor = AppSettings.TractotColors.Red;    break;
+                case 2: Settings.TractorColor = AppSettings.TractotColors.Blue;   break;
+                case 3: Settings.TractorColor = AppSettings.TractotColors.Yellow; break;
+            }
+
             return Settings;
         }
 
@@ -256,6 +266,16 @@ namespace AgGrade.Controls
 
             // Display log data selector
             LogDataSelector.SelectedIndex = Settings.LogData ? 1 : 0;
+
+            // Display tractor color
+            switch (Settings.TractorColor)
+            {
+                default:
+                case AppSettings.TractotColors.Green:  TractorColorSelector.SelectedIndex = 0; break;
+                case AppSettings.TractotColors.Red:    TractorColorSelector.SelectedIndex = 1; break;
+                case AppSettings.TractotColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
+                case AppSettings.TractotColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
+            }
         }
 
         /// <summary>

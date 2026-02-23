@@ -233,6 +233,26 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
+        /// Request the current front blade height
+        /// </summary>
+        public void RequestFrontBladeHeight
+            (
+            )
+        {
+            SendControllerCommand(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT));
+        }
+
+        /// <summary>
+        /// Request the current rear blade height
+        /// </summary>
+        public void RequestRearBladeHeight
+            (
+            )
+        {
+            SendControllerCommand(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT));
+        }
+
+        /// <summary>
         /// Communicates with the controller
         /// </summary>
         private void WorkThread_DoWork()

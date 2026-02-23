@@ -58,7 +58,6 @@ namespace AgGrade.Controls
             InitializeComponent();
 
             MapGen = new MapGenerator();
-            MapGen.TractorColor = MapGenerator.TractorColors.Red;
             MapGen.TractorYOffset = 5;
             MapGen.TractorStyle = MapGenerator.TractorStyles.Arrow;
 
@@ -110,6 +109,15 @@ namespace AgGrade.Controls
             )
         {
             _CurrentAppSettings = Settings;
+
+            switch (_CurrentAppSettings.TractorColor)
+            {
+                case AppSettings.TractotColors.Red: MapGen.TractorColor = MapGenerator.TractorColors.Red; break;
+                default:
+                case AppSettings.TractotColors.Green: MapGen.TractorColor = MapGenerator.TractorColors.Green; break;
+                case AppSettings.TractotColors.Blue: MapGen.TractorColor = MapGenerator.TractorColors.Blue; break;
+                case AppSettings.TractotColors.Yellow: MapGen.TractorColor = MapGenerator.TractorColors.Yellow; break;
+            }
         }
 
         public void SetEquipmentStatus

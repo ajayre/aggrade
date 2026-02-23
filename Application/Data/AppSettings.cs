@@ -12,6 +12,14 @@ namespace AgGrade.Data
 {
     public class AppSettings
     {
+        public enum TractotColors
+        {
+            Red,
+            Blue,
+            Green,
+            Yellow
+        }
+
         [XmlIgnore]
         public IPAddress ControllerAddress;
         public int ControllerPort;
@@ -22,6 +30,7 @@ namespace AgGrade.Data
         public int MagneticDeclinationDegrees;
         public uint MagneticDeclinationMinutes;
         public bool LogData;
+        public TractotColors TractorColor;
 
         // Property for XML serialization of IPAddress
         [XmlElement("ControllerAddress")]
@@ -71,6 +80,7 @@ namespace AgGrade.Data
             MagneticDeclinationDegrees = 0;
             MagneticDeclinationMinutes = 0;
             LogData = true;
+            TractorColor = TractotColors.Green;
         }
 
         /// <summary>
@@ -146,6 +156,7 @@ namespace AgGrade.Data
                         MagneticDeclinationDegrees = loadedSettings.MagneticDeclinationDegrees;
                         MagneticDeclinationMinutes = loadedSettings.MagneticDeclinationMinutes;
                         LogData = loadedSettings.LogData;
+                        TractorColor = loadedSettings.TractorColor;
                     }
                 }
             }

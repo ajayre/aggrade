@@ -213,6 +213,11 @@ namespace AgGrade
             ConfigureController();
 
             DeadReckoner.Start();
+
+            // get the current heights of the blades
+            // this will result in Controller.OnFrontBladeHeightChanged and Controller OnRearBladeHeightChanged being raised
+            Controller.RequestFrontBladeHeight();
+            Controller.RequestRearBladeHeight();
         }
 
         private void Controller_OnControllerLost()
@@ -712,10 +717,6 @@ namespace AgGrade
             // fixme - allow user to choose file to load
             //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4");
             LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft");
-
-            // set initial blade states
-            BladeCtrl.SetFrontToTransportState();
-            BladeCtrl.SetRearToTransportState();
 
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);

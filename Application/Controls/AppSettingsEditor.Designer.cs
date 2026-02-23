@@ -61,6 +61,8 @@
             LocalPortNum = new TextBox();
             label1 = new Label();
             ApplyBtn = new Button();
+            label2 = new Label();
+            TractorColorSelector = new ComboBox();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -374,11 +376,34 @@
             ApplyBtn.UseVisualStyleBackColor = true;
             ApplyBtn.Click += ApplyBtn_Click;
             // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 14F);
+            label2.Location = new Point(85, 287);
+            label2.Name = "label2";
+            label2.Size = new Size(125, 25);
+            label2.TabIndex = 45;
+            label2.Text = "Tractor Color:";
+            // 
+            // TractorColorSelector
+            // 
+            TractorColorSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            TractorColorSelector.Font = new Font("Segoe UI", 14F);
+            TractorColorSelector.FormattingEnabled = true;
+            TractorColorSelector.Items.AddRange(new object[] { "Green", "Red", "Blue", "Yellow" });
+            TractorColorSelector.Location = new Point(216, 284);
+            TractorColorSelector.Name = "TractorColorSelector";
+            TractorColorSelector.Size = new Size(127, 33);
+            TractorColorSelector.TabIndex = 44;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(label2);
+            Controls.Add(TractorColorSelector);
             Controls.Add(ApplyBtn);
             Controls.Add(LocalPortNum);
             Controls.Add(label1);
@@ -412,7 +437,7 @@
             Controls.Add(PowerBtn);
             Controls.Add(sectionTitle1);
             Name = "AppSettingsEditor";
-            Size = new Size(843, 313);
+            Size = new Size(843, 417);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -450,5 +475,7 @@
         private TextBox LocalPortNum;
         private Label label1;
         private Button ApplyBtn;
+        private Label label2;
+        private ComboBox TractorColorSelector;
     }
 }

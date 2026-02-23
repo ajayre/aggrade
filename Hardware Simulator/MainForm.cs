@@ -22,6 +22,8 @@ namespace HardwareSim
         private bool FrontDumping = false;
         private bool RearDumping = false;
         private DateTime? LastRxPingTime = null;
+        private UInt32 FrontBladeHeight = 200;
+        private UInt32 RearBladeHeight = 200;
 
         public MainForm()
         {
@@ -170,13 +172,25 @@ namespace HardwareSim
                     break;
 
                 case PGNValues.PGN_FRONT_CUT_VALVE:
+                    FrontBladeHeight = Command.GetUInt32();
                     // we send back the new blade height
-                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, Command.GetUInt32()));
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, FrontBladeHeight));
                     break;
 
                 case PGNValues.PGN_REAR_CUT_VALVE:
+                    RearBladeHeight = Command.GetUInt32();
                     // we send back the new blade height
-                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, Command.GetUInt32()));
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, RearBladeHeight));
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_HEIGHT:
+                    // send back the current blade height
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, FrontBladeHeight));
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_HEIGHT:
+                    // send back the current blade height
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, RearBladeHeight));
                     break;
             }
         }
