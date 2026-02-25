@@ -126,6 +126,7 @@ namespace AgGrade.Controls
             // parse misc settings
             Settings.MinBinCoveragePcent = ValidateUInt(MinBinCoveragePcent.Value, "Minimum Bin Coverage");
             if (Settings.MinBinCoveragePcent > 100) Settings.MinBinCoveragePcent = 100;
+            Settings.SoilSwellFactor = SoilSwellFactor.Value;
 
             return Settings;
         }
@@ -196,6 +197,7 @@ namespace AgGrade.Controls
 
             // Display misc settings
             MinBinCoveragePcent.Value = (int)Settings.MinBinCoveragePcent;
+            SoilSwellFactor.Value = Settings.SoilSwellFactor;
 
             // Update UI state after displaying settings
             UpdateFrontPanUI();

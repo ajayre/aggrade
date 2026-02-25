@@ -16,8 +16,6 @@ namespace AgGrade
         // how often to attempt to connect to the controller
         private const int CONTROLLER_TRY_CONNECT_PERIOD_MS = 200;
 
-        private const double SOIL_SWELL_FACTOR = 1.3;
-
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
         private EquipmentStatus CurrentEquipmentStatus;
@@ -120,7 +118,7 @@ namespace AgGrade
         private void FieldUpdater_OnRearVolumeCutUpdated(double VolumeBCY)
         {
             // calculate LCY
-            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            double VolumeLCY = VolumeBCY * CurrentEquipmentSettings.SoilSwellFactor;
 
             // update in equipment status
             CurrentEquipmentStatus.RearPan.LoadLCY = VolumeLCY;
@@ -141,7 +139,7 @@ namespace AgGrade
         private void FieldUpdater_OnFrontVolumeCutUpdated(double VolumeBCY)
         {
             // calculate LCY
-            double VolumeLCY = VolumeBCY * SOIL_SWELL_FACTOR;
+            double VolumeLCY = VolumeBCY * CurrentEquipmentSettings.SoilSwellFactor;
 
             // update in equipment status
             CurrentEquipmentStatus.FrontPan.LoadLCY = VolumeLCY;

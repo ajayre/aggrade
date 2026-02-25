@@ -189,6 +189,7 @@ namespace AgGrade.Data
         public BladeConfiguration FrontBlade;
         public BladeConfiguration RearBlade;
         public uint MinBinCoveragePcent;
+        public double SoilSwellFactor;
 
         public EquipmentSettings
             (
@@ -201,6 +202,7 @@ namespace AgGrade.Data
             TractorWidthMm = 0;
 
             MinBinCoveragePcent = 30;
+            SoilSwellFactor = 1.3;
 
             FrontPan = new PanSettings();
             RearPan = new PanSettings();
@@ -248,7 +250,8 @@ namespace AgGrade.Data
                         new XElement("RearPanSettings", RearPan.ToXml().Elements()),
                         new XElement("FrontBladeSettings", FrontBlade.ToXml().Elements()),
                         new XElement("RearBladeSettings", RearBlade.ToXml().Elements()),
-                        new XElement("MinBinCoveragePcent", MinBinCoveragePcent)
+                        new XElement("MinBinCoveragePcent", MinBinCoveragePcent),
+                        new XElement("SoilSwellFactor", SoilSwellFactor)
                     )
                 );
                 
@@ -325,6 +328,13 @@ namespace AgGrade.Data
                 if (minBinCoveragePcentElement != null && uint.TryParse(minBinCoveragePcentElement.Value, out uint minBinCoveragePcent))
                 {
                     MinBinCoveragePcent = minBinCoveragePcent;
+                }
+
+                // Parse SoilSwellFactor
+                XElement? soilSwellFactorElement = root.Element("SoilSwellFactor");
+                if (soilSwellFactorElement != null && double.TryParse(soilSwellFactorElement.Value, out double soilSwellFactor))
+                {
+                    SoilSwellFactor = soilSwellFactor;
                 }
 
                 // Parse FrontPanSettings

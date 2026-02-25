@@ -22,6 +22,9 @@
     <Compile Update="Controls\NumericInput.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\NumericInputF.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\SectionTitle.cs">
       <SubType>UserControl</SubType>
     </Compile>

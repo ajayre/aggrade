@@ -90,3 +90,5 @@
 30. Map showing all cuts and fills (colored according to passes?)
 
 31. SQLite database for all field data
+
+32. Need to make the swell factor configurable

@@ -23,7 +23,6 @@ namespace AgGrade.Controls
         private const int DEFAULT_SCALE_FACTOR = 13;
         private const double ZOOM_FACTOR = 1.3;
         private const int MAX_NAME_LENGTH = 20;
-        private const double SOIL_SWELL_FACTOR = 1.3;
 
         private const string DegreeSymbol = "°";
 

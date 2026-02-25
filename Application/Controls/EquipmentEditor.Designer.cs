@@ -51,6 +51,7 @@
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             tabPage2 = new TabPage();
+            panel1 = new Panel();
             FrontPanEndofFilling = new ComboBox();
             FrontPanEndofFillingLabel = new Label();
             FrontPanMaxHeightLabel = new Label();
@@ -97,6 +98,7 @@
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             tabPage1 = new TabPage();
+            panel2 = new Panel();
             RearPanEndofFilling = new ComboBox();
             RearPanEndofFillingLabel = new Label();
             label9 = new Label();
@@ -148,11 +150,11 @@
             RearPanAntennaHeight = new NumericInput();
             RearPanAntennaHeightLabel = new Label();
             tabPage3 = new TabPage();
+            SoilSwellFactor = new NumericInputF();
+            label17 = new Label();
             label7 = new Label();
             MinBinCoveragePcent = new NumericInput();
             label8 = new Label();
-            panel1 = new Panel();
-            panel2 = new Panel();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             tabPage2.SuspendLayout();
@@ -431,6 +433,15 @@
             tabPage2.Size = new Size(982, 939);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Front Pan";
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.RoyalBlue;
+            panel1.Dock = DockStyle.Top;
+            panel1.Location = new Point(3, 3);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(976, 7);
+            panel1.TabIndex = 104;
             // 
             // FrontPanEndofFilling
             // 
@@ -932,6 +943,15 @@
             tabPage1.Size = new Size(982, 939);
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
+            // 
+            // panel2
+            // 
+            panel2.BackColor = Color.DarkGoldenrod;
+            panel2.Dock = DockStyle.Top;
+            panel2.Location = new Point(3, 3);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(976, 7);
+            panel2.TabIndex = 112;
             // 
             // RearPanEndofFilling
             // 
@@ -1439,6 +1459,8 @@
             // tabPage3
             // 
             tabPage3.BackColor = SystemColors.Control;
+            tabPage3.Controls.Add(SoilSwellFactor);
+            tabPage3.Controls.Add(label17);
             tabPage3.Controls.Add(label7);
             tabPage3.Controls.Add(MinBinCoveragePcent);
             tabPage3.Controls.Add(label8);
@@ -1448,6 +1470,28 @@
             tabPage3.Size = new Size(982, 939);
             tabPage3.TabIndex = 3;
             tabPage3.Text = "Miscellaneous";
+            // 
+            // SoilSwellFactor
+            // 
+            SoilSwellFactor.ButtonChangeAmount = 0.05D;
+            SoilSwellFactor.DecimalPlaces = 2U;
+            SoilSwellFactor.Location = new Point(311, 55);
+            SoilSwellFactor.Maximum = 2D;
+            SoilSwellFactor.Minimum = 1D;
+            SoilSwellFactor.Name = "SoilSwellFactor";
+            SoilSwellFactor.Size = new Size(167, 41);
+            SoilSwellFactor.TabIndex = 61;
+            SoilSwellFactor.Value = 1D;
+            // 
+            // label17
+            // 
+            label17.AutoSize = true;
+            label17.Font = new Font("Segoe UI", 14F);
+            label17.Location = new Point(153, 61);
+            label17.Name = "label17";
+            label17.Size = new Size(152, 25);
+            label17.TabIndex = 60;
+            label17.Text = "Soil Swell Factor:";
             // 
             // label7
             // 
@@ -1477,24 +1521,6 @@
             label8.Size = new Size(291, 25);
             label8.TabIndex = 57;
             label8.Text = "Cutting/Filling Min Bin Coverage:";
-            // 
-            // panel1
-            // 
-            panel1.BackColor = Color.RoyalBlue;
-            panel1.Dock = DockStyle.Top;
-            panel1.Location = new Point(3, 3);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(976, 7);
-            panel1.TabIndex = 104;
-            // 
-            // panel2
-            // 
-            panel2.BackColor = Color.DarkGoldenrod;
-            panel2.Dock = DockStyle.Top;
-            panel2.Location = new Point(3, 3);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(976, 7);
-            panel2.TabIndex = 112;
             // 
             // EquipmentEditor
             // 
@@ -1656,5 +1682,7 @@
         private Label RearPanEndofFillingLabel;
         private Panel panel1;
         private Panel panel2;
+        private Label label17;
+        private NumericInputF SoilSwellFactor;
     }
 }
