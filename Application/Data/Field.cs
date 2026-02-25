@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Microsoft.Data.Sqlite;
 
 namespace AgGrade.Data
 {

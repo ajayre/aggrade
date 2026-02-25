@@ -47,6 +47,7 @@
             ContentPanel = new Panel();
             StatusPanel = new Panel();
             StatusBar = new AgGrade.Controls.StatusBar();
+            OpenFieldBtn = new Button();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
             StatusPanel.SuspendLayout();
@@ -142,6 +143,7 @@
             // 
             // panel1
             // 
+            panel1.Controls.Add(OpenFieldBtn);
             panel1.Controls.Add(StatusBtn);
             panel1.Controls.Add(MapBtn);
             panel1.Controls.Add(SurveyBtn);
@@ -156,9 +158,9 @@
             // 
             // StatusBtn
             // 
-            StatusBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            StatusBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             StatusBtn.Image = (Image)resources.GetObject("StatusBtn.Image");
-            StatusBtn.Location = new Point(8, 476);
+            StatusBtn.Location = new Point(8, 138);
             StatusBtn.Name = "StatusBtn";
             StatusBtn.Size = new Size(60, 60);
             StatusBtn.TabIndex = 6;
@@ -248,6 +250,17 @@
             StatusBar.Size = new Size(893, 26);
             StatusBar.TabIndex = 0;
             // 
+            // OpenFieldBtn
+            // 
+            OpenFieldBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            OpenFieldBtn.Image = (Image)resources.GetObject("OpenFieldBtn.Image");
+            OpenFieldBtn.Location = new Point(8, 476);
+            OpenFieldBtn.Name = "OpenFieldBtn";
+            OpenFieldBtn.Size = new Size(60, 60);
+            OpenFieldBtn.TabIndex = 7;
+            OpenFieldBtn.UseVisualStyleBackColor = true;
+            OpenFieldBtn.Click += OpenFieldBtn_Click;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -289,5 +302,6 @@
         private Button ZoomFitBtn;
         private Panel FrontPanIndicator;
         private Panel RearPanIndicator;
+        private Button OpenFieldBtn;
     }
 }

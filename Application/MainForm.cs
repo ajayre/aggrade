@@ -1539,5 +1539,15 @@ namespace AgGrade
 
             UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
         }
+
+        /// <summary>
+        /// Called when user taps on the button to open a field
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenFieldBtn_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
