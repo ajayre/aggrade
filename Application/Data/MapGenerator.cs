@@ -367,8 +367,6 @@ namespace AgGrade.Data
                 var gridWidth = maxX - minX + 1;
                 var gridHeight = maxY - minY + 1;
 
-                var ExistingElevationGrid = CreateExistingElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
-                var TargetElevationGrid = CreateTargetElevationGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
                 var BinGrid = CreateBinsGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
 
                 // The bin origin is the field coordinate that corresponds to bin grid index 0
@@ -486,9 +484,10 @@ namespace AgGrade.Data
                                         case MapTypes.Elevation:
                                             // Render this tile with extended bounds to include overlap
                                             NewTile.Bitmap = RenderElevationTile(
+                                                BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
-                                                ExistingElevationGrid, minX, minY, gridWidth, gridHeight,
+                                                minX, minY, gridWidth, gridHeight,
                                                 minElevation, maxElevation,
                                                 colorPalette, ShowGrid, ScaleFactor);
                                             break;
@@ -498,7 +497,6 @@ namespace AgGrade.Data
                                                 BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
-                                                ExistingElevationGrid, TargetElevationGrid,
                                                 minX, minY, gridWidth, gridHeight,
                                                 ShowGrid, ScaleFactor);
                                             break;
@@ -1695,40 +1693,6 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Gets the existing elevations of a set of bins
-        /// </summary>
-        /// <param name="bins"></param>
-        /// <param name="minX"></param>
-        /// <param name="maxX"></param>
-        /// <param name="minY"></param>
-        /// <param name="maxY"></param>
-        /// <param name="gridWidth"></param>
-        /// <param name="gridHeight"></param>
-        /// <returns></returns>
-        private double?[,] CreateExistingElevationGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
-        {
-            var elevationGrid = new double?[gridHeight, gridWidth];
-
-            foreach (var bin in bins)
-            {
-                if (bin.ExistingElevationM == 0 && bin.X > 5)
-                {
-                    bin.ExistingElevationM = 0;
-                }
-
-                var x = bin.X - minX;
-                var y = bin.Y - minY;
-
-                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
-                {
-                    elevationGrid[y, x] = bin.ExistingElevationM;
-                }
-            }
-
-            return elevationGrid;
-        }
-
-        /// <summary>
         /// Organizes the bins into a grid
         /// </summary>
         /// <param name="bins"></param>
@@ -1758,40 +1722,6 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Gets the target elevations of a set of bins
-        /// </summary>
-        /// <param name="bins"></param>
-        /// <param name="minX"></param>
-        /// <param name="maxX"></param>
-        /// <param name="minY"></param>
-        /// <param name="maxY"></param>
-        /// <param name="gridWidth"></param>
-        /// <param name="gridHeight"></param>
-        /// <returns></returns>
-        private double?[,] CreateTargetElevationGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
-        {
-            var elevationGrid = new double?[gridHeight, gridWidth];
-
-            foreach (var bin in bins)
-            {
-                if (bin.TargetElevationM == 0 && bin.X > 5)
-                {
-                    bin.TargetElevationM = 0;
-                }
-
-                var x = bin.X - minX;
-                var y = bin.Y - minY;
-
-                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
-                {
-                    elevationGrid[y, x] = bin.TargetElevationM;
-                }
-            }
-
-            return elevationGrid;
-        }
-
-        /// <summary>
         /// Renders a single tile of the cut/fill map
         /// </summary>
         /// <param name="BinGrid">2D grid of bins</param>
@@ -1801,8 +1731,6 @@ namespace AgGrade.Data
         /// <param name="tileHeight">Height of tile in pixels</param>
         /// <param name="mapWidthpx">Total map width in pixels</param>
         /// <param name="mapHeightpx">Total map height in pixels</param>
-        /// <param name="ExistingElevationGrid">Existing elevation grid data</param>
-        /// <param name="TargetElevationGrid">Target elevation grid data</param>
         /// <param name="minX">Minimum X bin index</param>
         /// <param name="minY">Minimum Y bin index</param>
         /// <param name="gridWidth">Width of elevation grid</param>
@@ -1819,8 +1747,6 @@ namespace AgGrade.Data
             int tileHeight,
             int mapWidthpx,
             int mapHeightpx,
-            double?[,] ExistingElevationGrid,
-            double?[,] TargetElevationGrid,
             int minX,
             int minY,
             int gridWidth,
@@ -1871,8 +1797,8 @@ namespace AgGrade.Data
 
                         if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
                         {
-                            var ExistingElevation = ExistingElevationGrid[gridY, gridX];
-                            var TargetElevation = TargetElevationGrid[gridY, gridX];
+                            var ExistingElevation = BinGrid[gridY, gridX]?.ExistingElevationM;
+                            var TargetElevation = BinGrid[gridY, gridX]?.TargetElevationM;
 
                             var CutNum = BinGrid[gridY, gridX]?.NumberOfCuts;
                             var FillNum = BinGrid[gridY, gridX]?.NumberofFills;
@@ -2019,13 +1945,13 @@ namespace AgGrade.Data
         /// <summary>
         /// Renders a single tile of the elevation map
         /// </summary>
+        /// <param name="BinGrid">2D grid of bins</param>
         /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
         /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
         /// <param name="tileWidth">Width of tile in pixels</param>
         /// <param name="tileHeight">Height of tile in pixels</param>
         /// <param name="mapWidthpx">Total map width in pixels</param>
         /// <param name="mapHeightpx">Total map height in pixels</param>
-        /// <param name="ExistingElevationGrid">Existing elevation grid data</param>
         /// <param name="minX">Minimum X bin index</param>
         /// <param name="minY">Minimum Y bin index</param>
         /// <param name="gridWidth">Width of elevation grid</param>
@@ -2038,13 +1964,13 @@ namespace AgGrade.Data
         /// <returns>Rendered tile bitmap</returns>
         private Bitmap RenderElevationTile
             (
+            Bin?[,] BinGrid,
             int tileStartX,
             int tileStartY,
             int tileWidth,
             int tileHeight,
             int mapWidthpx,
             int mapHeightpx,
-            double?[,] ExistingElevationGrid,
             int minX,
             int minY,
             int gridWidth,
@@ -2098,7 +2024,7 @@ namespace AgGrade.Data
 
                         if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
                         {
-                            var elevation = ExistingElevationGrid[gridY, gridX];
+                            var elevation = BinGrid[gridY, gridX]?.ExistingElevationM;
 
                             if (elevation.HasValue && elevation.Value != 0.0)
                             {
