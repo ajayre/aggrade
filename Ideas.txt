@@ -90,3 +90,22 @@
 30. Map showing all cuts and fills (colored according to passes?)
 
 31. SQLite database for all field data
+ - table with current field state (bin heights)
+ - table with history of bin height changes
+   - timestamp
+   - bin id
+   - height change
+ - table with event history
+   - positions
+   - headings
+   - speed
+   - blade height
+   - blade state - cutting/filling/etc
+   - one entry per change with timestamp
+   - columns
+     - timestamp
+	 - action (tractorpos, speed, frontbladeheight, etc)
+	 - data (lat/lon, heightmm, etc)
+ - table with x/y/z calibration data
+
+32. Save map display settings between starts
