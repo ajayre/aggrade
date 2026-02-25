@@ -200,11 +200,16 @@ namespace AgGrade.Data
                             FrontAccumulatedStartLeft = first.Left;
                             FrontAccumulatedStartRight = first.Right;
                         }
-                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
-                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                        foreach (Bin B in BinsToCut)
+                        TrimAccumulatorToMaxDistance(ref FrontAccumulatedStartLeft, ref FrontAccumulatedStartRight, FrontAccumulatedEnds,
+                            CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                        if (FrontAccumulatedStartLeft != null && FrontAccumulatedStartRight != null && FrontAccumulatedEnds.Count > 0)
                         {
-                            FrontCutBin(B);
+                            List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
+                            List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
+                            foreach (Bin B in BinsToCut)
+                            {
+                                FrontCutBin(B);
+                            }
                         }
                     }
 
@@ -259,11 +264,16 @@ namespace AgGrade.Data
                             RearAccumulatedStartLeft = first.Left;
                             RearAccumulatedStartRight = first.Right;
                         }
-                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
-                        List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                        foreach (Bin B in BinsToCut)
+                        TrimAccumulatorToMaxDistance(ref RearAccumulatedStartLeft, ref RearAccumulatedStartRight, RearAccumulatedEnds,
+                            CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
+                        if (RearAccumulatedStartLeft != null && RearAccumulatedStartRight != null && RearAccumulatedEnds.Count > 0)
                         {
-                            RearCutBin(B);
+                            List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
+                            List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
+                            foreach (Bin B in BinsToCut)
+                            {
+                                RearCutBin(B);
+                            }
                         }
                     }
 
@@ -318,11 +328,16 @@ namespace AgGrade.Data
                             FrontAccumulatedStartLeft = first.Left;
                             FrontAccumulatedStartRight = first.Right;
                         }
-                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
-                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                        foreach (Bin B in BinsToFill)
+                        TrimAccumulatorToMaxDistance(ref FrontAccumulatedStartLeft, ref FrontAccumulatedStartRight, FrontAccumulatedEnds,
+                            CurrentEquipmentStatus.FrontPan.Fix.Latitude, CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                        if (FrontAccumulatedStartLeft != null && FrontAccumulatedStartRight != null && FrontAccumulatedEnds.Count > 0)
                         {
-                            FrontFillBin(B);
+                            List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
+                            List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
+                            foreach (Bin B in BinsToFill)
+                            {
+                                FrontFillBin(B);
+                            }
                         }
                     }
 
@@ -377,11 +392,16 @@ namespace AgGrade.Data
                             RearAccumulatedStartLeft = first.Left;
                             RearAccumulatedStartRight = first.Right;
                         }
-                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
-                        List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                        foreach (Bin B in BinsToFill)
+                        TrimAccumulatorToMaxDistance(ref RearAccumulatedStartLeft, ref RearAccumulatedStartRight, RearAccumulatedEnds,
+                            CurrentEquipmentStatus.RearPan.Fix.Latitude, CurrentEquipmentStatus.RearPan.Fix.Longitude);
+                        if (RearAccumulatedStartLeft != null && RearAccumulatedStartRight != null && RearAccumulatedEnds.Count > 0)
                         {
-                            RearFillBin(B);
+                            List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
+                            List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
+                            foreach (Bin B in BinsToFill)
+                            {
+                                RearFillBin(B);
+                            }
                         }
                     }
 
@@ -560,6 +580,26 @@ namespace AgGrade.Data
                         }
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// Trims the accumulator so it does not extend more than RECUT_MIN_BLADE_BIN_DISTANCE_M behind the blade.
+        /// Prevents bins that have been culled from FrontProcessedBins from being included in the swept polygon and cut again.
+        /// </summary>
+        private static void TrimAccumulatorToMaxDistance(ref Coordinate? startLeft, ref Coordinate? startRight, List<(Coordinate Right, Coordinate Left)> ends, double bladeLat, double bladeLon)
+        {
+            while (ends.Count > 1 && startLeft != null && startRight != null)
+            {
+                double startMidLat = (startLeft.Latitude + startRight.Latitude) / 2.0;
+                double startMidLon = (startLeft.Longitude + startRight.Longitude) / 2.0;
+                double d = Haversine.Distance(startMidLat, startMidLon, bladeLat, bladeLon);
+                if (d <= RECUT_MIN_BLADE_BIN_DISTANCE_M)
+                    break;
+                var first = ends[0];
+                ends.RemoveAt(0);
+                startLeft = first.Left;
+                startRight = first.Right;
             }
         }
 
