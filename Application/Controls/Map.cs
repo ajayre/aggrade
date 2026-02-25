@@ -220,22 +220,22 @@ namespace AgGrade.Controls
         }
 
         // fixme - remove
-        private long LastPerf = 0;
+        //private long LastPerf = 0;
 
         private void RefreshMap
             (
             )
         {
             // fixme - remove debug code
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            //Stopwatch sw = new Stopwatch();
+            //sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
                 ShowHaulArrows, MapType, TractorStyle);
-            sw.Stop();
-            LastPerf = sw.ElapsedMilliseconds;
-            ShowPerf();
+            //sw.Stop();
+            //LastPerf = sw.ElapsedMilliseconds;
+            //ShowPerf();
 
             FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
             RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
@@ -251,7 +251,7 @@ namespace AgGrade.Controls
         }
 
         // fixme - remove
-        private void ShowPerf()
+        /*private void ShowPerf()
         {
             if (InvokeRequired)
             {
@@ -259,7 +259,7 @@ namespace AgGrade.Controls
                 return;
             }
             FieldNameLabel.Text = LastPerf.ToString();
-        }
+        }*/
 
         /// <summary>
         /// Zooms the map to fit

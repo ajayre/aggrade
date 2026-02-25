@@ -1771,6 +1771,9 @@ namespace AgGrade.Data
                 // Allocate buffer for one row of pixel data (BGRA format)
                 byte[] rowData = new byte[bytesPerRow];
 
+                // Precompute pixel-to-bin conversion (unrotated map space, matches PixelToBin with Heading=0)
+                double pixelsPerBin = CurrentScaleFactor * Field.BIN_SIZE_M;
+
                 // Write pixel data directly to bitmap memory
                 for (int y = 0; y < tileHeight; y++)
                 {
@@ -1785,13 +1788,11 @@ namespace AgGrade.Data
                         // Map X coordinate (relative to map origin)
                         int mapX = tileStartX + x;
 
-                        // Convert pixel coordinates to bin grid indices (using map coordinates)
-                        // No rotation here because we haven't rotated the map yet
-                        Point BinPoint = PixelToBin(mapX, mapY, 0);
-
-                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
-                        int gridX = BinPoint.X - minX;
-                        int gridY = BinPoint.Y - minY;
+                        // Inlined pixel-to-bin: same as PixelToBin(mapX, mapY, 0) without allocations
+                        int binGridX = (int)Math.Floor(mapX / pixelsPerBin);
+                        int binGridY = (int)Math.Floor((CurrentField.FieldMaxY - mapY / CurrentScaleFactor - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
+                        int gridX = binGridX - minX;
+                        int gridY = binGridY - minY;
 
                         byte r, g, b, a;
 
@@ -1998,6 +1999,9 @@ namespace AgGrade.Data
                 // Allocate buffer for one row of pixel data (BGRA format)
                 byte[] rowData = new byte[bytesPerRow];
 
+                // Precompute pixel-to-bin conversion (unrotated map space, matches PixelToBin with Heading=0)
+                double pixelsPerBin = CurrentScaleFactor * Field.BIN_SIZE_M;
+
                 // Write pixel data directly to bitmap memory
                 for (int y = 0; y < tileHeight; y++)
                 {
@@ -2012,13 +2016,11 @@ namespace AgGrade.Data
                         // Map X coordinate (relative to map origin)
                         int mapX = tileStartX + x;
 
-                        // Convert pixel coordinates to bin grid indices (using map coordinates)
-                        // No rotation here because we haven't rotated the map yet
-                        Point BinPoint = PixelToBin(mapX, mapY, 0);
-
-                        // Convert bin grid indices to array indices (elevationGrid uses 0-based indexing)
-                        int gridX = BinPoint.X - minX;
-                        int gridY = BinPoint.Y - minY;
+                        // Inlined pixel-to-bin: same as PixelToBin(mapX, mapY, 0) without allocations
+                        int binGridX = (int)Math.Floor(mapX / pixelsPerBin);
+                        int binGridY = (int)Math.Floor((CurrentField.FieldMaxY - mapY / CurrentScaleFactor - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
+                        int gridX = binGridX - minX;
+                        int gridY = binGridY - minY;
 
                         byte r, g, b, a;
 
