@@ -27,7 +27,6 @@ namespace AgGrade
         private bool RearHeightFound;
         private Timer ControllerConnectTimer;
         private BladeController BladeCtrl;
-        private DeadReckoner DeadReckoner;
         private Field? CurrentField;
         private FieldUpdater FieldUpdater;
 
@@ -95,10 +94,6 @@ namespace AgGrade
             BladeCtrl.OnRearStoppedCutting += BladeCtrl_OnRearStoppedCutting;
             BladeCtrl.OnRequestRearBladeStartCutting += BladeCtrl_OnRequestRearBladeStartCutting;
 
-            DeadReckoner = new DeadReckoner();
-            DeadReckoner.SetApplicationSettings(CurrentAppSettings);
-            DeadReckoner.OnNewLocations += DeadReckoner_OnNewLocations;
-
             TractorIMUFound = false;
             FrontIMUFound = false;
             RearIMUFound = false;
@@ -154,25 +149,6 @@ namespace AgGrade
         }
 
         /// <summary>
-        /// New locations from the dead reckoner
-        /// </summary>
-        /// <param name="TractorFix">New tractor location</param>
-        /// <param name="FrontScraperFix">New front scraper location</param>
-        /// <param name="RearScraperFix">New rear scraper location</param>
-        private void DeadReckoner_OnNewLocations(GNSSFix TractorFix, GNSSFix FrontScraperFix, GNSSFix RearScraperFix)
-        {
-            CurrentEquipmentStatus.TractorFix = TractorFix;
-            CurrentEquipmentStatus.FrontPan.Fix = FrontScraperFix;
-            CurrentEquipmentStatus.RearPan.Fix = RearScraperFix;
-
-
-            // update map
-            GetMap()?.SetTractor(TractorFix);
-            GetMap()?.SetFrontScraper(FrontScraperFix);
-            GetMap()?.SetRearScraper(RearScraperFix);
-        }
-
-        /// <summary>
         /// Sounds an alarm to alert the operator that something has happened with the controller
         /// </summary>
         private void SoundControllerAlarm
@@ -209,8 +185,6 @@ namespace AgGrade
 
             // send current configuration
             ConfigureController();
-
-            DeadReckoner.Start();
 
             // get the current heights of the blades
             // this will result in Controller.OnFrontBladeHeightChanged and Controller OnRearBladeHeightChanged being raised
@@ -262,8 +236,6 @@ namespace AgGrade
 
             // force map update
             GetMap()?.SetTractor(CurrentEquipmentStatus.TractorFix);
-
-            DeadReckoner.Stop();
         }
 
         private void Controller_OnEmergencyStop()
@@ -486,7 +458,6 @@ namespace AgGrade
 
             GetMap()?.SetApplicationSettings(AppSettings);
 
-            DeadReckoner.SetApplicationSettings(CurrentAppSettings);
             FieldUpdater.SetApplicationSettings(CurrentAppSettings);
 
             ConnectToController();
@@ -1066,8 +1037,6 @@ namespace AgGrade
 
             GetMap()?.SetTractor(Fix);
 
-            DeadReckoner.SetTractor(Fix);
-
             UpdateRTKLeds();
         }
 
@@ -1083,8 +1052,6 @@ namespace AgGrade
 
             GetMap()?.SetRearScraper(Fix);
 
-            DeadReckoner.SetRearScraper(Fix);
-
             UpdateRTKLeds();
         }
 
@@ -1099,8 +1066,6 @@ namespace AgGrade
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
             GetMap()?.SetFrontScraper(Fix);
-
-            DeadReckoner.SetFrontScraper(Fix);
 
             UpdateRTKLeds();
         }

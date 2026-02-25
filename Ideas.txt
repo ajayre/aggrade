@@ -69,7 +69,7 @@
     - enabled by moving joystick or exiting cutting mode if float not enabled
 
 
-21. Transparency and color options for tractor display
+21. Transparency option for tractor display
 
 22. Map scale.
 
@@ -90,5 +90,3 @@
 30. Map showing all cuts and fills (colored according to passes?)
 
 31. SQLite database for all field data
-
-32. Need to make the swell factor configurable

@@ -104,7 +104,7 @@ namespace HardwareSim
             )
         {
             GNSSUpdateTimer = new Timer();
-            GNSSUpdateTimer.Interval = 1000;
+            GNSSUpdateTimer.Interval = 100;
             GNSSUpdateTimer.Tick += GNSSUpdateTimer_Tick;
 
             IMUUpdateTimer = new Timer();

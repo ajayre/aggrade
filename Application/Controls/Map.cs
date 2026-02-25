@@ -167,12 +167,6 @@ namespace AgGrade.Controls
             GNSSFix Fix
             )
         {
-            if (InvokeRequired)
-            {
-                BeginInvoke(new Action<GNSSFix>(SetTractor), Fix);
-                return;
-            }
-
             if (Fix.IsValid)
             {
                 TractorFix = Fix.Clone();
@@ -186,12 +180,6 @@ namespace AgGrade.Controls
                         TractorLocationHistory.RemoveAt(0);
                     }
                 }
-
-                double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
-                if (TrueHeading >= 359.5) TrueHeading = 0;
-
-                HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;
-                SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
             }
         }
 
@@ -254,6 +242,12 @@ namespace AgGrade.Controls
 
             FrontLoadLabel.Text = _CurrentEquipmentStatus.FrontPan.LoadLCY.ToString("F1") + " LCY";
             RearLoadLabel.Text = _CurrentEquipmentStatus.RearPan.LoadLCY.ToString("F1") + " LCY";
+
+            double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+            if (TrueHeading >= 359.5) TrueHeading = 0;
+
+            HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;
+            SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
         }
 
         // fixme - remove

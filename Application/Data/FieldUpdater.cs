@@ -1,4 +1,4 @@
-﻿using AgGrade.Controller;
+using AgGrade.Controller;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +22,11 @@ namespace AgGrade.Data
         /// </summary>
         private const double RECUT_MIN_BLADE_BIN_DISTANCE_M = 3.0;
 
+        /// <summary>
+        /// Number of 100ms segments to accumulate so swept polygon is long enough for MinBinCoveragePcent.
+        /// </summary>
+        private const int ACCUMULATED_SEGMENTS_MAX = 10;
+
         private Field Field;
         private Timer CalcTimer;
         private AppSettings? CurrentAppSettings;
@@ -36,6 +41,12 @@ namespace AgGrade.Data
         private Coordinate? LastFrontBladeRight;
         private Coordinate? LastRearBladeLeft;
         private Coordinate? LastRearBladeRight;
+        private Coordinate? FrontAccumulatedStartLeft;
+        private Coordinate? FrontAccumulatedStartRight;
+        private List<(Coordinate Right, Coordinate Left)> FrontAccumulatedEnds = new List<(Coordinate, Coordinate)>();
+        private Coordinate? RearAccumulatedStartLeft;
+        private Coordinate? RearAccumulatedStartRight;
+        private List<(Coordinate Right, Coordinate Left)> RearAccumulatedEnds = new List<(Coordinate, Coordinate)>();
 
         public delegate void VolumeCutUpdated(double VolumeBCY);
         public event VolumeCutUpdated OnFrontVolumeCutUpdated = null;
@@ -61,6 +72,9 @@ namespace AgGrade.Data
         {
             LastFrontBladeLeft = null;
             LastFrontBladeRight = null;
+            FrontAccumulatedStartLeft = null;
+            FrontAccumulatedStartRight = null;
+            FrontAccumulatedEnds.Clear();
 
             OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
         }
@@ -71,6 +85,9 @@ namespace AgGrade.Data
         {
             LastFrontBladeLeft = null;
             LastFrontBladeRight = null;
+            FrontAccumulatedStartLeft = null;
+            FrontAccumulatedStartRight = null;
+            FrontAccumulatedEnds.Clear();
 
             OnFrontVolumeCutUpdated?.Invoke(FrontCutVolumeBCY);
         }
@@ -81,6 +98,9 @@ namespace AgGrade.Data
         {
             LastRearBladeLeft = null;
             LastRearBladeRight = null;
+            RearAccumulatedStartLeft = null;
+            RearAccumulatedStartRight = null;
+            RearAccumulatedEnds.Clear();
 
             OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
         }
@@ -91,6 +111,9 @@ namespace AgGrade.Data
         {
             LastRearBladeLeft = null;
             LastRearBladeRight = null;
+            RearAccumulatedStartLeft = null;
+            RearAccumulatedStartRight = null;
+            RearAccumulatedEnds.Clear();
 
             OnRearVolumeCutUpdated?.Invoke(RearCutVolumeBCY);
         }
@@ -164,11 +187,20 @@ namespace AgGrade.Data
                     // we have a previous location
                     if ((LastFrontBladeLeft != null) && (LastFrontBladeRight != null))
                     {
-                        List<Coordinate> SweptPolygon = new List<Coordinate>();
-                        SweptPolygon.Add(LastFrontBladeLeft);
-                        SweptPolygon.Add(LastFrontBladeRight);
-                        SweptPolygon.Add(FrontBladeRight);
-                        SweptPolygon.Add(FrontBladeLeft);
+                        if (FrontAccumulatedStartLeft == null)
+                        {
+                            FrontAccumulatedStartLeft = LastFrontBladeLeft;
+                            FrontAccumulatedStartRight = LastFrontBladeRight;
+                        }
+                        FrontAccumulatedEnds.Add((FrontBladeRight, FrontBladeLeft));
+                        if (FrontAccumulatedEnds.Count > ACCUMULATED_SEGMENTS_MAX)
+                        {
+                            var first = FrontAccumulatedEnds[0];
+                            FrontAccumulatedEnds.RemoveAt(0);
+                            FrontAccumulatedStartLeft = first.Left;
+                            FrontAccumulatedStartRight = first.Right;
+                        }
+                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
                         List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToCut)
                         {
@@ -214,11 +246,20 @@ namespace AgGrade.Data
                     // we have a previous location
                     if ((LastRearBladeLeft != null) && (LastRearBladeRight != null))
                     {
-                        List<Coordinate> SweptPolygon = new List<Coordinate>();
-                        SweptPolygon.Add(LastRearBladeLeft);
-                        SweptPolygon.Add(LastRearBladeRight);
-                        SweptPolygon.Add(RearBladeRight);
-                        SweptPolygon.Add(RearBladeLeft);
+                        if (RearAccumulatedStartLeft == null)
+                        {
+                            RearAccumulatedStartLeft = LastRearBladeLeft;
+                            RearAccumulatedStartRight = LastRearBladeRight;
+                        }
+                        RearAccumulatedEnds.Add((RearBladeRight, RearBladeLeft));
+                        if (RearAccumulatedEnds.Count > ACCUMULATED_SEGMENTS_MAX)
+                        {
+                            var first = RearAccumulatedEnds[0];
+                            RearAccumulatedEnds.RemoveAt(0);
+                            RearAccumulatedStartLeft = first.Left;
+                            RearAccumulatedStartRight = first.Right;
+                        }
+                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
                         List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToCut)
                         {
@@ -264,11 +305,20 @@ namespace AgGrade.Data
                     // we have a previous location
                     if ((LastFrontBladeLeft != null) && (LastFrontBladeRight != null))
                     {
-                        List<Coordinate> SweptPolygon = new List<Coordinate>();
-                        SweptPolygon.Add(LastFrontBladeLeft);
-                        SweptPolygon.Add(LastFrontBladeRight);
-                        SweptPolygon.Add(FrontBladeRight);
-                        SweptPolygon.Add(FrontBladeLeft);
+                        if (FrontAccumulatedStartLeft == null)
+                        {
+                            FrontAccumulatedStartLeft = LastFrontBladeLeft;
+                            FrontAccumulatedStartRight = LastFrontBladeRight;
+                        }
+                        FrontAccumulatedEnds.Add((FrontBladeRight, FrontBladeLeft));
+                        if (FrontAccumulatedEnds.Count > ACCUMULATED_SEGMENTS_MAX)
+                        {
+                            var first = FrontAccumulatedEnds[0];
+                            FrontAccumulatedEnds.RemoveAt(0);
+                            FrontAccumulatedStartLeft = first.Left;
+                            FrontAccumulatedStartRight = first.Right;
+                        }
+                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
                         List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToFill)
                         {
@@ -314,11 +364,20 @@ namespace AgGrade.Data
                     // we have a previous location
                     if ((LastRearBladeLeft != null) && (LastRearBladeRight != null))
                     {
-                        List<Coordinate> SweptPolygon = new List<Coordinate>();
-                        SweptPolygon.Add(LastRearBladeLeft);
-                        SweptPolygon.Add(LastRearBladeRight);
-                        SweptPolygon.Add(RearBladeRight);
-                        SweptPolygon.Add(RearBladeLeft);
+                        if (RearAccumulatedStartLeft == null)
+                        {
+                            RearAccumulatedStartLeft = LastRearBladeLeft;
+                            RearAccumulatedStartRight = LastRearBladeRight;
+                        }
+                        RearAccumulatedEnds.Add((RearBladeRight, RearBladeLeft));
+                        if (RearAccumulatedEnds.Count > ACCUMULATED_SEGMENTS_MAX)
+                        {
+                            var first = RearAccumulatedEnds[0];
+                            RearAccumulatedEnds.RemoveAt(0);
+                            RearAccumulatedStartLeft = first.Left;
+                            RearAccumulatedStartRight = first.Right;
+                        }
+                        List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
                         List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
                         foreach (Bin B in BinsToFill)
                         {
@@ -502,6 +561,23 @@ namespace AgGrade.Data
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Builds a single polygon from accumulated segment start and segment ends (outline of swept strip).
+        /// </summary>
+        private static List<Coordinate> BuildAccumulatedSweptPolygon(Coordinate startLeft, Coordinate startRight, List<(Coordinate Right, Coordinate Left)> ends)
+        {
+            List<Coordinate> polygon = new List<Coordinate>();
+            polygon.Add(startLeft);
+            polygon.Add(startRight);
+            for (int i = 0; i < ends.Count; i++)
+                polygon.Add(ends[i].Right);
+            polygon.Add(ends[ends.Count - 1].Left);
+            for (int i = ends.Count - 2; i >= 0; i--)
+                polygon.Add(ends[i].Left);
+            polygon.Add(startLeft);
+            return polygon;
         }
 
         /// <summary>
