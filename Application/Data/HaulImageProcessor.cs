@@ -62,7 +62,7 @@ public class HaulImageProcessor
         }
 
         if (pairs.Count == 0)
-            throw new InvalidOperationException("Error: no PNG+KML pairs found in input directory.");
+            return;
 
         List<CsvRow> allRows = new List<CsvRow>();
         foreach ((string pngPath, _, Bbox bbox) in pairs)

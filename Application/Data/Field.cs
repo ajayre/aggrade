@@ -15,6 +15,8 @@ namespace AgGrade.Data
         // Bin size in meters (2ft = 0.6096m)
         public const double BIN_SIZE_M = 0.6096;
 
+        private Database Db;
+
         public string Name;
         public List<TopologyPoint> TopologyPoints;
         public double FieldCentroidLat;
@@ -37,6 +39,8 @@ namespace AgGrade.Data
             Bins = new List<Bin>();
             Benchmarks = new List<Benchmark>();
             HaulDirections = new List<HaulDirection>();
+
+            Db = new Database();
         }
 
         /// <summary>
@@ -656,9 +660,11 @@ namespace AgGrade.Data
         /// Loads a field from a folder containing field data
         /// </summary>
         /// <param name="Folder">Path of folder to load from</param>
+        /// <param name="DbFile">Database file to load or null to create new database</param>
         public void Load
             (
-            string Folder
+            string Folder,
+            string? DbFile
             )
         {
             // get first AGD file in folder
@@ -666,6 +672,26 @@ namespace AgGrade.Data
             if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
             string AGDFile = AGDFiles[0];
 
+            // if no database file then get the name of the database file to create
+            // we increment based on the previous database files so no data is overwritten
+            if (DbFile == null)
+            {
+                int nextVersion = 1;
+                foreach (string path in Directory.GetFiles(Folder, "V*.db"))
+                {
+                    string name = Path.GetFileNameWithoutExtension(path);
+                    if (name.Length > 1 && name[0] == 'V' && int.TryParse(name.Substring(1), out int v) && v >= nextVersion)
+                        nextVersion = v + 1;
+                }
+                DbFile = Path.Combine(Folder, $"V{nextVersion}.db");
+
+                Db.Create(DbFile);
+            }
+            else
+            {
+                Db.Open(DbFile);
+            }
+                
             Clear();
 
             // load AGD file

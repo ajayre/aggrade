@@ -24,6 +24,8 @@ namespace AgGrade.Controls
             }
         }
 
+        public event Action<string, string?> OnFieldChosen = null;
+
         public FieldChooserPage()
         {
             InitializeComponent();
@@ -40,7 +42,7 @@ namespace AgGrade.Controls
             if (string.IsNullOrEmpty(FieldDataFolder) || !Directory.Exists(FieldDataFolder))
                 return;
 
-            var entries = new List<(string FieldName, string FieldNameText, string LastModifiedText, DateTime SortDate)>();
+            var entries = new List<(string FieldName, string FieldNameText, string LastModifiedText, DateTime SortDate, bool ShowIcon, string Folder, string? DbFile)>();
 
             foreach (string subDir in Directory.GetDirectories(FieldDataFolder))
             {
@@ -52,7 +54,7 @@ namespace AgGrade.Controls
                     continue;
 
                 // Create New panel (sorts last within this field)
-                entries.Add((fieldName, fieldName, "Create New", DateTime.MinValue));
+                entries.Add((fieldName, fieldName, "", DateTime.MinValue, true, subDir, null));
 
                 // One panel per .db file, newest first for sorting
                 var dbFiles = Directory.GetFiles(subDir, "*.db")
@@ -65,7 +67,10 @@ namespace AgGrade.Controls
                         fieldName,
                         fieldName + " (" + dbFileName + ")",
                         FormatLastModifiedFriendly(fi.LastWriteTime),
-                        fi.LastWriteTime
+                        fi.LastWriteTime,
+                        false,
+                        subDir,
+                        fi.FullName
                     ));
                 }
             }
@@ -82,13 +87,30 @@ namespace AgGrade.Controls
             {
                 var e = sorted[i];
                 var panel = new FieldPanel();
+                panel.OnClicked += Panel_OnClicked;
                 panel.Odd = odd;
                 panel.FieldNameText = e.FieldNameText;
                 panel.LastModifiedText = e.LastModifiedText;
+                panel.ShowIcon = e.ShowIcon;
                 panel.Dock = DockStyle.Top;
+                panel.Folder = e.Folder;
+                panel.DbFile = e.DbFile;
                 FieldTable.Controls.Add(panel);
                 odd = !odd;
             }
+        }
+
+        /// <summary>
+        /// Called when a panel is tapped
+        /// </summary>
+        /// <param name="obj"></param>
+        private void Panel_OnClicked(object sender)
+        {
+            FieldPanel Panel = (FieldPanel)sender;
+            string Folder = Panel.Folder;
+            string? DbFile = Panel.DbFile;
+
+            OnFieldChosen?.Invoke(Folder, DbFile);
         }
 
         /// <summary>

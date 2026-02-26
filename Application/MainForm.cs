@@ -370,6 +370,7 @@ namespace AgGrade
             fieldChooserPage.FieldDataFolder = FieldDataFolder;
             fieldChooserPage.Parent = ContentPanel;
             fieldChooserPage.Dock = DockStyle.Fill;
+            fieldChooserPage.OnFieldChosen += (folder, dbfile) => { LoadField(folder, dbfile); };
             fieldChooserPage.Show();
         }
 
@@ -424,7 +425,7 @@ namespace AgGrade
             }
         }
 
-        /// <summary>
+        /*/// <summary>
         /// Loads a field
         /// </summary>
         /// <param name="Folder">Path of the field data</param>
@@ -435,6 +436,29 @@ namespace AgGrade
         {
             CurrentField = new Field();
             CurrentField.Load(Folder);
+
+            BladeCtrl.SetField(CurrentField);
+            FieldUpdater.SetField(CurrentField);
+
+            // if showing map then update to show field
+            GetMap()?.ShowField(CurrentField);
+        }*/
+
+        /// <summary>
+        /// Loads a field
+        /// </summary>
+        /// <param name="Folder">Path to folder containing field data</param>
+        /// <param name="DbFile">Database to load or null to create new field</param>
+        private void LoadField
+            (
+            string Folder,
+            string? DbFile
+            )
+        {
+            ShowMap();
+
+            CurrentField = new Field();
+            CurrentField.Load(Folder, DbFile);
 
             BladeCtrl.SetField(CurrentField);
             FieldUpdater.SetField(CurrentField);
@@ -711,7 +735,7 @@ namespace AgGrade
 
             // fixme - allow user to choose file to load
             //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4");
-            LoadField(FieldDataFolder + "TheShop2_2ft");
+            //LoadField(FieldDataFolder + "TheShop2_2ft");
 
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);

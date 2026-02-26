@@ -736,7 +736,7 @@ namespace AgGrade.Data
                     LastLocpx = Pix;
                 }*/
 
-                if (ShowHaulArrows)
+                if (ShowHaulArrows && (CurrentField != null))
                 {
                     // draw haul arrows
                     foreach (HaulDirection HaulDir in CurrentField.HaulDirections)
