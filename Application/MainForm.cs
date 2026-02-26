@@ -1,12 +1,12 @@
-using System.Runtime;
-using System.Windows.Forms;
-using System.Media;
+using AgGrade.Controller;
 using AgGrade.Controls;
 using AgGrade.Data;
 using AgGrade.Properties;
-using AgGrade.Controller;
 using System.IO.MemoryMappedFiles;
-
+using System.Media;
+using System.Reflection;
+using System.Runtime;
+using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
 namespace AgGrade
@@ -29,6 +29,7 @@ namespace AgGrade
         private BladeController BladeCtrl;
         private Field? CurrentField;
         private FieldUpdater FieldUpdater;
+        private string FieldDataFolder;
 
         public MainForm
             (
@@ -354,6 +355,22 @@ namespace AgGrade
             surveyPage.Parent = ContentPanel;
             surveyPage.Dock = DockStyle.Fill;
             surveyPage.Show();
+        }
+
+        /// <summary>
+        /// Shows the UI for loading fields
+        /// </summary>
+        private void ShowFieldChooserPage
+            (
+            )
+        {
+            ClosePage();
+
+            FieldChooserPage fieldChooserPage = new FieldChooserPage();
+            fieldChooserPage.FieldDataFolder = FieldDataFolder;
+            fieldChooserPage.Parent = ContentPanel;
+            fieldChooserPage.Dock = DockStyle.Fill;
+            fieldChooserPage.Show();
         }
 
         /// <summary>
@@ -683,9 +700,18 @@ namespace AgGrade
             UpdateHeightLeds();
             UpdateRTKLeds();
 
+#if DEBUG
+            FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
+                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "FieldData" +
+                Path.DirectorySeparatorChar;
+#else
+            FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "FieldData" +
+                Path.DirectorySeparatorChar;
+#endif
+
             // fixme - allow user to choose file to load
             //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4");
-            LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\TheShop2_2ft");
+            LoadField(FieldDataFolder + "TheShop2_2ft");
 
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);
@@ -1547,7 +1573,7 @@ namespace AgGrade
         /// <param name="e"></param>
         private void OpenFieldBtn_Click(object sender, EventArgs e)
         {
-
+            ShowFieldChooserPage();
         }
     }
 }

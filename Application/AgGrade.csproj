@@ -24,6 +24,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\FieldChooserPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\FieldPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\StatusPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
