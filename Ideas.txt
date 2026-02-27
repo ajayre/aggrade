@@ -109,3 +109,13 @@
  - table with x/y/z calibration data
 
 32. Save map display settings between starts
+
+33. When loading a field calculate total cut/fill amounts and store in db
+
+34. Every hour of operation or when user shows stats page use database to calculate amount of cu yd moved and percentage complete of field. Calculate projection of remaining time to complete.
+
+35. Separate db for stripping?
+
+36. Store current loads in db so that they can be restored if a crash happens
+
+37. Fix bug where zeroing loads doesn't stick.

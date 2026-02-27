@@ -285,6 +285,17 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Inserts a bin row into the FieldState table with the given coordinates and height.
+        /// </summary>
+        /// <param name="x">Bin X coordinate</param>
+        /// <param name="y">Bin Y coordinate</param>
+        /// <param name="heightM">Height in meters</param>
+        public void AddBinState(int x, int y, double heightM)
+        {
+            AddBinState(new BinState(x, y, heightM));
+        }
+
+        /// <summary>
         /// Inserts a bin row into the FieldState table.
         /// </summary>
         public void AddBinState(BinState binState)
@@ -297,6 +308,66 @@ namespace AgGrade.Data
                 cmd.Parameters.AddWithValue("@Y", binState.Y);
                 cmd.Parameters.AddWithValue("@HeightM", binState.HeightM);
                 cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Gets the height of every bin in the FieldState table.
+        /// </summary>
+        /// <returns>Array of bin states</returns>
+        public BinState[] GetBinStates()
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            List<BinState> States = new List<BinState>();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT X, Y, HeightM FROM FieldState";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        States.Add(new BinState(
+                            reader.GetInt32(0),
+                            reader.GetInt32(1),
+                            reader.GetDouble(2)
+                        ));
+                    }
+                }
+            }
+
+            return States.ToArray();
+        }
+
+        /// <summary>
+        /// Stores a set of bins into the database
+        /// </summary>
+        /// <param name="Bins">Bins to store</param>
+        public void AddBinStates(List<Bin> Bins)
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            using (var transaction = _connection.BeginTransaction())
+            {
+                using (var command = _connection.CreateCommand())
+                {
+                    // Create command and parameters
+                    command.CommandText = "INSERT INTO FieldState (X, Y, HeightM) VALUES (@X, @Y, @HeightM)";
+                    var param1 = command.Parameters.Add("@X", SqliteType.Integer);
+                    var param2 = command.Parameters.Add("@Y", SqliteType.Integer);
+                    var param3 = command.Parameters.Add("@HeightM", SqliteType.Real);
+
+                    foreach (Bin b in Bins)
+                    {
+                        // For each row, only update parameter values
+                        param1.Value = b.X;
+                        param2.Value = b.Y;
+                        param3.Value = b.ExistingElevationM;
+                        command.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
             }
         }
 

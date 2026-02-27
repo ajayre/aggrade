@@ -357,17 +357,10 @@ namespace AgGrade.Data
                 int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
                 int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
-                // Calculate grid dimensions
-                var bins = Field.Bins;
-                var minX = bins.Min(b => b.X);
-                var maxX = bins.Max(b => b.X);
-                var minY = bins.Min(b => b.Y);
-                var maxY = bins.Max(b => b.Y);
-
-                var gridWidth = maxX - minX + 1;
-                var gridHeight = maxY - minY + 1;
-
-                var BinGrid = CreateBinsGrid(bins, minX, maxX, minY, maxY, gridWidth, gridHeight);
+                int gridWidth;
+                int gridHeight;
+                Field.GetBinGridSize(out gridWidth, out gridHeight);
+                var BinGrid = Field.BinGrid;
 
                 // The bin origin is the field coordinate that corresponds to bin grid index 0
                 // Bins are created with: BinX = Floor((Point.X - MinX) / BinSizeM)
@@ -487,7 +480,7 @@ namespace AgGrade.Data
                                                 BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
-                                                minX, minY, gridWidth, gridHeight,
+                                                0, 0, gridWidth, gridHeight,
                                                 minElevation, maxElevation,
                                                 colorPalette, ShowGrid, ScaleFactor);
                                             break;
@@ -497,7 +490,7 @@ namespace AgGrade.Data
                                                 BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
-                                                minX, minY, gridWidth, gridHeight,
+                                                0, 0, gridWidth, gridHeight,
                                                 ShowGrid, ScaleFactor);
                                             break;
                                     }
@@ -1690,35 +1683,6 @@ namespace AgGrade.Data
             }
 
             return new double[] { r + m, g + m, b + m };
-        }
-
-        /// <summary>
-        /// Organizes the bins into a grid
-        /// </summary>
-        /// <param name="bins"></param>
-        /// <param name="minX"></param>
-        /// <param name="maxX"></param>
-        /// <param name="minY"></param>
-        /// <param name="maxY"></param>
-        /// <param name="gridWidth"></param>
-        /// <param name="gridHeight"></param>
-        /// <returns></returns>
-        private Bin?[,] CreateBinsGrid(List<Bin> bins, int minX, int maxX, int minY, int maxY, int gridWidth, int gridHeight)
-        {
-            var BinGrid = new Bin?[gridHeight, gridWidth];
-
-            foreach (var bin in bins)
-            {
-                var x = bin.X - minX;
-                var y = bin.Y - minY;
-
-                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
-                {
-                    BinGrid[y, x] = bin;
-                }
-            }
-
-            return BinGrid;
         }
 
         /// <summary>

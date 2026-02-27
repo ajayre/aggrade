@@ -33,6 +33,8 @@ namespace AgGrade.Data
         public List<Benchmark> Benchmarks;
         public List<HaulDirection> HaulDirections;
 
+        public Bin?[,] BinGrid;
+
         public Field()
         {
             TopologyPoints = new List<TopologyPoint>();
@@ -672,6 +674,8 @@ namespace AgGrade.Data
             if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
             string AGDFile = AGDFiles[0];
 
+            bool HasData = false;
+
             // if no database file then get the name of the database file to create
             // we increment based on the previous database files so no data is overwritten
             if (DbFile == null)
@@ -686,10 +690,12 @@ namespace AgGrade.Data
                 DbFile = Path.Combine(Folder, $"V{nextVersion}.db");
 
                 Db.Create(DbFile);
+                HasData = false;
             }
             else
             {
                 Db.Open(DbFile);
+                HasData = true;
             }
                 
             Clear();
@@ -709,6 +715,126 @@ namespace AgGrade.Data
             }
 
             LoadHaulDirections(HaulDirectionsCSV);
+
+            int GridWidth;
+            int GridHeight;
+            GetBinGridSize(out GridWidth, out GridHeight);
+
+            // construct bin grid to access bins vix y, x
+            BinGrid = CreateBinsGrid();
+
+            // has data, load it now
+            if (HasData)
+            {
+                Database.BinState[] States = Db.GetBinStates();
+
+                foreach (Database.BinState State in States)
+                {
+                    try
+                    {
+                        if (BinGrid[State.Y, State.X] != null)
+                        {
+                            BinGrid[State.Y, State.X]!.ExistingElevationM = State.HeightM;
+                        }
+                    }
+                    catch (IndexOutOfRangeException Exc)
+                    {
+                        ;
+                    }
+                }
+            }
+            // no data, store initial bin state
+            else
+            {
+                // store current field state in the database
+                Db.AddBinStates(Bins);
+            }
+        }
+
+        /// <summary>
+        /// Cuts soil from a bin
+        /// </summary>
+        /// <param name="BinToCut">Bin to cut from</param>
+        /// <param name="CutHeightM">Height of soil to remove</param>
+        public void CutBin
+            (
+            Bin BinToCut,
+            double CutHeightM
+            )
+        {
+            BinToCut.ExistingElevationM -= CutHeightM;
+
+            Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
+        }
+
+        /// <summary>
+        /// Adds soil to a bin
+        /// </summary>
+        /// <param name="BinToCut">Bin to add to</param>
+        /// <param name="CutHeightM">Height of soil to add</param>
+        public void FillBin
+            (
+            Bin BinToFill,
+            double FillHeightM
+            )
+        {
+            BinToFill.ExistingElevationM += FillHeightM;
+
+            Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
+        }
+
+        /// <summary>
+        /// Gets the size of the bin grid in bins
+        /// </summary>
+        /// <param name="GridWidth">Width of bin grid</param>
+        /// <param name="GridHeight">Height of bin grid</param>
+        public void GetBinGridSize
+            (
+            out int GridWidth,
+            out int GridHeight
+            )
+        {
+            // Calculate grid dimensions
+            var bins = Bins;
+            var minX = bins.Min(b => b.X);
+            var maxX = bins.Max(b => b.X);
+            var minY = bins.Min(b => b.Y);
+            var maxY = bins.Max(b => b.Y);
+
+            GridWidth = maxX - minX + 1;
+            GridHeight = maxY - minY + 1;
+        }
+
+        /// <summary>
+        /// Organizes the bins into a grid
+        /// </summary>
+        /// <returns></returns>
+        public Bin?[,] CreateBinsGrid
+            (
+            )
+        {
+            int gridWidth;
+            int gridHeight;
+
+            GetBinGridSize(out gridWidth, out gridHeight);
+
+            var BinGrid = new Bin?[gridHeight, gridWidth];
+
+            int minX = 0;
+            int minY = 0;
+
+            foreach (var bin in Bins)
+            {
+                var x = bin.X - minX;
+                var y = bin.Y - minY;
+
+                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+                {
+                    BinGrid[y, x] = bin;
+                }
+            }
+
+            return BinGrid;
         }
 
         /// <summary>

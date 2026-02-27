@@ -288,6 +288,7 @@ namespace AgGrade.Data
                     Bin NewBin = new Bin();
                     NewBin.X = x;
                     NewBin.Y = y;
+                    NewBin.Field = Field;
 
                     Point Key = new Point(x, y);
 

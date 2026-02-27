@@ -441,7 +441,7 @@ namespace AgGrade.Data
                         if (FillHeightM > 0)
                         {
                             // increase bin height
-                            BinToFill.ExistingElevationM += FillHeightM;
+                            BinToFill.Field.FillBin(BinToFill, FillHeightM);
                             BinToFill.Dirty = true;
                             BinToFill.NumberofFills++;
 
@@ -488,7 +488,7 @@ namespace AgGrade.Data
                         if (FillHeightM > 0)
                         {
                             // increase bin height
-                            BinToFill.ExistingElevationM += FillHeightM;
+                            BinToFill.Field.FillBin(BinToFill, FillHeightM);
                             BinToFill.Dirty = true;
                             BinToFill.NumberofFills++;
 
@@ -529,8 +529,8 @@ namespace AgGrade.Data
 
                         if (CutHeightM < 0)
                         {
-                            // reduce bin height (adding because the cut height is negative)
-                            BinToCut.ExistingElevationM += CutHeightM;
+                            // reduce bin height
+                            BinToCut.Field.CutBin(BinToCut, -CutHeightM);
                             BinToCut.Dirty = true;
                             BinToCut.NumberOfCuts++;
 
@@ -567,8 +567,8 @@ namespace AgGrade.Data
 
                         if (CutHeightM < 0)
                         {
-                            // reduce bin height (adding because the cut height is negative)
-                            BinToCut.ExistingElevationM += CutHeightM;
+                            // reduce bin height
+                            BinToCut.Field.CutBin(BinToCut, -CutHeightM);
                             BinToCut.Dirty = true;
                             BinToCut.NumberOfCuts++;
 
