@@ -15,6 +15,8 @@ namespace AgGrade.Data
         // Bin size in meters (2ft = 0.6096m)
         public const double BIN_SIZE_M = 0.6096;
 
+        private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
+
         private Database Db;
 
         public string Name;
@@ -28,12 +30,16 @@ namespace AgGrade.Data
         public List<Bin> Bins;
         public int UTMZone;
         public bool IsNorthernHemisphere;
-        public double TotalCutBCY;
-        public double TotalFillBCY;
+        public double TotalCutCY;
+        public double TotalFillCY;
         public List<Benchmark> Benchmarks;
         public List<HaulDirection> HaulDirections;
+        public double CompletedCutCY;
+        public double CompletedFillCY;
 
         public Bin?[,] BinGrid;
+        public int GridWidth { get; private set; }
+        public int GridHeight { get; private set; }
 
         public Field()
         {
@@ -716,9 +722,7 @@ namespace AgGrade.Data
 
             LoadHaulDirections(HaulDirectionsCSV);
 
-            int GridWidth;
-            int GridHeight;
-            GetBinGridSize(out GridWidth, out GridHeight);
+            CalculateBinGridSize();
 
             // construct bin grid to access bins vix y, x
             BinGrid = CreateBinsGrid();
@@ -749,6 +753,10 @@ namespace AgGrade.Data
                 // store current field state in the database
                 Db.AddBinStates(Bins);
             }
+
+            // get how much we have done so far
+            CompletedCutCY = Db.GetData(Database.DataNames.CompletedCutCY);
+            CompletedFillCY = Db.GetData(Database.DataNames.CompletedCutCY);
         }
 
         /// <summary>
@@ -766,8 +774,12 @@ namespace AgGrade.Data
 
             BinToCut.ExistingElevationM -= CutHeightM;
 
-            Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
-            Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
+            //Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
+            //Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
+
+            // updated completed cuts
+            CompletedCutCY += BIN_SIZE_M * BIN_SIZE_M * CutHeightM * CUBIC_YARDS_PER_CUBIC_METER;
+            Db.SetData(Database.DataNames.CompletedCutCY, CompletedCutCY);
         }
 
         /// <summary>
@@ -785,19 +797,19 @@ namespace AgGrade.Data
 
             BinToFill.ExistingElevationM += FillHeightM;
 
-            Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
-            Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
+            //Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
+            //Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
+
+            // update completed fills
+            CompletedFillCY += BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER;
+            Db.SetData(Database.DataNames.CompletedFillCY, CompletedFillCY);
         }
 
         /// <summary>
-        /// Gets the size of the bin grid in bins
+        /// Calculates the size of the bin grid in bins
         /// </summary>
-        /// <param name="GridWidth">Width of bin grid</param>
-        /// <param name="GridHeight">Height of bin grid</param>
-        public void GetBinGridSize
+        private void CalculateBinGridSize
             (
-            out int GridWidth,
-            out int GridHeight
             )
         {
             // Calculate grid dimensions
@@ -819,12 +831,7 @@ namespace AgGrade.Data
             (
             )
         {
-            int gridWidth;
-            int gridHeight;
-
-            GetBinGridSize(out gridWidth, out gridHeight);
-
-            var BinGrid = new Bin?[gridHeight, gridWidth];
+            var BinGrid = new Bin?[GridHeight, GridWidth];
 
             int minX = 0;
             int minY = 0;
@@ -834,7 +841,7 @@ namespace AgGrade.Data
                 var x = bin.X - minX;
                 var y = bin.Y - minY;
 
-                if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+                if (x >= 0 && x < GridWidth && y >= 0 && y < GridHeight)
                 {
                     BinGrid[y, x] = bin;
                 }

@@ -357,9 +357,9 @@ namespace AgGrade.Data
                 int MapWidthpx = (int)Math.Round(MapWidthM * ScaleFactor);
                 int MapHeightpx = (int)Math.Round(MapHeightM * ScaleFactor);
 
-                int gridWidth;
-                int gridHeight;
-                Field.GetBinGridSize(out gridWidth, out gridHeight);
+                int gridWidth = Field.GridWidth;
+                int gridHeight = Field.GridHeight;
+                //Field.CalculateBinGridSize(out gridWidth, out gridHeight);
                 var BinGrid = Field.BinGrid;
 
                 // The bin origin is the field coordinate that corresponds to bin grid index 0

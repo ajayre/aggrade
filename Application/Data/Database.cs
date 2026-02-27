@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using static AgGrade.Data.Database;
 
 namespace AgGrade.Data
@@ -111,33 +112,16 @@ namespace AgGrade.Data
             }
         }
 
-        /// <summary>Row from Settings table.</summary>
-        public class Setting
+        /// <summary>
+        /// Names of supported data
+        /// </summary>
+        public enum DataNames
         {
-            public enum SettingNames
-            {
-                XOffsetM,
-                YOffsetM,
-                HeightOffsetM
-            }
-
-            public int SettingID { get; set; }
-            public SettingNames Name { get; set; }
-            public int Value { get; set; }
-
-            /// <summary>Creates an empty setting.</summary>
-            public Setting() { }
-
-            /// <summary>Creates a setting with the given name and value. SettingID is assigned by the database on insert.</summary>
-            public Setting
-                (
-                SettingNames name,
-                int value
-                )
-            {
-                Name = name;
-                Value = value;
-            }
+            XOffsetM,
+            YOffsetM,
+            HeightOffsetM,
+            CompletedCutCY,
+            CompletedFillCY
         }
 
         /// <summary>
@@ -188,10 +172,10 @@ namespace AgGrade.Data
             }
             using (var cmd = connection.CreateCommand())
             {
-                cmd.CommandText = @"CREATE TABLE Settings (
-                        SettingID INTEGER PRIMARY KEY AUTOINCREMENT,
+                cmd.CommandText = @"CREATE TABLE Data (
+                        DataID INTEGER PRIMARY KEY AUTOINCREMENT,
                         Name TEXT,
-                        Value INTEGER
+                        Value REAL
                     )";
                 cmd.ExecuteNonQuery();
             }
@@ -430,17 +414,68 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Inserts a setting into the Settings table.
+        /// Upserts a data item
         /// </summary>
-        public void AddSetting(Setting setting)
+        /// <param name="Name">Data item to upsert</param>
+        /// <param name="Value">New value</param>
+        public void SetData
+            (
+            DataNames Name,
+            double Value
+            )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO Settings (Name, Value) VALUES (@Name, @Value)";
-                cmd.Parameters.AddWithValue("@Name", setting.Name.ToString());
-                cmd.Parameters.AddWithValue("@Value", setting.Value);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    // First try to update an existing setting
+                    cmd.CommandText = "UPDATE Data SET Value = @Value WHERE Name = @Name";
+                    cmd.Parameters.AddWithValue("@Name", Name.ToString());
+                    cmd.Parameters.AddWithValue("@Value", Value);
+                    var rows = cmd.ExecuteNonQuery();
+
+                    // If no row was updated, insert a new one
+                    if (rows == 0)
+                    {
+                        cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (SqliteException)
+                {
+                    cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
+                    cmd.Parameters.AddWithValue("@Name", Name.ToString());
+                    cmd.Parameters.AddWithValue("@Value", Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of a data item
+        /// </summary>
+        /// <param name="name">Data to get</param>
+        public double GetData(DataNames name)
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                try
+                {
+                    cmd.CommandText = "SELECT Value FROM Data WHERE Name = @Name LIMIT 1";
+                    cmd.Parameters.AddWithValue("@Name", name.ToString());
+                    var result = cmd.ExecuteScalar();
+
+                    if (result == null || result is DBNull) return 0;
+
+                    return Convert.ToDouble(result);
+                }
+                catch (SqliteException)
+                {
+                    return 0;
+                }
             }
         }
     }

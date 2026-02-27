@@ -352,8 +352,8 @@ namespace AgGrade.Data
                 TotalFillVolumeM3 += (b.FillAmountM * BinAreaM2);
             }
 
-            Field.TotalCutBCY = TotalCutVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
-            Field.TotalFillBCY = TotalFillVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
+            Field.TotalCutCY = TotalCutVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
+            Field.TotalFillCY = TotalFillVolumeM3 * CUBIC_YARDS_PER_CUBIC_METER;
         }
 
         /// <summary>

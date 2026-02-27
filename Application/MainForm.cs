@@ -118,6 +118,8 @@ namespace AgGrade
 
             // update in equipment status
             CurrentEquipmentStatus.RearPan.LoadLCY = VolumeLCY;
+            Properties.Settings.Default.RearLoadLCY = VolumeLCY;
+            Properties.Settings.Default.Save();
 
             // check if rear scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.RearPan.CapacityCY && !CurrentEquipmentStatus.RearPan.CapacityWarningOccurred)
@@ -139,6 +141,8 @@ namespace AgGrade
 
             // update in equipment status
             CurrentEquipmentStatus.FrontPan.LoadLCY = VolumeLCY;
+            Properties.Settings.Default.FrontLoadLCY = VolumeLCY;
+            Properties.Settings.Default.Save();
 
             // check if front scraper has reached capacity
             if (VolumeLCY >= CurrentEquipmentSettings.FrontPan.CapacityCY && !CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred)
@@ -740,6 +744,12 @@ namespace AgGrade
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);
             SetRearPanIndicator(PanIndicatorStates.None);
+
+            Properties.Settings.Default.Reload();
+
+            // get previous loads in case the application crashed during cutting or filling
+            CurrentEquipmentStatus.FrontPan.LoadLCY = Properties.Settings.Default.FrontLoadLCY;
+            CurrentEquipmentStatus.RearPan.LoadLCY = Properties.Settings.Default.RearLoadLCY;
         }
 
         /// <summary>

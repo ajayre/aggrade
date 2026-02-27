@@ -17,6 +17,8 @@ namespace AgGrade.Data
         // size of a side of a bin in meters (2ft)
         private const double BIN_SIZE_M = 0.6096;
 
+        private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
+
         /// <summary>
         /// Distance bin has to be from a blade center before it can be cut again
         /// </summary>
@@ -432,7 +434,7 @@ namespace AgGrade.Data
                     if ((CurrentEquipmentStatus!.FrontPan.BladeHeight > 0) && (FrontCutVolumeBCY > 0))
                     {
                         // get height change for bin based on how much we have left in the scraper
-                        double FillHeightM = FrontCutVolumeBCY / 1.30795 / BIN_SIZE_M / BIN_SIZE_M;
+                        double FillHeightM = FrontCutVolumeBCY / CUBIC_YARDS_PER_CUBIC_METER / BIN_SIZE_M / BIN_SIZE_M;
                         if (FillHeightM > CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0)
                         {
                             FillHeightM = CurrentEquipmentStatus.FrontPan.BladeHeight / 1000.0;
@@ -446,7 +448,7 @@ namespace AgGrade.Data
                             BinToFill.NumberofFills++;
 
                             // update volume, can't go negative
-                            FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                            FrontCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER;
                             if (FrontCutVolumeBCY < 0)
                             {
                                 FrontCutVolumeBCY = 0;
@@ -479,7 +481,7 @@ namespace AgGrade.Data
                     if (CurrentEquipmentStatus!.RearPan.BladeHeight > 0)
                     {
                         // get height change for bin based on how much we have left in the scraper
-                        double FillHeightM = RearCutVolumeBCY / 1.30795 / BIN_SIZE_M / BIN_SIZE_M;
+                        double FillHeightM = RearCutVolumeBCY / CUBIC_YARDS_PER_CUBIC_METER / BIN_SIZE_M / BIN_SIZE_M;
                         if (FillHeightM > CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0)
                         {
                             FillHeightM = CurrentEquipmentStatus.RearPan.BladeHeight / 1000.0;
@@ -493,7 +495,7 @@ namespace AgGrade.Data
                             BinToFill.NumberofFills++;
 
                             // update volume, can't go negative
-                            RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * 1.30795;
+                            RearCutVolumeBCY -= BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER;
                             if (RearCutVolumeBCY < 0)
                             {
                                 RearCutVolumeBCY = 0;
@@ -535,7 +537,7 @@ namespace AgGrade.Data
                             BinToCut.NumberOfCuts++;
 
                             // update volume
-                            FrontCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
+                            FrontCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * CUBIC_YARDS_PER_CUBIC_METER;
 
                             // remember this bin so we don't process it more than one this pass of the blade
                             FrontProcessedBins.Add(BinToCut);
@@ -573,7 +575,7 @@ namespace AgGrade.Data
                             BinToCut.NumberOfCuts++;
 
                             // update volume
-                            RearCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * 1.30795;
+                            RearCutVolumeBCY += BIN_SIZE_M * BIN_SIZE_M * -CutHeightM * CUBIC_YARDS_PER_CUBIC_METER;
 
                             // remember this bin so we don't process it more than one this pass of the blade
                             RearProcessedBins.Add(BinToCut);
