@@ -762,9 +762,12 @@ namespace AgGrade.Data
             double CutHeightM
             )
         {
+            if (CutHeightM == 0) return;
+
             BinToCut.ExistingElevationM -= CutHeightM;
 
             Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
+            Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
         }
 
         /// <summary>
@@ -778,9 +781,12 @@ namespace AgGrade.Data
             double FillHeightM
             )
         {
+            if (FillHeightM == 0) return;
+
             BinToFill.ExistingElevationM += FillHeightM;
 
             Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
+            Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
         }
 
         /// <summary>

@@ -1,9 +1,10 @@
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
+using static AgGrade.Data.Database;
 
 namespace AgGrade.Data
 {
@@ -81,7 +82,8 @@ namespace AgGrade.Data
         public class BinChange
         {
             public int BinHistoryID { get; set; }
-            public int BinID { get; set; }
+            public int X { get; set; }
+            public int Y { get; set; }
             public double HeightChangeM { get; set; }
             /// <summary>Milliseconds since 1970-01-01 00:00:00 UTC.</summary>
             public long Timestamp { get; set; }
@@ -97,11 +99,13 @@ namespace AgGrade.Data
             /// <summary>Creates a bin change with the given bin and height change; Timestamp is set to current time in GMT.</summary>
             public BinChange
                 (
-                int binID,
+                int x,
+                int y,
                 double heightChangeM
                 )
             {
-                BinID = binID;
+                X = x;
+                Y = y;
                 HeightChangeM = heightChangeM;
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
@@ -175,7 +179,8 @@ namespace AgGrade.Data
             {
                 cmd.CommandText = @"CREATE TABLE BinHistory (
                         BinHistoryID INTEGER PRIMARY KEY AUTOINCREMENT,
-                        BinID INTEGER,
+                        X INTEGER,
+                        Y INTEGER,
                         HeightChangeM REAL,
                         Timestamp INTEGER
                     )";
@@ -292,7 +297,15 @@ namespace AgGrade.Data
         /// <param name="heightM">Height in meters</param>
         public void AddBinState(int x, int y, double heightM)
         {
-            AddBinState(new BinState(x, y, heightM));
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO FieldState (X, Y, HeightM) VALUES (@X, @Y, @HeightM)";
+                cmd.Parameters.AddWithValue("@X", x);
+                cmd.Parameters.AddWithValue("@Y", y);
+                cmd.Parameters.AddWithValue("@HeightM", heightM);
+                cmd.ExecuteNonQuery();
+            }
         }
 
         /// <summary>
@@ -374,13 +387,42 @@ namespace AgGrade.Data
         /// <summary>
         /// Inserts a row into the BinHistory table.
         /// </summary>
+        /// <param name="X">Bin X coordinate</param>
+        /// <param name="Y">Bin Y coordinate</param>
+        /// <param name="HeightChangeM">Change in height in meters (negative = cut)</param>
+        public void AddBinHistory
+            (
+            int x,
+            int y,
+            double HeightChangeM
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            long Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO BinHistory (X, Y, HeightChangeM, Timestamp) VALUES (@X, @Y, @HeightChangeM, @Timestamp)";
+                cmd.Parameters.AddWithValue("@X", x);
+                cmd.Parameters.AddWithValue("@Y", y);
+                cmd.Parameters.AddWithValue("@HeightChangeM", HeightChangeM);
+                cmd.Parameters.AddWithValue("@Timestamp", Timestamp);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Inserts a row into the BinHistory table.
+        /// </summary>
         public void AddBinHistory(BinChange binChange)
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO BinHistory (BinID, HeightChangeM, Timestamp) VALUES (@BinID, @HeightChangeM, @Timestamp)";
-                cmd.Parameters.AddWithValue("@BinID", binChange.BinID);
+                cmd.CommandText = "INSERT INTO BinHistory (X, Y, HeightChangeM, Timestamp) VALUES (@X, @Y, @HeightChangeM, @Timestamp)";
+                cmd.Parameters.AddWithValue("@X", binChange.X);
+                cmd.Parameters.AddWithValue("@Y", binChange.Y);
                 cmd.Parameters.AddWithValue("@HeightChangeM", binChange.HeightChangeM);
                 cmd.Parameters.AddWithValue("@Timestamp", binChange.Timestamp);
                 cmd.ExecuteNonQuery();
