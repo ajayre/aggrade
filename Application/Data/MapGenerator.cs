@@ -1611,8 +1611,8 @@ namespace AgGrade.Data
             double InitialMaximumElevationM;
 
             var nonZeroElevations = Field.Bins
-                .Where(bin => bin.ExistingElevationM != 0.0)
-                .Select(bin => bin.ExistingElevationM)
+                .Where(bin => bin.CurrentElevationM != 0.0)
+                .Select(bin => bin.CurrentElevationM)
                 .ToList();
 
             if (nonZeroElevations.Any())
@@ -1762,7 +1762,7 @@ namespace AgGrade.Data
 
                         if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
                         {
-                            var ExistingElevation = BinGrid[gridY, gridX]?.ExistingElevationM;
+                            var ExistingElevation = BinGrid[gridY, gridX]?.CurrentElevationM;
                             var TargetElevation = BinGrid[gridY, gridX]?.TargetElevationM;
 
                             var CutNum = BinGrid[gridY, gridX]?.NumberOfCuts;
@@ -1990,7 +1990,7 @@ namespace AgGrade.Data
 
                         if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
                         {
-                            var elevation = BinGrid[gridY, gridX]?.ExistingElevationM;
+                            var elevation = BinGrid[gridY, gridX]?.CurrentElevationM;
 
                             if (elevation.HasValue && elevation.Value != 0.0)
                             {

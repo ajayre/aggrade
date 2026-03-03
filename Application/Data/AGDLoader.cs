@@ -77,8 +77,8 @@ namespace AgGrade.Data
             {
                 // Check if bin is empty (no existing elevation data)
                 // A bin is considered empty if it has no existing elevation data
-                // We check if ExistingElevationM is 0, which is the default when no data was assigned
-                bool isEmpty = bin.ExistingElevationM == 0 && bin.TargetElevationM == 0;
+                // We check if CurrentElevationM is 0, which is the default when no data was assigned
+                bool isEmpty = bin.CurrentElevationM == 0 && bin.TargetElevationM == 0;
 
                 // Skip if not empty
                 if (!isEmpty)
@@ -103,7 +103,7 @@ namespace AgGrade.Data
                         if (binMap.TryGetValue((neighborX, neighborY), out Bin neighbor))
                         {
                             // Neighbor must have both existing and target elevation data
-                            if (neighbor.ExistingElevationM != 0 && neighbor.TargetElevationM != 0)
+                            if (neighbor.CurrentElevationM != 0 && neighbor.TargetElevationM != 0)
                             {
                                 neighborsWithData.Add(neighbor);
                             }
@@ -118,7 +118,7 @@ namespace AgGrade.Data
                     // Calculate averages from all neighbors that have data
                     // Use all available neighbors, not just those with non-zero values
                     double avgExistingElevation = neighborsWithData
-                        .Select(n => n.ExistingElevationM)
+                        .Select(n => n.CurrentElevationM)
                         .Average();
 
                     double avgTargetElevation = neighborsWithData
@@ -134,7 +134,7 @@ namespace AgGrade.Data
                         .Average();
 
                     // Fill the empty bin with averaged values
-                    bin.ExistingElevationM = avgExistingElevation;
+                    bin.CurrentElevationM = avgExistingElevation;
                     bin.TargetElevationM = avgTargetElevation;
                     bin.CutAmountM = avgCutAmount;
                     bin.FillAmountM = avgFillAmount;
@@ -309,7 +309,7 @@ namespace AgGrade.Data
 
                     if (BinExistingElevationValues.ContainsKey(Key))
                     {
-                        NewBin.ExistingElevationM = BinExistingElevationValues[Key].Average();
+                        NewBin.CurrentElevationM = BinExistingElevationValues[Key].Average();
                     }
                     if (BinTargetElevationValues.ContainsKey(Key))
                     {

@@ -60,7 +60,9 @@ namespace AgGrade.Data
             public int BinID { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
-            public double HeightM { get; set; }
+            public double InitialHeightM { get; set; }
+            public double CurrentHeightM { get; set; }
+            public double TargetHeightM { get; set; }
 
             /// <summary>Creates an empty bin state.</summary>
             public BinState() { }
@@ -70,12 +72,16 @@ namespace AgGrade.Data
                 (
                 int x,
                 int y,
-                double heightM
+                double initialHeightM,
+                double currentHeightM,
+                double targetHeightM
                 )
             {
                 X = x;
                 Y = y;
-                HeightM = heightM;
+                InitialHeightM = initialHeightM;
+                CurrentHeightM = currentHeightM;
+                TargetHeightM = targetHeightM;
             }
         }
 
@@ -150,7 +156,9 @@ namespace AgGrade.Data
                         BinID INTEGER PRIMARY KEY AUTOINCREMENT,
                         X INTEGER,
                         Y INTEGER,
-                        HeightM REAL
+                        InitialHeightM REAL,
+                        CurrentHeightM REAL,
+                        TargetHeightM REAL
                     )";
                 cmd.ExecuteNonQuery();
             }
@@ -237,7 +245,7 @@ namespace AgGrade.Data
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT BinID, X, Y, HeightM FROM FieldState WHERE X = @X AND Y = @Y";
+                cmd.CommandText = "SELECT BinID, X, Y, InitialHeightM, CurrentHeightM, TargetHeightM FROM FieldState WHERE X = @X AND Y = @Y";
                 cmd.Parameters.AddWithValue("@X", x);
                 cmd.Parameters.AddWithValue("@Y", y);
                 using (var reader = cmd.ExecuteReader())
@@ -248,7 +256,9 @@ namespace AgGrade.Data
                         BinID = reader.GetInt32(0),
                         X = reader.GetInt32(1),
                         Y = reader.GetInt32(2),
-                        HeightM = reader.GetDouble(3)
+                        InitialHeightM = reader.GetDouble(3),
+                        CurrentHeightM = reader.GetDouble(3),
+                        TargetHeightM = reader.GetDouble(3)
                     };
                 }
             }
@@ -300,10 +310,12 @@ namespace AgGrade.Data
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO FieldState (X, Y, HeightM) VALUES (@X, @Y, @HeightM)";
+                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM)";
                 cmd.Parameters.AddWithValue("@X", binState.X);
                 cmd.Parameters.AddWithValue("@Y", binState.Y);
-                cmd.Parameters.AddWithValue("@HeightM", binState.HeightM);
+                cmd.Parameters.AddWithValue("@InitialHeightM", binState.InitialHeightM);
+                cmd.Parameters.AddWithValue("@CurrentHeightM", binState.CurrentHeightM);
+                cmd.Parameters.AddWithValue("@TargetHeightM", binState.TargetHeightM);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -320,7 +332,7 @@ namespace AgGrade.Data
 
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT X, Y, HeightM FROM FieldState";
+                cmd.CommandText = "SELECT X, Y, InitialHeightM, CurrentHeightM, TargetHeightM FROM FieldState";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -328,7 +340,9 @@ namespace AgGrade.Data
                         States.Add(new BinState(
                             reader.GetInt32(0),
                             reader.GetInt32(1),
-                            reader.GetDouble(2)
+                            reader.GetDouble(2),
+                            reader.GetDouble(3),
+                            reader.GetDouble(4)
                         ));
                     }
                 }
@@ -349,17 +363,21 @@ namespace AgGrade.Data
                 using (var command = _connection.CreateCommand())
                 {
                     // Create command and parameters
-                    command.CommandText = "INSERT INTO FieldState (X, Y, HeightM) VALUES (@X, @Y, @HeightM)";
+                    command.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM)";
                     var param1 = command.Parameters.Add("@X", SqliteType.Integer);
                     var param2 = command.Parameters.Add("@Y", SqliteType.Integer);
-                    var param3 = command.Parameters.Add("@HeightM", SqliteType.Real);
+                    var param3 = command.Parameters.Add("@InitialHeightM", SqliteType.Real);
+                    var param4 = command.Parameters.Add("@CurrentHeightM", SqliteType.Real);
+                    var param5 = command.Parameters.Add("@TargetHeightM", SqliteType.Real);
 
                     foreach (Bin b in Bins)
                     {
                         // For each row, only update parameter values
                         param1.Value = b.X;
                         param2.Value = b.Y;
-                        param3.Value = b.ExistingElevationM;
+                        param3.Value = b.InitialElevationM;
+                        param4.Value = b.CurrentElevationM;
+                        param5.Value = b.TargetElevationM;
                         command.ExecuteNonQuery();
                     }
                 }

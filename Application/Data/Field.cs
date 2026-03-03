@@ -695,23 +695,24 @@ namespace AgGrade.Data
                 }
                 DbFile = Path.Combine(Folder, $"V{nextVersion}.db");
 
-                Db.Create(DbFile);
-                HasData = false;
+                // get base database
+                string[] BaseDbs = Directory.GetFiles(Folder, "*-base.db");
+                if (BaseDbs.Length != 1) throw new Exception("No base database found for field");
+
+                // copy base to new database file
+                File.Copy(BaseDbs[0], DbFile);
             }
-            else
-            {
-                Db.Open(DbFile);
-                HasData = true;
-            }
-                
+
+            Db.Open(DbFile);
+
             Clear();
 
             // load AGD file
             AGDLoader Loader = new AGDLoader();
             Loader.Load(this, AGDFile);
 
-            // set field name using AGD file name
-            Name = Path.GetFileNameWithoutExtension(AGDFile);
+            // set field name using folder name and version
+            Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
 
             // if haul directions do not exist, then create them now
             string HaulDirectionsCSV = Folder + Path.DirectorySeparatorChar + "HaulDirections.csv";
@@ -727,31 +728,22 @@ namespace AgGrade.Data
             // construct bin grid to access bins vix y, x
             BinGrid = CreateBinsGrid();
 
-            // has data, load it now
-            if (HasData)
-            {
-                Database.BinState[] States = Db.GetBinStates();
+            // load data
+            Database.BinState[] States = Db.GetBinStates();
 
-                foreach (Database.BinState State in States)
+            foreach (Database.BinState State in States)
+            {
+                try
                 {
-                    try
+                    if (BinGrid[State.Y, State.X] != null)
                     {
-                        if (BinGrid[State.Y, State.X] != null)
-                        {
-                            BinGrid[State.Y, State.X]!.ExistingElevationM = State.HeightM;
-                        }
-                    }
-                    catch (IndexOutOfRangeException Exc)
-                    {
-                        ;
+                        BinGrid[State.Y, State.X]!.CurrentElevationM = State.CurrentHeightM;
                     }
                 }
-            }
-            // no data, store initial bin state
-            else
-            {
-                // store current field state in the database
-                Db.AddBinStates(Bins);
+                catch (IndexOutOfRangeException Exc)
+                {
+                    ;
+                }
             }
 
             // get how much we have done so far
@@ -772,7 +764,7 @@ namespace AgGrade.Data
         {
             if (CutHeightM == 0) return;
 
-            BinToCut.ExistingElevationM -= CutHeightM;
+            BinToCut.CurrentElevationM -= CutHeightM;
 
             //Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
             //Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
@@ -795,7 +787,7 @@ namespace AgGrade.Data
         {
             if (FillHeightM == 0) return;
 
-            BinToFill.ExistingElevationM += FillHeightM;
+            BinToFill.CurrentElevationM += FillHeightM;
 
             //Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
             //Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);

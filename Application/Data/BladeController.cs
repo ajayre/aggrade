@@ -188,18 +188,18 @@ namespace AgGrade.Data
                     if (CurrentBin != null)
                     {
                         // no data for this bin
-                        if (CurrentBin.ExistingElevationM == 0)
+                        if (CurrentBin.CurrentElevationM == 0)
                         {
                             Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
-                        else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
+                        else if (CurrentBin.CurrentElevationM > CurrentBin.TargetElevationM)
                         {
                             // get depth of cut, use max cut depth unless the target elevation is shallower
                             double CutDepthM = CurrentEquipmentSettings.FrontPan.MaxCutDepthMm / 1000.0;
-                            if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
+                            if ((CurrentBin.CurrentElevationM - CutDepthM) < CurrentBin.TargetElevationM)
                             {
-                                CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
+                                CutDepthM = CurrentBin.CurrentElevationM - CurrentBin.TargetElevationM;
                             }
 
                             // convert to command for controller
@@ -238,18 +238,18 @@ namespace AgGrade.Data
                     if (CurrentBin != null)
                     {
                         // no data for this bin
-                        if (CurrentBin.ExistingElevationM == 0)
+                        if (CurrentBin.CurrentElevationM == 0)
                         {
                             Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
-                        else if (CurrentBin.ExistingElevationM > CurrentBin.TargetElevationM)
+                        else if (CurrentBin.CurrentElevationM > CurrentBin.TargetElevationM)
                         {
                             // get depth of cut, use max cut depth unless the target elevation is shallower
                             double CutDepthM = CurrentEquipmentSettings.RearPan.MaxCutDepthMm / 1000.0;
-                            if ((CurrentBin.ExistingElevationM - CutDepthM) < CurrentBin.TargetElevationM)
+                            if ((CurrentBin.CurrentElevationM - CutDepthM) < CurrentBin.TargetElevationM)
                             {
-                                CutDepthM = CurrentBin.ExistingElevationM - CurrentBin.TargetElevationM;
+                                CutDepthM = CurrentBin.CurrentElevationM - CurrentBin.TargetElevationM;
                             }
 
                             // convert to command for controller
@@ -278,18 +278,18 @@ namespace AgGrade.Data
                 if (CurrentBin != null)
                 {
                     // no data for this bin
-                    if (CurrentBin.ExistingElevationM == 0)
+                    if (CurrentBin.CurrentElevationM == 0)
                     {
                         Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
-                    else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
+                    else if (CurrentBin.CurrentElevationM < CurrentBin.TargetElevationM)
                     {
                         // get depth of fill, use max fill depth unless the target elevation is shallower
                         double FillDepthM = CurrentEquipmentSettings.FrontPan.MaxFillDepthMm / 1000.0;
-                        if ((CurrentBin.ExistingElevationM + FillDepthM) > CurrentBin.TargetElevationM)
+                        if ((CurrentBin.CurrentElevationM + FillDepthM) > CurrentBin.TargetElevationM)
                         {
-                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.ExistingElevationM;
+                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.CurrentElevationM;
                         }
 
                         // convert to command for controller
@@ -319,18 +319,18 @@ namespace AgGrade.Data
                 if (CurrentBin != null)
                 {
                     // no data for this bin
-                    if (CurrentBin.ExistingElevationM == 0)
+                    if (CurrentBin.CurrentElevationM == 0)
                     {
                         Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
-                    else if (CurrentBin.ExistingElevationM < CurrentBin.TargetElevationM)
+                    else if (CurrentBin.CurrentElevationM < CurrentBin.TargetElevationM)
                     {
                         // get depth of fill, use max fill depth unless the target elevation is shallower
                         double FillDepthM = CurrentEquipmentSettings.RearPan.MaxFillDepthMm / 1000.0;
-                        if ((CurrentBin.ExistingElevationM + FillDepthM) > CurrentBin.TargetElevationM)
+                        if ((CurrentBin.CurrentElevationM + FillDepthM) > CurrentBin.TargetElevationM)
                         {
-                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.ExistingElevationM;
+                            FillDepthM = CurrentBin.TargetElevationM - CurrentBin.CurrentElevationM;
                         }
 
                         // convert to command for controller

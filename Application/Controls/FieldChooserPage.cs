@@ -50,7 +50,12 @@ namespace AgGrade.Controls
                 if (string.IsNullOrEmpty(fieldName))
                     continue;
 
+                // look for AGD files
                 if (Directory.GetFiles(subDir, "*.agd").Length == 0)
+                    continue;
+
+                // look for exactly one base database
+                if (Directory.GetFiles(subDir, "*-base.db").Length != 1)
                     continue;
 
                 // Create New panel (sorts last within this field)
@@ -63,6 +68,7 @@ namespace AgGrade.Controls
                 foreach (var fi in dbFiles)
                 {
                     string dbFileName = Path.GetFileNameWithoutExtension(fi.FullName);
+                    if (dbFileName.Contains("-base")) continue;
                     entries.Add((
                         fieldName,
                         fieldName + " (" + dbFileName + ")",

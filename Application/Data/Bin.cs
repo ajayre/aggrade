@@ -10,7 +10,8 @@ public class Bin
     public Coordinate Centroid { get; set; }
     public double CutAmountM { get; set; }
     public double FillAmountM { get; set; }
-    public double ExistingElevationM { get; set; }
+    public double InitialElevationM { get; set; }
+    public double CurrentElevationM { get; set; }
     public double TargetElevationM { get; set; }
     public bool Dirty { get; set; }
     public uint NumberOfCuts { get; set; }

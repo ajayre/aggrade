@@ -425,7 +425,7 @@ namespace AgGrade.Data
             )
         {
             // if bin is specified and has valid data then process it
-            if ((BinToFill != null) && (BinToFill.ExistingElevationM > 0))
+            if ((BinToFill != null) && (BinToFill.CurrentElevationM > 0))
             {
                 // if we haven't already seen this bin
                 if (!FrontProcessedBins.Contains(BinToFill))
@@ -472,7 +472,7 @@ namespace AgGrade.Data
             )
         {
             // if bin is specified and has valid data then process it
-            if ((BinToFill != null) && (BinToFill.ExistingElevationM > 0))
+            if ((BinToFill != null) && (BinToFill.CurrentElevationM > 0))
             {
                 // if we haven't already seen this bin
                 if (!RearProcessedBins.Contains(BinToFill))
@@ -519,7 +519,7 @@ namespace AgGrade.Data
             )
         {
             // if bin is specified and has valid data then process it
-            if ((BinToCut != null) && (BinToCut.ExistingElevationM > 0))
+            if ((BinToCut != null) && (BinToCut.CurrentElevationM > 0))
             {
                 // if we haven't already seen this bin
                 if (!FrontProcessedBins.Contains(BinToCut))
@@ -557,7 +557,7 @@ namespace AgGrade.Data
             )
         {
             // if bin is specified and has valid data then process it
-            if ((BinToCut != null) && (BinToCut.ExistingElevationM > 0))
+            if ((BinToCut != null) && (BinToCut.CurrentElevationM > 0))
             {
                 // if we haven't already seen this bin
                 if (!RearProcessedBins.Contains(BinToCut))
