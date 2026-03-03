@@ -707,9 +707,28 @@ namespace AgGrade.Data
 
             Clear();
 
-            // load AGD file
-            AGDLoader Loader = new AGDLoader();
-            Loader.Load(this, AGDFile);
+            // load in field
+            Database.BinState[] BinStates = Db.GetBinStates();
+            foreach (Database.BinState BinState in BinStates)
+            {
+                Bin NewBin = new Bin();
+                NewBin.X = BinState.X;
+                NewBin.Y = BinState.Y;
+                NewBin.CurrentElevationM = BinState.CurrentHeightM;
+                NewBin.InitialElevationM = BinState.InitialHeightM;
+                NewBin.TargetElevationM = BinState.TargetHeightM;
+                NewBin.Centroid = new Coordinate(BinState.CentroidLat, BinState.CentroidLon);
+                NewBin.Field = this;
+                Bins.Add(NewBin);
+            }
+
+            // load in field data
+            FieldCentroidLat = Db.GetData(Database.DataNames.MeanLat);
+            FieldCentroidLon = Db.GetData(Database.DataNames.MeanLon);
+            GridWidth = (int)Db.GetData(Database.DataNames.GridWidth);
+            GridHeight = (int)Db.GetData(Database.DataNames.GridHeight);
+            CompletedCutCY = Db.GetData(Database.DataNames.CompletedCutCY);
+            CompletedFillCY = Db.GetData(Database.DataNames.CompletedFillCY);
 
             // set field name using folder name and version
             Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
@@ -723,12 +742,29 @@ namespace AgGrade.Data
 
             LoadHaulDirections(HaulDirectionsCSV);
 
+            // find the Southwest corner (minimum X and Y) to use as origin
+            double MinLat = Db.GetData(Database.DataNames.MinLat);
+            double MinLon = Db.GetData(Database.DataNames.MinLon);
+            UTM.UTMCoordinate MinXY = UTM.FromLatLon(MinLat, MinLon);
+            FieldMinX = MinXY.Easting;
+            FieldMinY = MinXY.Northing;
+
+            UTMZone = MinXY.Zone;
+            IsNorthernHemisphere = MinXY.IsNorthernHemisphere;
+
+            // find the northeast corner (maximum X and Y)
+            double MaxLat = Db.GetData(Database.DataNames.MaxLat);
+            double MaxLon = Db.GetData(Database.DataNames.MaxLon);
+            UTM.UTMCoordinate MaxXY = UTM.FromLatLon(MaxLat, MaxLon);
+            FieldMaxX = MaxXY.Easting;
+            FieldMaxY = MaxXY.Northing;
+
             CalculateBinGridSize();
 
             // construct bin grid to access bins vix y, x
             BinGrid = CreateBinsGrid();
 
-            // load data
+            /*// load data
             Database.BinState[] States = Db.GetBinStates();
 
             foreach (Database.BinState State in States)
@@ -737,7 +773,7 @@ namespace AgGrade.Data
                 {
                     if (BinGrid[State.Y, State.X] != null)
                     {
-                        BinGrid[State.Y, State.X]!.CurrentElevationM = State.CurrentHeightM;
+                        //BinGrid[State.Y, State.X]!.CurrentElevationM = State.CurrentHeightM;
                     }
                 }
                 catch (IndexOutOfRangeException Exc)
@@ -748,7 +784,7 @@ namespace AgGrade.Data
 
             // get how much we have done so far
             CompletedCutCY = Db.GetData(Database.DataNames.CompletedCutCY);
-            CompletedFillCY = Db.GetData(Database.DataNames.CompletedCutCY);
+            CompletedFillCY = Db.GetData(Database.DataNames.CompletedCutCY);*/
         }
 
         /// <summary>
@@ -766,7 +802,7 @@ namespace AgGrade.Data
 
             BinToCut.CurrentElevationM -= CutHeightM;
 
-            //Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.ExistingElevationM);
+            //Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.CurrentElevationM);
             //Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
 
             // updated completed cuts
@@ -789,7 +825,7 @@ namespace AgGrade.Data
 
             BinToFill.CurrentElevationM += FillHeightM;
 
-            //Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.ExistingElevationM);
+            //Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.CurrentElevationM);
             //Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
 
             // update completed fills

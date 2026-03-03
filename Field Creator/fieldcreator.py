@@ -1002,6 +1002,8 @@ def init_sqlite_db(db_path: Path) -> sqlite3.Connection:
             InitialHeightM REAL,
             CurrentHeightM REAL,
             TargetHeightM REAL,
+            CentroidLat REAL,
+            CentroidLon REAL,
             HaulPath INTEGER
         );
 
@@ -1761,10 +1763,11 @@ def main() -> int:
     for bx, by in all_bins:
         existing_height_m = existing_values.get((bx, by))
         target_height_m = target_values.get((bx, by))
-        field_rows.append((bx, by, existing_height_m, existing_height_m, target_height_m, 0))
+        centroid_lat, centroid_lon = centroids.get((bx, by), (None, None))
+        field_rows.append((bx, by, existing_height_m, existing_height_m, target_height_m, centroid_lat, centroid_lon, 0))
 
     cur.executemany(
-        "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, HaulPath) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
         field_rows,
     )
     # Store grid and projection parameters in the Data table for downstream consumers.
@@ -1791,6 +1794,24 @@ def main() -> int:
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("MinY", float(min_y)),
+    )
+    centroid_lats = [lat for lat, _ in centroids.values()]
+    centroid_lons = [lon for _, lon in centroids.values()]
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MinLat", float(min(centroid_lats))),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MinLon", float(min(centroid_lons))),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MaxLat", float(max(centroid_lats))),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MaxLon", float(max(centroid_lons))),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
