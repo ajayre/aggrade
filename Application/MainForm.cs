@@ -860,6 +860,7 @@ namespace AgGrade
                 CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartRearCutting();
                 RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
+                GetMap()?.StartRearCutting();
             }
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {
@@ -1028,6 +1029,7 @@ namespace AgGrade
                 CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartFrontCutting();
                 FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
+                GetMap()?.StartFrontCutting();
             }
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using static AgGrade.Data.Database;
+using static OpenCvSharp.FileStorage;
 
 namespace AgGrade.Data
 {
@@ -65,6 +66,7 @@ namespace AgGrade.Data
             public double TargetHeightM { get; set; }
             public double CentroidLat { get; set; }
             public double CentroidLon { get; set; }
+            public int HaulPath {  get; set; }
 
             /// <summary>Creates an empty bin state.</summary>
             public BinState() { }
@@ -78,7 +80,8 @@ namespace AgGrade.Data
                 double currentHeightM,
                 double targetHeightM,
                 double centroidLat,
-                double centroidLon
+                double centroidLon,
+                int haulPath
                 )
             {
                 X = x;
@@ -88,6 +91,7 @@ namespace AgGrade.Data
                 TargetHeightM = targetHeightM;
                 CentroidLat = centroidLat;
                 CentroidLon = centroidLon;
+                HaulPath = haulPath;
             }
         }
 
@@ -221,6 +225,22 @@ namespace AgGrade.Data
             _connection?.Dispose();
             _connection = new SqliteConnection($"Data Source={FileName}");
             _connection.Open();
+            EnsureHaulPathsIndex();
+        }
+
+        /// <summary>
+        /// Ensures HaulPaths has an index for WHERE HaulPath = ? ORDER BY PointNumber (for existing DBs created before the index existed).
+        /// </summary>
+        private void EnsureHaulPathsIndex()
+        {
+            if (_connection == null) return;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT 1 FROM sqlite_master WHERE type='table' AND name='HaulPaths'";
+                if (cmd.ExecuteScalar() == null) return;
+                cmd.CommandText = "CREATE INDEX IF NOT EXISTS idx_haulpaths_haul_point ON HaulPaths (HaulPath, PointNumber)";
+                cmd.ExecuteNonQuery();
+            }
         }
 
         /// <summary>
@@ -261,7 +281,7 @@ namespace AgGrade.Data
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT BinID, X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon FROM FieldState WHERE X = @X AND Y = @Y";
+                cmd.CommandText = "SELECT BinID, X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath FROM FieldState WHERE X = @X AND Y = @Y";
                 cmd.Parameters.AddWithValue("@X", x);
                 cmd.Parameters.AddWithValue("@Y", y);
                 using (var reader = cmd.ExecuteReader())
@@ -276,7 +296,8 @@ namespace AgGrade.Data
                         CurrentHeightM = reader.GetDouble(3),
                         TargetHeightM = reader.GetDouble(3),
                         CentroidLat = reader.GetDouble(4),
-                        CentroidLon = reader.GetDouble(5)
+                        CentroidLon = reader.GetDouble(5),
+                        HaulPath = reader.GetInt32(6)
                     };
                 }
             }
@@ -315,13 +336,14 @@ namespace AgGrade.Data
             double currentHeightM,
             double targetHeightM,
             double centroidLat,
-            double centroidLon
+            double centroidLon,
+            int haulPath
             )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon)";
+                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
                 cmd.Parameters.AddWithValue("@X", x);
                 cmd.Parameters.AddWithValue("@Y", y);
                 cmd.Parameters.AddWithValue("@InitialHeightM", initialHeightM);
@@ -329,6 +351,7 @@ namespace AgGrade.Data
                 cmd.Parameters.AddWithValue("@TargetHeightM", targetHeightM);
                 cmd.Parameters.AddWithValue("@CentroidLat", centroidLat);
                 cmd.Parameters.AddWithValue("@CentroidLon", centroidLon);
+                cmd.Parameters.AddWithValue("@HaulPath", haulPath);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -341,7 +364,7 @@ namespace AgGrade.Data
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon)";
+                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
                 cmd.Parameters.AddWithValue("@X", binState.X);
                 cmd.Parameters.AddWithValue("@Y", binState.Y);
                 cmd.Parameters.AddWithValue("@InitialHeightM", binState.InitialHeightM);
@@ -349,6 +372,7 @@ namespace AgGrade.Data
                 cmd.Parameters.AddWithValue("@TargetHeightM", binState.TargetHeightM);
                 cmd.Parameters.AddWithValue("@CentroidLat", binState.CentroidLat);
                 cmd.Parameters.AddWithValue("@CentroidLon", binState.CentroidLon);
+                cmd.Parameters.AddWithValue("@HaulPath", binState.HaulPath);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -365,7 +389,7 @@ namespace AgGrade.Data
 
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "SELECT X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon FROM FieldState";
+                cmd.CommandText = "SELECT X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath FROM FieldState";
                 using (var reader = cmd.ExecuteReader())
                 {
                     while (reader.Read())
@@ -377,7 +401,8 @@ namespace AgGrade.Data
                             reader.GetDouble(3),
                             reader.GetDouble(4),
                             reader.GetDouble(5),
-                            reader.GetDouble(6)
+                            reader.GetDouble(6),
+                            reader.GetInt32(7)
                         ));
                     }
                 }
@@ -398,7 +423,7 @@ namespace AgGrade.Data
                 using (var command = _connection.CreateCommand())
                 {
                     // Create command and parameters
-                    command.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon)";
+                    command.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
                     var param1 = command.Parameters.Add("@X", SqliteType.Integer);
                     var param2 = command.Parameters.Add("@Y", SqliteType.Integer);
                     var param3 = command.Parameters.Add("@InitialHeightM", SqliteType.Real);
@@ -406,6 +431,7 @@ namespace AgGrade.Data
                     var param5 = command.Parameters.Add("@TargetHeightM", SqliteType.Real);
                     var param6 = command.Parameters.AddWithValue("@CentroidLat", SqliteType.Real);
                     var param7 = command.Parameters.AddWithValue("@CentroidLon", SqliteType.Real);
+                    var param8 = command.Parameters.Add("@HaulPath", SqliteType.Integer);
 
                     foreach (Bin b in Bins)
                     {
@@ -417,6 +443,7 @@ namespace AgGrade.Data
                         param5.Value = b.TargetElevationM;
                         param6.Value = b.Centroid.Latitude;
                         param7.Value = b.Centroid.Longitude;
+                        param8.Value = b.HaulPath;
                         command.ExecuteNonQuery();
                     }
                 }
@@ -532,6 +559,55 @@ namespace AgGrade.Data
                 catch (SqliteException)
                 {
                     return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the path to haul soil
+        /// </summary>
+        /// <param name="StartBin">The starting bin for the haul</param>
+        /// <returns>The haul path or empty list for no path</returns>
+        public List<Coordinate> GetHaulPath
+            (
+            Bin StartBin
+            )
+        {
+            // if not cutting then there won't be a haul path
+            if (StartBin.CurrentElevationM <= StartBin.TargetElevationM)
+            {
+                return new List<Coordinate>();
+            }
+
+            // if no haul path then nothing to get
+            if (StartBin.HaulPath == 0)
+            {
+                return new List<Coordinate>();
+            }
+
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            List<Coordinate> Path = new List<Coordinate>();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                try
+                {
+                    cmd.CommandText = "SELECT Latitude, Longitude FROM HaulPaths WHERE HaulPath = @HaulPath ORDER BY PointNumber";
+                    cmd.Parameters.AddWithValue("@HaulPath", StartBin.HaulPath.ToString());
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            Path.Add(new Coordinate(reader.GetDouble(0), reader.GetDouble(1)));
+                        }
+                    }
+
+                    return Path;
+                }
+                catch (SqliteException)
+                {
+                    return new List<Coordinate>();
                 }
             }
         }

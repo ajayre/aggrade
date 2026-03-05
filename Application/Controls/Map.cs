@@ -36,6 +36,7 @@ namespace AgGrade.Controls
         private bool ShowHaulArrows;
         private MapGenerator.MapTypes MapType;
         private MapGenerator.TractorStyles TractorStyle;
+        private List<Coordinate> HaulPath = new List<Coordinate>();
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
@@ -232,7 +233,7 @@ namespace AgGrade.Controls
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType, TractorStyle);
+                ShowHaulArrows, MapType, TractorStyle, HaulPath);
             //sw.Stop();
             //LastPerf = sw.ElapsedMilliseconds;
             //ShowPerf();
@@ -260,6 +261,34 @@ namespace AgGrade.Controls
             }
             FieldNameLabel.Text = LastPerf.ToString();
         }*/
+
+        /// <summary>
+        /// Called when the front starts cutting
+        /// </summary>
+        public void StartFrontCutting
+            (
+            )
+        {
+            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.FrontPan.Fix.Latitude, _CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            {
+                HaulPath = CurrentField.GetHaulPath(CurrentBin);
+            }
+            else
+            {
+                HaulPath = new List<Coordinate>();
+            }
+        }
+
+        /// <summary>
+        /// Called when the rear starts cutting
+        /// </summary>
+        public void StartRearCutting
+            (
+            )
+        {
+            // fixme - to do
+        }
 
         /// <summary>
         /// Zooms the map to fit

@@ -680,6 +680,9 @@ namespace AgGrade.Data
             if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
             string AGDFile = AGDFiles[0];
 
+            AGDLoader Loader = new AGDLoader();
+            Loader.Load(this, AGDFile);
+
             bool HasData = false;
 
             // if no database file then get the name of the database file to create
@@ -718,6 +721,7 @@ namespace AgGrade.Data
                 NewBin.InitialElevationM = BinState.InitialHeightM;
                 NewBin.TargetElevationM = BinState.TargetHeightM;
                 NewBin.Centroid = new Coordinate(BinState.CentroidLat, BinState.CentroidLon);
+                NewBin.HaulPath = BinState.HaulPath;
                 NewBin.Field = this;
                 Bins.Add(NewBin);
             }
@@ -891,6 +895,19 @@ namespace AgGrade.Data
         {
             HaulImageProcessor Processor = new HaulImageProcessor();
             Processor.Process(Folder, OutputFileName);
+        }
+
+        /// <summary>
+        /// Gets the haul path for a specific starting bin
+        /// </summary>
+        /// <param name="StartBin">Starting bin</param>
+        /// <returns>List of coordinates or empty list for no path</returns>
+        public List<Coordinate> GetHaulPath
+            (
+            Bin StartBin
+            )
+        {
+            return Db.GetHaulPath(StartBin);
         }
 
         /// <summary>

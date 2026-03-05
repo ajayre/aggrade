@@ -178,6 +178,7 @@ namespace AgGrade.Data
         private AppSettings CurrentAppSettings;
         private bool ShowHaulArrows;
         private MapTypes MapType;
+        private List<Coordinate> HaulPath;
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -243,6 +244,8 @@ namespace AgGrade.Data
         /// <param name="CurrentAppSettings">The current application settings</param>
         /// <param name="ShowHaulArrows">true to show the haul arrows</param>
         /// <param name="MapType">The type of map to generate</param>
+        /// <param name="TractorStyle">Style of tractor icon</param>
+        /// <param name="HaulPath">List of points for current haul path or empty/null for no path</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -260,7 +263,8 @@ namespace AgGrade.Data
             AppSettings CurrentAppSettings,
             bool ShowHaulArrows,
             MapTypes MapType,
-            TractorStyles TractorStyle
+            TractorStyles TractorStyle,
+            List<Coordinate> HaulPath
             )
         {
             CurrentField = Field;
@@ -274,6 +278,8 @@ namespace AgGrade.Data
             this.CurrentAppSettings = CurrentAppSettings;
 
             this.ShowHaulArrows = ShowHaulArrows;
+
+            this.HaulPath = HaulPath;
 
             // has the type of map changed?
             bool MapTypeChanged = false;
@@ -618,7 +624,7 @@ namespace AgGrade.Data
                 }
             }
 
-            Decorate(bitmap, Benchmarks, TractorLocationHistory, CurrentEquipmentSettings);
+            Decorate(bitmap, Benchmarks, TractorLocationHistory, CurrentEquipmentSettings, HaulPath);
 
             return bitmap;
         }
@@ -688,12 +694,14 @@ namespace AgGrade.Data
             Bitmap Map,
             List<Benchmark> Benchmarks,
             List<Coordinate> TractorLocationHistory,
-            EquipmentSettings CurrentEquipmentSettings
+            EquipmentSettings CurrentEquipmentSettings,
+            List<Coordinate> HaulPath
             )
         {
             Pen TractorPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
             Pen HaulArrowPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
-            Pen HaulArrowTipPen = new Pen(Color.FromArgb(0x80, 0x00, 0x00, 0x00), 2);
+            Pen HaulArrowTipPen = new Pen(Color.FromArgb(0x80, 0x50, 0x50, 0x50), 2);
+            Pen HaulPathPen = new Pen(Color.FromArgb(0xA0, 0x00, 0x00, 0x00), 4);
 
             var BenchmarkFontFamily = new FontFamily("Arial");
             var BenchmarkFont = new System.Drawing.Font(BenchmarkFontFamily, 14, FontStyle.Regular, GraphicsUnit.Pixel);
@@ -742,6 +750,23 @@ namespace AgGrade.Data
                         int TipLength = (int)(40 * (CurrentScaleFactor / 13.0));
                         Point lineEnd = new Point(Vertices[0].X + (int)(TipLength * ldx), Vertices[0].Y + (int)(TipLength * ldy));
                         g.DrawLine(HaulArrowTipPen, Vertices[0], lineEnd);
+                    }
+                }
+
+                // draw haul path
+                if (HaulPath != null && HaulPath.Count > 0)
+                {
+                    Point? LastLocpx = null;
+                    foreach (Coordinate HaulPoint in HaulPath.ToList())
+                    {
+                        Point Pix = LatLonToWorld(HaulPoint);
+
+                        if (LastLocpx != null)
+                        {
+                            g.DrawLine(HaulPathPen, LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);
+                        }
+
+                        LastLocpx = Pix;
                     }
                 }
 

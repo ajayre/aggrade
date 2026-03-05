@@ -16,6 +16,7 @@ public class Bin
     public bool Dirty { get; set; }
     public uint NumberOfCuts { get; set; }
     public uint NumberofFills { get; set; }
+    public int HaulPath {  get; set; }
     public Field Field { get; set; }
 
     public override string ToString()
