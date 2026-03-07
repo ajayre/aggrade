@@ -33,6 +33,184 @@ SOURCE_ARROW_COLOR = (255, 0, 0)
 
 
 # ---------------------------------------------------------------------------
+# UTM (WGS‑84) helpers – ported from Application/Data/UTM.cs
+# ---------------------------------------------------------------------------
+
+class UTMCoordinate(Tuple[int, bool, float, float]):
+    __slots__ = ()
+
+    @property
+    def zone(self) -> int:
+        return self[0]
+
+    @property
+    def is_northern(self) -> bool:
+        return self[1]
+
+    @property
+    def easting(self) -> float:
+        return self[2]
+
+    @property
+    def northing(self) -> float:
+        return self[3]
+
+
+_UTM_A = 6378137.0
+_UTM_F = 1.0 / 298.257223563
+_UTM_K0 = 0.9996
+_UTM_B = _UTM_A * (1.0 - _UTM_F)
+_UTM_E2 = 1.0 - (_UTM_B * _UTM_B) / (_UTM_A * _UTM_A)
+_UTM_EPRIME2 = _UTM_E2 / (1.0 - _UTM_E2)
+
+
+def _deg_to_rad(deg: float) -> float:
+    return deg * math.pi / 180.0
+
+
+def _rad_to_deg(rad: float) -> float:
+    return rad * 180.0 / math.pi
+
+
+def utm_from_latlon(latitude_deg: float, longitude_deg: float) -> UTMCoordinate:
+    """
+    Match AgGrade.Data.UTM.FromLatLon (WGS‑84, no Norway/Svalbard special cases).
+    Returns (zone, is_northern, easting_m, northing_m).
+    """
+    if latitude_deg < -80.0 or latitude_deg > 84.0:
+        raise ValueError("Latitude out of UTM bounds (-80 to 84 degrees).")
+
+    # Normalize longitude to [-180, 180)
+    lon_norm = ((longitude_deg + 180.0) % 360.0 + 360.0) % 360.0 - 180.0
+
+    zone = int(math.floor((lon_norm + 180.0) / 6.0) + 1)
+    is_northern = latitude_deg >= 0.0
+
+    lat_rad = _deg_to_rad(latitude_deg)
+    lon_rad = _deg_to_rad(lon_norm)
+
+    lon_origin = (zone - 1) * 6 - 180 + 3  # central meridian of zone
+    lon_origin_rad = _deg_to_rad(lon_origin)
+
+    sin_lat = math.sin(lat_rad)
+    cos_lat = math.cos(lat_rad)
+
+    N = _UTM_A / math.sqrt(1.0 - _UTM_E2 * sin_lat * sin_lat)
+    T = math.tan(lat_rad) ** 2
+    C = _UTM_EPRIME2 * cos_lat * cos_lat
+    A = cos_lat * (lon_rad - lon_origin_rad)
+
+    M = _UTM_A * (
+        (1.0 - _UTM_E2 / 4.0 - 3.0 * _UTM_E2 * _UTM_E2 / 64.0 - 5.0 * _UTM_E2 * _UTM_E2 * _UTM_E2 / 256.0) * lat_rad
+        - (3.0 * _UTM_E2 / 8.0 + 3.0 * _UTM_E2 * _UTM_E2 / 32.0 + 45.0 * _UTM_E2 * _UTM_E2 * _UTM_E2 / 1024.0)
+        * math.sin(2.0 * lat_rad)
+        + (15.0 * _UTM_E2 * _UTM_E2 / 256.0 + 45.0 * _UTM_E2 * _UTM_E2 * _UTM_E2 / 1024.0)
+        * math.sin(4.0 * lat_rad)
+        - (35.0 * _UTM_E2 * _UTM_E2 * _UTM_E2 / 3072.0) * math.sin(6.0 * lat_rad)
+    )
+
+    x = _UTM_K0 * N * (
+        A
+        + (1.0 - T + C) * A**3 / 6.0
+        + (5.0 - 18.0 * T + T * T + 72.0 * C - 58.0 * _UTM_EPRIME2) * A**5 / 120.0
+    )
+
+    y = _UTM_K0 * (
+        M
+        + N * math.tan(lat_rad)
+        * (
+            A * A / 2.0
+            + (5.0 - T + 9.0 * C + 4.0 * C * C) * A**4 / 24.0
+            + (61.0 - 58.0 * T + T * T + 600.0 * C - 330.0 * _UTM_EPRIME2) * A**6 / 720.0
+        )
+    )
+
+    easting = x + 500000.0
+    northing = y + (0.0 if is_northern else 10000000.0)
+
+    return UTMCoordinate((zone, is_northern, easting, northing))
+
+
+def utm_to_latlon(
+    zone: int,
+    is_northern: bool,
+    easting: float,
+    northing: float,
+) -> Tuple[float, float]:
+    """
+    Match AgGrade.Data.UTM.ToLatLon.
+    """
+    if zone < 1 or zone > 60:
+        raise ValueError("UTM zone must be between 1 and 60.")
+
+    x = easting - 500000.0
+    y = northing - (0.0 if is_northern else 10000000.0)
+
+    lon_origin = (zone - 1) * 6 - 180 + 3
+    lon_origin_rad = _deg_to_rad(lon_origin)
+
+    M = y / _UTM_K0
+    mu = M / (
+        _UTM_A
+        * (
+            1.0
+            - _UTM_E2 / 4.0
+            - 3.0 * _UTM_E2 * _UTM_E2 / 64.0
+            - 5.0 * _UTM_E2 * _UTM_E2 * _UTM_E2 / 256.0
+        )
+    )
+
+    e1 = (1.0 - math.sqrt(1.0 - _UTM_E2)) / (1.0 + math.sqrt(1.0 - _UTM_E2))
+
+    J1 = 3.0 * e1 / 2.0 - 27.0 * e1**3 / 32.0
+    J2 = 21.0 * e1 * e1 / 16.0 - 55.0 * e1**4 / 32.0
+    J3 = 151.0 * e1**3 / 96.0
+    J4 = 1097.0 * e1**4 / 512.0
+
+    fp = (
+        mu
+        + J1 * math.sin(2.0 * mu)
+        + J2 * math.sin(4.0 * mu)
+        + J3 * math.sin(6.0 * mu)
+        + J4 * math.sin(8.0 * mu)
+    )
+
+    sin_fp = math.sin(fp)
+    cos_fp = math.cos(fp)
+
+    C1 = _UTM_EPRIME2 * cos_fp * cos_fp
+    T1 = math.tan(fp) ** 2
+    N1 = _UTM_A / math.sqrt(1.0 - _UTM_E2 * sin_fp * sin_fp)
+    R1 = N1 * (1.0 - _UTM_E2) / (1.0 - _UTM_E2 * sin_fp * sin_fp)
+    D = x / (N1 * _UTM_K0)
+
+    lat_rad = fp - (N1 * math.tan(fp) / R1) * (
+        D * D / 2.0
+        - (5.0 + 3.0 * T1 + 10.0 * C1 - 4.0 * C1 * C1 - 9.0 * _UTM_EPRIME2) * D**4 / 24.0
+        + (
+            61.0
+            + 90.0 * T1
+            + 298.0 * C1
+            + 45.0 * T1 * T1
+            - 252.0 * _UTM_EPRIME2
+            - 3.0 * C1 * C1
+        )
+        * D**6
+        / 720.0
+    )
+
+    lon_rad = lon_origin_rad + (
+        D
+        - (1.0 + 2.0 * T1 + C1) * D**3 / 6.0
+        + (5.0 - 2.0 * C1 + 28.0 * T1 - 3.0 * C1 * C1 + 8.0 * _UTM_EPRIME2 + 24.0 * T1 * T1)
+        * D**5
+        / 120.0
+    ) / cos_fp
+
+    return _rad_to_deg(lat_rad), _rad_to_deg(lon_rad)
+
+
+# ---------------------------------------------------------------------------
 # Palette + elevation helpers (from render_existing_heights.py, inlined here)
 # ---------------------------------------------------------------------------
 
@@ -500,7 +678,13 @@ def _blend_vector_field(
     ]
     blended: Dict[Tuple[int, int], Tuple[float, float]] = dict(field_vectors)
 
-    for _ in range(max(0, passes)):
+    for pass_i in range(max(0, passes)):
+        if passes > 0:
+            print(
+                f"INFO: haul_heading: blend pass {pass_i + 1}/{passes}...",
+                file=sys.stderr,
+                flush=True,
+            )
         next_vectors: Dict[Tuple[int, int], Tuple[float, float]] = {}
         for bx, by in bins_to_draw:
             base = blended.get((bx, by))
@@ -545,33 +729,37 @@ def _blend_vector_field(
 
 def build_haul_heading_by_bin(
     samples: list[tuple[float, float, float]],
-    mean_lat: float,
-    mean_lon: float,
     min_x: float,
     min_y: float,
     grid_width: int,
     grid_height: int,
     bins_to_draw: set[Tuple[int, int]],
+    utm_zone: int,
+    utm_is_northern: bool,
 ) -> Dict[Tuple[int, int], float]:
     """
     From raw haul samples (lat, lon, heading_deg), build a smooth heading
     field over the binned grid: (bin_x, bin_y) -> heading_deg.
+    Uses the same UTM (min_x, min_y) as the grid so bin indices match.
     """
     if not samples:
         return {}
 
-    lat0_rad = math.radians(mean_lat)
-
-    # 1) Accumulate unit vectors per bin from samples.
+    # 1) Accumulate unit vectors per bin from samples. Convert lat/lon to UTM
+    #    so bin indices match the grid (min_x, min_y are UTM easting/northing).
     accum: Dict[Tuple[int, int], List[Tuple[float, float]]] = {}
-    for lat, lon, direction_deg in samples:
-        dlat = math.radians(lat - mean_lat)
-        dlon = math.radians(lon - mean_lon)
-        y_local = EARTH_RADIUS_M * dlat
-        x_local = EARTH_RADIUS_M * dlon * math.cos(lat0_rad)
-
-        bx_f = (x_local - min_x) / BIN_SIZE_M
-        by_f = (y_local - min_y) / BIN_SIZE_M
+    n_samples = len(samples)
+    for i, (lat, lon, direction_deg) in enumerate(samples):
+        if (i + 1) % 2000 == 0 or i == 0:
+            print(f"INFO: haul_heading: assigning samples {i + 1}/{n_samples}...", file=sys.stderr, flush=True)
+        try:
+            utm = utm_from_latlon(lat, lon)
+        except ValueError:
+            continue
+        if utm.zone != utm_zone or utm.is_northern != utm_is_northern:
+            continue
+        bx_f = (utm.easting - min_x) / BIN_SIZE_M
+        by_f = (utm.northing - min_y) / BIN_SIZE_M
         bx = int(math.floor(bx_f))
         by = int(math.floor(by_f))
         if bx < 0 or bx >= grid_width or by < 0 or by >= grid_height:
@@ -582,6 +770,7 @@ def build_haul_heading_by_bin(
         dy = math.cos(rad)
         accum.setdefault((bx, by), []).append((dx, dy))
 
+    print(f"INFO: haul_heading: {len(accum)} bins from samples", file=sys.stderr, flush=True)
     if not accum:
         return {}
 
@@ -600,12 +789,25 @@ def build_haul_heading_by_bin(
     # 2) Interpolate vectors so every requested bin gets an arrow.
     field_vectors: Dict[Tuple[int, int], Tuple[float, float]] = dict(known)
     pending: set[Tuple[int, int]] = set(bins_to_draw) - set(field_vectors.keys())
+    print(
+        f"INFO: haul_heading: interpolating to {len(pending)} bins (from {len(known)} sample bins)...",
+        file=sys.stderr,
+        flush=True,
+    )
     neighbors = [
         (-1, -1), (0, -1), (1, -1),
         (-1, 0),           (1, 0),
         (-1, 1),  (0, 1),  (1, 1),
     ]
+    iter_num = 0
     while pending:
+        iter_num += 1
+        if iter_num % 5 == 1 or iter_num <= 2:
+            print(
+                f"INFO: haul_heading: interpolation pass {iter_num}, {len(pending)} pending...",
+                file=sys.stderr,
+                flush=True,
+            )
         progressed = False
         still_pending: set[Tuple[int, int]] = set()
         for bx, by in pending:
@@ -633,10 +835,29 @@ def build_haul_heading_by_bin(
             break
         pending = still_pending
 
+    print(
+        f"INFO: haul_heading: interpolation done; {len(pending)} isolated bins remaining",
+        file=sys.stderr,
+        flush=True,
+    )
     # 3) Fallback for isolated bins: use nearest known vector.
     if pending and known:
         known_items = list(known.items())
+        n_pending = len(pending)
+        print(
+            f"INFO: haul_heading: nearest-vector fallback for {n_pending} isolated bins...",
+            file=sys.stderr,
+            flush=True,
+        )
+        done = 0
         for bx, by in pending:
+            done += 1
+            if n_pending >= 10000 and (done % 50000 == 0 or done == n_pending):
+                print(
+                    f"INFO: haul_heading: fallback {done}/{n_pending}...",
+                    file=sys.stderr,
+                    flush=True,
+                )
             best_vec = None
             best_d2 = None
             for (kx, ky), vec in known_items:
@@ -648,6 +869,7 @@ def build_haul_heading_by_bin(
                 field_vectors[(bx, by)] = best_vec
 
     # 4) Blend interpolated vectors to reduce abrupt block boundaries.
+    print("INFO: haul_heading: blending (5 passes)...", file=sys.stderr, flush=True)
     field_vectors = _blend_vector_field(
         field_vectors=field_vectors,
         bins_to_draw=bins_to_draw,
@@ -664,6 +886,12 @@ def build_haul_heading_by_bin(
 
 
 def _local_xy_to_latlon(x: float, y: float, lat0: float, lon0: float) -> Tuple[float, float]:
+    """
+    Legacy helper kept for compatibility in other modules.
+    NOTE: In this script, core binning now uses UTM; this equirectangular
+    helper is only used where we still need an approximate local XY
+    for visualization unrelated to bin indexing.
+    """
     lat0_rad = math.radians(lat0)
     lat = math.degrees(y / EARTH_RADIUS_M + lat0_rad)
     lon = math.degrees(x / (EARTH_RADIUS_M * math.cos(lat0_rad))) + lon0
@@ -728,63 +956,107 @@ def bin_agd_points_2ft(
     float,
     float,
     float,
+    float,
+    float,
     int,
     int,
+    int,
+    bool,
 ]:
     """
-    In-memory equivalent of bin_agd_heights.py for existing + target elevations.
+    In-memory equivalent of CalculateCutFillVolumesWithBinning in AGDLoader.cs
+    for existing + target elevations, using the same UTM-based binning.
     Returns:
-    - existing_values (bin -> avg existing elev)
-    - target_values (bin -> avg target elev)
-    - centroids (bin -> centroid_lat, centroid_lon)
-    - bins_raw (bin -> centroid_lat, centroid_lon, existing_elev, area_m2)
-    - mean_lat, mean_lon
-    - min_x, min_y
-    - grid_width, grid_height
+    - existing_values (bin -> avg existing elev for original AGD points, no fill)
+    - target_values (bin -> avg target elev for original AGD points, no fill)
+    - centroids (bin -> centroid_lat, centroid_lon) for every bin in the full grid
+    - bins_raw (bin -> centroid_lat, centroid_lon, existing_elev, area_m2) for image helpers
+    - mean_lat, mean_lon (for optional visualization)
+    - min_x, min_y (UTM easting/northing min over points; matches AGDLoader FieldMinX/FieldMinY)
+    - max_x, max_y (UTM easting/northing max over points; matches AGDLoader FieldMaxX/FieldMaxY)
+    - grid_width, grid_height (bin dimensions)
+    - utm_zone, utm_is_northern (zone parameters used for all conversions)
     """
+    if not points:
+        raise ValueError("No AGD points to bin")
+
+    # Field centroid for reporting/visualization (not used for binning).
     mean_lat = sum(p[0] for p in points) / len(points)
     mean_lon = sum(p[1] for p in points) / len(points)
-    lat0_rad = math.radians(mean_lat)
 
-    xy_points: List[Tuple[float, float, float, float]] = []
+    # Match AGDLoader.ConvertToLocalCoordinates: use SW corner (min lat, min lon)
+    # to determine UTM zone / hemisphere, then convert every point to UTM.
+    min_lat = min(p[0] for p in points)
+    min_lon = min(p[1] for p in points)
+    sw_utm = utm_from_latlon(min_lat, min_lon)
+    utm_zone = sw_utm.zone
+    utm_is_northern = sw_utm.is_northern
+
+    utm_points: List[Tuple[float, float, float, float]] = []
     for lat, lon, existing, target in points:
-        dlat = math.radians(lat - mean_lat)
-        dlon = math.radians(lon - mean_lon)
-        y = EARTH_RADIUS_M * dlat
-        x = EARTH_RADIUS_M * dlon * math.cos(lat0_rad)
-        xy_points.append((x, y, existing, target))
+        coord = utm_from_latlon(lat, lon)
+        if coord.zone != utm_zone:
+            # AGDLoader does not support fields that cross UTM zones; we mirror that
+            raise ValueError(
+                f"AGD field crosses UTM zones (got zone {coord.zone}, expected {utm_zone})"
+            )
+        utm_points.append((coord.easting, coord.northing, existing, target))
 
-    min_x = min(p[0] for p in xy_points)
-    min_y = min(p[1] for p in xy_points)
+    min_x = min(p[0] for p in utm_points)
+    max_x = max(p[0] for p in utm_points)
+    min_y = min(p[1] for p in utm_points)
+    max_y = max(p[1] for p in utm_points)
 
+    grid_width = int(math.ceil((max_x - min_x) / BIN_SIZE_M))
+    grid_height = int(math.ceil((max_y - min_y) / BIN_SIZE_M))
+    if grid_width <= 0 or grid_height <= 0:
+        raise ValueError("Computed non-positive grid dimensions from AGD data")
+
+    # Aggregate existing/target elevations per bin, mirroring the C# logic that
+    # only bins points with non-zero cut/fill (existing != target).
     grouped: Dict[Tuple[int, int], List[Tuple[float, float]]] = {}
-    for x, y, existing, target in xy_points:
-        bx = int(math.floor((x - min_x) / BIN_SIZE_M))
-        by = int(math.floor((y - min_y) / BIN_SIZE_M))
+    for easting, northing, existing, target in utm_points:
+        cut_fill = existing - target
+        if abs(cut_fill) <= 0.0:
+            continue
+        bx = int(math.floor((easting - min_x) / BIN_SIZE_M))
+        by = int(math.floor((northing - min_y) / BIN_SIZE_M))
+        if bx < 0 or bx >= grid_width or by < 0 or by >= grid_height:
+            continue
         grouped.setdefault((bx, by), []).append((existing, target))
 
     existing_values: Dict[Tuple[int, int], float] = {}
     target_values: Dict[Tuple[int, int], float] = {}
     centroids: Dict[Tuple[int, int], Tuple[float, float]] = {}
     bins_raw: Dict[Tuple[int, int], Tuple[float, float, float, float]] = {}
-    max_x = -1
-    max_y = -1
+
+    # Precompute averages for bins that received AGD points.
     for (bx, by), pairs in grouped.items():
         avg_existing = sum(p[0] for p in pairs) / len(pairs)
         avg_target = sum(p[1] for p in pairs) / len(pairs)
         existing_values[(bx, by)] = avg_existing
         target_values[(bx, by)] = avg_target
-        max_x = max(max_x, bx)
-        max_y = max(max_y, by)
 
-        # Centroid of bin in local XY
-        x0 = min_x + bx * BIN_SIZE_M
-        y0 = min_y + by * BIN_SIZE_M
-        cx = x0 + 0.5 * BIN_SIZE_M
-        cy = y0 + 0.5 * BIN_SIZE_M
-        centroid_lat, centroid_lon = _local_xy_to_latlon(cx, cy, mean_lat, mean_lon)
-        centroids[(bx, by)] = (centroid_lat, centroid_lon)
-        bins_raw[(bx, by)] = (centroid_lat, centroid_lon, avg_existing, BIN_AREA_M2)
+    # Now mirror AGDLoader: materialize the full rectangular grid of bins and
+    # compute centroids for every bin using UTM -> lat/lon.
+    for by in range(grid_height):
+        for bx in range(grid_width):
+            bin_min_x = min_x + bx * BIN_SIZE_M
+            bin_min_y = min_y + by * BIN_SIZE_M
+            bin_max_x = bin_min_x + BIN_SIZE_M
+            bin_max_y = bin_min_y + BIN_SIZE_M
+            cx = 0.5 * (bin_min_x + bin_max_x)
+            cy = 0.5 * (bin_min_y + bin_max_y)
+            centroid_lat, centroid_lon = utm_to_latlon(
+                utm_zone,
+                utm_is_northern,
+                cx,
+                cy,
+            )
+            centroids[(bx, by)] = (centroid_lat, centroid_lon)
+
+            avg_existing = existing_values.get((bx, by), 0.0)
+            bins_raw[(bx, by)] = (centroid_lat, centroid_lon, avg_existing, BIN_AREA_M2)
 
     return (
         existing_values,
@@ -795,8 +1067,12 @@ def bin_agd_points_2ft(
         mean_lon,
         min_x,
         min_y,
-        max_x + 1,
-        max_y + 1,
+        max_x,
+        max_y,
+        grid_width,
+        grid_height,
+        utm_zone,
+        utm_is_northern,
     )
 
 
@@ -807,8 +1083,12 @@ def subset_center_bottom_eighth(
     bins_raw: Dict[Tuple[int, int], Tuple[float, float, float, float]],
     min_x: float,
     min_y: float,
+    max_x: float,
+    max_y: float,
     grid_width: int,
     grid_height: int,
+    utm_zone: int,
+    utm_is_northern: bool,
 ) -> tuple[
     Dict[Tuple[int, int], float],
     Dict[Tuple[int, int], float],
@@ -816,14 +1096,18 @@ def subset_center_bottom_eighth(
     Dict[Tuple[int, int], Tuple[float, float, float, float]],
     float,
     float,
+    float,
+    float,
     int,
     int,
+    int,
+    bool,
 ]:
     """
     Keep only center-bottom (south) one-eighth of field:
       width fraction = 1/2 (centered), height fraction = 1/4 (bottom),
       total area fraction = 1/8.
-    Reindex bins so subset starts at (0,0), and adjust min_x/min_y accordingly.
+    Reindex bins so subset starts at (0,0), and adjust min_x/min_y/max_x/max_y accordingly.
     """
     x0 = int(grid_width * 0.25)
     x1 = int(grid_width * 0.75)
@@ -855,7 +1139,9 @@ def subset_center_bottom_eighth(
     new_h = max(1, y1 - y0)
     new_min_x = min_x + x0 * BIN_SIZE_M
     new_min_y = min_y + y0 * BIN_SIZE_M
-    return ex2, tg2, ct2, br2, new_min_x, new_min_y, new_w, new_h
+    new_max_x = new_min_x + new_w * BIN_SIZE_M
+    new_max_y = new_min_y + new_h * BIN_SIZE_M
+    return ex2, tg2, ct2, br2, new_min_x, new_min_y, new_max_x, new_max_y, new_w, new_h, utm_zone, utm_is_northern
 
 
 def write_binned_elevation_csv(
@@ -874,10 +1160,7 @@ def write_binned_elevation_csv(
 def write_haul_directions_binned_csv(
     out_path: Path,
     arrows: List[Tuple[float, float, float]],
-    mean_lat: float,
-    mean_lon: float,
-    min_x: float,
-    min_y: float,
+    centroids: Dict[Tuple[int, int], Tuple[float, float]],
     grid_height: int,
     pixels_per_bin: int,
 ) -> None:
@@ -887,16 +1170,14 @@ def write_haul_directions_binned_csv(
         for px, py, heading in arrows:
             bx = int(round(px / pixels_per_bin - 0.5))
             by = int(round(grid_height - 0.5 - (py / pixels_per_bin)))
-            cx = min_x + (bx + 0.5) * BIN_SIZE_M
-            cy = min_y + (by + 0.5) * BIN_SIZE_M
-            lat, lon = _local_xy_to_latlon(cx, cy, mean_lat, mean_lon)
+            lat, lon = centroids.get((bx, by), ("", ""))
             writer.writerow([f"{lat:.9f}", f"{lon:.9f}", bx, by, f"{heading:.6f}"])
 
 
 def load_source_haul_arrows(
     haul_path: Path,
-    mean_lat: float,
-    mean_lon: float,
+    utm_zone: int,
+    utm_is_northern: bool,
     min_x: float,
     min_y: float,
     grid_width: int,
@@ -911,8 +1192,6 @@ def load_source_haul_arrows(
     if not haul_path.is_file():
         return arrows
 
-    lat0_rad = math.radians(mean_lat)
-
     with haul_path.open(newline="", encoding="utf-8") as f:
         reader = csv.DictReader(f)
         for row in reader:
@@ -922,11 +1201,11 @@ def load_source_haul_arrows(
                 heading = float(row["direction_degrees"])
             except (KeyError, ValueError):
                 continue
-
-            dlat = math.radians(lat - mean_lat)
-            dlon = math.radians(lon - mean_lon)
-            y_local = EARTH_RADIUS_M * dlat
-            x_local = EARTH_RADIUS_M * dlon * math.cos(lat0_rad)
+            coord = utm_from_latlon(lat, lon)
+            if coord.zone != utm_zone:
+                continue
+            x_local = coord.easting
+            y_local = coord.northing
 
             bx_f = (x_local - min_x) / BIN_SIZE_M
             by_f = (y_local - min_y) / BIN_SIZE_M
@@ -1038,6 +1317,9 @@ def init_sqlite_db(db_path: Path) -> sqlite3.Connection:
             Latitude REAL,
             Longitude REAL
         );
+
+        CREATE INDEX IF NOT EXISTS idx_haulpaths_haul_point
+            ON HaulPaths (HaulPath, PointNumber);
 
         CREATE TABLE IF NOT EXISTS HaulArrows (
             ArrowID INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -1392,7 +1674,7 @@ def main() -> int:
         help="Overlay source haul arrows in red 2x size over interpolated arrows",
     )
     parser.add_argument(
-        "--pathgeneration",
+        "--imgpathgeneration",
         action="store_true",
         help="Enable path generation flow (default: off)",
     )
@@ -1400,13 +1682,13 @@ def main() -> int:
         "--path-start-x",
         type=int,
         default=None,
-        help="Path start bin X coordinate (used when --pathgeneration is enabled)",
+        help="Path start bin X coordinate (used when --imgpathgeneration is enabled)",
     )
     parser.add_argument(
         "--path-start-y",
         type=int,
         default=None,
-        help="Path start bin Y coordinate (used when --pathgeneration is enabled)",
+        help="Path start bin Y coordinate (used when --imgpathgeneration is enabled)",
     )
     parser.add_argument(
         "--path-hit-threshold-in",
@@ -1456,6 +1738,11 @@ def main() -> int:
         action="store_true",
         help="Process only center-bottom one-eighth subset of field (default: off)",
     )
+    parser.add_argument(
+        "--disablehaulpaths",
+        action="store_true",
+        help="Do not calculate haul paths or write to the HaulPaths table",
+    )
     args = parser.parse_args()
 
     if not args.agd.is_file():
@@ -1464,9 +1751,9 @@ def main() -> int:
     if args.pixels_per_bin <= 0:
         print("ERROR: --pixels-per-bin must be > 0", file=sys.stderr)
         return 1
-    if args.pathgeneration and (args.path_start_x is None or args.path_start_y is None):
+    if args.imgpathgeneration and (args.path_start_x is None or args.path_start_y is None):
         print(
-            "ERROR: --path-start-x and --path-start-y are required when --pathgeneration is enabled",
+            "ERROR: --path-start-x and --path-start-y are required when --imgpathgeneration is enabled",
             file=sys.stderr,
         )
         return 1
@@ -1509,8 +1796,12 @@ def main() -> int:
         mean_lon,
         min_x,
         min_y,
+        max_x,
+        max_y,
         grid_width,
         grid_height,
+        utm_zone,
+        utm_is_northern,
     ) = bin_agd_points_2ft(points)
 
     if args.test_subset:
@@ -1521,8 +1812,12 @@ def main() -> int:
             bins_raw,
             min_x,
             min_y,
+            max_x,
+            max_y,
             grid_width,
             grid_height,
+            utm_zone,
+            utm_is_northern,
         ) = subset_center_bottom_eighth(
             existing_values=existing_values,
             target_values=target_values,
@@ -1530,15 +1825,25 @@ def main() -> int:
             bins_raw=bins_raw,
             min_x=min_x,
             min_y=min_y,
+            max_x=max_x,
+            max_y=max_y,
             grid_width=grid_width,
             grid_height=grid_height,
+            utm_zone=utm_zone,
+            utm_is_northern=utm_is_northern,
         )
         print(
             f"INFO: test-subset enabled -> grid {grid_width}x{grid_height}",
             file=sys.stderr,
         )
 
-    values = fill_missing_bins(existing_values, grid_width, grid_height)
+    print("INFO: filling missing bins (existing elevations)...", file=sys.stderr, flush=True)
+    existing_filled = fill_missing_bins(existing_values, grid_width, grid_height)
+    print(f"INFO: filled missing bins (existing); {len(existing_filled)} bins", file=sys.stderr, flush=True)
+    print("INFO: filling missing bins (target elevations)...", file=sys.stderr, flush=True)
+    target_filled = fill_missing_bins(target_values, grid_width, grid_height)
+    print(f"INFO: filled missing bins (target); {len(target_filled)} bins", file=sys.stderr, flush=True)
+    values = existing_filled
     palette = generate_palette()
     min_elev, max_elev = elevation_range(values)
 
@@ -1608,16 +1913,40 @@ def main() -> int:
             file=sys.stderr,
         )
 
-    if haul_samples:
+    # Build per-bin haul heading only when needed: for HaulPaths, output image arrows,
+    # or path-generation overlay. With --disablehaulpaths and no image/pathgen we skip it.
+    need_haul_heading = (
+        not args.disablehaulpaths
+        or args.output is not None
+        or args.imgpathgeneration
+    )
+    if haul_samples and need_haul_heading:
+        print(
+            f"INFO: building haul heading field from {len(haul_samples)} samples "
+            f"(grid {grid_width}x{grid_height}, {len(bins_to_draw)} bins)...",
+            file=sys.stderr,
+            flush=True,
+        )
         haul_heading_by_bin = build_haul_heading_by_bin(
             samples=haul_samples,
-            mean_lat=mean_lat,
-            mean_lon=mean_lon,
             min_x=min_x,
             min_y=min_y,
             grid_width=grid_width,
             grid_height=grid_height,
             bins_to_draw=bins_to_draw,
+            utm_zone=utm_zone,
+            utm_is_northern=utm_is_northern,
+        )
+        print(
+            f"INFO: haul heading field complete: {len(haul_heading_by_bin)} bins",
+            file=sys.stderr,
+            flush=True,
+        )
+    elif haul_samples and not need_haul_heading:
+        print(
+            "INFO: skipping haul heading field (--disablehaulpaths and no --output or --imgpathgeneration)",
+            file=sys.stderr,
+            flush=True,
         )
 
     # Draw interpolated haul arrows (per-bin) and optional source arrows.
@@ -1631,15 +1960,16 @@ def main() -> int:
         print(f"INFO: drew {arrow_count} haul direction arrows (hollow triangles)", file=sys.stderr)
 
         if args.overlay_source_arrows and haul_samples:
-            lat0_rad = math.radians(mean_lat)
             source_count = 0
             for lat, lon, heading in haul_samples:
-                dlat = math.radians(lat - mean_lat)
-                dlon = math.radians(lon - mean_lon)
-                y_local = EARTH_RADIUS_M * dlat
-                x_local = EARTH_RADIUS_M * dlon * math.cos(lat0_rad)
-                bx_f = (x_local - min_x) / BIN_SIZE_M
-                by_f = (y_local - min_y) / BIN_SIZE_M
+                try:
+                    utm = utm_from_latlon(lat, lon)
+                except ValueError:
+                    continue
+                if utm.zone != utm_zone or utm.is_northern != utm_is_northern:
+                    continue
+                bx_f = (utm.easting - min_x) / BIN_SIZE_M
+                by_f = (utm.northing - min_y) / BIN_SIZE_M
                 if bx_f < 0.0 or bx_f >= grid_width or by_f < 0.0 or by_f >= grid_height:
                     continue
                 px = bx_f * args.pixels_per_bin
@@ -1661,12 +1991,12 @@ def main() -> int:
             )
 
     # Optional path generation overlay for visualization (kept from interpolate.py).
-    if args.pathgeneration:
+    if args.imgpathgeneration:
         # Random starts must come only from cut bins (existing > target) that also
         # have an interpolated haul heading.
         cut_bins = [
             b for b in haul_heading_by_bin.keys()
-            if b in existing_values and b in target_values and existing_values[b] > target_values[b]
+            if b in existing_filled and b in target_filled and existing_filled[b] > target_filled[b]
         ]
         if not cut_bins:
             print("WARNING: no cut bins with haul-heading data available for path generation", file=sys.stderr)
@@ -1747,8 +2077,8 @@ def main() -> int:
     write_combined_binned_csv(
         out_path=combined_csv,
         centroids=centroids,
-        existing_values=existing_values,
-        target_values=target_values,
+        existing_values=existing_filled,
+        target_values=target_filled,
         haul_heading_by_bin=haul_heading_by_bin,
     )
     print(f"INFO: wrote merged binned CSV {combined_csv}", file=sys.stderr)
@@ -1757,13 +2087,13 @@ def main() -> int:
     con = init_sqlite_db(db_path)
     cur = con.cursor()
 
-    # Populate FieldState for every bin present in the binned model.
-    all_bins = sorted(set(existing_values.keys()) | set(target_values.keys()))
+    # Populate FieldState for every bin in the full rectangular grid (to match AGDLoader).
+    all_bins = [(bx, by) for by in range(grid_height) for bx in range(grid_width)]
     field_rows = []
     for bx, by in all_bins:
-        existing_height_m = existing_values.get((bx, by))
-        target_height_m = target_values.get((bx, by))
-        centroid_lat, centroid_lon = centroids.get((bx, by), (None, None))
+        existing_height_m = existing_filled.get((bx, by), 0.0)
+        target_height_m = target_filled.get((bx, by), 0.0)
+        centroid_lat, centroid_lon = centroids.get((bx, by), (0.0, 0.0))
         field_rows.append((bx, by, existing_height_m, existing_height_m, target_height_m, centroid_lat, centroid_lon, 0))
 
     cur.executemany(
@@ -1771,6 +2101,13 @@ def main() -> int:
         field_rows,
     )
     # Store grid and projection parameters in the Data table for downstream consumers.
+    # MinX, MinY, MaxX, MaxY: UTM easting/northing (meters), min/max over topology points.
+    # MinLat, MinLon, MaxLat, MaxLon: WGS84 bounds from UTM corners (not from centroid extents).
+    # Converting (min_x,min_y) and (max_x,max_y) to lat/lon ensures Field.Load gets correct
+    # FieldMinX/Y when it does UTM.FromLatLon(MinLat,MinLon). Bin width and height in degrees
+    # are not equal, so we must use the actual UTM corners, not min/max of centroid lats/lons.
+    data_min_lat, data_min_lon = utm_to_latlon(utm_zone, utm_is_northern, min_x, min_y)
+    data_max_lat, data_max_lon = utm_to_latlon(utm_zone, utm_is_northern, max_x, max_y)
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("GridWidth", float(grid_width)),
@@ -1795,23 +2132,29 @@ def main() -> int:
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("MinY", float(min_y)),
     )
-    centroid_lats = [lat for lat, _ in centroids.values()]
-    centroid_lons = [lon for _, lon in centroids.values()]
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
-        ("MinLat", float(min(centroid_lats))),
+        ("MaxX", float(max_x)),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
-        ("MinLon", float(min(centroid_lons))),
+        ("MaxY", float(max_y)),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
-        ("MaxLat", float(max(centroid_lats))),
+        ("MinLat", float(data_min_lat)),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
-        ("MaxLon", float(max(centroid_lons))),
+        ("MinLon", float(data_min_lon)),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MaxLat", float(data_max_lat)),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("MaxLon", float(data_max_lon)),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
@@ -1842,13 +2185,19 @@ def main() -> int:
     cut_bins = [
         (bx, by)
         for (bx, by) in all_bins
-        if existing_values.get((bx, by)) is not None
-        and target_values.get((bx, by)) is not None
-        and existing_values[(bx, by)] > target_values[(bx, by)]
+        if existing_filled.get((bx, by)) is not None
+        and target_filled.get((bx, by)) is not None
+        and existing_filled[(bx, by)] > target_filled[(bx, by)]
     ]
 
     total_cut = len(cut_bins)
-    if total_cut == 0:
+    if args.disablehaulpaths:
+        if total_cut > 0:
+            print(
+                "INFO: haul paths disabled (--disablehaulpaths); HaulPaths table left empty",
+                file=sys.stderr,
+            )
+    elif total_cut == 0:
         print("INFO: no cut bins found; HaulPaths table will remain empty", file=sys.stderr)
     else:
         missing_heading = [b for b in cut_bins if b not in haul_heading_by_bin]
@@ -1920,7 +2269,7 @@ def main() -> int:
             for point_idx, (x_center, y_center) in enumerate(soil_path):
                 cx_local = min_x + x_center * BIN_SIZE_M
                 cy_local = min_y + y_center * BIN_SIZE_M
-                lat, lon = _local_xy_to_latlon(cx_local, cy_local, mean_lat, mean_lon)
+                lat, lon = utm_to_latlon(utm_zone, utm_is_northern, cx_local, cy_local)
                 path_rows.append((haul_id, point_idx, lat, lon))
 
             cur.executemany(insert_path_sql, path_rows)
