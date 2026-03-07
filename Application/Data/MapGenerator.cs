@@ -1833,9 +1833,9 @@ namespace AgGrade.Data
                                     else if ((DifferenceM >= -0.05) && (DifferenceM < -0.01))
                                     {
                                         // cyan
-                                        r = 0x1B;
-                                        g = 0x7F;
-                                        b = 0xC9;
+                                        r = 0x36;
+                                        g = 0xF5;
+                                        b = 0xF5;
                                         a = 255;
                                     }
                                     else if ((DifferenceM >= -0.01) && (DifferenceM <= 0.01))
