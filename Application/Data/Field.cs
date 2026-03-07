@@ -1,3 +1,6 @@
+using Microsoft.Data.Sqlite;
+using Microsoft.VisualBasic.Logging;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,7 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using Microsoft.Data.Sqlite;
+
+using Point = System.Drawing.Point;
 
 namespace AgGrade.Data
 {
@@ -680,10 +684,9 @@ namespace AgGrade.Data
             if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
             string AGDFile = AGDFiles[0];
 
-            AGDLoader Loader = new AGDLoader();
-            Loader.Load(this, AGDFile);
-
-            bool HasData = false;
+            // fixme - remove
+            //AGDLoader Loader = new AGDLoader();
+            //Loader.Load(this, AGDFile);
 
             // if no database file then get the name of the database file to create
             // we increment based on the previous database files so no data is overwritten
@@ -737,14 +740,22 @@ namespace AgGrade.Data
             // set field name using folder name and version
             Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
 
-            // if haul directions do not exist, then create them now
+            // fixme - remove
+            /*// if haul directions do not exist, then create them now
             string HaulDirectionsCSV = Folder + Path.DirectorySeparatorChar + "HaulDirections.csv";
             if (!File.Exists(HaulDirectionsCSV))
             {
                 CreateHaulDirections(Folder, HaulDirectionsCSV);
             }
 
-            LoadHaulDirections(HaulDirectionsCSV);
+            LoadHaulDirections(HaulDirectionsCSV);*/
+
+            // load in haul arrows
+            Database.HaulArrow[] HaulArrows = Db.GetHaulArrows();
+            foreach (Database.HaulArrow Arrow in HaulArrows)
+            {
+                HaulDirections.Add(new HaulDirection(Arrow.Latitude, Arrow.Longitude, Arrow.Heading));
+            }
 
             // find the Southwest corner (minimum X and Y) to use as origin
             double MinLat = Db.GetData(Database.DataNames.MinLat);
@@ -767,28 +778,6 @@ namespace AgGrade.Data
 
             // construct bin grid to access bins vix y, x
             BinGrid = CreateBinsGrid();
-
-            /*// load data
-            Database.BinState[] States = Db.GetBinStates();
-
-            foreach (Database.BinState State in States)
-            {
-                try
-                {
-                    if (BinGrid[State.Y, State.X] != null)
-                    {
-                        //BinGrid[State.Y, State.X]!.CurrentElevationM = State.CurrentHeightM;
-                    }
-                }
-                catch (IndexOutOfRangeException Exc)
-                {
-                    ;
-                }
-            }
-
-            // get how much we have done so far
-            CompletedCutCY = Db.GetData(Database.DataNames.CompletedCutCY);
-            CompletedFillCY = Db.GetData(Database.DataNames.CompletedCutCY);*/
         }
 
         /// <summary>

@@ -55,6 +55,31 @@ namespace AgGrade.Data
             }
         }
 
+        /// <summary>
+        /// Row from HaulArrows table
+        /// </summary>
+        public class HaulArrow
+        {
+            public int ArrowID { get; set; }
+            public double Latitude { get; set; }
+            public double Longitude { get; set; }
+            public double Heading { get; set; }
+
+            public HaulArrow() { }
+
+            public HaulArrow
+                (
+                double Latitude,
+                double Longitude,
+                double Heading
+                )
+            {
+                this.Latitude = Latitude;
+                this.Longitude = Longitude;
+                this.Heading = Heading;
+            }
+        }
+
         /// <summary>Row from FieldState table (one per bin).</summary>
         public class BinState
         {
@@ -409,6 +434,35 @@ namespace AgGrade.Data
             }
 
             return States.ToArray();
+        }
+
+        /// <summary>
+        /// Gets all of the haul arrows in the database
+        /// </summary>
+        /// <returns>List of haul arrows</returns>
+        public HaulArrow[] GetHaulArrows()
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            List<HaulArrow> Arrows = new List<HaulArrow>();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT Latitude, Longitude, Heading FROM HaulArrows";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        Arrows.Add(new HaulArrow(
+                            reader.GetDouble(0),
+                            reader.GetDouble(1),
+                            reader.GetDouble(2)
+                            ));
+                    }
+                }
+            }
+
+            return Arrows.ToArray();
         }
 
         /// <summary>
