@@ -103,7 +103,7 @@ namespace AgGrade.Data
 
         private class TileCache
         {
-            public List<MapTile> Tiles = new List<MapTile>();
+            public Dictionary<long, MapTile> Tiles = new Dictionary<long, MapTile>();
             public double ScaleFactor;
             public int ImageWidthpx;
             public int ImageHeightpx;
@@ -179,6 +179,23 @@ namespace AgGrade.Data
         private bool ShowHaulArrows;
         private MapTypes MapType;
         private List<Coordinate> HaulPath;
+        private int _rotatedMapWidthpx;
+        private int _rotatedMapHeightpx;
+        private double _rotationCosNeg;
+        private double _rotationSinNeg;
+        private double _unrotatedCenterX;
+        private double _unrotatedCenterY;
+        private double _rotatedCenterX;
+        private double _rotatedCenterY;
+        private double _invScaleFactor;
+        private double _pixelsPerBin;
+        private static readonly int[,] ElevationPalette = BuildColorPalette();
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static long GetTileKey(int tileX, int tileY)
+        {
+            return ((long)tileX << 32) | (uint)tileY;
+        }
 
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
@@ -409,8 +426,33 @@ namespace AgGrade.Data
                 _mapLeftpx = MapLeftpx;
                 _mapToppx = MapToppx;
 
-                // Generate color palette
-                var colorPalette = GenerateColorPalette();
+                // Precompute transform values reused by visibility checks and coordinate transforms.
+                if (_tractorHeading == 0.0)
+                {
+                    _rotatedMapWidthpx = MapWidthpx;
+                    _rotatedMapHeightpx = MapHeightpx;
+                    _rotationCosNeg = 1.0;
+                    _rotationSinNeg = 0.0;
+                }
+                else
+                {
+                    Point rotatedSize = GetRotatedSize(_unrotatedMapWidthpx, _unrotatedMapHeightpx, _tractorHeading);
+                    _rotatedMapWidthpx = rotatedSize.X;
+                    _rotatedMapHeightpx = rotatedSize.Y;
+                    double radians = _tractorHeading * Math.PI / 180.0;
+                    _rotationCosNeg = Math.Cos(-radians);
+                    _rotationSinNeg = Math.Sin(-radians);
+                }
+
+                _unrotatedCenterX = _unrotatedMapWidthpx / 2.0;
+                _unrotatedCenterY = _unrotatedMapHeightpx / 2.0;
+                _rotatedCenterX = _rotatedMapWidthpx / 2.0;
+                _rotatedCenterY = _rotatedMapHeightpx / 2.0;
+                _invScaleFactor = 1.0 / CurrentScaleFactor;
+                _pixelsPerBin = CurrentScaleFactor * Field.BIN_SIZE_M;
+
+                // Use static palette to avoid per-frame regeneration.
+                var colorPalette = ElevationPalette;
 
                 // generate a list of visible tiles
                 List<MapTile> Tiles = new List<MapTile>();
@@ -441,30 +483,19 @@ namespace AgGrade.Data
                             int extendedHeight = extendedEndY - extendedStartY;
 
                             // if this tile can be seen then retrieve from cache or render and add to list of tiles to show
-                            if (IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                            bool tileInView = IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx);
+                            if (tileInView)
                             {
-                                // look in cache for tile
-                                bool InCache = false;
-                                MapTile? CachedTile = null;
-                                foreach (MapTile CTile in Cache.Tiles)
-                                {
-                                    if ((CTile.TileGridX == tileX) && (CTile.TileGridY == tileY))
-                                    {
-                                        CachedTile = CTile;
-                                        Tiles.Add(CTile);
-                                        InCache = true;
-                                        break;
-                                    }
-                                }
+                                // O(1) tile cache lookup by grid coordinate.
+                                long tileKey = GetTileKey(tileX, tileY);
+                                bool InCache = Cache.Tiles.TryGetValue(tileKey, out MapTile? CachedTile);
 
                                 // check if any of the bins in the cached tile are marked as dirty
                                 // if they are then remove tile from cache
                                 if (InCache && CachedTile!.IsDirty(CurrentField))
                                 {
-                                    // remove tile from display
-                                    Tiles.Remove(CachedTile!);
                                     // remove tile from cache to force a re-render
-                                    Cache.Tiles.Remove(CachedTile!);
+                                    Cache.Tiles.Remove(tileKey);
                                     InCache = false;
                                 }
 
@@ -502,16 +533,20 @@ namespace AgGrade.Data
                                     }
 
                                     // cache it
-                                    Cache.Tiles.Add(NewTile);
+                                    Cache.Tiles[tileKey] = NewTile;
                                     // show it
                                     Tiles.Add(NewTile);
+                                }
+                                else
+                                {
+                                    Tiles.Add(CachedTile!);
                                 }
                             }
                         }
                     }
 
                     // clear all dirty flags
-                    foreach (MapTile Tile in Cache.Tiles)
+                    foreach (MapTile Tile in Cache.Tiles.Values)
                     {
                         Tile.ClearDirty();
                     }
@@ -522,10 +557,11 @@ namespace AgGrade.Data
                 {
                     if (_tractorHeading != 0)
                     {
-                        if (IsTileInView(Tile.StartX, Tile.StartY, Tile.Width, Tile.Height, ImageWidthpx, ImageHeightpx))
+                        if ((Tile.RotatedBitmap != null) && !ReferenceEquals(Tile.RotatedBitmap, Tile.Bitmap))
                         {
-                            Tile.RotatedBitmap = Rotate(Tile.Bitmap, _tractorHeading);
+                            Tile.RotatedBitmap.Dispose();
                         }
+                        Tile.RotatedBitmap = Rotate(Tile.Bitmap, _tractorHeading);
                     }
                     else
                     {
@@ -643,15 +679,11 @@ namespace AgGrade.Data
                 return;
             }
 
-            // Convert tile pixel bounds to bin grid coordinates
-            // The tile coordinates are in unrotated map pixel space
-            // We need to check all four corners and the area in between to find all bins
-            
-            // Get bin coordinates for the four corners of the tile
-            Point topLeftBin = PixelToBin(tile.StartX, tile.StartY, 0);
-            Point topRightBin = PixelToBin(tile.StartX + tile.Width, tile.StartY, 0);
-            Point bottomLeftBin = PixelToBin(tile.StartX, tile.StartY + tile.Height, 0);
-            Point bottomRightBin = PixelToBin(tile.StartX + tile.Width, tile.StartY + tile.Height, 0);
+            // Tile coordinates are already in unrotated map space; use direct conversion.
+            Point topLeftBin = PixelToBinFastUnrotated(tile.StartX, tile.StartY);
+            Point topRightBin = PixelToBinFastUnrotated(tile.StartX + tile.Width, tile.StartY);
+            Point bottomLeftBin = PixelToBinFastUnrotated(tile.StartX, tile.StartY + tile.Height);
+            Point bottomRightBin = PixelToBinFastUnrotated(tile.StartX + tile.Width, tile.StartY + tile.Height);
 
             // Find the range of bin coordinates that could be in this tile
             tile.MinBinX = Math.Min(Math.Min(topLeftBin.X, topRightBin.X), Math.Min(bottomLeftBin.X, bottomRightBin.X));
@@ -679,12 +711,26 @@ namespace AgGrade.Data
             // Clear any existing bins
             tile.AssociatedBins.Clear();
 
-            // Filter bins that fall within the tile's bin coordinate range
-            foreach (Bin bin in field.Bins)
+            // Pull bins directly from BinGrid window instead of scanning all field bins.
+            int minX = Math.Max(0, tile.MinBinX);
+            int maxX = Math.Min(field.GridWidth - 1, tile.MaxBinX);
+            int minY = Math.Max(0, tile.MinBinY);
+            int maxY = Math.Min(field.GridHeight - 1, tile.MaxBinY);
+
+            if ((minX > maxX) || (minY > maxY))
             {
-                if (bin.X >= tile.MinBinX && bin.X <= tile.MaxBinX && bin.Y >= tile.MinBinY && bin.Y <= tile.MaxBinY)
+                return;
+            }
+
+            for (int y = minY; y <= maxY; y++)
+            {
+                for (int x = minX; x <= maxX; x++)
                 {
-                    tile.AssociatedBins.Add(bin);
+                    Bin? bin = field.BinGrid[y, x];
+                    if (bin != null)
+                    {
+                        tile.AssociatedBins.Add(bin);
+                    }
                 }
             }
         }
@@ -1446,36 +1492,18 @@ namespace AgGrade.Data
             }
             else
             {
-                // Apply rotation transformation (same as in Rotate method)
-                double radians = _tractorHeading * Math.PI / 180.0;
-                
-                // Calculate rotated map dimensions
-                Point rotatedSize = GetRotatedSize(_unrotatedMapWidthpx, _unrotatedMapHeightpx, _tractorHeading);
-                int rotatedWidth = rotatedSize.X;
-                int rotatedHeight = rotatedSize.Y;
-
-                // Original map center
-                double originalCenterX = _unrotatedMapWidthpx / 2.0;
-                double originalCenterY = _unrotatedMapHeightpx / 2.0;
-
-                // Rotated map center
-                double rotatedCenterX = rotatedWidth / 2.0;
-                double rotatedCenterY = rotatedHeight / 2.0;
-
-                // Translate point to be relative to original map center
-                double relX = unrotatedMapX - originalCenterX;
-                double relY = unrotatedMapY - originalCenterY;
+                // Apply precomputed rotation transform around map center.
+                double relX = unrotatedMapX - _unrotatedCenterX;
+                double relY = unrotatedMapY - _unrotatedCenterY;
 
                 // Apply rotation (counter-clockwise by -Heading, which is clockwise by Heading)
                 // Graphics.RotateTransform(-Heading) rotates counter-clockwise by -Heading
-                double cosAngle = Math.Cos(-radians);
-                double sinAngle = Math.Sin(-radians);
-                double rotatedRelX = relX * cosAngle - relY * sinAngle;
-                double rotatedRelY = relX * sinAngle + relY * cosAngle;
+                double rotatedRelX = relX * _rotationCosNeg - relY * _rotationSinNeg;
+                double rotatedRelY = relX * _rotationSinNeg + relY * _rotationCosNeg;
 
                 // Translate back relative to rotated map center
-                rotatedX = (int)Math.Round(rotatedRelX + rotatedCenterX);
-                rotatedY = (int)Math.Round(rotatedRelY + rotatedCenterY);
+                rotatedX = (int)Math.Round(rotatedRelX + _rotatedCenterX);
+                rotatedY = (int)Math.Round(rotatedRelY + _rotatedCenterY);
             }
 
             // Apply translation to get final image coordinates
@@ -1654,7 +1682,7 @@ namespace AgGrade.Data
             return new double[] {  InitialMinimumElevationM, InitialMaximumElevationM };
         }
 
-        private int[,] GenerateColorPalette()
+        private static int[,] BuildColorPalette()
         {
             var palette = new int[256, 3]; // 256 colors, RGB values
 
@@ -1671,7 +1699,7 @@ namespace AgGrade.Data
             return palette;
         }
 
-        private double[] HsvToRgb(double h, double s, double v)
+        private static double[] HsvToRgb(double h, double s, double v)
         {
             h = h % 360.0;
             if (h < 0) h += 360.0;
@@ -1708,6 +1736,15 @@ namespace AgGrade.Data
             }
 
             return new double[] { r + m, g + m, b + m };
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private Point PixelToBinFastUnrotated(int pixelX, int pixelY)
+        {
+            int binX = (int)Math.Floor(pixelX / _pixelsPerBin);
+            double fieldY = CurrentField.FieldMaxY - (pixelY * _invScaleFactor);
+            int binY = (int)Math.Floor((fieldY - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
+            return new Point(binX, binY);
         }
 
         /// <summary>
