@@ -12,6 +12,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using static AgGrade.Data.FlowMapGenerator;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace AgGrade.Data
@@ -192,6 +193,11 @@ namespace AgGrade.Data
         private double _invScaleFactor;
         private double _pixelsPerBin;
         private static readonly int[,] ElevationPalette = BuildColorPalette();
+        private bool ShowSurfaceFlow;
+        private FlowMapGenerator.ElevationTypes SurfaceFlowElevationType;
+        private Coordinate SurfaceFlowSWCorner = new Coordinate();
+        private Coordinate SurfaceFlowNECorner = new Coordinate();
+        private string? SurfaceFlowImage = null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long GetTileKey(int tileX, int tileY)
@@ -286,6 +292,7 @@ namespace AgGrade.Data
         /// <param name="MapType">The type of map to generate</param>
         /// <param name="TractorStyle">Style of tractor icon</param>
         /// <param name="HaulPath">List of points for current haul path or empty/null for no path</param>
+        /// <param name="ShowSurfaceFlow">true to show the surface water flow</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -304,7 +311,8 @@ namespace AgGrade.Data
             bool ShowHaulArrows,
             MapTypes MapType,
             TractorStyles TractorStyle,
-            List<Coordinate> HaulPath
+            List<Coordinate> HaulPath,
+            bool ShowSurfaceFlow
             )
         {
             CurrentField = Field;
@@ -330,6 +338,8 @@ namespace AgGrade.Data
 
             this.MapType = MapType;
             this.TractorStyle = TractorStyle;
+
+            this.ShowSurfaceFlow = ShowSurfaceFlow;
 
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
@@ -794,6 +804,12 @@ namespace AgGrade.Data
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
+                // show the flow of surface water
+                if (ShowSurfaceFlow)
+                {
+                    RenderSurfaceFlow();
+                }
+
                 // draw benchmarks
                 foreach (Benchmark bmark in Benchmarks)
                 {
@@ -961,6 +977,66 @@ namespace AgGrade.Data
             double dx = Math.Sin(rad);
             double dy = -Math.Cos(rad);
             return (dx, dy);
+        }
+
+        /// <summary>
+        /// Calculates and generates the tiles for showing the surface water flow
+        /// </summary>
+        /// <param name="SurfaceFlowElevationType">Elevation type to use</param>
+        /// <param name="Opacity">Opacity to use</param>
+        public void CalculateSurfaceFlow
+            (
+            FlowMapGenerator.ElevationTypes SurfaceFlowElevationType,
+            int Opacity = 50
+            )
+        {
+            // remove old image
+            if ((SurfaceFlowImage != null) && File.Exists(SurfaceFlowImage))
+            {
+                File.Delete(SurfaceFlowImage);
+                SurfaceFlowImage = null;
+            }
+
+            if (CurrentField == null) return;
+
+            this.SurfaceFlowElevationType = SurfaceFlowElevationType;
+
+            FlowMapGenerator FlowGen = new FlowMapGenerator();
+
+            string TempDEM = Path.GetTempFileName() + ".tiff";
+            string TempFlowDEM = Path.GetTempFileName() + ".tiff";
+            string TempPNG = Path.GetTempFileName() + ".png";
+
+            try
+            {
+                FlowGen.GenerateElevationDEM(CurrentField, FlowMapGenerator.ElevationTypes.Current, TempDEM, out SurfaceFlowSWCorner, out SurfaceFlowNECorner, true);
+                FlowGen.GenerateFlowDEM(TempDEM, TempFlowDEM);
+                FlowGen.ConvertFlowDEMtoPNG(TempFlowDEM, TempPNG, true, Opacity);
+
+                SurfaceFlowImage = TempPNG;
+            }
+            catch
+            {
+                // on any error remove image
+                if (File.Exists(TempPNG)) { File.Delete(TempPNG); }
+                SurfaceFlowImage = null;
+            }
+            finally
+            {
+                if (File.Exists(TempFlowDEM)) { File.Delete(TempFlowDEM); }
+                if (File.Exists(TempDEM)) { File.Delete(TempDEM); }
+            }
+        }
+
+        /// <summary>
+        /// Renders the surface water flow on the current map using the current tractor location and heading
+        /// </summary>
+        private void RenderSurfaceFlow
+            (
+            )
+        {
+            // render tiles from SurfaceFlowImage
+            // if SurfaceFlowImage is null then clear tile cache
         }
 
         /// <summary>

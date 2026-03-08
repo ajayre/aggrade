@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Reflection;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 using Point = System.Drawing.Point;
@@ -684,10 +685,6 @@ namespace AgGrade.Data
             if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
             string AGDFile = AGDFiles[0];
 
-            // fixme - remove
-            //AGDLoader Loader = new AGDLoader();
-            //Loader.Load(this, AGDFile);
-
             // if no database file then get the name of the database file to create
             // we increment based on the previous database files so no data is overwritten
             if (DbFile == null)
@@ -740,16 +737,6 @@ namespace AgGrade.Data
             // set field name using folder name and version
             Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
 
-            // fixme - remove
-            /*// if haul directions do not exist, then create them now
-            string HaulDirectionsCSV = Folder + Path.DirectorySeparatorChar + "HaulDirections.csv";
-            if (!File.Exists(HaulDirectionsCSV))
-            {
-                CreateHaulDirections(Folder, HaulDirectionsCSV);
-            }
-
-            LoadHaulDirections(HaulDirectionsCSV);*/
-
             // load in haul arrows
             Database.HaulArrow[] HaulArrows = Db.GetHaulArrows();
             foreach (Database.HaulArrow Arrow in HaulArrows)
@@ -778,6 +765,9 @@ namespace AgGrade.Data
 
             // construct bin grid to access bins vix y, x
             BinGrid = CreateBinsGrid();
+
+            string OutFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar;
+            FlowMapGenerator FlowGen = new FlowMapGenerator();
         }
 
         /// <summary>

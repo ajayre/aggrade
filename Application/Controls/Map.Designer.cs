@@ -43,6 +43,7 @@
             ElevationMapBtn = new Button();
             CutFillMapBtn = new Button();
             TractorStyleBtn = new Button();
+            FlowBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -208,18 +209,30 @@
             // 
             TractorStyleBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             TractorStyleBtn.Image = (Image)resources.GetObject("TractorStyleBtn.Image");
-            TractorStyleBtn.Location = new Point(810, 253);
+            TractorStyleBtn.Location = new Point(810, 319);
             TractorStyleBtn.Name = "TractorStyleBtn";
             TractorStyleBtn.Size = new Size(60, 60);
             TractorStyleBtn.TabIndex = 11;
             TractorStyleBtn.UseVisualStyleBackColor = true;
             TractorStyleBtn.Click += TractorStyleBtn_Click;
             // 
+            // FlowBtn
+            // 
+            FlowBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            FlowBtn.Image = Properties.Resources.flow_48px;
+            FlowBtn.Location = new Point(810, 253);
+            FlowBtn.Name = "FlowBtn";
+            FlowBtn.Size = new Size(60, 60);
+            FlowBtn.TabIndex = 12;
+            FlowBtn.UseVisualStyleBackColor = true;
+            FlowBtn.Click += FlowBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(FlowBtn);
             Controls.Add(TractorStyleBtn);
             Controls.Add(CutFillMapBtn);
             Controls.Add(ElevationMapBtn);
@@ -251,5 +264,6 @@
         private Button ElevationMapBtn;
         private Button CutFillMapBtn;
         private Button TractorStyleBtn;
+        private Button FlowBtn;
     }
 }

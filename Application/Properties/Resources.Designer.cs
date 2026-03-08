@@ -93,6 +93,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap flow_48px {
+            get {
+                object obj = ResourceManager.GetObject("flow_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap led_green_24px {
             get {
                 object obj = ResourceManager.GetObject("led-green_24px", resourceCulture);

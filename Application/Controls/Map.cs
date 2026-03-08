@@ -34,6 +34,8 @@ namespace AgGrade.Controls
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Timer RefreshTimer;
         private bool ShowHaulArrows;
+        private FlowMapGenerator.ElevationTypes SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
+        private bool ShowSurfaceFlow;
         private MapGenerator.MapTypes MapType;
         private MapGenerator.TractorStyles TractorStyle;
         private List<Coordinate> HaulPath = new List<Coordinate>();
@@ -70,6 +72,7 @@ namespace AgGrade.Controls
             ShowHaulArrows = true;
             MapType = MapGenerator.MapTypes.Elevation;
             TractorStyle = MapGenerator.TractorStyles.Arrow;
+            ShowSurfaceFlow = false;
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
@@ -221,22 +224,22 @@ namespace AgGrade.Controls
         }
 
         // fixme - remove
-        //private long LastPerf = 0;
+        private long LastPerf = 0;
 
         private void RefreshMap
             (
             )
         {
             // fixme - remove debug code
-            //Stopwatch sw = new Stopwatch();
-            //sw.Start();
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType, TractorStyle, HaulPath);
-            //sw.Stop();
-            //LastPerf = sw.ElapsedMilliseconds;
-            //ShowPerf();
+                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow);
+            sw.Stop();
+            LastPerf = sw.ElapsedMilliseconds;
+            ShowPerf();
 
             FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
             RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
@@ -252,7 +255,7 @@ namespace AgGrade.Controls
         }
 
         // fixme - remove
-        /*private void ShowPerf()
+        private void ShowPerf()
         {
             if (InvokeRequired)
             {
@@ -260,7 +263,7 @@ namespace AgGrade.Controls
                 return;
             }
             FieldNameLabel.Text = LastPerf.ToString();
-        }*/
+        }
 
         /// <summary>
         /// Called when the front starts cutting
@@ -402,6 +405,42 @@ namespace AgGrade.Controls
             else
             {
                 TractorStyle = MapGenerator.TractorStyles.Arrow;
+            }
+        }
+
+        /// <summary>
+        /// Called when user clicks on the button to show the surface water flow
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FlowBtn_Click(object sender, EventArgs e)
+        {
+            // turn on display, show current
+            if (!ShowSurfaceFlow)
+            {
+                ShowSurfaceFlow = true;
+                SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
+                MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
+            }
+            // cycle through different displays or turn off
+            else
+            {
+                switch (SurfaceFlowElevationType)
+                {
+                    case FlowMapGenerator.ElevationTypes.Current:
+                        SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Target;
+                        MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
+                        break;
+
+                    case FlowMapGenerator.ElevationTypes.Target:
+                        SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Initial;
+                        MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
+                        break;
+
+                    case FlowMapGenerator.ElevationTypes.Initial:
+                        ShowSurfaceFlow = false;
+                        break;
+                }
             }
         }
     }
