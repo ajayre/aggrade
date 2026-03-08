@@ -864,17 +864,57 @@ namespace AgGrade.Data
                 // draw haul path
                 if (HaulPath != null && HaulPath.Count > 0)
                 {
-                    Point? LastLocpx = null;
-                    foreach (Coordinate HaulPoint in HaulPath.ToList())
-                    {
-                        Point Pix = LatLonToWorld(HaulPoint);
+                    List<Coordinate> haulPoints = HaulPath.ToList();
+                    List<PointF> haulPixelPoints = haulPoints.Select(LatLonToWorldF).ToList();
 
-                        if (LastLocpx != null)
+                    for (int i = 1; i < haulPixelPoints.Count; i++)
+                    {
+                        g.DrawLine(HaulPathPen, haulPixelPoints[i - 1].X, haulPixelPoints[i - 1].Y, haulPixelPoints[i].X, haulPixelPoints[i].Y);
+                    }
+
+                    if (haulPoints.Count > 1)
+                    {
+                        // Arrow geometry and spacing in real-world feet.
+                        const double FEET_TO_METERS = 0.3048;
+                        double arrowLengthM = 20.0 * FEET_TO_METERS;
+                        double arrowWidthM = 10.0 * FEET_TO_METERS;
+                        double arrowSpacingM = 70.0 * FEET_TO_METERS;
+
+                        List<double> cumulativeDistanceM = new List<double>(haulPoints.Count) { 0.0 };
+                        for (int i = 1; i < haulPoints.Count; i++)
                         {
-                            g.DrawLine(HaulPathPen, LastLocpx.Value.X, LastLocpx.Value.Y, Pix.X, Pix.Y);
+                            double segmentDistanceM = Haversine.Distance(
+                                haulPoints[i - 1].Latitude,
+                                haulPoints[i - 1].Longitude,
+                                haulPoints[i].Latitude,
+                                haulPoints[i].Longitude);
+                            cumulativeDistanceM.Add(cumulativeDistanceM[i - 1] + segmentDistanceM);
                         }
 
-                        LastLocpx = Pix;
+                        double totalDistanceM = cumulativeDistanceM[haulPoints.Count - 1];
+                        List<double> arrowDistancesM = new List<double>();
+                        for (double d = totalDistanceM; d >= 0.0; d -= arrowSpacingM)
+                        {
+                            arrowDistancesM.Add(d);
+                        }
+                        if (arrowDistancesM.Count == 0)
+                        {
+                            arrowDistancesM.Add(totalDistanceM);
+                        }
+
+                        float arrowLengthPx = (float)(arrowLengthM * CurrentScaleFactor);
+                        float arrowHalfWidthPx = (float)(arrowWidthM * CurrentScaleFactor / 2.0);
+
+                        using (SolidBrush arrowBrush = new SolidBrush(HaulPathPen.Color))
+                        {
+                            foreach (double arrowDistanceM in arrowDistancesM)
+                            {
+                                if (TryGetPathPointAndDirection(haulPixelPoints, cumulativeDistanceM, arrowDistanceM, out PointF tip, out PointF direction))
+                                {
+                                    DrawArrowhead(g, arrowBrush, tip, direction, arrowLengthPx, arrowHalfWidthPx);
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -985,6 +1025,95 @@ namespace AgGrade.Data
             double dx = Math.Sin(rad);
             double dy = -Math.Cos(rad);
             return (dx, dy);
+        }
+
+        /// <summary>
+        /// Gets a point and direction vector at a distance along a polyline.
+        /// </summary>
+        private bool TryGetPathPointAndDirection
+            (
+            List<PointF> polylinePoints,
+            List<double> cumulativeDistanceM,
+            double targetDistanceM,
+            out PointF point,
+            out PointF direction
+            )
+        {
+            point = PointF.Empty;
+            direction = PointF.Empty;
+
+            if (polylinePoints == null || cumulativeDistanceM == null || polylinePoints.Count < 2 || cumulativeDistanceM.Count != polylinePoints.Count)
+            {
+                return false;
+            }
+
+            int segmentIndex = -1;
+            for (int i = 1; i < cumulativeDistanceM.Count; i++)
+            {
+                if (targetDistanceM <= cumulativeDistanceM[i])
+                {
+                    segmentIndex = i;
+                    break;
+                }
+            }
+
+            if (segmentIndex < 0)
+            {
+                segmentIndex = cumulativeDistanceM.Count - 1;
+                targetDistanceM = cumulativeDistanceM[segmentIndex];
+            }
+
+            PointF start = polylinePoints[segmentIndex - 1];
+            PointF end = polylinePoints[segmentIndex];
+            double startDistanceM = cumulativeDistanceM[segmentIndex - 1];
+            double segmentDistanceM = cumulativeDistanceM[segmentIndex] - startDistanceM;
+
+            double t = (segmentDistanceM > 1e-9) ? ((targetDistanceM - startDistanceM) / segmentDistanceM) : 1.0;
+            if (t < 0.0) t = 0.0;
+            if (t > 1.0) t = 1.0;
+
+            float px = (float)(start.X + (end.X - start.X) * t);
+            float py = (float)(start.Y + (end.Y - start.Y) * t);
+            point = new PointF(px, py);
+
+            float dx = end.X - start.X;
+            float dy = end.Y - start.Y;
+            float length = (float)Math.Sqrt(dx * dx + dy * dy);
+            if (length <= 0.001f)
+            {
+                return false;
+            }
+
+            direction = new PointF(dx / length, dy / length);
+            return true;
+        }
+
+        /// <summary>
+        /// Draws a filled arrowhead at the given tip using unit direction vector.
+        /// </summary>
+        private void DrawArrowhead
+            (
+            Graphics g,
+            Brush brush,
+            PointF tip,
+            PointF directionUnit,
+            float lengthPx,
+            float halfWidthPx
+            )
+        {
+            PointF baseCenter = new PointF(
+                tip.X - directionUnit.X * lengthPx,
+                tip.Y - directionUnit.Y * lengthPx);
+
+            PointF perp = new PointF(-directionUnit.Y, directionUnit.X);
+            PointF left = new PointF(
+                baseCenter.X + perp.X * halfWidthPx,
+                baseCenter.Y + perp.Y * halfWidthPx);
+            PointF right = new PointF(
+                baseCenter.X - perp.X * halfWidthPx,
+                baseCenter.Y - perp.Y * halfWidthPx);
+
+            g.FillPolygon(brush, new[] { tip, left, right });
         }
 
         /// <summary>
@@ -1285,6 +1414,20 @@ namespace AgGrade.Data
             Coordinate Location
             )
         {
+            PointF world = LatLonToWorldF(Location);
+            return new Point((int)Math.Round(world.X), (int)Math.Round(world.Y));
+        }
+
+        /// <summary>
+        /// Converts latitude and longitude to a pixel in the world with sub-pixel precision.
+        /// </summary>
+        /// <param name="Location">Location to convert</param>
+        /// <returns>Pixel location with floating-point precision</returns>
+        private PointF LatLonToWorldF
+            (
+            Coordinate Location
+            )
+        {
             // Convert input location to UTM coordinates
             UTM.UTMCoordinate Pos = UTM.FromLatLon(Location.Latitude, Location.Longitude);
 
@@ -1305,10 +1448,12 @@ namespace AgGrade.Data
             // The map is rotated so that the tractor heading is up (north)
             // We need to rotate the delta vector by -_tractorHeading degrees (counter-clockwise)
             // to align with the rotated map coordinate system (same as FieldMToPixel)
-            Point rotatedDelta;
+            double rotatedX;
+            double rotatedY;
             if (_tractorHeading == 0.0)
             {
-                rotatedDelta = new Point((int)Math.Round(deltaXPx), (int)Math.Round(deltaYPx));
+                rotatedX = deltaXPx;
+                rotatedY = deltaYPx;
             }
             else
             {
@@ -1317,14 +1462,14 @@ namespace AgGrade.Data
                 double sinAngle = Math.Sin(radians);
                 
                 // Rotate the delta vector
-                double rotatedX = deltaXPx * cosAngle - deltaYPx * sinAngle;
-                double rotatedY = deltaXPx * sinAngle + deltaYPx * cosAngle;
-                
-                rotatedDelta = new Point((int)Math.Round(rotatedX), (int)Math.Round(rotatedY));
+                rotatedX = deltaXPx * cosAngle - deltaYPx * sinAngle;
+                rotatedY = deltaXPx * sinAngle + deltaYPx * cosAngle;
             }
 
             // Add the tractor pixel position to get the final pixel location
-            return new Point(_tractorXpx + rotatedDelta.X, _tractorYpx + rotatedDelta.Y);
+            return new PointF(
+                (float)(_tractorXpx + rotatedX),
+                (float)(_tractorYpx + rotatedY));
         }
 
         /// <summary>

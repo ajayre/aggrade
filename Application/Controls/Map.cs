@@ -223,23 +223,29 @@ namespace AgGrade.Controls
             }
         }
 
-        // fixme - remove
+#if SHOW_MAP_PERF
         private long LastPerf = 0;
+#endif
 
         private void RefreshMap
             (
             )
         {
-            // fixme - remove debug code
+#if SHOW_MAP_PERF
             Stopwatch sw = new Stopwatch();
             sw.Start();
+#endif
+
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
                 ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow);
+
+#if SHOW_MAP_PERF
             sw.Stop();
             LastPerf = sw.ElapsedMilliseconds;
             ShowPerf();
+#endif
 
             FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
             RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
@@ -254,7 +260,7 @@ namespace AgGrade.Controls
             SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
         }
 
-        // fixme - remove
+#if SHOW_MAP_PERF
         private void ShowPerf()
         {
             if (InvokeRequired)
@@ -264,6 +270,7 @@ namespace AgGrade.Controls
             }
             FieldNameLabel.Text = LastPerf.ToString();
         }
+#endif
 
         /// <summary>
         /// Called when the front starts cutting
