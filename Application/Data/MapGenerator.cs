@@ -21,6 +21,7 @@ namespace AgGrade.Data
         private const int TILE_SIZE = 128;
         private const int TILE_OVERLAP = 5;
         private const int PROJECTED_PATH_LENGTH_M = 80;
+        private const double HEADING_BUCKET_DEGREES = 0.5;
 
         private class MapTile
         {
@@ -37,6 +38,7 @@ namespace AgGrade.Data
             public int MinBinY;
             public int MaxBinY;
             public List<Bin> AssociatedBins;
+            public int RotationBucket = int.MinValue;
 
             public MapTile
                 (
@@ -197,6 +199,27 @@ namespace AgGrade.Data
             return ((long)tileX << 32) | (uint)tileY;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static double QuantizeHeading(double headingDegrees)
+        {
+            return Math.Round(headingDegrees / HEADING_BUCKET_DEGREES) * HEADING_BUCKET_DEGREES;
+        }
+
+        private static void DisposeTileBitmaps(MapTile tile)
+        {
+            if ((tile.RotatedBitmap != null) && !ReferenceEquals(tile.RotatedBitmap, tile.Bitmap))
+            {
+                tile.RotatedBitmap.Dispose();
+                tile.RotatedBitmap = null!;
+            }
+
+            if (tile.Bitmap != null)
+            {
+                tile.Bitmap.Dispose();
+                tile.Bitmap = null!;
+            }
+        }
+
         /// <summary>
         /// Calculates the scale factor (pixels per meter) to fit the entire map inside the image
         /// Takes into account that the field may be wider than it is tall, or taller than it is wide
@@ -320,7 +343,10 @@ namespace AgGrade.Data
             _tractorXpx = TractorXpx;
             _tractorYpx = TractorYpx;
 
-            _tractorHeading = TractorFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+            _tractorHeading = QuantizeHeading(
+                TractorFix.Vector.GetTrueHeading(
+                    CurrentAppSettings.MagneticDeclinationDegrees,
+                    CurrentAppSettings.MagneticDeclinationMinutes));
 
             // if tile cache is empty then set up
             if (Cache.Tiles.Count == 0)
@@ -335,6 +361,10 @@ namespace AgGrade.Data
                 // if anything that affects the cache has changed then empty it and set up
                 if ((ScaleFactor != Cache.ScaleFactor) || (ImageHeightpx != Cache.ImageHeightpx) || (ImageWidthpx != Cache.ImageWidthpx) || MapTypeChanged)
                 {
+                    foreach (MapTile tile in Cache.Tiles.Values)
+                    {
+                        DisposeTileBitmaps(tile);
+                    }
                     Cache.Tiles.Clear();
                     Cache.ScaleFactor = ScaleFactor;
                     Cache.ImageHeightpx = ImageHeightpx;
@@ -496,6 +526,7 @@ namespace AgGrade.Data
                                 {
                                     // remove tile from cache to force a re-render
                                     Cache.Tiles.Remove(tileKey);
+                                    DisposeTileBitmaps(CachedTile!);
                                     InCache = false;
                                 }
 
@@ -553,21 +584,28 @@ namespace AgGrade.Data
                 }
 
                 // rotate tiles
-                foreach (MapTile Tile in Tiles)
+                int rotationBucket = (int)Math.Round(_tractorHeading / HEADING_BUCKET_DEGREES);
+                double rotationHeading = rotationBucket * HEADING_BUCKET_DEGREES;
+                Parallel.ForEach(Tiles, Tile =>
                 {
                     if (_tractorHeading != 0)
                     {
-                        if ((Tile.RotatedBitmap != null) && !ReferenceEquals(Tile.RotatedBitmap, Tile.Bitmap))
+                        if ((Tile.RotatedBitmap == null) || (Tile.RotationBucket != rotationBucket))
                         {
-                            Tile.RotatedBitmap.Dispose();
+                            if ((Tile.RotatedBitmap != null) && !ReferenceEquals(Tile.RotatedBitmap, Tile.Bitmap))
+                            {
+                                Tile.RotatedBitmap.Dispose();
+                            }
+                            Tile.RotatedBitmap = Rotate(Tile.Bitmap, rotationHeading);
+                            Tile.RotationBucket = rotationBucket;
                         }
-                        Tile.RotatedBitmap = Rotate(Tile.Bitmap, _tractorHeading);
                     }
                     else
                     {
                         Tile.RotatedBitmap = Tile.Bitmap;
+                        Tile.RotationBucket = int.MinValue;
                     }
-                }
+                });
 
                 // render tiles
                 using (Graphics g = Graphics.FromImage(bitmap))
@@ -1660,26 +1698,29 @@ namespace AgGrade.Data
             Field Field
             )
         {
-            double InitialMinimumElevationM;
-            double InitialMaximumElevationM;
+            bool found = false;
+            double minElevation = double.MaxValue;
+            double maxElevation = double.MinValue;
 
-            var nonZeroElevations = Field.Bins
-                .Where(bin => bin.CurrentElevationM != 0.0)
-                .Select(bin => bin.CurrentElevationM)
-                .ToList();
+            foreach (Bin bin in Field.Bins)
+            {
+                double elevation = bin.CurrentElevationM;
+                if (elevation == 0.0)
+                {
+                    continue;
+                }
 
-            if (nonZeroElevations.Any())
-            {
-                InitialMinimumElevationM = nonZeroElevations.Min();
-                InitialMaximumElevationM = nonZeroElevations.Max();
-            }
-            else
-            {
-                InitialMinimumElevationM = 0.0;
-                InitialMaximumElevationM = 0.0;
+                if (elevation < minElevation) minElevation = elevation;
+                if (elevation > maxElevation) maxElevation = elevation;
+                found = true;
             }
 
-            return new double[] {  InitialMinimumElevationM, InitialMaximumElevationM };
+            if (!found)
+            {
+                return new double[] { 0.0, 0.0 };
+            }
+
+            return new double[] { minElevation, maxElevation };
         }
 
         private static int[,] BuildColorPalette()
