@@ -415,7 +415,14 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void FlowBtn_Click(object sender, EventArgs e)
         {
-            // turn on display, show current
+            ShowSurfaceFlow = !ShowSurfaceFlow;
+            if (ShowSurfaceFlow)
+            {
+                SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
+                MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
+            }
+
+            /*// turn on display, show current
             if (!ShowSurfaceFlow)
             {
                 ShowSurfaceFlow = true;
@@ -441,7 +448,7 @@ namespace AgGrade.Controls
                         ShowSurfaceFlow = false;
                         break;
                 }
-            }
+            }*/
         }
     }
 }

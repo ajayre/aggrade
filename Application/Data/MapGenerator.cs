@@ -199,6 +199,13 @@ namespace AgGrade.Data
         private Coordinate SurfaceFlowNECorner = new Coordinate();
         private string? SurfaceFlowImage = null;
 
+        private readonly Dictionary<long, Bitmap> _surfaceFlowTileCache = new Dictionary<long, Bitmap>();
+        private readonly Dictionary<(long, int), Bitmap> _surfaceFlowRotatedTileCache = new Dictionary<(long, int), Bitmap>();
+        private int _surfaceFlowRotationBucket = int.MinValue;
+        private double? _surfaceFlowCacheScaleFactor = null;
+        private Bitmap? _surfaceFlowImageBitmap = null;
+        private string? _surfaceFlowImagePath = null;
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long GetTileKey(int tileX, int tileY)
         {
@@ -379,6 +386,7 @@ namespace AgGrade.Data
                     Cache.ScaleFactor = ScaleFactor;
                     Cache.ImageHeightpx = ImageHeightpx;
                     Cache.ImageWidthpx = ImageWidthpx;
+                    ClearSurfaceFlowTileCache();
                 }
             }
 
@@ -807,7 +815,7 @@ namespace AgGrade.Data
                 // show the flow of surface water
                 if (ShowSurfaceFlow)
                 {
-                    RenderSurfaceFlow();
+                    RenderSurfaceFlow(g);
                 }
 
                 // draw benchmarks
@@ -990,10 +998,11 @@ namespace AgGrade.Data
             int Opacity = 50
             )
         {
-            // remove old image
+            // Release the cached flow image and tiles (dispose bitmaps) so the temp file is no longer locked, then delete it
+            ClearSurfaceFlowTileCache();
             if ((SurfaceFlowImage != null) && File.Exists(SurfaceFlowImage))
             {
-                File.Delete(SurfaceFlowImage);
+                try { File.Delete(SurfaceFlowImage); } catch { /* ignore if already deleted or still in use */ }
                 SurfaceFlowImage = null;
             }
 
@@ -1029,14 +1038,197 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Renders the surface water flow on the current map using the current tractor location and heading
+        /// Clears the surface flow tile cache and releases the cached flow image bitmap.
+        /// Call when SurfaceFlowImage is null or when zoom/scale changes.
         /// </summary>
-        private void RenderSurfaceFlow
-            (
-            )
+        private void ClearSurfaceFlowTileCache()
         {
-            // render tiles from SurfaceFlowImage
-            // if SurfaceFlowImage is null then clear tile cache
+            foreach (Bitmap bmp in _surfaceFlowTileCache.Values)
+            {
+                bmp?.Dispose();
+            }
+            _surfaceFlowTileCache.Clear();
+            foreach (Bitmap bmp in _surfaceFlowRotatedTileCache.Values)
+            {
+                bmp?.Dispose();
+            }
+            _surfaceFlowRotatedTileCache.Clear();
+            _surfaceFlowRotationBucket = int.MinValue;
+            _surfaceFlowCacheScaleFactor = null;
+            _surfaceFlowImageBitmap?.Dispose();
+            _surfaceFlowImageBitmap = null;
+            _surfaceFlowImagePath = null;
+        }
+
+        /// <summary>
+        /// Renders the surface water flow on the current map using the current tractor location and heading.
+        /// Splits SurfaceFlowImage into tiles aligned with the field tile grid; uses cache unless zoom or image changes.
+        /// </summary>
+        private void RenderSurfaceFlow(Graphics g)
+        {
+            if (SurfaceFlowImage == null)
+            {
+                ClearSurfaceFlowTileCache();
+                return;
+            }
+
+            if (CurrentField == null) return;
+
+            if (_surfaceFlowCacheScaleFactor.HasValue && Math.Abs(CurrentScaleFactor - _surfaceFlowCacheScaleFactor.Value) > 1e-9)
+            {
+                foreach (Bitmap bmp in _surfaceFlowTileCache.Values)
+                    bmp?.Dispose();
+                _surfaceFlowTileCache.Clear();
+            }
+            _surfaceFlowCacheScaleFactor = CurrentScaleFactor;
+
+            if (_surfaceFlowImagePath != SurfaceFlowImage)
+            {
+                _surfaceFlowImageBitmap?.Dispose();
+                _surfaceFlowImageBitmap = null;
+                try
+                {
+                    if (File.Exists(SurfaceFlowImage))
+                    {
+                        _surfaceFlowImageBitmap = new Bitmap(SurfaceFlowImage);
+                        _surfaceFlowImagePath = SurfaceFlowImage;
+                    }
+                    else
+                    {
+                        _surfaceFlowImagePath = null;
+                        return;
+                    }
+                }
+                catch
+                {
+                    _surfaceFlowImagePath = null;
+                    return;
+                }
+            }
+
+            if (_surfaceFlowImageBitmap == null) return;
+
+            UTM.UTMCoordinate swUtm = UTM.FromLatLon(SurfaceFlowSWCorner.Latitude, SurfaceFlowSWCorner.Longitude);
+            UTM.UTMCoordinate neUtm = UTM.FromLatLon(SurfaceFlowNECorner.Latitude, SurfaceFlowNECorner.Longitude);
+            double swE = swUtm.Easting;
+            double swN = swUtm.Northing;
+            double neE = neUtm.Easting;
+            double neN = neUtm.Northing;
+            double flowEastingSpan = neE - swE;
+            double flowNorthingSpan = neN - swN;
+            if (flowEastingSpan <= 0 || flowNorthingSpan <= 0) return;
+
+            int MapWidthpx = _unrotatedMapWidthpx;
+            int MapHeightpx = _unrotatedMapHeightpx;
+            int Wf = _surfaceFlowImageBitmap.Width;
+            int Hf = _surfaceFlowImageBitmap.Height;
+            double ScaleFactor = CurrentScaleFactor;
+            double FieldMinX = CurrentField.FieldMinX;
+            double FieldMaxY = CurrentField.FieldMaxY;
+            int ImageWidthpx = Cache.ImageWidthpx;
+            int ImageHeightpx = Cache.ImageHeightpx;
+
+            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
+
+            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+            int rotationBucket = (int)Math.Round(_tractorHeading / HEADING_BUCKET_DEGREES);
+            double rotationHeading = rotationBucket * HEADING_BUCKET_DEGREES;
+            if (_tractorHeading != 0 && rotationBucket != _surfaceFlowRotationBucket)
+            {
+                foreach (Bitmap bmp in _surfaceFlowRotatedTileCache.Values)
+                    bmp?.Dispose();
+                _surfaceFlowRotatedTileCache.Clear();
+                _surfaceFlowRotationBucket = rotationBucket;
+            }
+
+            for (int tileY = 0; tileY < tilesY; tileY++)
+            {
+                for (int tileX = 0; tileX < tilesX; tileX++)
+                {
+                    int tileStartX = tileX * TILE_SIZE;
+                    int tileStartY = tileY * TILE_SIZE;
+                    int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
+                    int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
+
+                    if (!IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                        continue;
+
+                    long tileKey = GetTileKey(tileX, tileY);
+                    if (!_surfaceFlowTileCache.TryGetValue(tileKey, out Bitmap? flowTile))
+                    {
+                        // Use core tile bounds only (no overlap) so adjacent tiles don't double-draw and create a visible grid
+                        double leftUtm = FieldMinX + tileStartX / ScaleFactor;
+                        double rightUtm = FieldMinX + (tileStartX + tileWidth) / ScaleFactor;
+                        double topUtm = FieldMaxY - tileStartY / ScaleFactor;
+                        double bottomUtm = FieldMaxY - (tileStartY + tileHeight) / ScaleFactor;
+                        float srcX = (float)((leftUtm - swE) / flowEastingSpan * Wf);
+                        float srcY = (float)((neN - topUtm) / flowNorthingSpan * Hf);
+                        float srcW = (float)((rightUtm - leftUtm) / flowEastingSpan * Wf);
+                        float srcH = (float)((topUtm - bottomUtm) / flowNorthingSpan * Hf);
+                        srcX = Math.Max(0, Math.Min(Wf - 1, srcX));
+                        srcY = Math.Max(0, Math.Min(Hf - 1, srcY));
+                        srcW = Math.Max(1, Math.Min(Wf - srcX, srcW));
+                        srcH = Math.Max(1, Math.Min(Hf - srcY, srcH));
+
+                        flowTile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
+                        using (Graphics tg = Graphics.FromImage(flowTile))
+                        {
+                            tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            tg.DrawImage(_surfaceFlowImageBitmap,
+                                new Rectangle(0, 0, tileWidth, tileHeight),
+                                new RectangleF(srcX, srcY, srcW, srcH),
+                                GraphicsUnit.Pixel);
+                        }
+                        _surfaceFlowTileCache[tileKey] = flowTile;
+                    }
+
+                    Bitmap tileToDraw = flowTile;
+                    if (_tractorHeading != 0)
+                    {
+                        var rotatedKey = (tileKey, rotationBucket);
+                        if (!_surfaceFlowRotatedTileCache.TryGetValue(rotatedKey, out Bitmap? rotatedTile))
+                        {
+                            rotatedTile = Rotate(flowTile, rotationHeading);
+                            _surfaceFlowRotatedTileCache[rotatedKey] = rotatedTile;
+                        }
+                        tileToDraw = rotatedTile;
+                    }
+
+                    int drawX, drawY;
+                    if (_tractorHeading != 0)
+                    {
+                        int centerX = tileStartX + tileWidth / 2;
+                        int centerY = tileStartY + tileHeight / 2;
+                        Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(centerX, centerY);
+                        drawX = rotatedCenter.X - tileToDraw.Width / 2;
+                        drawY = rotatedCenter.Y - tileToDraw.Height / 2;
+                    }
+                    else
+                    {
+                        drawX = tileStartX + _mapLeftpx;
+                        drawY = tileStartY + _mapToppx;
+                    }
+
+                    int srcRectX = 0, srcRectY = 0, srcRectW = tileToDraw.Width, srcRectH = tileToDraw.Height;
+                    if (drawX < 0) { srcRectX = -drawX; srcRectW -= srcRectX; drawX = 0; }
+                    if (drawY < 0) { srcRectY = -drawY; srcRectH -= srcRectY; drawY = 0; }
+                    int drawW = Math.Min(srcRectW, ImageWidthpx - drawX);
+                    int drawH = Math.Min(srcRectH, ImageHeightpx - drawY);
+                    srcRectW = drawW;
+                    srcRectH = drawH;
+                    if (drawW > 0 && drawH > 0)
+                    {
+                        g.DrawImage(tileToDraw,
+                            new Rectangle(drawX, drawY, drawW, drawH),
+                            new Rectangle(srcRectX, srcRectY, srcRectW, srcRectH),
+                            GraphicsUnit.Pixel);
+                    }
+                }
+            }
         }
 
         /// <summary>
