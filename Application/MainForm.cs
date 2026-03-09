@@ -865,7 +865,7 @@ namespace AgGrade
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {
                 FieldUpdater.StartRearFilling();
-                // fixme - what to show on button indicator?
+                GetMap()?.StartRearFilling();
             }
             else
             {
@@ -1034,7 +1034,7 @@ namespace AgGrade
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {
                 FieldUpdater.StartFrontFilling();
-                // fixme - what to show on button indicator?
+                GetMap()?.StartFrontFilling();
             }
             else
             {

@@ -514,7 +514,7 @@ namespace HardwareSim
             }
             else
             {
-                TurnHeadingChange -= 3;
+                TurnHeadingChange -= 1;
             }
             StraightenSteeringCounter = STEERING_DAMPENING;
         }
@@ -529,7 +529,7 @@ namespace HardwareSim
             }
             else
             {
-                TurnHeadingChange += 3;
+                TurnHeadingChange += 1;
             }
             StraightenSteeringCounter = STEERING_DAMPENING;
         }

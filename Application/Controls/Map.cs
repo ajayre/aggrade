@@ -300,7 +300,51 @@ namespace AgGrade.Controls
             (
             )
         {
-            // fixme - to do
+            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.RearPan.Fix.Latitude, _CurrentEquipmentStatus.RearPan.Fix.Longitude);
+            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            {
+                HaulPath = CurrentField.GetHaulPath(CurrentBin);
+            }
+            else
+            {
+                HaulPath = new List<Coordinate>();
+            }
+        }
+
+        /// <summary>
+        /// Called when the front starts filling
+        /// </summary>
+        public void StartFrontFilling
+            (
+            )
+        {
+            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.FrontPan.Fix.Latitude, _CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            {
+                HaulPath = CurrentField.GetHaulPath(CurrentBin);
+            }
+            else
+            {
+                HaulPath = new List<Coordinate>();
+            }
+        }
+
+        /// <summary>
+        /// Called when the rear starts filling
+        /// </summary>
+        public void StartRearFilling
+            (
+            )
+        {
+            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.RearPan.Fix.Latitude, _CurrentEquipmentStatus.RearPan.Fix.Longitude);
+            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            {
+                HaulPath = CurrentField.GetHaulPath(CurrentBin);
+            }
+            else
+            {
+                HaulPath = new List<Coordinate>();
+            }
         }
 
         /// <summary>
