@@ -198,6 +198,7 @@ namespace AgGrade.Data
         private Coordinate SurfaceFlowSWCorner = new Coordinate();
         private Coordinate SurfaceFlowNECorner = new Coordinate();
         private string? SurfaceFlowImage = null;
+        private bool ShowBenchmarks;
 
         private readonly Dictionary<long, Bitmap> _surfaceFlowTileCache = new Dictionary<long, Bitmap>();
         private readonly Dictionary<(long, int), Bitmap> _surfaceFlowRotatedTileCache = new Dictionary<(long, int), Bitmap>();
@@ -300,6 +301,7 @@ namespace AgGrade.Data
         /// <param name="TractorStyle">Style of tractor icon</param>
         /// <param name="HaulPath">List of points for current haul path or empty/null for no path</param>
         /// <param name="ShowSurfaceFlow">true to show the surface water flow</param>
+        /// <param name="ShowBenchmarks">true to show benchmarks</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -319,7 +321,8 @@ namespace AgGrade.Data
             MapTypes MapType,
             TractorStyles TractorStyle,
             List<Coordinate> HaulPath,
-            bool ShowSurfaceFlow
+            bool ShowSurfaceFlow,
+            bool ShowBenchmarks
             )
         {
             CurrentField = Field;
@@ -333,6 +336,7 @@ namespace AgGrade.Data
             this.CurrentAppSettings = CurrentAppSettings;
 
             this.ShowHaulArrows = ShowHaulArrows;
+            this.ShowBenchmarks = ShowBenchmarks;
 
             this.HaulPath = HaulPath;
 
@@ -818,17 +822,20 @@ namespace AgGrade.Data
                     RenderSurfaceFlow(g);
                 }
 
-                // draw benchmarks
-                foreach (Benchmark bmark in Benchmarks)
+                if (ShowBenchmarks)
                 {
-                    Point Pix = LatLonToWorld(bmark.Location);
+                    // draw benchmarks
+                    foreach (Benchmark bmark in Benchmarks)
+                    {
+                        Point Pix = LatLonToWorld(bmark.Location);
 
-                    g.FillPolygon(new SolidBrush(Color.Gray), new Point[] { new Point(Pix.X - 10, Pix.Y + 10), new Point(Pix.X + 10, Pix.Y + 10),
+                        g.FillPolygon(new SolidBrush(Color.Gray), new Point[] { new Point(Pix.X - 10, Pix.Y + 10), new Point(Pix.X + 10, Pix.Y + 10),
                         new Point(Pix.X, Pix.Y - 10) });
-                    g.FillPolygon(new SolidBrush(Color.Orange), new Point[] { new Point(Pix.X - 9, Pix.Y + 9), new Point(Pix.X + 9, Pix.Y + 9),
+                        g.FillPolygon(new SolidBrush(Color.Orange), new Point[] { new Point(Pix.X - 9, Pix.Y + 9), new Point(Pix.X + 9, Pix.Y + 9),
                         new Point(Pix.X, Pix.Y - 9) });
 
-                    g.DrawString(bmark.Name, BenchmarkFont, new SolidBrush(Color.Black), Pix.X + 12, Pix.Y - 6);
+                        g.DrawString(bmark.Name, BenchmarkFont, new SolidBrush(Color.Black), Pix.X + 12, Pix.Y - 6);
+                    }
                 }
 
                 /*// draw tractor trail

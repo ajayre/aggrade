@@ -44,6 +44,7 @@
             CutFillMapBtn = new Button();
             TractorStyleBtn = new Button();
             FlowBtn = new Button();
+            BenchmarkBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -227,11 +228,23 @@
             FlowBtn.UseVisualStyleBackColor = true;
             FlowBtn.Click += FlowBtn_Click;
             // 
+            // BenchmarkBtn
+            // 
+            BenchmarkBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            BenchmarkBtn.Image = Properties.Resources.benchmark_48px;
+            BenchmarkBtn.Location = new Point(810, 385);
+            BenchmarkBtn.Name = "BenchmarkBtn";
+            BenchmarkBtn.Size = new Size(60, 60);
+            BenchmarkBtn.TabIndex = 13;
+            BenchmarkBtn.UseVisualStyleBackColor = true;
+            BenchmarkBtn.Click += BenchmarkBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(BenchmarkBtn);
             Controls.Add(FlowBtn);
             Controls.Add(TractorStyleBtn);
             Controls.Add(CutFillMapBtn);
@@ -265,5 +278,6 @@
         private Button CutFillMapBtn;
         private Button TractorStyleBtn;
         private Button FlowBtn;
+        private Button BenchmarkBtn;
     }
 }

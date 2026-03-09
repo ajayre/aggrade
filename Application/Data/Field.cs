@@ -744,6 +744,13 @@ namespace AgGrade.Data
                 HaulDirections.Add(new HaulDirection(Arrow.Latitude, Arrow.Longitude, Arrow.Heading));
             }
 
+            // load in benchmarks
+            Database.BenchMark[] benchMarks = Db.GetBenchMarks();
+            foreach (Database.BenchMark BMark in benchMarks)
+            {
+                this.Benchmarks.Add(new Benchmark(new Coordinate(BMark.Latitude, BMark.Longitude), BMark.Name, BMark.ElevationM));
+            }
+
             // find the Southwest corner (minimum X and Y) to use as origin
             double MinLat = Db.GetData(Database.DataNames.MinLat);
             double MinLon = Db.GetData(Database.DataNames.MinLon);

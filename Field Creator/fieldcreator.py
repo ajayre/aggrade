@@ -898,10 +898,13 @@ def _local_xy_to_latlon(x: float, y: float, lat0: float, lon0: float) -> Tuple[f
     return lat, lon
 
 
-def parse_agd_points(agd_path: Path) -> List[Tuple[float, float, float, float]]:
+def parse_agd_points(
+    agd_path: Path,
+) -> Tuple[List[Tuple[float, float, float, float]], List[Tuple[float, float, str, float]]]:
     """
-    Parse AGD lines using extract_agd_heights.py rules and return
-    (lat, lon, existing_elevation, target_elevation) points.
+    Parse AGD lines using extract_agd_heights.py rules and return:
+    - points: (lat, lon, existing_elevation, target_elevation)
+    - benchmarks: (lat, lon, point_name, elevation_m) where code/name contains BM or MB
     """
     try:
         text = agd_path.read_text(encoding="utf-8")
@@ -913,6 +916,7 @@ def parse_agd_points(agd_path: Path) -> List[Tuple[float, float, float, float]]:
         raise ValueError(f"AGD file is empty: {agd_path}")
 
     points: List[Tuple[float, float, float, float]] = []
+    benchmarks: List[Tuple[float, float, str, float]] = []
     # Skip AGD header row
     for line_no, line in enumerate(lines[1:], start=2):
         raw = line.strip()
@@ -922,9 +926,18 @@ def parse_agd_points(agd_path: Path) -> List[Tuple[float, float, float, float]]:
         if len(parts) < 4:
             continue
         lat_s, lon_s, existing_s, target_s = parts[:4]
+        point_name = parts[4].strip() if len(parts) > 4 else ""
         code_s = parts[5].strip() if len(parts) > 5 else ""
-        code_upper = code_s.upper()
-        if "MB" in code_upper or "BM" in code_upper:
+        benchmark_token = f"{point_name} {code_s}".upper()
+        if "MB" in benchmark_token or "BM" in benchmark_token:
+            try:
+                lat = float(lat_s)
+                lon = float(lon_s)
+                elevation_m = float(existing_s)
+            except ValueError:
+                continue
+            name = point_name or code_s
+            benchmarks.append((lat, lon, name, elevation_m))
             continue
         if not existing_s or not target_s:
             continue
@@ -942,7 +955,7 @@ def parse_agd_points(agd_path: Path) -> List[Tuple[float, float, float, float]]:
 
     if not points:
         raise ValueError(f"No valid elevation points parsed from AGD: {agd_path}")
-    return points
+    return points, benchmarks
 
 
 def bin_agd_points_2ft(
@@ -1326,6 +1339,14 @@ def init_sqlite_db(db_path: Path) -> sqlite3.Connection:
             Latitude REAL,
             Longitude REAL,
             Heading REAL
+        );
+
+        CREATE TABLE IF NOT EXISTS Benchmarks (
+            BenchMarkID INTEGER PRIMARY KEY AUTOINCREMENT,
+            Latitude REAL,
+            Longitude REAL,
+            Name TEXT,
+            ElevationM REAL
         );
         """
     )
@@ -1786,7 +1807,7 @@ def main() -> int:
             print(f"ERROR: failed to delete existing DB {db_path}: {exc}", file=sys.stderr)
             return 1
 
-    points = parse_agd_points(args.agd)
+    points, benchmarks = parse_agd_points(args.agd)
     (
         existing_values,
         target_values,
@@ -2180,6 +2201,19 @@ def main() -> int:
         )
     else:
         print("INFO: no haul samples available; HaulArrows table left empty", file=sys.stderr)
+
+    if benchmarks:
+        cur.executemany(
+            "INSERT INTO Benchmarks (Latitude, Longitude, Name, ElevationM) VALUES (?, ?, ?, ?)",
+            benchmarks,
+        )
+        con.commit()
+        print(
+            f"INFO: wrote {len(benchmarks)} benchmarks to Benchmarks in {db_path}",
+            file=sys.stderr,
+        )
+    else:
+        print("INFO: no benchmarks found in AGD; Benchmarks table left empty", file=sys.stderr)
 
     # Generate and store haul paths for every cut bin (InitialHeightM > TargetHeightM).
     cut_bins = [

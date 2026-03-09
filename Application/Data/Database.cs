@@ -56,6 +56,34 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Row from the benchmark table
+        /// </summary>
+        public class BenchMark
+        {
+            public int BenchMarkID { get; set; }
+            public double Latitude { get; set; }
+            public double Longitude { get; set; }
+            public string Name { get; set; }
+            public double ElevationM { get; set; }
+
+            public BenchMark() { }
+
+            public BenchMark
+                (
+                double Latitude,
+                double Longitude,
+                string Name,
+                double ElevationM
+                )
+            {
+                this.Latitude = Latitude;
+                this.Longitude = Longitude;
+                this.Name = Name;
+                this.ElevationM = ElevationM;
+            }
+        }
+
+        /// <summary>
         /// Row from HaulArrows table
         /// </summary>
         public class HaulArrow
@@ -171,74 +199,6 @@ namespace AgGrade.Data
             MinLon,
             MaxLat,
             MaxLon
-        }
-
-        /// <summary>
-        /// Creates a new empty database file with the desired filename and opens it for subsequent access.
-        /// </summary>
-        /// <param name="FileName">Path and name of database file to create</param>
-        public void Create(string FileName)
-        {
-            _connection?.Dispose();
-            var connection = new SqliteConnection($"Data Source={FileName}");
-            connection.Open();
-
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = @"CREATE TABLE Events (
-                        EventID INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Type TEXT,
-                        Details TEXT,
-                        Timestamp INTEGER
-                    )";
-                cmd.ExecuteNonQuery();
-            }
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = @"CREATE TABLE FieldState (
-                        BinID INTEGER PRIMARY KEY AUTOINCREMENT,
-                        X INTEGER,
-                        Y INTEGER,
-                        InitialHeightM REAL,
-                        CurrentHeightM REAL,
-                        TargetHeightM REAL,
-                        CentroidLat REAL,
-                        CentroidLon REAL
-                    )";
-                cmd.ExecuteNonQuery();
-            }
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = "CREATE UNIQUE INDEX idx_fieldstate_xy ON FieldState(X, Y)";
-                cmd.ExecuteNonQuery();
-            }
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = @"CREATE TABLE BinHistory (
-                        BinHistoryID INTEGER PRIMARY KEY AUTOINCREMENT,
-                        X INTEGER,
-                        Y INTEGER,
-                        HeightChangeM REAL,
-                        Timestamp INTEGER
-                    )";
-                cmd.ExecuteNonQuery();
-            }
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = @"CREATE TABLE Data (
-                        DataID INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Name TEXT,
-                        Value REAL
-                    )";
-                cmd.ExecuteNonQuery();
-            }
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = "PRAGMA user_version = 1";
-                cmd.ExecuteNonQuery();
-            }
-
-            _connection = connection;
         }
 
         /// <summary>
@@ -434,6 +394,36 @@ namespace AgGrade.Data
             }
 
             return States.ToArray();
+        }
+
+        /// <summary>
+        /// Gets the benchmarks from the database
+        /// </summary>
+        /// <returns>Array of benchmarks</returns>
+        public BenchMark[] GetBenchMarks()
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            List<BenchMark> BenchMarks = new List<BenchMark>();
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT Latitude, Longitude, Name, ElevationM FROM BenchMarks";
+                using (var reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        BenchMarks.Add(new BenchMark(
+                            reader.GetDouble(0),
+                            reader.GetDouble(1),
+                            reader.GetString(2),
+                            reader.GetDouble(3)
+                            ));
+                    }
+                }
+            }
+
+            return BenchMarks.ToArray();
         }
 
         /// <summary>
