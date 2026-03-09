@@ -792,8 +792,8 @@ namespace AgGrade.Data
 
             BinToCut.CurrentElevationM -= CutHeightM;
 
-            //Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.CurrentElevationM);
-            //Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
+            Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.CurrentElevationM);
+            Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
 
             // updated completed cuts
             CompletedCutCY += BIN_SIZE_M * BIN_SIZE_M * CutHeightM * CUBIC_YARDS_PER_CUBIC_METER;
@@ -815,8 +815,8 @@ namespace AgGrade.Data
 
             BinToFill.CurrentElevationM += FillHeightM;
 
-            //Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.CurrentElevationM);
-            //Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
+            Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.CurrentElevationM);
+            Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
 
             // update completed fills
             CompletedFillCY += BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER;
