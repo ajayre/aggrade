@@ -6,6 +6,7 @@ using System.IO.MemoryMappedFiles;
 using System.Media;
 using System.Reflection;
 using System.Runtime;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using Timer = System.Windows.Forms.Timer;
 
@@ -15,6 +16,9 @@ namespace AgGrade
     {
         // how often to attempt to connect to the controller
         private const int CONTROLLER_TRY_CONNECT_PERIOD_MS = 200;
+
+        // how often to send fixes to the field
+        private const int FIELD_FIX_PERIOD_MS = 250;
 
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
@@ -30,6 +34,7 @@ namespace AgGrade
         private Field? CurrentField;
         private FieldUpdater FieldUpdater;
         private string FieldDataFolder;
+        private Timer FieldFixTimer;
 
         public MainForm
             (
@@ -104,7 +109,32 @@ namespace AgGrade
 
             CurrentField = null;
 
+            FieldFixTimer = new Timer();
+            FieldFixTimer.Interval = FIELD_FIX_PERIOD_MS;
+            FieldFixTimer.Tick += FieldFixTimer_Tick;
+
             ShowMap();
+        }
+
+        /// <summary>
+        /// Called periodically to give fixes to the current field
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void FieldFixTimer_Tick(object? sender, EventArgs e)
+        {
+            if (CurrentField != null)
+            {
+                CurrentField.SetTractorFix(CurrentEquipmentStatus.TractorFix);
+                if (CurrentEquipmentSettings.FrontPan.Equipped)
+                {
+                    CurrentField.SetFrontScraperFix(CurrentEquipmentStatus.FrontPan.Fix);
+                }
+                if (CurrentEquipmentSettings.RearPan.Equipped)
+                {
+                    CurrentField.SetRearScraperFix(CurrentEquipmentStatus.RearPan.Fix);
+                }
+            }
         }
 
         /// <summary>
@@ -469,6 +499,8 @@ namespace AgGrade
 
             // if showing map then update to show field
             GetMap()?.ShowField(CurrentField);
+
+            FieldFixTimer.Enabled = true;
         }
 
         /// <summary>

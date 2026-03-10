@@ -1302,18 +1302,32 @@ def init_sqlite_db(db_path: Path) -> sqlite3.Connection:
         CREATE UNIQUE INDEX IF NOT EXISTS idx_fieldstate_xy
             ON FieldState (X, Y);
 
-        CREATE TABLE IF NOT EXISTS BinHistory (
-            BinHistoryID INTEGER PRIMARY KEY AUTOINCREMENT,
-            X INTEGER,
-            Y INTEGER,
-            HeightChangeM REAL,
-            Timestamp INTEGER
+        CREATE TABLE IF NOT EXISTS LevelingOperation (
+            OperationId INTEGER PRIMARY KEY AUTOINCREMENT,
+            OperationType TEXT NOT NULL CHECK (OperationType IN ('CUT', 'FILL')),
+            StartedAtMs INTEGER NOT NULL,
+            CompletedAtMs INTEGER NOT NULL
         );
+
+        CREATE TABLE IF NOT EXISTS LevelingOperationBin (
+            OperationBinId INTEGER PRIMARY KEY AUTOINCREMENT,
+            OperationId INTEGER NOT NULL,
+            X INTEGER NOT NULL,
+            Y INTEGER NOT NULL,
+            DeltaHeightM REAL NOT NULL,
+            FOREIGN KEY (OperationId) REFERENCES LevelingOperation(OperationId) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_opbin_operation
+            ON LevelingOperationBin (OperationId);
+
+        CREATE INDEX IF NOT EXISTS idx_opbin_xy
+            ON LevelingOperationBin (X, Y);
 
         CREATE TABLE IF NOT EXISTS Events (
             EventID INTEGER PRIMARY KEY AUTOINCREMENT,
             Type TEXT,
-            Details TEXT,
+            Value REAL,
             Timestamp INTEGER
         );
 

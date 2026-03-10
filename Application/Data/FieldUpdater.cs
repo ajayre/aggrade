@@ -208,9 +208,20 @@ namespace AgGrade.Data
                         {
                             List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
                             List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                            foreach (Bin B in BinsToCut)
+                            if (BinsToCut.Count > 0)
                             {
-                                FrontCutBin(B);
+                                Field.BeginLevelingOperation(Database.LevelingOperationType.CUT);
+                                try
+                                {
+                                    foreach (Bin B in BinsToCut)
+                                    {
+                                        FrontCutBin(B);
+                                    }
+                                }
+                                finally
+                                {
+                                    Field.CommitLevelingOperation();
+                                }
                             }
                         }
                     }
@@ -272,9 +283,20 @@ namespace AgGrade.Data
                         {
                             List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
                             List<Bin> BinsToCut = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                            foreach (Bin B in BinsToCut)
+                            if (BinsToCut.Count > 0)
                             {
-                                RearCutBin(B);
+                                Field.BeginLevelingOperation(Database.LevelingOperationType.CUT);
+                                try
+                                {
+                                    foreach (Bin B in BinsToCut)
+                                    {
+                                        RearCutBin(B);
+                                    }
+                                }
+                                finally
+                                {
+                                    Field.CommitLevelingOperation();
+                                }
                             }
                         }
                     }
@@ -336,9 +358,20 @@ namespace AgGrade.Data
                         {
                             List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(FrontAccumulatedStartLeft, FrontAccumulatedStartRight, FrontAccumulatedEnds);
                             List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                            foreach (Bin B in BinsToFill)
+                            if (BinsToFill.Count > 0)
                             {
-                                FrontFillBin(B);
+                                Field.BeginLevelingOperation(Database.LevelingOperationType.FILL);
+                                try
+                                {
+                                    foreach (Bin B in BinsToFill)
+                                    {
+                                        FrontFillBin(B);
+                                    }
+                                }
+                                finally
+                                {
+                                    Field.CommitLevelingOperation();
+                                }
                             }
                         }
                     }
@@ -400,9 +433,20 @@ namespace AgGrade.Data
                         {
                             List<Coordinate> SweptPolygon = BuildAccumulatedSweptPolygon(RearAccumulatedStartLeft, RearAccumulatedStartRight, RearAccumulatedEnds);
                             List<Bin> BinsToFill = Field.GetBinsInside(SweptPolygon, CurrentEquipmentSettings.MinBinCoveragePcent);
-                            foreach (Bin B in BinsToFill)
+                            if (BinsToFill.Count > 0)
                             {
-                                RearFillBin(B);
+                                Field.BeginLevelingOperation(Database.LevelingOperationType.FILL);
+                                try
+                                {
+                                    foreach (Bin B in BinsToFill)
+                                    {
+                                        RearFillBin(B);
+                                    }
+                                }
+                                finally
+                                {
+                                    Field.CommitLevelingOperation();
+                                }
                             }
                         }
                     }

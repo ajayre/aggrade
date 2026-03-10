@@ -1,3 +1,4 @@
+using AgGrade.Controller;
 using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic.Logging;
 using OpenCvSharp;
@@ -6,11 +7,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Reflection;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-
 using Point = System.Drawing.Point;
 
 namespace AgGrade.Data
@@ -21,6 +21,8 @@ namespace AgGrade.Data
         public const double BIN_SIZE_M = 0.6096;
 
         private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
+
+        public const double CUT_FILL_RATIO = 1.2;
 
         private Database Db;
 
@@ -41,6 +43,8 @@ namespace AgGrade.Data
         public List<HaulDirection> HaulDirections;
         public double CompletedCutCY;
         public double CompletedFillCY;
+        private bool IsLevelingOperationActive;
+        private Database.LevelingOperationType? ActiveOperationType;
 
         public Bin?[,] BinGrid;
         public int GridWidth { get; private set; }
@@ -789,15 +793,23 @@ namespace AgGrade.Data
             )
         {
             if (CutHeightM == 0) return;
+            bool shouldAutoCommit = false;
+            if (!IsLevelingOperationActive)
+            {
+                BeginLevelingOperation(Database.LevelingOperationType.CUT);
+                shouldAutoCommit = true;
+            }
 
             BinToCut.CurrentElevationM -= CutHeightM;
 
-            Db.UpdateBinState(BinToCut.X, BinToCut.Y, BinToCut.CurrentElevationM);
-            Db.AddBinHistory(BinToCut.X, BinToCut.Y, -CutHeightM);
+            AddBinDelta(BinToCut.X, BinToCut.Y, -CutHeightM);
 
             // updated completed cuts
             CompletedCutCY += BIN_SIZE_M * BIN_SIZE_M * CutHeightM * CUBIC_YARDS_PER_CUBIC_METER;
-            Db.SetData(Database.DataNames.CompletedCutCY, CompletedCutCY);
+            if (shouldAutoCommit)
+            {
+                CommitLevelingOperation();
+            }
         }
 
         /// <summary>
@@ -812,15 +824,69 @@ namespace AgGrade.Data
             )
         {
             if (FillHeightM == 0) return;
+            bool shouldAutoCommit = false;
+            if (!IsLevelingOperationActive)
+            {
+                BeginLevelingOperation(Database.LevelingOperationType.FILL);
+                shouldAutoCommit = true;
+            }
 
             BinToFill.CurrentElevationM += FillHeightM;
 
-            Db.UpdateBinState(BinToFill.X, BinToFill.Y, BinToFill.CurrentElevationM);
-            Db.AddBinHistory(BinToFill.X, BinToFill.Y, FillHeightM);
+            AddBinDelta(BinToFill.X, BinToFill.Y, FillHeightM);
 
             // update completed fills
-            CompletedFillCY += BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER;
-            Db.SetData(Database.DataNames.CompletedFillCY, CompletedFillCY);
+            CompletedFillCY += (BIN_SIZE_M * BIN_SIZE_M * FillHeightM * CUBIC_YARDS_PER_CUBIC_METER) / Field.CUT_FILL_RATIO;
+            if (shouldAutoCommit)
+            {
+                CommitLevelingOperation();
+            }
+        }
+
+        /// <summary>
+        /// Begins one leveled swath operation for batched journaled persistence.
+        /// </summary>
+        public void BeginLevelingOperation
+            (
+            Database.LevelingOperationType operationType
+            )
+        {
+            if (IsLevelingOperationActive)
+            {
+                if (ActiveOperationType == operationType) return;
+                throw new InvalidOperationException("Cannot mix operation types in one active leveling operation.");
+            }
+
+            Db.BeginLevelingOperation(operationType);
+            IsLevelingOperationActive = true;
+            ActiveOperationType = operationType;
+        }
+
+        /// <summary>
+        /// Adds one bin delta to the current active leveling operation.
+        /// </summary>
+        public void AddBinDelta
+            (
+            int x,
+            int y,
+            double deltaHeightM
+            )
+        {
+            if (!IsLevelingOperationActive) throw new InvalidOperationException("No active leveling operation.");
+            Db.AddLevelingOperationBinDelta(x, y, deltaHeightM);
+        }
+
+        /// <summary>
+        /// Commits the current active leveling operation into one SQLite transaction.
+        /// </summary>
+        public void CommitLevelingOperation
+            (
+            )
+        {
+            if (!IsLevelingOperationActive) return;
+            Db.CommitLevelingOperation(CompletedCutCY, CompletedFillCY);
+            IsLevelingOperationActive = false;
+            ActiveOperationType = null;
         }
 
         /// <summary>
@@ -897,39 +963,47 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Loads in the haul directions from a CSV file
+        /// Sets a tractor fix
         /// </summary>
-        /// <param name="FileName">Path and name of CSV file</param>
-        private void LoadHaulDirections
+        /// <param name="Fix">Fix</param>
+        public void SetTractorFix
             (
-            string FileName
+            GNSSFix Fix
             )
         {
-            if (!File.Exists(FileName))
-                return;
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
+        }
 
-            HaulDirections.Clear();
-            using (StreamReader reader = new StreamReader(FileName))
-            {
-                // Skip header: lat,lon,direction_degrees,source
-                string? header = reader.ReadLine();
-                if (header == null)
-                    return;
+        /// <summary>
+        /// Sets a front scraper fix
+        /// </summary>
+        /// <param name="Fix">Fix</param>
+        public void SetFrontScraperFix
+            (
+            GNSSFix Fix
+            )
+        {
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLon, Fix.Longitude));
+        }
 
-                while ((header = reader.ReadLine()) != null)
-                {
-                    string[] parts = header.Split(',');
-                    if (parts.Length < 3)
-                        continue;
-
-                    if (double.TryParse(parts[0], NumberStyles.Float, CultureInfo.InvariantCulture, out double lat) &&
-                        double.TryParse(parts[1], NumberStyles.Float, CultureInfo.InvariantCulture, out double lon) &&
-                        double.TryParse(parts[2], NumberStyles.Float, CultureInfo.InvariantCulture, out double directionDeg))
-                    {
-                        HaulDirections.Add(new HaulDirection(lat, lon, directionDeg));
-                    }
-                }
-            }
+        /// <summary>
+        /// Sets a rear scraper fix
+        /// </summary>
+        /// <param name="Fix">Fix</param>
+        public void SetRearScraperFix
+            (
+            GNSSFix Fix
+            )
+        {
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
         }
     }
 }

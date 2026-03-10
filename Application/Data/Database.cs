@@ -1,6 +1,9 @@
 using Microsoft.Data.Sqlite;
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,24 +16,84 @@ namespace AgGrade.Data
     public class Database
     {
         private SqliteConnection? _connection;
+        private string? _databaseFilePath;
+        private JournalOperationState? _activeJournalOperation;
+        private bool _possibleDataLoss;
+
+        private const int JOURNAL_HEADER_SIZE = 32;
+        private const int JOURNAL_RECORD_SIZE = 32;
+        private const int JOURNAL_MAGIC = 0x4A4C4F50; // "JLOP"
+        private const int JOURNAL_VERSION = 1;
+
+        /// <summary>
+        /// Number of journal records appended between mandatory mid-operation flushes.
+        /// </summary>
+        public int JournalFlushRecords { get; set; } = 32;
+
+        /// <summary>
+        /// True when the database detects unresolved/rejected journal state and potential data loss.
+        /// </summary>
+        public bool PossibleDataLoss => _possibleDataLoss;
+
+        /// <summary>
+        /// Raised when PossibleDataLoss transitions from false to true.
+        /// </summary>
+        public event EventHandler? PossibleDataLossChanged;
+
+        /// <summary>
+        /// Supported operation types for leveling history.
+        /// </summary>
+        public enum LevelingOperationType
+        {
+            CUT,
+            FILL
+        }
+
+        /// <summary>
+        /// Represents one bin delta in a leveling operation.
+        /// </summary>
+        public class LevelingOperationBinDelta
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+            public double DeltaHeightM { get; set; }
+        }
+
+        /// <summary>
+        /// In-memory state for an active journaled leveling operation.
+        /// </summary>
+        private sealed class JournalOperationState
+        {
+            public int OperationId { get; set; }
+            public LevelingOperationType OperationType { get; set; }
+            public long StartedAtMs { get; set; }
+            public string JournalPath { get; set; } = string.Empty;
+            public FileStream Stream { get; set; } = null!;
+            public int Sequence { get; set; }
+            public int SinceFlushCount { get; set; }
+            public List<LevelingOperationBinDelta> Deltas { get; } = new List<LevelingOperationBinDelta>();
+        }
 
         /// <summary>Row from Events table.</summary>
         public class Event
         {
             public enum EventTypes
             {
-                Speed,
+                Speedkph,
                 Heading,
                 FrontBladeHeight,
                 RearBladeHeight,
-                TractorLocation,
-                FrontScraperLocation,
-                RearScraperLocation
+                TractorLat,
+                TractorLon,
+                FrontScraperLat,
+                FrontScraperLon,
+                RearScraperLat,
+                RearScraperLon
             }
 
             public int EventID { get; set; }
             public EventTypes Type { get; set; }
-            public string Details { get; set; }
+            public double Value { get; set; }
             /// <summary>Tenths of seconds since 1970-01-01 00:00:00 UTC.</summary>
             public long Timestamp { get; set; }
 
@@ -42,15 +105,15 @@ namespace AgGrade.Data
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
 
-            /// <summary>Creates an event with the given type and details; Timestamp is set to current time in GMT.</summary>
+            /// <summary>Creates an event with the given type and value; Timestamp is set to current time in GMT.</summary>
             public Event
                 (
                 EventTypes Type,
-                string Details
+                double Value
                 )
             {
                 this.Type = Type;
-                this.Details = Details ?? "";
+                this.Value = Value;
                 Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             }
         }
@@ -148,39 +211,6 @@ namespace AgGrade.Data
             }
         }
 
-        /// <summary>Row from BinHistory table.</summary>
-        public class BinChange
-        {
-            public int BinHistoryID { get; set; }
-            public int X { get; set; }
-            public int Y { get; set; }
-            public double HeightChangeM { get; set; }
-            /// <summary>Milliseconds since 1970-01-01 00:00:00 UTC.</summary>
-            public long Timestamp { get; set; }
-
-            /// <summary>Creates a bin change with Timestamp set to current time in GMT.</summary>
-            public BinChange
-                (
-                )
-            {
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            }
-
-            /// <summary>Creates a bin change with the given bin and height change; Timestamp is set to current time in GMT.</summary>
-            public BinChange
-                (
-                int x,
-                int y,
-                double heightChangeM
-                )
-            {
-                X = x;
-                Y = y;
-                HeightChangeM = heightChangeM;
-                Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            }
-        }
-
         /// <summary>
         /// Names of supported data
         /// </summary>
@@ -205,12 +235,18 @@ namespace AgGrade.Data
         /// Opens an existing database file for use. The connection is kept open until Close or Dispose.
         /// </summary>
         /// <param name="FileName">Path and name of database file to open</param>
-        public void Open(string FileName)
+        public void Open
+            (
+            string FileName
+            )
         {
             _connection?.Dispose();
+            _databaseFilePath = FileName;
             _connection = new SqliteConnection($"Data Source={FileName}");
             _connection.Open();
+            ApplyHistoryWritePragmas();
             EnsureHaulPathsIndex();
+            RecoverFromJournal();
         }
 
         /// <summary>
@@ -229,6 +265,58 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Applies SQLite PRAGMA settings used by the leveling history write path.
+        /// </summary>
+        private void ApplyHistoryWritePragmas
+            (
+            )
+        {
+            if (_connection == null) return;
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "PRAGMA journal_mode=WAL";
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = "PRAGMA synchronous=FULL";
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = "PRAGMA busy_timeout=5000";
+                cmd.ExecuteNonQuery();
+                cmd.CommandText = "PRAGMA wal_autocheckpoint=2000";
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        /// <summary>
+        /// Releases resources for an unfinished active operation if the database closes unexpectedly.
+        /// </summary>
+        private void CleanupActiveJournalOperation
+            (
+            )
+        {
+            if (_activeJournalOperation == null) return;
+            try
+            {
+                _activeJournalOperation.Stream.Dispose();
+            }
+            catch
+            {
+                // best-effort cleanup only
+            }
+            _activeJournalOperation = null;
+        }
+
+        /// <summary>
+        /// Sets PossibleDataLoss true and raises its transition event once.
+        /// </summary>
+        private void SetPossibleDataLossTrue
+            (
+            )
+        {
+            if (_possibleDataLoss) return;
+            _possibleDataLoss = true;
+            PossibleDataLossChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
         /// Gets the open connection. Returns null if the database has not been opened.
         /// </summary>
         public SqliteConnection? Connection => _connection;
@@ -238,6 +326,7 @@ namespace AgGrade.Data
         /// </summary>
         public void Close()
         {
+            CleanupActiveJournalOperation();
             _connection?.Dispose();
             _connection = null;
         }
@@ -250,9 +339,9 @@ namespace AgGrade.Data
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO Events (Type, Details, Timestamp) VALUES (@Type, @Details, @Timestamp)";
+                cmd.CommandText = "INSERT INTO Events (Type, Value, Timestamp) VALUES (@Type, @Value, @Timestamp)";
                 cmd.Parameters.AddWithValue("@Type", evt.Type.ToString());
-                cmd.Parameters.AddWithValue("@Details", evt.Details ?? "");
+                cmd.Parameters.AddWithValue("@Value", evt.Value);
                 cmd.Parameters.AddWithValue("@Timestamp", evt.Timestamp);
                 cmd.ExecuteNonQuery();
             }
@@ -497,48 +586,584 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Inserts a row into the BinHistory table.
+        /// Starts a journaled leveling operation and reserves the next OperationId.
         /// </summary>
-        /// <param name="X">Bin X coordinate</param>
-        /// <param name="Y">Bin Y coordinate</param>
-        /// <param name="HeightChangeM">Change in height in meters (negative = cut)</param>
-        public void AddBinHistory
+        public int BeginLevelingOperation
             (
-            int x,
-            int y,
-            double HeightChangeM
+            LevelingOperationType operationType
             )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            if (_activeJournalOperation != null) throw new InvalidOperationException("A leveling operation is already active.");
+            if (_databaseFilePath == null) throw new InvalidOperationException("Database path is not available.");
 
-            long Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
-            using (var cmd = _connection.CreateCommand())
+            int nextOperationId = GetNextLevelingOperationId();
+            string dbFolder = Path.GetDirectoryName(_databaseFilePath) ?? ".";
+            string[] existingActiveJournals = Directory.GetFiles(dbFolder, "op_*.journal.active");
+            if (existingActiveJournals.Length > 0)
             {
-                cmd.CommandText = "INSERT INTO BinHistory (X, Y, HeightChangeM, Timestamp) VALUES (@X, @Y, @HeightChangeM, @Timestamp)";
-                cmd.Parameters.AddWithValue("@X", x);
-                cmd.Parameters.AddWithValue("@Y", y);
-                cmd.Parameters.AddWithValue("@HeightChangeM", HeightChangeM);
-                cmd.Parameters.AddWithValue("@Timestamp", Timestamp);
-                cmd.ExecuteNonQuery();
+                SetPossibleDataLossTrue();
+                throw new InvalidOperationException("Cannot start a new operation while an active journal already exists.");
+            }
+
+            string journalPath = Path.Combine(dbFolder, $"op_{nextOperationId}.journal.active");
+            FileStream stream = new FileStream
+                (
+                journalPath,
+                FileMode.CreateNew,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                4096,
+                FileOptions.WriteThrough
+                );
+            WriteJournalHeader(stream, nextOperationId, operationType);
+            _activeJournalOperation = new JournalOperationState
+            {
+                OperationId = nextOperationId,
+                OperationType = operationType,
+                StartedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                JournalPath = journalPath,
+                Stream = stream,
+                Sequence = 0,
+                SinceFlushCount = 0
+            };
+            return nextOperationId;
+        }
+
+        /// <summary>
+        /// Adds one bin delta to the active journaled leveling operation.
+        /// </summary>
+        public void AddLevelingOperationBinDelta
+            (
+            int x,
+            int y,
+            double deltaHeightM
+            )
+        {
+            if (_activeJournalOperation == null) throw new InvalidOperationException("No active leveling operation.");
+
+            try
+            {
+                _activeJournalOperation.Deltas.Add
+                    (
+                    new LevelingOperationBinDelta
+                    {
+                        X = x,
+                        Y = y,
+                        DeltaHeightM = deltaHeightM
+                    }
+                    );
+
+                _activeJournalOperation.Sequence++;
+                WriteJournalRecord
+                    (
+                    _activeJournalOperation.Stream,
+                    _activeJournalOperation.Sequence,
+                    x,
+                    y,
+                    deltaHeightM
+                    );
+
+                _activeJournalOperation.SinceFlushCount++;
+                int flushRecords = Math.Max(1, JournalFlushRecords);
+                if (_activeJournalOperation.SinceFlushCount >= flushRecords)
+                {
+                    _activeJournalOperation.Stream.Flush(true);
+                    _activeJournalOperation.SinceFlushCount = 0;
+                }
+            }
+            catch
+            {
+                HandleJournalWriteFailure();
+                throw;
             }
         }
 
         /// <summary>
-        /// Inserts a row into the BinHistory table.
+        /// Commits the active leveling operation to SQLite in one transaction and removes its journal file.
         /// </summary>
-        public void AddBinHistory(BinChange binChange)
+        public void CommitLevelingOperation
+            (
+            double completedCutCY,
+            double completedFillCY
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            if (_activeJournalOperation == null) return;
+
+            JournalOperationState op = _activeJournalOperation;
+            _activeJournalOperation = null;
+
+            try
+            {
+                op.Stream.Flush(true);
+                long completedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                PersistLevelingOperationInternal(op, completedAt, completedCutCY, completedFillCY);
+                op.Stream.Dispose();
+                if (File.Exists(op.JournalPath))
+                {
+                    File.Delete(op.JournalPath);
+                }
+            }
+            catch
+            {
+                try
+                {
+                    op.Stream.Dispose();
+                }
+                catch
+                {
+                    // best-effort cleanup only
+                }
+                SetPossibleDataLossTrue();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Recovers unresolved journal files at startup according to operation-id replay rules.
+        /// </summary>
+        public void RecoverFromJournal
+            (
+            )
+        {
+            if (_connection == null || _databaseFilePath == null) return;
+
+            string dbFolder = Path.GetDirectoryName(_databaseFilePath) ?? ".";
+            string quarantineFolder = Path.Combine(dbFolder, "journal-quarantine");
+            if (!Directory.Exists(quarantineFolder))
+            {
+                Directory.CreateDirectory(quarantineFolder);
+            }
+
+            string[] allJournalFiles = Directory.GetFiles(dbFolder, "op_*.journal.*");
+            if (allJournalFiles.Length == 0) return;
+
+            int highestId = GetCurrentHighestOperationId();
+            int expectedId = highestId + 1;
+
+            List<string> activeFiles = allJournalFiles
+                .Where(f => string.Equals(Path.GetExtension(f), ".active", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => TryParseOperationIdFromPath(f))
+                .ToList();
+            List<string> errorFiles = allJournalFiles
+                .Where(f => string.Equals(Path.GetExtension(f), ".error", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (string errorFile in errorFiles)
+            {
+                SetPossibleDataLossTrue();
+                MoveToQuarantine(errorFile, quarantineFolder);
+            }
+
+            string? replayFile = activeFiles.FirstOrDefault(f => TryParseOperationIdFromPath(f) == expectedId);
+
+            foreach (string activeFile in activeFiles)
+            {
+                if (activeFile == replayFile) continue;
+                SetPossibleDataLossTrue();
+                MoveToQuarantine(activeFile, quarantineFolder);
+            }
+
+            if (replayFile == null) return;
+
+            try
+            {
+                bool replayed = ReplayJournalFile(replayFile);
+                if (replayed && File.Exists(replayFile))
+                {
+                    File.Delete(replayFile);
+                }
+                else if (!replayed)
+                {
+                    SetPossibleDataLossTrue();
+                    MoveToQuarantine(replayFile, quarantineFolder);
+                }
+            }
+            catch
+            {
+                SetPossibleDataLossTrue();
+                MoveToQuarantine(replayFile, quarantineFolder);
+            }
+        }
+
+        /// <summary>
+        /// Gets the next operation id to be used for journaled operations.
+        /// </summary>
+        private int GetNextLevelingOperationId
+            (
+            )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
             using (var cmd = _connection.CreateCommand())
             {
-                cmd.CommandText = "INSERT INTO BinHistory (X, Y, HeightChangeM, Timestamp) VALUES (@X, @Y, @HeightChangeM, @Timestamp)";
-                cmd.Parameters.AddWithValue("@X", binChange.X);
-                cmd.Parameters.AddWithValue("@Y", binChange.Y);
-                cmd.Parameters.AddWithValue("@HeightChangeM", binChange.HeightChangeM);
-                cmd.Parameters.AddWithValue("@Timestamp", binChange.Timestamp);
-                cmd.ExecuteNonQuery();
+                cmd.CommandText = "SELECT IFNULL(MAX(OperationId), 0) + 1 FROM LevelingOperation";
+                object? value = cmd.ExecuteScalar();
+                return Convert.ToInt32(value ?? 1, CultureInfo.InvariantCulture);
             }
+        }
+
+        /// <summary>
+        /// Gets the current highest persisted operation id.
+        /// </summary>
+        private int GetCurrentHighestOperationId
+            (
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT IFNULL(MAX(OperationId), 0) FROM LevelingOperation";
+                object? value = cmd.ExecuteScalar();
+                return Convert.ToInt32(value ?? 0, CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>
+        /// Writes the fixed-size journal header.
+        /// </summary>
+        private void WriteJournalHeader
+            (
+            FileStream stream,
+            int operationId,
+            LevelingOperationType operationType
+            )
+        {
+            long startedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Span<byte> header = stackalloc byte[JOURNAL_HEADER_SIZE];
+            BinaryPrimitives.WriteInt32LittleEndian(header.Slice(0, 4), JOURNAL_MAGIC);
+            BinaryPrimitives.WriteInt32LittleEndian(header.Slice(4, 4), JOURNAL_VERSION);
+            BinaryPrimitives.WriteInt32LittleEndian(header.Slice(8, 4), operationId);
+            BinaryPrimitives.WriteInt32LittleEndian(header.Slice(12, 4), (int)operationType);
+            BinaryPrimitives.WriteInt64LittleEndian(header.Slice(16, 8), startedAt);
+            uint crc = ComputeCrc32(header.Slice(0, 28));
+            BinaryPrimitives.WriteUInt32LittleEndian(header.Slice(28, 4), crc);
+            stream.Write(header);
+            stream.Flush(true);
+        }
+
+        /// <summary>
+        /// Writes one fixed-size journal record.
+        /// </summary>
+        private void WriteJournalRecord
+            (
+            FileStream stream,
+            int seq,
+            int x,
+            int y,
+            double deltaHeightM
+            )
+        {
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Span<byte> record = stackalloc byte[JOURNAL_RECORD_SIZE];
+            BinaryPrimitives.WriteInt32LittleEndian(record.Slice(0, 4), seq);
+            BinaryPrimitives.WriteInt32LittleEndian(record.Slice(4, 4), x);
+            BinaryPrimitives.WriteInt32LittleEndian(record.Slice(8, 4), y);
+            BinaryPrimitives.WriteDoubleLittleEndian(record.Slice(12, 8), deltaHeightM);
+            BinaryPrimitives.WriteInt64LittleEndian(record.Slice(20, 8), timestamp);
+            uint crc = ComputeCrc32(record.Slice(0, 28));
+            BinaryPrimitives.WriteUInt32LittleEndian(record.Slice(28, 4), crc);
+            stream.Write(record);
+        }
+
+        /// <summary>
+        /// Handles journal-write failures by marking data-loss and renaming the active journal.
+        /// </summary>
+        private void HandleJournalWriteFailure
+            (
+            )
+        {
+            if (_activeJournalOperation == null) return;
+
+            string journalPath = _activeJournalOperation.JournalPath;
+            try
+            {
+                _activeJournalOperation.Stream.Dispose();
+            }
+            catch
+            {
+                // best-effort cleanup only
+            }
+
+            string errorPath = Path.ChangeExtension(journalPath, ".error");
+            try
+            {
+                if (File.Exists(journalPath))
+                {
+                    if (File.Exists(errorPath))
+                    {
+                        File.Delete(errorPath);
+                    }
+                    File.Move(journalPath, errorPath);
+                }
+            }
+            catch
+            {
+                // best-effort rename only
+            }
+            finally
+            {
+                _activeJournalOperation = null;
+                SetPossibleDataLossTrue();
+            }
+        }
+
+        /// <summary>
+        /// Writes one leveling operation and all deltas in a single SQLite transaction.
+        /// </summary>
+        private void PersistLevelingOperationInternal
+            (
+            JournalOperationState operation,
+            long completedAtMs,
+            double completedCutCY,
+            double completedFillCY
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            using (SqliteTransaction transaction = _connection.BeginTransaction())
+            {
+                using (SqliteCommand opCmd = _connection.CreateCommand())
+                {
+                    opCmd.Transaction = transaction;
+                    opCmd.CommandText = "INSERT INTO LevelingOperation (OperationId, OperationType, StartedAtMs, CompletedAtMs) VALUES (@OperationId, @OperationType, @StartedAtMs, @CompletedAtMs)";
+                    opCmd.Parameters.AddWithValue("@OperationId", operation.OperationId);
+                    opCmd.Parameters.AddWithValue("@OperationType", operation.OperationType.ToString());
+                    opCmd.Parameters.AddWithValue("@StartedAtMs", operation.StartedAtMs);
+                    opCmd.Parameters.AddWithValue("@CompletedAtMs", completedAtMs);
+                    opCmd.ExecuteNonQuery();
+                }
+
+                using (SqliteCommand insertDeltaCmd = _connection.CreateCommand())
+                {
+                    insertDeltaCmd.Transaction = transaction;
+                    insertDeltaCmd.CommandText = "INSERT INTO LevelingOperationBin (OperationId, X, Y, DeltaHeightM) VALUES (@OperationId, @X, @Y, @DeltaHeightM)";
+                    SqliteParameter pOperationId = insertDeltaCmd.Parameters.Add("@OperationId", SqliteType.Integer);
+                    SqliteParameter pX = insertDeltaCmd.Parameters.Add("@X", SqliteType.Integer);
+                    SqliteParameter pY = insertDeltaCmd.Parameters.Add("@Y", SqliteType.Integer);
+                    SqliteParameter pDelta = insertDeltaCmd.Parameters.Add("@DeltaHeightM", SqliteType.Real);
+                    foreach (LevelingOperationBinDelta delta in operation.Deltas)
+                    {
+                        pOperationId.Value = operation.OperationId;
+                        pX.Value = delta.X;
+                        pY.Value = delta.Y;
+                        pDelta.Value = delta.DeltaHeightM;
+                        insertDeltaCmd.ExecuteNonQuery();
+                    }
+                }
+
+                using (SqliteCommand updateStateCmd = _connection.CreateCommand())
+                {
+                    updateStateCmd.Transaction = transaction;
+                    updateStateCmd.CommandText = "UPDATE FieldState SET CurrentHeightM = CurrentHeightM + @DeltaHeightM WHERE X = @X AND Y = @Y";
+                    SqliteParameter pDelta = updateStateCmd.Parameters.Add("@DeltaHeightM", SqliteType.Real);
+                    SqliteParameter pX = updateStateCmd.Parameters.Add("@X", SqliteType.Integer);
+                    SqliteParameter pY = updateStateCmd.Parameters.Add("@Y", SqliteType.Integer);
+                    foreach (LevelingOperationBinDelta delta in operation.Deltas)
+                    {
+                        pDelta.Value = delta.DeltaHeightM;
+                        pX.Value = delta.X;
+                        pY.Value = delta.Y;
+                        updateStateCmd.ExecuteNonQuery();
+                    }
+                }
+
+                UpsertDataInTransaction(transaction, DataNames.CompletedCutCY, completedCutCY);
+                UpsertDataInTransaction(transaction, DataNames.CompletedFillCY, completedFillCY);
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Upserts one data key/value pair within an existing transaction.
+        /// </summary>
+        private void UpsertDataInTransaction
+            (
+            SqliteTransaction transaction,
+            DataNames name,
+            double value
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            using (SqliteCommand cmd = _connection.CreateCommand())
+            {
+                cmd.Transaction = transaction;
+                cmd.CommandText = "UPDATE Data SET Value = @Value WHERE Name = @Name";
+                cmd.Parameters.AddWithValue("@Name", name.ToString());
+                cmd.Parameters.AddWithValue("@Value", value);
+                int rows = cmd.ExecuteNonQuery();
+                if (rows == 0)
+                {
+                    cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Replays one active journal file when its operation id is exactly the next expected id.
+        /// </summary>
+        private bool ReplayJournalFile
+            (
+            string journalPath
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            ReadJournalPayload payload = ReadJournal(journalPath);
+            int highest = GetCurrentHighestOperationId();
+            if (payload.OperationId != highest + 1)
+            {
+                SetPossibleDataLossTrue();
+                return false;
+            }
+
+            JournalOperationState op = new JournalOperationState
+            {
+                OperationId = payload.OperationId,
+                OperationType = payload.OperationType,
+                StartedAtMs = payload.StartedAtMs,
+                JournalPath = journalPath,
+                Stream = File.OpenRead(journalPath)
+            };
+            op.Deltas.AddRange(payload.Deltas);
+
+            double cutDeltaM = payload.Deltas.Where(d => d.DeltaHeightM < 0).Sum(d => -d.DeltaHeightM);
+            double fillDeltaM = payload.Deltas.Where(d => d.DeltaHeightM > 0).Sum(d => d.DeltaHeightM);
+            const double BIN_SIZE_M = 0.6096;
+            const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
+            double opCutCY = BIN_SIZE_M * BIN_SIZE_M * cutDeltaM * CUBIC_YARDS_PER_CUBIC_METER;
+            double opFillCY = (BIN_SIZE_M * BIN_SIZE_M * fillDeltaM * CUBIC_YARDS_PER_CUBIC_METER) / Field.CUT_FILL_RATIO;
+            double completedCutCY = GetData(DataNames.CompletedCutCY) + opCutCY;
+            double completedFillCY = GetData(DataNames.CompletedFillCY) + opFillCY;
+            long completedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            PersistLevelingOperationInternal(op, completedAtMs, completedCutCY, completedFillCY);
+            op.Stream.Dispose();
+            return true;
+        }
+
+        /// <summary>
+        /// Moves one journal file to quarantine without overwriting an existing file.
+        /// </summary>
+        private static void MoveToQuarantine
+            (
+            string filePath,
+            string quarantineFolder
+            )
+        {
+            if (!File.Exists(filePath)) return;
+            string fileName = Path.GetFileName(filePath);
+            string destinationPath = Path.Combine(quarantineFolder, fileName);
+            if (File.Exists(destinationPath))
+            {
+                string stamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(CultureInfo.InvariantCulture);
+                destinationPath = Path.Combine(quarantineFolder, $"{stamp}_{fileName}");
+            }
+            File.Move(filePath, destinationPath);
+        }
+
+        /// <summary>
+        /// Extracts the operation id from a journal filename.
+        /// </summary>
+        private static int TryParseOperationIdFromPath
+            (
+            string filePath
+            )
+        {
+            string fileName = Path.GetFileName(filePath);
+            if (!fileName.StartsWith("op_", StringComparison.OrdinalIgnoreCase)) return int.MinValue;
+            int underscore = fileName.IndexOf('_');
+            int dot = fileName.IndexOf('.');
+            if (underscore < 0 || dot < 0 || dot <= underscore + 1) return int.MinValue;
+            string idPart = fileName.Substring(underscore + 1, dot - underscore - 1);
+            return int.TryParse(idPart, NumberStyles.Integer, CultureInfo.InvariantCulture, out int id) ? id : int.MinValue;
+        }
+
+        /// <summary>
+        /// Deserializes a journal file and validates fixed-size header/records with CRC.
+        /// </summary>
+        private ReadJournalPayload ReadJournal
+            (
+            string journalPath
+            )
+        {
+            using (FileStream stream = File.OpenRead(journalPath))
+            {
+                byte[] header = new byte[JOURNAL_HEADER_SIZE];
+                int readHeader = stream.Read(header, 0, JOURNAL_HEADER_SIZE);
+                if (readHeader != JOURNAL_HEADER_SIZE) throw new InvalidDataException("Journal header is incomplete.");
+
+                int magic = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(0, 4));
+                int version = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(4, 4));
+                int operationId = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(8, 4));
+                int operationTypeRaw = BinaryPrimitives.ReadInt32LittleEndian(header.AsSpan(12, 4));
+                long startedAtMs = BinaryPrimitives.ReadInt64LittleEndian(header.AsSpan(16, 8));
+                uint storedHeaderCrc = BinaryPrimitives.ReadUInt32LittleEndian(header.AsSpan(28, 4));
+                uint computedHeaderCrc = ComputeCrc32(header.AsSpan(0, 28));
+                if (magic != JOURNAL_MAGIC || version != JOURNAL_VERSION || storedHeaderCrc != computedHeaderCrc)
+                {
+                    throw new InvalidDataException("Journal header CRC or version is invalid.");
+                }
+
+                List<LevelingOperationBinDelta> deltas = new List<LevelingOperationBinDelta>();
+                byte[] record = new byte[JOURNAL_RECORD_SIZE];
+                while (true)
+                {
+                    int bytesRead = stream.Read(record, 0, JOURNAL_RECORD_SIZE);
+                    if (bytesRead == 0) break;
+                    if (bytesRead != JOURNAL_RECORD_SIZE) throw new InvalidDataException("Journal record is incomplete.");
+
+                    uint storedCrc = BinaryPrimitives.ReadUInt32LittleEndian(record.AsSpan(28, 4));
+                    uint computedCrc = ComputeCrc32(record.AsSpan(0, 28));
+                    if (storedCrc != computedCrc) throw new InvalidDataException("Journal record CRC is invalid.");
+
+                    int x = BinaryPrimitives.ReadInt32LittleEndian(record.AsSpan(4, 4));
+                    int y = BinaryPrimitives.ReadInt32LittleEndian(record.AsSpan(8, 4));
+                    double delta = BinaryPrimitives.ReadDoubleLittleEndian(record.AsSpan(12, 8));
+                    deltas.Add(new LevelingOperationBinDelta { X = x, Y = y, DeltaHeightM = delta });
+                }
+
+                return new ReadJournalPayload
+                {
+                    OperationId = operationId,
+                    OperationType = (LevelingOperationType)operationTypeRaw,
+                    StartedAtMs = startedAtMs,
+                    Deltas = deltas
+                };
+            }
+        }
+
+        /// <summary>
+        /// CRC32 helper used by fixed-size journal header/records.
+        /// </summary>
+        private static uint ComputeCrc32
+            (
+            ReadOnlySpan<byte> bytes
+            )
+        {
+            uint crc = 0xFFFFFFFFu;
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                crc ^= bytes[i];
+                for (int bit = 0; bit < 8; bit++)
+                {
+                    bool lsb = (crc & 1u) != 0;
+                    crc >>= 1;
+                    if (lsb) crc ^= 0xEDB88320u;
+                }
+            }
+            return ~crc;
+        }
+
+        /// <summary>
+        /// Materialized payload from one parsed journal file.
+        /// </summary>
+        private sealed class ReadJournalPayload
+        {
+            public int OperationId { get; set; }
+            public LevelingOperationType OperationType { get; set; }
+            public long StartedAtMs { get; set; }
+            public List<LevelingOperationBinDelta> Deltas { get; set; } = new List<LevelingOperationBinDelta>();
         }
 
         /// <summary>
