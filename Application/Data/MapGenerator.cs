@@ -199,9 +199,9 @@ namespace AgGrade.Data
         private Coordinate SurfaceFlowNECorner = new Coordinate();
         private string? SurfaceFlowImage = null;
         private bool ShowBenchmarks;
+        private bool ShowSatelliteBasemap;
         private BruTileBasemapLayer? _bruTileBasemapLayer = null;
         private bool _enableBruTileBasemap = false;
-        private AppSettings.BasemapStyles _basemapStyle = AppSettings.BasemapStyles.OpenStreetMap;
         private bool _wasBruTileEnabled = false;
 
         private readonly Dictionary<long, Bitmap> _surfaceFlowTileCache = new Dictionary<long, Bitmap>();
@@ -306,6 +306,7 @@ namespace AgGrade.Data
         /// <param name="HaulPath">List of points for current haul path or empty/null for no path</param>
         /// <param name="ShowSurfaceFlow">true to show the surface water flow</param>
         /// <param name="ShowBenchmarks">true to show benchmarks</param>
+        /// <param name="ShowSatelliteBasemap">true to show satellite basemap</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -326,7 +327,8 @@ namespace AgGrade.Data
             TractorStyles TractorStyle,
             List<Coordinate> HaulPath,
             bool ShowSurfaceFlow,
-            bool ShowBenchmarks
+            bool ShowBenchmarks,
+            bool ShowSatelliteBasemap
             )
         {
             CurrentField = Field;
@@ -338,8 +340,7 @@ namespace AgGrade.Data
 
             this.CurrentEquipmentSettings = CurrentEquipmentSettings;
             this.CurrentAppSettings = CurrentAppSettings;
-            _enableBruTileBasemap = CurrentAppSettings.EnableBruTileBasemap;
-            _basemapStyle = CurrentAppSettings.BasemapStyle;
+            _enableBruTileBasemap = ShowSatelliteBasemap;
             if (!_enableBruTileBasemap && _wasBruTileEnabled && _bruTileBasemapLayer != null)
             {
                 _bruTileBasemapLayer.Dispose();
@@ -349,6 +350,7 @@ namespace AgGrade.Data
 
             this.ShowHaulArrows = ShowHaulArrows;
             this.ShowBenchmarks = ShowBenchmarks;
+            this.ShowSatelliteBasemap = ShowSatelliteBasemap;
 
             this.HaulPath = HaulPath;
 
@@ -449,7 +451,7 @@ namespace AgGrade.Data
                             TractorYpx,
                             _tractorHeading,
                             CurrentScaleFactor,
-                            _basemapStyle,
+                            BruTileBasemapLayer.BasemapProviders.SatelliteEsri,
                             (coord) => LatLonToWorldF(coord));
                     }
                 }

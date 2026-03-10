@@ -45,6 +45,7 @@
             TractorStyleBtn = new Button();
             FlowBtn = new Button();
             BenchmarkBtn = new Button();
+            SatelliteBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -54,7 +55,7 @@
             MapCanvas.Dock = DockStyle.Fill;
             MapCanvas.Location = new Point(0, 49);
             MapCanvas.Name = "MapCanvas";
-            MapCanvas.Size = new Size(881, 421);
+            MapCanvas.Size = new Size(881, 478);
             MapCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             MapCanvas.TabIndex = 0;
             MapCanvas.TabStop = false;
@@ -210,7 +211,7 @@
             // 
             TractorStyleBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             TractorStyleBtn.Image = (Image)resources.GetObject("TractorStyleBtn.Image");
-            TractorStyleBtn.Location = new Point(810, 319);
+            TractorStyleBtn.Location = new Point(810, 385);
             TractorStyleBtn.Name = "TractorStyleBtn";
             TractorStyleBtn.Size = new Size(60, 60);
             TractorStyleBtn.TabIndex = 11;
@@ -221,7 +222,7 @@
             // 
             FlowBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             FlowBtn.Image = Properties.Resources.flow_48px;
-            FlowBtn.Location = new Point(810, 253);
+            FlowBtn.Location = new Point(810, 319);
             FlowBtn.Name = "FlowBtn";
             FlowBtn.Size = new Size(60, 60);
             FlowBtn.TabIndex = 12;
@@ -232,18 +233,30 @@
             // 
             BenchmarkBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             BenchmarkBtn.Image = Properties.Resources.benchmark_48px;
-            BenchmarkBtn.Location = new Point(810, 385);
+            BenchmarkBtn.Location = new Point(810, 451);
             BenchmarkBtn.Name = "BenchmarkBtn";
             BenchmarkBtn.Size = new Size(60, 60);
             BenchmarkBtn.TabIndex = 13;
             BenchmarkBtn.UseVisualStyleBackColor = true;
             BenchmarkBtn.Click += BenchmarkBtn_Click;
             // 
+            // SatelliteBtn
+            // 
+            SatelliteBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            SatelliteBtn.Image = Properties.Resources.satellite_48px;
+            SatelliteBtn.Location = new Point(810, 253);
+            SatelliteBtn.Name = "SatelliteBtn";
+            SatelliteBtn.Size = new Size(60, 60);
+            SatelliteBtn.TabIndex = 14;
+            SatelliteBtn.UseVisualStyleBackColor = true;
+            SatelliteBtn.Click += SatelliteBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(SatelliteBtn);
             Controls.Add(BenchmarkBtn);
             Controls.Add(FlowBtn);
             Controls.Add(TractorStyleBtn);
@@ -254,7 +267,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "Map";
-            Size = new Size(881, 470);
+            Size = new Size(881, 527);
             ((System.ComponentModel.ISupportInitialize)MapCanvas).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
@@ -279,5 +292,6 @@
         private Button TractorStyleBtn;
         private Button FlowBtn;
         private Button BenchmarkBtn;
+        private Button SatelliteBtn;
     }
 }

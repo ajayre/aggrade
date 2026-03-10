@@ -227,5 +227,15 @@ namespace AgGrade.Properties {
                 return ResourceManager.GetStream("public-domain-beep-sound-100267", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap satellite_48px {
+            get {
+                object obj = ResourceManager.GetObject("satellite_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
     }
 }

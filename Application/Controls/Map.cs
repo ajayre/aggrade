@@ -40,6 +40,7 @@ namespace AgGrade.Controls
         private MapGenerator.TractorStyles TractorStyle;
         private List<Coordinate> HaulPath = new List<Coordinate>();
         private bool ShowBenchmarks;
+        private bool ShowSatelliteBasemap;
 
         // maximum number of tractor history points to keep
         private int MaxTractorHistoryLength = 500;
@@ -76,6 +77,7 @@ namespace AgGrade.Controls
             ShowSurfaceFlow = false;
 
             ShowBenchmarks = true;
+            ShowSatelliteBasemap = false;
 
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
@@ -242,7 +244,7 @@ namespace AgGrade.Controls
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowBenchmarks);
+                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowBenchmarks, ShowSatelliteBasemap);
 
 #if SHOW_MAP_PERF
             sw.Stop();
@@ -495,6 +497,11 @@ namespace AgGrade.Controls
         private void BenchmarkBtn_Click(object sender, EventArgs e)
         {
             ShowBenchmarks = !ShowBenchmarks;
+        }
+
+        private void SatelliteBtn_Click(object sender, EventArgs e)
+        {
+            ShowSatelliteBasemap = !ShowSatelliteBasemap;
         }
     }
 }

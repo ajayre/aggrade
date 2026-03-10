@@ -18,7 +18,13 @@ namespace AgGrade.Data
     /// </summary>
     public sealed class BruTileBasemapLayer : IDisposable
     {
-        private readonly record struct TileKey(AppSettings.BasemapStyles Style, int Zoom, int X, int Y);
+        public enum BasemapProviders
+        {
+            OpenStreetMap,
+            SatelliteEsri
+        }
+
+        private readonly record struct TileKey(BasemapProviders Provider, int Zoom, int X, int Y);
 
         private sealed class CacheEntry
         {
@@ -72,7 +78,7 @@ namespace AgGrade.Data
             int tractorYpx,
             double tractorHeadingDeg,
             double pixelsPerMeter,
-            AppSettings.BasemapStyles basemapStyle,
+            BasemapProviders provider,
             Func<Coordinate, PointF> latLonToPixel)
         {
             if (_disposed || !tractorFix.IsValid || imageWidthPx <= 0 || imageHeightPx <= 0 || pixelsPerMeter <= 0.0)
@@ -80,7 +86,7 @@ namespace AgGrade.Data
                 return;
             }
 
-            int providerMaxZoom = basemapStyle == AppSettings.BasemapStyles.OpenStreetMap ? MaxZoomOpenStreetMap : MaxZoomSatellite;
+            int providerMaxZoom = provider == BasemapProviders.OpenStreetMap ? MaxZoomOpenStreetMap : MaxZoomSatellite;
             int zoom = _zoomAdapter.SelectZoomLevel(pixelsPerMeter, tractorFix.Latitude, MinZoom, providerMaxZoom);
             List<TileKey> visibleTiles = GetVisibleTiles(
                 imageWidthPx,
@@ -90,7 +96,7 @@ namespace AgGrade.Data
                 tractorYpx,
                 tractorHeadingDeg,
                 pixelsPerMeter,
-                basemapStyle,
+                provider,
                 zoom);
 
             bool canRequest = ShouldAttemptRequests();
@@ -183,7 +189,7 @@ namespace AgGrade.Data
 
         private async Task<byte[]?> DownloadTileAsync(TileKey key)
         {
-            string? directUrl = BuildFallbackTileUrl(key.Style, key.Zoom, key.X, key.Y);
+            string? directUrl = BuildTileUrl(key.Provider, key.Zoom, key.X, key.Y);
             if (string.IsNullOrWhiteSpace(directUrl))
             {
                 return null;
@@ -200,9 +206,9 @@ namespace AgGrade.Data
             return await res.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
         }
 
-        private static string BuildFallbackTileUrl(AppSettings.BasemapStyles style, int zoom, int x, int y)
+        private static string BuildTileUrl(BasemapProviders provider, int zoom, int x, int y)
         {
-            if (style == AppSettings.BasemapStyles.OpenStreetMap)
+            if (provider == BasemapProviders.OpenStreetMap)
             {
                 return $"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png";
             }
@@ -257,7 +263,7 @@ namespace AgGrade.Data
             int tractorYpx,
             double tractorHeadingDeg,
             double pixelsPerMeter,
-            AppSettings.BasemapStyles style,
+            BasemapProviders provider,
             int zoom)
         {
             Coordinate c1 = ScreenPixelToLatLon(0, 0, tractorFix, tractorXpx, tractorYpx, tractorHeadingDeg, pixelsPerMeter);
@@ -284,7 +290,7 @@ namespace AgGrade.Data
             {
                 for (int x = minX; x <= maxX; x++)
                 {
-                    keys.Add(new TileKey(style, zoom, x, y));
+                    keys.Add(new TileKey(provider, zoom, x, y));
                 }
             }
 
