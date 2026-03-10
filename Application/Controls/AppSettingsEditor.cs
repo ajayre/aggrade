@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -184,6 +184,15 @@ namespace AgGrade.Controls
                 case 3: Settings.TractorColor = AppSettings.TractotColors.Yellow; break;
             }
 
+            // Parse BruTile basemap settings
+            Settings.EnableBruTileBasemap = BruTileEnabledSelector.SelectedIndex == 1;
+            switch (BruTileStyleSelector.SelectedIndex)
+            {
+                default:
+                case 0: Settings.BasemapStyle = AppSettings.BasemapStyles.OpenStreetMap; break;
+                case 1: Settings.BasemapStyle = AppSettings.BasemapStyles.Satellite; break;
+            }
+
             return Settings;
         }
 
@@ -276,6 +285,16 @@ namespace AgGrade.Controls
                 case AppSettings.TractotColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
                 case AppSettings.TractotColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
             }
+
+            BruTileEnabledSelector.SelectedIndex = Settings.EnableBruTileBasemap ? 1 : 0;
+            switch (Settings.BasemapStyle)
+            {
+                default:
+                case AppSettings.BasemapStyles.OpenStreetMap: BruTileStyleSelector.SelectedIndex = 0; break;
+                case AppSettings.BasemapStyles.Satellite: BruTileStyleSelector.SelectedIndex = 1; break;
+            }
+
+            BruTileEnabledSelector_SelectedIndexChanged(this, EventArgs.Empty);
         }
 
         /// <summary>
@@ -286,6 +305,11 @@ namespace AgGrade.Controls
         private void ApplyBtn_Click(object sender, EventArgs e)
         {
             OnApplySettings?.Invoke();
+        }
+
+        private void BruTileEnabledSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            BruTileStyleSelector.Enabled = BruTileEnabledSelector.SelectedIndex == 1;
         }
     }
 }

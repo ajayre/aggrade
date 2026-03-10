@@ -199,6 +199,10 @@ namespace AgGrade.Data
         private Coordinate SurfaceFlowNECorner = new Coordinate();
         private string? SurfaceFlowImage = null;
         private bool ShowBenchmarks;
+        private BruTileBasemapLayer? _bruTileBasemapLayer = null;
+        private bool _enableBruTileBasemap = false;
+        private AppSettings.BasemapStyles _basemapStyle = AppSettings.BasemapStyles.OpenStreetMap;
+        private bool _wasBruTileEnabled = false;
 
         private readonly Dictionary<long, Bitmap> _surfaceFlowTileCache = new Dictionary<long, Bitmap>();
         private readonly Dictionary<(long, int), Bitmap> _surfaceFlowRotatedTileCache = new Dictionary<(long, int), Bitmap>();
@@ -334,6 +338,14 @@ namespace AgGrade.Data
 
             this.CurrentEquipmentSettings = CurrentEquipmentSettings;
             this.CurrentAppSettings = CurrentAppSettings;
+            _enableBruTileBasemap = CurrentAppSettings.EnableBruTileBasemap;
+            _basemapStyle = CurrentAppSettings.BasemapStyle;
+            if (!_enableBruTileBasemap && _wasBruTileEnabled && _bruTileBasemapLayer != null)
+            {
+                _bruTileBasemapLayer.Dispose();
+                _bruTileBasemapLayer = null;
+            }
+            _wasBruTileEnabled = _enableBruTileBasemap;
 
             this.ShowHaulArrows = ShowHaulArrows;
             this.ShowBenchmarks = ShowBenchmarks;
@@ -419,6 +431,32 @@ namespace AgGrade.Data
                 }
 
                 return bitmap;
+            }
+
+            if (_enableBruTileBasemap)
+            {
+                _bruTileBasemapLayer ??= new BruTileBasemapLayer();
+                try
+                {
+                    using (Graphics g = Graphics.FromImage(bitmap))
+                    {
+                        _bruTileBasemapLayer.Render(
+                            g,
+                            ImageWidthpx,
+                            ImageHeightpx,
+                            TractorFix,
+                            TractorXpx,
+                            TractorYpx,
+                            _tractorHeading,
+                            CurrentScaleFactor,
+                            _basemapStyle,
+                            (coord) => LatLonToWorldF(coord));
+                    }
+                }
+                catch
+                {
+                    // Basemap add-on must never break the existing renderer.
+                }
             }
 
             // if a field is defined then render it
@@ -637,8 +675,11 @@ namespace AgGrade.Data
                     g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                     g.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                     g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
-
-                    g.FillRectangle(new SolidBrush(Background), 0, 0, bitmap.Width, bitmap.Height);
+                    // Keep previously rendered basemap pixels when enabled.
+                    if (!_enableBruTileBasemap)
+                    {
+                        g.FillRectangle(new SolidBrush(Background), 0, 0, bitmap.Width, bitmap.Height);
+                    }
 
                     // add tiles
                     foreach (MapTile Tile in Tiles)

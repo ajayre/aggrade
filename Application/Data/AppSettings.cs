@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,6 +20,12 @@ namespace AgGrade.Data
             Yellow
         }
 
+        public enum BasemapStyles
+        {
+            OpenStreetMap,
+            Satellite
+        }
+
         [XmlIgnore]
         public IPAddress ControllerAddress;
         public int ControllerPort;
@@ -31,6 +37,8 @@ namespace AgGrade.Data
         public uint MagneticDeclinationMinutes;
         public bool LogData;
         public TractotColors TractorColor;
+        public bool EnableBruTileBasemap;
+        public BasemapStyles BasemapStyle;
 
         // Property for XML serialization of IPAddress
         [XmlElement("ControllerAddress")]
@@ -81,6 +89,8 @@ namespace AgGrade.Data
             MagneticDeclinationMinutes = 0;
             LogData = true;
             TractorColor = TractotColors.Green;
+            EnableBruTileBasemap = false;
+            BasemapStyle = BasemapStyles.OpenStreetMap;
         }
 
         /// <summary>
@@ -157,6 +167,8 @@ namespace AgGrade.Data
                         MagneticDeclinationMinutes = loadedSettings.MagneticDeclinationMinutes;
                         LogData = loadedSettings.LogData;
                         TractorColor = loadedSettings.TractorColor;
+                        EnableBruTileBasemap = loadedSettings.EnableBruTileBasemap;
+                        BasemapStyle = loadedSettings.BasemapStyle;
                     }
                 }
             }

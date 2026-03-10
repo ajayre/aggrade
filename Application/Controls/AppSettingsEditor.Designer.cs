@@ -1,4 +1,4 @@
-﻿namespace AgGrade.Controls
+namespace AgGrade.Controls
 {
     partial class AppSettingsEditor
     {
@@ -63,6 +63,10 @@
             ApplyBtn = new Button();
             label2 = new Label();
             TractorColorSelector = new ComboBox();
+            label3 = new Label();
+            BruTileEnabledSelector = new ComboBox();
+            label4 = new Label();
+            BruTileStyleSelector = new ComboBox();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -397,11 +401,58 @@
             TractorColorSelector.Size = new Size(127, 33);
             TractorColorSelector.TabIndex = 44;
             // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 14F);
+            label3.Location = new Point(16, 326);
+            label3.Name = "label3";
+            label3.Size = new Size(194, 25);
+            label3.TabIndex = 46;
+            label3.Text = "Enable BruTile Map:";
+            // 
+            // BruTileEnabledSelector
+            // 
+            BruTileEnabledSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            BruTileEnabledSelector.Font = new Font("Segoe UI", 14F);
+            BruTileEnabledSelector.FormattingEnabled = true;
+            BruTileEnabledSelector.Items.AddRange(new object[] { "No", "Yes" });
+            BruTileEnabledSelector.Location = new Point(216, 323);
+            BruTileEnabledSelector.Name = "BruTileEnabledSelector";
+            BruTileEnabledSelector.Size = new Size(94, 33);
+            BruTileEnabledSelector.TabIndex = 47;
+            BruTileEnabledSelector.SelectedIndexChanged += BruTileEnabledSelector_SelectedIndexChanged;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 14F);
+            label4.Location = new Point(90, 364);
+            label4.Name = "label4";
+            label4.Size = new Size(120, 25);
+            label4.TabIndex = 48;
+            label4.Text = "Map Source:";
+            // 
+            // BruTileStyleSelector
+            // 
+            BruTileStyleSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            BruTileStyleSelector.Font = new Font("Segoe UI", 14F);
+            BruTileStyleSelector.FormattingEnabled = true;
+            BruTileStyleSelector.Items.AddRange(new object[] { "OpenStreetMap", "Satellite" });
+            BruTileStyleSelector.Location = new Point(216, 361);
+            BruTileStyleSelector.Name = "BruTileStyleSelector";
+            BruTileStyleSelector.Size = new Size(202, 33);
+            BruTileStyleSelector.TabIndex = 49;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(BruTileStyleSelector);
+            Controls.Add(label4);
+            Controls.Add(BruTileEnabledSelector);
+            Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(TractorColorSelector);
             Controls.Add(ApplyBtn);
@@ -477,5 +528,9 @@
         private Button ApplyBtn;
         private Label label2;
         private ComboBox TractorColorSelector;
+        private Label label3;
+        private ComboBox BruTileEnabledSelector;
+        private Label label4;
+        private ComboBox BruTileStyleSelector;
     }
 }
