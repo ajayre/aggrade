@@ -19,6 +19,7 @@ namespace AgGrade.Data
         private string? _databaseFilePath;
         private JournalOperationState? _activeJournalOperation;
         private bool _possibleDataLoss;
+        private readonly object _operationSync = new object();
 
         private const int JOURNAL_HEADER_SIZE = 32;
         private const int JOURNAL_RECORD_SIZE = 32;
@@ -336,14 +337,21 @@ namespace AgGrade.Data
         /// </summary>
         public void AddEvent(Event evt)
         {
-            if (_connection == null) throw new InvalidOperationException("Database is not open.");
-            using (var cmd = _connection.CreateCommand())
+            try
             {
-                cmd.CommandText = "INSERT INTO Events (Type, Value, Timestamp) VALUES (@Type, @Value, @Timestamp)";
-                cmd.Parameters.AddWithValue("@Type", evt.Type.ToString());
-                cmd.Parameters.AddWithValue("@Value", evt.Value);
-                cmd.Parameters.AddWithValue("@Timestamp", evt.Timestamp);
-                cmd.ExecuteNonQuery();
+                if (_connection == null) throw new InvalidOperationException("Database is not open.");
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandText = "INSERT INTO Events (Type, Value, Timestamp) VALUES (@Type, @Value, @Timestamp)";
+                    cmd.Parameters.AddWithValue("@Type", evt.Type.ToString());
+                    cmd.Parameters.AddWithValue("@Value", evt.Value);
+                    cmd.Parameters.AddWithValue("@Timestamp", evt.Timestamp);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (IndexOutOfRangeException)
+            {
+                // ignore
             }
         }
 
@@ -593,41 +601,58 @@ namespace AgGrade.Data
             LevelingOperationType operationType
             )
         {
-            if (_connection == null) throw new InvalidOperationException("Database is not open.");
-            if (_activeJournalOperation != null) throw new InvalidOperationException("A leveling operation is already active.");
-            if (_databaseFilePath == null) throw new InvalidOperationException("Database path is not available.");
-
-            int nextOperationId = GetNextLevelingOperationId();
-            string dbFolder = Path.GetDirectoryName(_databaseFilePath) ?? ".";
-            string[] existingActiveJournals = Directory.GetFiles(dbFolder, "op_*.journal.active");
-            if (existingActiveJournals.Length > 0)
+            lock (_operationSync)
             {
-                SetPossibleDataLossTrue();
-                throw new InvalidOperationException("Cannot start a new operation while an active journal already exists.");
+                if (_connection == null) throw new InvalidOperationException("Database is not open.");
+                if (_activeJournalOperation != null) throw new InvalidOperationException("A leveling operation is already active.");
+                if (_databaseFilePath == null) throw new InvalidOperationException("Database path is not available.");
+
+                string dbFolder = Path.GetDirectoryName(_databaseFilePath) ?? ".";
+                string[] existingActiveJournals = Directory.GetFiles(dbFolder, "op_*.journal.active");
+                if (existingActiveJournals.Length > 0)
+                {
+                    RecoverFromJournalInternal();
+                    existingActiveJournals = Directory.GetFiles(dbFolder, "op_*.journal.active");
+                    if (existingActiveJournals.Length > 0)
+                    {
+                        SetPossibleDataLossTrue();
+                        throw new InvalidOperationException("Cannot start a new operation while an active journal already exists.");
+                    }
+                }
+
+                int nextOperationId = GetNextLevelingOperationId();
+                string journalPath = Path.Combine(dbFolder, $"op_{nextOperationId}.journal.active");
+                try
+                {
+                    FileStream stream = new FileStream
+                        (
+                        journalPath,
+                        FileMode.CreateNew,
+                        FileAccess.ReadWrite,
+                        FileShare.None,
+                        4096,
+                        FileOptions.WriteThrough
+                        );
+                    WriteJournalHeader(stream, nextOperationId, operationType);
+                    _activeJournalOperation = new JournalOperationState
+                    {
+                        OperationId = nextOperationId,
+                        OperationType = operationType,
+                        StartedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                        JournalPath = journalPath,
+                        Stream = stream,
+                        Sequence = 0,
+                        SinceFlushCount = 0
+                    };
+                    return nextOperationId;
+                }
+                catch
+                {
+                    RenameJournalToError(journalPath);
+                    SetPossibleDataLossTrue();
+                    throw;
+                }
             }
-
-            string journalPath = Path.Combine(dbFolder, $"op_{nextOperationId}.journal.active");
-            FileStream stream = new FileStream
-                (
-                journalPath,
-                FileMode.CreateNew,
-                FileAccess.ReadWrite,
-                FileShare.None,
-                4096,
-                FileOptions.WriteThrough
-                );
-            WriteJournalHeader(stream, nextOperationId, operationType);
-            _activeJournalOperation = new JournalOperationState
-            {
-                OperationId = nextOperationId,
-                OperationType = operationType,
-                StartedAtMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                JournalPath = journalPath,
-                Stream = stream,
-                Sequence = 0,
-                SinceFlushCount = 0
-            };
-            return nextOperationId;
         }
 
         /// <summary>
@@ -640,42 +665,45 @@ namespace AgGrade.Data
             double deltaHeightM
             )
         {
-            if (_activeJournalOperation == null) throw new InvalidOperationException("No active leveling operation.");
-
-            try
+            lock (_operationSync)
             {
-                _activeJournalOperation.Deltas.Add
-                    (
-                    new LevelingOperationBinDelta
-                    {
-                        X = x,
-                        Y = y,
-                        DeltaHeightM = deltaHeightM
-                    }
-                    );
+                if (_activeJournalOperation == null) throw new InvalidOperationException("No active leveling operation.");
 
-                _activeJournalOperation.Sequence++;
-                WriteJournalRecord
-                    (
-                    _activeJournalOperation.Stream,
-                    _activeJournalOperation.Sequence,
-                    x,
-                    y,
-                    deltaHeightM
-                    );
-
-                _activeJournalOperation.SinceFlushCount++;
-                int flushRecords = Math.Max(1, JournalFlushRecords);
-                if (_activeJournalOperation.SinceFlushCount >= flushRecords)
+                try
                 {
-                    _activeJournalOperation.Stream.Flush(true);
-                    _activeJournalOperation.SinceFlushCount = 0;
+                    _activeJournalOperation.Deltas.Add
+                        (
+                        new LevelingOperationBinDelta
+                        {
+                            X = x,
+                            Y = y,
+                            DeltaHeightM = deltaHeightM
+                        }
+                        );
+
+                    _activeJournalOperation.Sequence++;
+                    WriteJournalRecord
+                        (
+                        _activeJournalOperation.Stream,
+                        _activeJournalOperation.Sequence,
+                        x,
+                        y,
+                        deltaHeightM
+                        );
+
+                    _activeJournalOperation.SinceFlushCount++;
+                    int flushRecords = Math.Max(1, JournalFlushRecords);
+                    if (_activeJournalOperation.SinceFlushCount >= flushRecords)
+                    {
+                        _activeJournalOperation.Stream.Flush(true);
+                        _activeJournalOperation.SinceFlushCount = 0;
+                    }
                 }
-            }
-            catch
-            {
-                HandleJournalWriteFailure();
-                throw;
+                catch
+                {
+                    HandleJournalWriteFailure();
+                    throw;
+                }
             }
         }
 
@@ -688,35 +716,39 @@ namespace AgGrade.Data
             double completedFillCY
             )
         {
-            if (_connection == null) throw new InvalidOperationException("Database is not open.");
-            if (_activeJournalOperation == null) return;
-
-            JournalOperationState op = _activeJournalOperation;
-            _activeJournalOperation = null;
-
-            try
+            lock (_operationSync)
             {
-                op.Stream.Flush(true);
-                long completedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-                PersistLevelingOperationInternal(op, completedAt, completedCutCY, completedFillCY);
-                op.Stream.Dispose();
-                if (File.Exists(op.JournalPath))
-                {
-                    File.Delete(op.JournalPath);
-                }
-            }
-            catch
-            {
+                if (_connection == null) throw new InvalidOperationException("Database is not open.");
+                if (_activeJournalOperation == null) return;
+
+                JournalOperationState op = _activeJournalOperation;
+                _activeJournalOperation = null;
+
                 try
                 {
+                    op.Stream.Flush(true);
+                    long completedAt = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                    PersistLevelingOperationInternal(op, completedAt, completedCutCY, completedFillCY);
                     op.Stream.Dispose();
+                    if (File.Exists(op.JournalPath))
+                    {
+                        File.Delete(op.JournalPath);
+                    }
                 }
                 catch
                 {
-                    // best-effort cleanup only
+                    try
+                    {
+                        op.Stream.Dispose();
+                    }
+                    catch
+                    {
+                        // best-effort cleanup only
+                    }
+                    RenameJournalToError(op.JournalPath);
+                    SetPossibleDataLossTrue();
+                    throw;
                 }
-                SetPossibleDataLossTrue();
-                throw;
             }
         }
 
@@ -724,6 +756,19 @@ namespace AgGrade.Data
         /// Recovers unresolved journal files at startup according to operation-id replay rules.
         /// </summary>
         public void RecoverFromJournal
+            (
+            )
+        {
+            lock (_operationSync)
+            {
+                RecoverFromJournalInternal();
+            }
+        }
+
+        /// <summary>
+        /// Internal startup recovery routine; caller controls synchronization.
+        /// </summary>
+        private void RecoverFromJournalInternal
             (
             )
         {
@@ -885,17 +930,9 @@ namespace AgGrade.Data
                 // best-effort cleanup only
             }
 
-            string errorPath = Path.ChangeExtension(journalPath, ".error");
             try
             {
-                if (File.Exists(journalPath))
-                {
-                    if (File.Exists(errorPath))
-                    {
-                        File.Delete(errorPath);
-                    }
-                    File.Move(journalPath, errorPath);
-                }
+                RenameJournalToError(journalPath);
             }
             catch
             {
@@ -906,6 +943,23 @@ namespace AgGrade.Data
                 _activeJournalOperation = null;
                 SetPossibleDataLossTrue();
             }
+        }
+
+        /// <summary>
+        /// Renames an active journal file to .error.
+        /// </summary>
+        private static void RenameJournalToError
+            (
+            string journalPath
+            )
+        {
+            string errorPath = Path.ChangeExtension(journalPath, ".error");
+            if (!File.Exists(journalPath)) return;
+            if (File.Exists(errorPath))
+            {
+                File.Delete(errorPath);
+            }
+            File.Move(journalPath, errorPath);
         }
 
         /// <summary>
