@@ -50,9 +50,9 @@ namespace AgGrade.Controls
                 if (string.IsNullOrEmpty(fieldName))
                     continue;
 
-                // look for AGD files
-                if (Directory.GetFiles(subDir, "*.agd").Length == 0)
-                    continue;
+                //// look for AGD files
+                //if (Directory.GetFiles(subDir, "*.agd").Length == 0)
+                //    continue;
 
                 // look for exactly one base database
                 if (Directory.GetFiles(subDir, "*-base.db").Length != 1)

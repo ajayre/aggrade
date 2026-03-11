@@ -1774,9 +1774,28 @@ def main() -> int:
         help="Process only center-bottom one-eighth subset of field (default: off)",
     )
     parser.add_argument(
+        "--heightoffset",
+        type=float,
+        default=0.0,
+        help="Height offset in meters; stored in Data table as HeightOffsetM (default: 0.0)",
+    )
+    parser.add_argument(
         "--disablehaulpaths",
         action="store_true",
         help="Do not calculate haul paths or write to the HaulPaths table",
+    )
+    strip_restore_group = parser.add_mutually_exclusive_group()
+    strip_restore_group.add_argument(
+        "--stripping",
+        type=float,
+        default=None,
+        help="Height to strip in meters (top soil stripping mode); disables haul paths and arrows",
+    )
+    strip_restore_group.add_argument(
+        "--restoring",
+        type=float,
+        default=None,
+        help="Height to restore in meters (top soil restoring mode); disables haul paths and arrows",
     )
     args = parser.parse_args()
 
@@ -1808,11 +1827,20 @@ def main() -> int:
         print("ERROR: --path-random-start-count must be > 0", file=sys.stderr)
         return 1
 
+    strip_or_restore = (args.stripping is not None) or (args.restoring is not None)
+
     # Determine DB path and ensure any existing DB file is removed so that each
     # run starts from a clean database.
     db_path = args.db
     if db_path is None:
         db_path = args.agd.with_name(f"{args.agd.stem}-base.db")
+    if strip_or_restore:
+        suffix = "stripping" if args.stripping is not None else "restoring"
+        if db_path.stem.endswith("-base"):
+            new_stem = db_path.stem[:-5] + f"-{suffix}-base"
+        else:
+            new_stem = db_path.stem + f"-{suffix}"
+        db_path = db_path.parent / f"{new_stem}{db_path.suffix}"
     if db_path.exists():
         try:
             db_path.unlink()
@@ -1878,6 +1906,14 @@ def main() -> int:
     print("INFO: filling missing bins (target elevations)...", file=sys.stderr, flush=True)
     target_filled = fill_missing_bins(target_values, grid_width, grid_height)
     print(f"INFO: filled missing bins (target); {len(target_filled)} bins", file=sys.stderr, flush=True)
+    if args.stripping is not None:
+        for by in range(grid_height):
+            for bx in range(grid_width):
+                target_filled[(bx, by)] = existing_filled.get((bx, by), 0.0) - args.stripping
+    if args.restoring is not None:
+        for by in range(grid_height):
+            for bx in range(grid_width):
+                existing_filled[(bx, by)] = target_filled.get((bx, by), 0.0) - args.restoring
     values = existing_filled
     palette = generate_palette()
     min_elev, max_elev = elevation_range(values)
@@ -1951,9 +1987,12 @@ def main() -> int:
     # Build per-bin haul heading only when needed: for HaulPaths, output image arrows,
     # or path-generation overlay. With --disablehaulpaths and no image/pathgen we skip it.
     need_haul_heading = (
-        not args.disablehaulpaths
-        or args.output is not None
-        or args.imgpathgeneration
+        (not strip_or_restore)
+        and (
+            not args.disablehaulpaths
+            or args.output is not None
+            or args.imgpathgeneration
+        )
     )
     if haul_samples and need_haul_heading:
         print(
@@ -2199,11 +2238,25 @@ def main() -> int:
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("CompletedFillCY", 0.0),
     )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("HeightOffsetM", float(args.heightoffset)),
+    )
+    if args.stripping is not None:
+        cur.execute(
+            "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+            ("StrippingM", float(args.stripping)),
+        )
+    if args.restoring is not None:
+        cur.execute(
+            "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+            ("RestoringM", float(args.restoring)),
+        )
     con.commit()
     print(f"INFO: wrote {len(field_rows)} bins to FieldState in {db_path}", file=sys.stderr)
 
     # Populate HaulArrows with high-level source arrows from haul_samples (image or CSV).
-    if haul_samples:
+    if haul_samples and not strip_or_restore:
         cur.executemany(
             "INSERT INTO HaulArrows (Latitude, Longitude, Heading) VALUES (?, ?, ?)",
             haul_samples,
@@ -2213,7 +2266,7 @@ def main() -> int:
             f"INFO: wrote {len(haul_samples)} haul arrows to HaulArrows in {db_path}",
             file=sys.stderr,
         )
-    else:
+    elif not haul_samples:
         print("INFO: no haul samples available; HaulArrows table left empty", file=sys.stderr)
 
     if benchmarks:
@@ -2239,12 +2292,18 @@ def main() -> int:
     ]
 
     total_cut = len(cut_bins)
-    if args.disablehaulpaths:
+    if args.disablehaulpaths or strip_or_restore:
         if total_cut > 0:
-            print(
-                "INFO: haul paths disabled (--disablehaulpaths); HaulPaths table left empty",
-                file=sys.stderr,
-            )
+            if strip_or_restore:
+                print(
+                    "INFO: haul paths disabled (stripping/restoring mode); HaulPaths table left empty",
+                    file=sys.stderr,
+                )
+            else:
+                print(
+                    "INFO: haul paths disabled (--disablehaulpaths); HaulPaths table left empty",
+                    file=sys.stderr,
+                )
     elif total_cut == 0:
         print("INFO: no cut bins found; HaulPaths table will remain empty", file=sys.stderr)
     else:
@@ -2347,8 +2406,17 @@ def main() -> int:
     con.close()
 
     if image is not None and args.output is not None:
-        image.save(args.output)
-        print(f"Wrote {args.output}", file=sys.stderr)
+        output_path = args.output
+        if strip_or_restore:
+            suffix = "stripping" if args.stripping is not None else "restoring"
+            stem = args.output.stem
+            if stem.endswith("-base"):
+                new_stem = stem[:-5] + f"-{suffix}-base"
+            else:
+                new_stem = stem + f"-{suffix}"
+            output_path = args.output.parent / f"{new_stem}{args.output.suffix}"
+        image.save(output_path)
+        print(f"Wrote {output_path}", file=sys.stderr)
 
     return 0
 

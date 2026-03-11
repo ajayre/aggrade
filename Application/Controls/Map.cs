@@ -22,7 +22,7 @@ namespace AgGrade.Controls
         private const int DEAD_RECKONING_PERIOD_MS = 50;
         private const int DEFAULT_SCALE_FACTOR = 13;
         private const double ZOOM_FACTOR = 1.3;
-        private const int MAX_NAME_LENGTH = 20;
+        private const int MAX_NAME_LENGTH = 30;
 
         private const string DegreeSymbol = "°";
 

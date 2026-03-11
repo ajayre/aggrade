@@ -684,10 +684,10 @@ namespace AgGrade.Data
             string? DbFile
             )
         {
-            // get first AGD file in folder
-            string[] AGDFiles = Directory.GetFiles(Folder, "*.agd");
-            if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
-            string AGDFile = AGDFiles[0];
+            //// get first AGD file in folder
+            //string[] AGDFiles = Directory.GetFiles(Folder, "*.agd");
+            //if (AGDFiles.Length == 0) throw new Exception("No AGD file found for field");
+            //string AGDFile = AGDFiles[0];
 
             // if no database file then get the name of the database file to create
             // we increment based on the previous database files so no data is overwritten
