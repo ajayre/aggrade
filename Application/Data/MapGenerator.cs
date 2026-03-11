@@ -20,6 +20,11 @@ namespace AgGrade.Data
     public class MapGenerator
     {
         private const int TILE_SIZE = 128;
+
+        /// <summary>Pixels of source overlap when extracting flow/ponding tiles to avoid visible seams.</summary>
+        private const int OVERLAY_TILE_SOURCE_OVERLAP = 1;
+        /// <summary>Pixels of source overlap for ponding tiles (larger overlap to reduce grid visibility).</summary>
+        private const int PONDING_TILE_SOURCE_OVERLAP = 5;
         private const int TILE_OVERLAP = 5;
         private const int PROJECTED_PATH_LENGTH_M = 80;
         private const double HEADING_BUCKET_DEGREES = 0.5;
@@ -1387,12 +1392,12 @@ namespace AgGrade.Data
             int ImageWidthpx = Cache.ImageWidthpx;
             int ImageHeightpx = Cache.ImageHeightpx;
 
-            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
-            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
-
             g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
 
             int rotationBucket = (int)Math.Round(_tractorHeading / HEADING_BUCKET_DEGREES);
             double rotationHeading = rotationBucket * HEADING_BUCKET_DEGREES;
@@ -1427,10 +1432,14 @@ namespace AgGrade.Data
                         float srcY = (float)((neN - topUtm) / spanN * Hf);
                         float srcW = (float)((rightUtm - leftUtm) / spanE * Wf);
                         float srcH = (float)((topUtm - bottomUtm) / spanN * Hf);
-                        srcX = Math.Max(0, Math.Min(Wf - 1, srcX));
-                        srcY = Math.Max(0, Math.Min(Hf - 1, srcY));
-                        srcW = Math.Max(1, Math.Min(Wf - srcX, srcW));
-                        srcH = Math.Max(1, Math.Min(Hf - srcY, srcH));
+                        float srcX0 = Math.Max(0, srcX - PONDING_TILE_SOURCE_OVERLAP);
+                        float srcY0 = Math.Max(0, srcY - PONDING_TILE_SOURCE_OVERLAP);
+                        float srcW0 = Math.Min(Wf - srcX0, srcW + 2 * PONDING_TILE_SOURCE_OVERLAP);
+                        float srcH0 = Math.Min(Hf - srcY0, srcH + 2 * PONDING_TILE_SOURCE_OVERLAP);
+                        srcX0 = Math.Min(srcX0, Wf - 1);
+                        srcY0 = Math.Min(srcY0, Hf - 1);
+                        srcW0 = Math.Max(1, srcW0);
+                        srcH0 = Math.Max(1, srcH0);
 
                         pondTile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
                         using (Graphics tg = Graphics.FromImage(pondTile))
@@ -1438,7 +1447,7 @@ namespace AgGrade.Data
                             tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                             tg.DrawImage(_pondingImageBitmap,
                                 new Rectangle(0, 0, tileWidth, tileHeight),
-                                new RectangleF(srcX, srcY, srcW, srcH),
+                                new RectangleF(srcX0, srcY0, srcW0, srcH0),
                                 GraphicsUnit.Pixel);
                         }
                         _pondingTileCache[tileKey] = pondTile;
@@ -1557,12 +1566,12 @@ namespace AgGrade.Data
             int ImageWidthpx = Cache.ImageWidthpx;
             int ImageHeightpx = Cache.ImageHeightpx;
 
-            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
-            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
-
             g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
 
             int rotationBucket = (int)Math.Round(_tractorHeading / HEADING_BUCKET_DEGREES);
             double rotationHeading = rotationBucket * HEADING_BUCKET_DEGREES;
@@ -1589,7 +1598,6 @@ namespace AgGrade.Data
                     long tileKey = GetTileKey(tileX, tileY);
                     if (!_surfaceFlowTileCache.TryGetValue(tileKey, out Bitmap? flowTile))
                     {
-                        // Use core tile bounds only (no overlap) so adjacent tiles don't double-draw and create a visible grid
                         double leftUtm = FieldMinX + tileStartX / ScaleFactor;
                         double rightUtm = FieldMinX + (tileStartX + tileWidth) / ScaleFactor;
                         double topUtm = FieldMaxY - tileStartY / ScaleFactor;
@@ -1598,10 +1606,14 @@ namespace AgGrade.Data
                         float srcY = (float)((neN - topUtm) / flowNorthingSpan * Hf);
                         float srcW = (float)((rightUtm - leftUtm) / flowEastingSpan * Wf);
                         float srcH = (float)((topUtm - bottomUtm) / flowNorthingSpan * Hf);
-                        srcX = Math.Max(0, Math.Min(Wf - 1, srcX));
-                        srcY = Math.Max(0, Math.Min(Hf - 1, srcY));
-                        srcW = Math.Max(1, Math.Min(Wf - srcX, srcW));
-                        srcH = Math.Max(1, Math.Min(Hf - srcY, srcH));
+                        float srcX0 = Math.Max(0, srcX - OVERLAY_TILE_SOURCE_OVERLAP);
+                        float srcY0 = Math.Max(0, srcY - OVERLAY_TILE_SOURCE_OVERLAP);
+                        float srcW0 = Math.Min(Wf - srcX0, srcW + 2 * OVERLAY_TILE_SOURCE_OVERLAP);
+                        float srcH0 = Math.Min(Hf - srcY0, srcH + 2 * OVERLAY_TILE_SOURCE_OVERLAP);
+                        srcX0 = Math.Min(srcX0, Wf - 1);
+                        srcY0 = Math.Min(srcY0, Hf - 1);
+                        srcW0 = Math.Max(1, srcW0);
+                        srcH0 = Math.Max(1, srcH0);
 
                         flowTile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
                         using (Graphics tg = Graphics.FromImage(flowTile))
@@ -1609,7 +1621,7 @@ namespace AgGrade.Data
                             tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                             tg.DrawImage(_surfaceFlowImageBitmap,
                                 new Rectangle(0, 0, tileWidth, tileHeight),
-                                new RectangleF(srcX, srcY, srcW, srcH),
+                                new RectangleF(srcX0, srcY0, srcW0, srcH0),
                                 GraphicsUnit.Pixel);
                         }
                         _surfaceFlowTileCache[tileKey] = flowTile;

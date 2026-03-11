@@ -56,7 +56,7 @@
             MapCanvas.Dock = DockStyle.Fill;
             MapCanvas.Location = new Point(0, 49);
             MapCanvas.Name = "MapCanvas";
-            MapCanvas.Size = new Size(881, 478);
+            MapCanvas.Size = new Size(881, 550);
             MapCanvas.SizeMode = PictureBoxSizeMode.CenterImage;
             MapCanvas.TabIndex = 0;
             MapCanvas.TabStop = false;
@@ -177,9 +177,8 @@
             // 
             // ToggleHaulArrowsBtn
             // 
-            ToggleHaulArrowsBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             ToggleHaulArrowsBtn.Image = (Image)resources.GetObject("ToggleHaulArrowsBtn.Image");
-            ToggleHaulArrowsBtn.Location = new Point(810, 55);
+            ToggleHaulArrowsBtn.Location = new Point(11, 55);
             ToggleHaulArrowsBtn.Name = "ToggleHaulArrowsBtn";
             ToggleHaulArrowsBtn.Size = new Size(60, 60);
             ToggleHaulArrowsBtn.TabIndex = 8;
@@ -190,7 +189,7 @@
             // 
             ElevationMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             ElevationMapBtn.Image = (Image)resources.GetObject("ElevationMapBtn.Image");
-            ElevationMapBtn.Location = new Point(810, 121);
+            ElevationMapBtn.Location = new Point(810, 55);
             ElevationMapBtn.Name = "ElevationMapBtn";
             ElevationMapBtn.Size = new Size(60, 60);
             ElevationMapBtn.TabIndex = 9;
@@ -201,7 +200,7 @@
             // 
             CutFillMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             CutFillMapBtn.Image = (Image)resources.GetObject("CutFillMapBtn.Image");
-            CutFillMapBtn.Location = new Point(810, 187);
+            CutFillMapBtn.Location = new Point(810, 121);
             CutFillMapBtn.Name = "CutFillMapBtn";
             CutFillMapBtn.Size = new Size(60, 60);
             CutFillMapBtn.TabIndex = 10;
@@ -210,9 +209,8 @@
             // 
             // TractorStyleBtn
             // 
-            TractorStyleBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             TractorStyleBtn.Image = (Image)resources.GetObject("TractorStyleBtn.Image");
-            TractorStyleBtn.Location = new Point(810, 385);
+            TractorStyleBtn.Location = new Point(11, 121);
             TractorStyleBtn.Name = "TractorStyleBtn";
             TractorStyleBtn.Size = new Size(60, 60);
             TractorStyleBtn.TabIndex = 11;
@@ -223,7 +221,7 @@
             // 
             FlowBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             FlowBtn.Image = Properties.Resources.flow_48px;
-            FlowBtn.Location = new Point(810, 319);
+            FlowBtn.Location = new Point(810, 253);
             FlowBtn.Name = "FlowBtn";
             FlowBtn.Size = new Size(60, 60);
             FlowBtn.TabIndex = 12;
@@ -232,9 +230,8 @@
             // 
             // BenchmarkBtn
             // 
-            BenchmarkBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             BenchmarkBtn.Image = Properties.Resources.benchmark_48px;
-            BenchmarkBtn.Location = new Point(810, 451);
+            BenchmarkBtn.Location = new Point(11, 187);
             BenchmarkBtn.Name = "BenchmarkBtn";
             BenchmarkBtn.Size = new Size(60, 60);
             BenchmarkBtn.TabIndex = 13;
@@ -245,7 +242,7 @@
             // 
             SatelliteBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             SatelliteBtn.Image = Properties.Resources.satellite_48px;
-            SatelliteBtn.Location = new Point(810, 253);
+            SatelliteBtn.Location = new Point(810, 187);
             SatelliteBtn.Name = "SatelliteBtn";
             SatelliteBtn.Size = new Size(60, 60);
             SatelliteBtn.TabIndex = 14;
@@ -255,7 +252,8 @@
             // PondingBtn
             // 
             PondingBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            PondingBtn.Location = new Point(744, 319);
+            PondingBtn.Image = Properties.Resources.ponding_48px;
+            PondingBtn.Location = new Point(810, 319);
             PondingBtn.Name = "PondingBtn";
             PondingBtn.Size = new Size(60, 60);
             PondingBtn.TabIndex = 15;
@@ -279,7 +277,7 @@
             Controls.Add(panel2);
             Controls.Add(panel1);
             Name = "Map";
-            Size = new Size(881, 527);
+            Size = new Size(881, 599);
             ((System.ComponentModel.ISupportInitialize)MapCanvas).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
