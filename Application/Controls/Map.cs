@@ -495,7 +495,9 @@ namespace AgGrade.Controls
             if (ShowPonding)
             {
                 PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
-                MapGen.CalculatePonding(PondingElevationType, 85, 50, 50);
+                double curveNumber = _CurrentAppSettings?.PondingCurveNumber ?? 85;
+                double rainfallMm = _CurrentAppSettings?.PondingRainfallMm ?? 50;
+                MapGen.CalculatePonding(PondingElevationType, curveNumber, rainfallMm, 50);
             }
         }
     }

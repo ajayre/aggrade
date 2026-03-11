@@ -130,6 +130,34 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Validates ponding curve number (1–100).
+        /// </summary>
+        private double ValidatePondingCurveNumber(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Ponding curve number cannot be empty.");
+            if (!double.TryParse(value, out double cn))
+                throw new ArgumentException("Ponding curve number must be a valid number.");
+            if (cn < 1 || cn > 100)
+                throw new ArgumentException("Ponding curve number must be between 1 and 100.");
+            return cn;
+        }
+
+        /// <summary>
+        /// Validates ponding rainfall mm (>= 0).
+        /// </summary>
+        private double ValidatePondingRainfallMm(string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+                throw new ArgumentException("Ponding rainfall cannot be empty.");
+            if (!double.TryParse(value, out double mm))
+                throw new ArgumentException("Ponding rainfall must be a valid number.");
+            if (mm < 0)
+                throw new ArgumentException("Ponding rainfall must be 0 or greater.");
+            return mm;
+        }
+
+        /// <summary>
         /// Gets the current settings from the UI with validation
         /// </summary>
         /// <returns>Current settings</returns>
@@ -183,6 +211,9 @@ namespace AgGrade.Controls
                 case 2: Settings.TractorColor = AppSettings.TractotColors.Blue;   break;
                 case 3: Settings.TractorColor = AppSettings.TractotColors.Yellow; break;
             }
+
+            Settings.PondingCurveNumber = ValidatePondingCurveNumber(PondingCurveNumberText.Text);
+            Settings.PondingRainfallMm = ValidatePondingRainfallMm(PondingRainfallMmText.Text);
 
             return Settings;
         }
@@ -276,6 +307,9 @@ namespace AgGrade.Controls
                 case AppSettings.TractotColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
                 case AppSettings.TractotColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
             }
+
+            PondingCurveNumberText.Text = Settings.PondingCurveNumber.ToString();
+            PondingRainfallMmText.Text = Settings.PondingRainfallMm.ToString();
 
         }
 

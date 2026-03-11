@@ -31,6 +31,10 @@ namespace AgGrade.Data
         public uint MagneticDeclinationMinutes;
         public bool LogData;
         public TractotColors TractorColor;
+        /// <summary>SCS Curve Number for ponding (1–100).</summary>
+        public double PondingCurveNumber;
+        /// <summary>Event rainfall depth in mm for ponding.</summary>
+        public double PondingRainfallMm;
 
         // Property for XML serialization of IPAddress
         [XmlElement("ControllerAddress")]
@@ -81,6 +85,8 @@ namespace AgGrade.Data
             MagneticDeclinationMinutes = 0;
             LogData = true;
             TractorColor = TractotColors.Green;
+            PondingCurveNumber = 85;
+            PondingRainfallMm = 50;
         }
 
         /// <summary>
@@ -157,6 +163,8 @@ namespace AgGrade.Data
                         MagneticDeclinationMinutes = loadedSettings.MagneticDeclinationMinutes;
                         LogData = loadedSettings.LogData;
                         TractorColor = loadedSettings.TractorColor;
+                        PondingCurveNumber = loadedSettings.PondingCurveNumber;
+                        PondingRainfallMm = loadedSettings.PondingRainfallMm;
                     }
                 }
             }

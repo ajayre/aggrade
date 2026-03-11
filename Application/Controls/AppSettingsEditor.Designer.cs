@@ -63,6 +63,10 @@ namespace AgGrade.Controls
             ApplyBtn = new Button();
             label2 = new Label();
             TractorColorSelector = new ComboBox();
+            labelPondingCurveNumber = new Label();
+            PondingCurveNumberText = new TextBox();
+            labelPondingRainfall = new Label();
+            PondingRainfallMmText = new TextBox();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -90,7 +94,7 @@ namespace AgGrade.Controls
             // 
             label5.AutoSize = true;
             label5.Font = new Font("Segoe UI", 14F);
-            label5.Location = new Point(309, 57);
+            label5.Location = new Point(323, 57);
             label5.Name = "label5";
             label5.Size = new Size(16, 25);
             label5.TabIndex = 19;
@@ -100,7 +104,7 @@ namespace AgGrade.Controls
             // 
             label6.AutoSize = true;
             label6.Font = new Font("Segoe UI", 14F);
-            label6.Location = new Point(363, 57);
+            label6.Location = new Point(377, 57);
             label6.Name = "label6";
             label6.Size = new Size(16, 25);
             label6.TabIndex = 18;
@@ -110,7 +114,7 @@ namespace AgGrade.Controls
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 14F);
-            label7.Location = new Point(255, 57);
+            label7.Location = new Point(269, 57);
             label7.Name = "label7";
             label7.Size = new Size(16, 25);
             label7.TabIndex = 17;
@@ -119,7 +123,7 @@ namespace AgGrade.Controls
             // ControllerIPAddrNum2
             // 
             ControllerIPAddrNum2.Font = new Font("Segoe UI", 14F);
-            ControllerIPAddrNum2.Location = new Point(270, 54);
+            ControllerIPAddrNum2.Location = new Point(284, 54);
             ControllerIPAddrNum2.Name = "ControllerIPAddrNum2";
             ControllerIPAddrNum2.PlaceholderText = "000";
             ControllerIPAddrNum2.Size = new Size(40, 32);
@@ -128,7 +132,7 @@ namespace AgGrade.Controls
             // ControllerIPAddrNum3
             // 
             ControllerIPAddrNum3.Font = new Font("Segoe UI", 14F);
-            ControllerIPAddrNum3.Location = new Point(324, 54);
+            ControllerIPAddrNum3.Location = new Point(338, 54);
             ControllerIPAddrNum3.Name = "ControllerIPAddrNum3";
             ControllerIPAddrNum3.PlaceholderText = "000";
             ControllerIPAddrNum3.Size = new Size(40, 32);
@@ -137,7 +141,7 @@ namespace AgGrade.Controls
             // ControllerIPAddrNum4
             // 
             ControllerIPAddrNum4.Font = new Font("Segoe UI", 14F);
-            ControllerIPAddrNum4.Location = new Point(378, 54);
+            ControllerIPAddrNum4.Location = new Point(392, 54);
             ControllerIPAddrNum4.Name = "ControllerIPAddrNum4";
             ControllerIPAddrNum4.PlaceholderText = "000";
             ControllerIPAddrNum4.Size = new Size(40, 32);
@@ -146,7 +150,7 @@ namespace AgGrade.Controls
             // ControllerIPAddrNum1
             // 
             ControllerIPAddrNum1.Font = new Font("Segoe UI", 14F);
-            ControllerIPAddrNum1.Location = new Point(216, 54);
+            ControllerIPAddrNum1.Location = new Point(230, 54);
             ControllerIPAddrNum1.Name = "ControllerIPAddrNum1";
             ControllerIPAddrNum1.PlaceholderText = "000";
             ControllerIPAddrNum1.Size = new Size(40, 32);
@@ -156,7 +160,7 @@ namespace AgGrade.Controls
             // 
             label8.AutoSize = true;
             label8.Font = new Font("Segoe UI", 14F);
-            label8.Location = new Point(16, 57);
+            label8.Location = new Point(30, 57);
             label8.Name = "label8";
             label8.Size = new Size(194, 25);
             label8.TabIndex = 14;
@@ -166,7 +170,7 @@ namespace AgGrade.Controls
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(309, 133);
+            label9.Location = new Point(323, 133);
             label9.Name = "label9";
             label9.Size = new Size(16, 25);
             label9.TabIndex = 27;
@@ -176,7 +180,7 @@ namespace AgGrade.Controls
             // 
             label10.AutoSize = true;
             label10.Font = new Font("Segoe UI", 14F);
-            label10.Location = new Point(363, 133);
+            label10.Location = new Point(377, 133);
             label10.Name = "label10";
             label10.Size = new Size(16, 25);
             label10.TabIndex = 26;
@@ -186,7 +190,7 @@ namespace AgGrade.Controls
             // 
             label11.AutoSize = true;
             label11.Font = new Font("Segoe UI", 14F);
-            label11.Location = new Point(255, 133);
+            label11.Location = new Point(269, 133);
             label11.Name = "label11";
             label11.Size = new Size(16, 25);
             label11.TabIndex = 25;
@@ -195,7 +199,7 @@ namespace AgGrade.Controls
             // SubnetMaskNum2
             // 
             SubnetMaskNum2.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum2.Location = new Point(270, 130);
+            SubnetMaskNum2.Location = new Point(284, 130);
             SubnetMaskNum2.Name = "SubnetMaskNum2";
             SubnetMaskNum2.PlaceholderText = "000";
             SubnetMaskNum2.Size = new Size(40, 32);
@@ -204,7 +208,7 @@ namespace AgGrade.Controls
             // SubnetMaskNum3
             // 
             SubnetMaskNum3.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum3.Location = new Point(324, 130);
+            SubnetMaskNum3.Location = new Point(338, 130);
             SubnetMaskNum3.Name = "SubnetMaskNum3";
             SubnetMaskNum3.PlaceholderText = "000";
             SubnetMaskNum3.Size = new Size(40, 32);
@@ -213,7 +217,7 @@ namespace AgGrade.Controls
             // SubnetMaskNum4
             // 
             SubnetMaskNum4.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum4.Location = new Point(378, 130);
+            SubnetMaskNum4.Location = new Point(392, 130);
             SubnetMaskNum4.Name = "SubnetMaskNum4";
             SubnetMaskNum4.PlaceholderText = "000";
             SubnetMaskNum4.Size = new Size(40, 32);
@@ -222,7 +226,7 @@ namespace AgGrade.Controls
             // SubnetMaskNum1
             // 
             SubnetMaskNum1.Font = new Font("Segoe UI", 14F);
-            SubnetMaskNum1.Location = new Point(216, 130);
+            SubnetMaskNum1.Location = new Point(230, 130);
             SubnetMaskNum1.Name = "SubnetMaskNum1";
             SubnetMaskNum1.PlaceholderText = "000";
             SubnetMaskNum1.Size = new Size(40, 32);
@@ -232,7 +236,7 @@ namespace AgGrade.Controls
             // 
             label12.AutoSize = true;
             label12.Font = new Font("Segoe UI", 14F);
-            label12.Location = new Point(86, 133);
+            label12.Location = new Point(100, 133);
             label12.Name = "label12";
             label12.Size = new Size(124, 25);
             label12.TabIndex = 22;
@@ -241,7 +245,7 @@ namespace AgGrade.Controls
             // RemotePortNum
             // 
             RemotePortNum.Font = new Font("Segoe UI", 14F);
-            RemotePortNum.Location = new Point(480, 54);
+            RemotePortNum.Location = new Point(494, 54);
             RemotePortNum.Name = "RemotePortNum";
             RemotePortNum.PlaceholderText = "00000";
             RemotePortNum.Size = new Size(61, 32);
@@ -251,7 +255,7 @@ namespace AgGrade.Controls
             // 
             label14.AutoSize = true;
             label14.Font = new Font("Segoe UI", 14F);
-            label14.Location = new Point(424, 57);
+            label14.Location = new Point(438, 57);
             label14.Name = "label14";
             label14.Size = new Size(50, 25);
             label14.TabIndex = 31;
@@ -263,7 +267,7 @@ namespace AgGrade.Controls
             SecondaryTabletSelector.Font = new Font("Segoe UI", 14F);
             SecondaryTabletSelector.FormattingEnabled = true;
             SecondaryTabletSelector.Items.AddRange(new object[] { "No", "Yes" });
-            SecondaryTabletSelector.Location = new Point(216, 168);
+            SecondaryTabletSelector.Location = new Point(230, 168);
             SecondaryTabletSelector.Name = "SecondaryTabletSelector";
             SecondaryTabletSelector.Size = new Size(94, 33);
             SecondaryTabletSelector.TabIndex = 32;
@@ -272,7 +276,7 @@ namespace AgGrade.Controls
             // 
             label15.AutoSize = true;
             label15.Font = new Font("Segoe UI", 14F);
-            label15.Location = new Point(15, 171);
+            label15.Location = new Point(29, 171);
             label15.Name = "label15";
             label15.Size = new Size(195, 25);
             label15.TabIndex = 33;
@@ -281,7 +285,7 @@ namespace AgGrade.Controls
             // MagDeclinationDeg
             // 
             MagDeclinationDeg.Font = new Font("Segoe UI", 14F);
-            MagDeclinationDeg.Location = new Point(216, 207);
+            MagDeclinationDeg.Location = new Point(230, 207);
             MagDeclinationDeg.Name = "MagDeclinationDeg";
             MagDeclinationDeg.PlaceholderText = "+-0";
             MagDeclinationDeg.Size = new Size(70, 32);
@@ -291,7 +295,7 @@ namespace AgGrade.Controls
             // 
             label16.AutoSize = true;
             label16.Font = new Font("Segoe UI", 14F);
-            label16.Location = new Point(14, 210);
+            label16.Location = new Point(28, 210);
             label16.Name = "label16";
             label16.Size = new Size(196, 25);
             label16.TabIndex = 35;
@@ -301,7 +305,7 @@ namespace AgGrade.Controls
             // 
             label17.AutoSize = true;
             label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(292, 210);
+            label17.Location = new Point(306, 210);
             label17.Name = "label17";
             label17.Size = new Size(79, 25);
             label17.TabIndex = 36;
@@ -311,7 +315,7 @@ namespace AgGrade.Controls
             // 
             label18.AutoSize = true;
             label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(454, 210);
+            label18.Location = new Point(468, 210);
             label18.Name = "label18";
             label18.Size = new Size(79, 25);
             label18.TabIndex = 38;
@@ -320,7 +324,7 @@ namespace AgGrade.Controls
             // MagDeclinationMin
             // 
             MagDeclinationMin.Font = new Font("Segoe UI", 14F);
-            MagDeclinationMin.Location = new Point(378, 207);
+            MagDeclinationMin.Location = new Point(392, 207);
             MagDeclinationMin.Name = "MagDeclinationMin";
             MagDeclinationMin.PlaceholderText = "0";
             MagDeclinationMin.Size = new Size(70, 32);
@@ -330,7 +334,7 @@ namespace AgGrade.Controls
             // 
             label19.AutoSize = true;
             label19.Font = new Font("Segoe UI", 14F);
-            label19.Location = new Point(119, 248);
+            label19.Location = new Point(133, 248);
             label19.Name = "label19";
             label19.Size = new Size(91, 25);
             label19.TabIndex = 40;
@@ -342,7 +346,7 @@ namespace AgGrade.Controls
             LogDataSelector.Font = new Font("Segoe UI", 14F);
             LogDataSelector.FormattingEnabled = true;
             LogDataSelector.Items.AddRange(new object[] { "No", "Yes" });
-            LogDataSelector.Location = new Point(216, 245);
+            LogDataSelector.Location = new Point(230, 245);
             LogDataSelector.Name = "LogDataSelector";
             LogDataSelector.Size = new Size(94, 33);
             LogDataSelector.TabIndex = 39;
@@ -350,7 +354,7 @@ namespace AgGrade.Controls
             // LocalPortNum
             // 
             LocalPortNum.Font = new Font("Segoe UI", 14F);
-            LocalPortNum.Location = new Point(216, 92);
+            LocalPortNum.Location = new Point(230, 92);
             LocalPortNum.Name = "LocalPortNum";
             LocalPortNum.PlaceholderText = "00000";
             LocalPortNum.Size = new Size(61, 32);
@@ -360,7 +364,7 @@ namespace AgGrade.Controls
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 14F);
-            label1.Location = new Point(111, 95);
+            label1.Location = new Point(125, 95);
             label1.Name = "label1";
             label1.Size = new Size(99, 25);
             label1.TabIndex = 42;
@@ -380,7 +384,7 @@ namespace AgGrade.Controls
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 14F);
-            label2.Location = new Point(85, 287);
+            label2.Location = new Point(99, 287);
             label2.Name = "label2";
             label2.Size = new Size(125, 25);
             label2.TabIndex = 45;
@@ -392,16 +396,58 @@ namespace AgGrade.Controls
             TractorColorSelector.Font = new Font("Segoe UI", 14F);
             TractorColorSelector.FormattingEnabled = true;
             TractorColorSelector.Items.AddRange(new object[] { "Green", "Red", "Blue", "Yellow" });
-            TractorColorSelector.Location = new Point(216, 284);
+            TractorColorSelector.Location = new Point(230, 284);
             TractorColorSelector.Name = "TractorColorSelector";
             TractorColorSelector.Size = new Size(127, 33);
             TractorColorSelector.TabIndex = 44;
+            // 
+            // labelPondingCurveNumber
+            // 
+            labelPondingCurveNumber.AutoSize = true;
+            labelPondingCurveNumber.Font = new Font("Segoe UI", 14F);
+            labelPondingCurveNumber.Location = new Point(16, 326);
+            labelPondingCurveNumber.Name = "labelPondingCurveNumber";
+            labelPondingCurveNumber.Size = new Size(208, 25);
+            labelPondingCurveNumber.TabIndex = 46;
+            labelPondingCurveNumber.Text = "Ponding curve number:";
+            // 
+            // PondingCurveNumberText
+            // 
+            PondingCurveNumberText.Font = new Font("Segoe UI", 14F);
+            PondingCurveNumberText.Location = new Point(230, 323);
+            PondingCurveNumberText.Name = "PondingCurveNumberText";
+            PondingCurveNumberText.PlaceholderText = "85";
+            PondingCurveNumberText.Size = new Size(70, 32);
+            PondingCurveNumberText.TabIndex = 47;
+            // 
+            // labelPondingRainfall
+            // 
+            labelPondingRainfall.AutoSize = true;
+            labelPondingRainfall.Font = new Font("Segoe UI", 14F);
+            labelPondingRainfall.Location = new Point(25, 364);
+            labelPondingRainfall.Name = "labelPondingRainfall";
+            labelPondingRainfall.Size = new Size(199, 25);
+            labelPondingRainfall.TabIndex = 48;
+            labelPondingRainfall.Text = "Ponding rainfall (mm):";
+            // 
+            // PondingRainfallMmText
+            // 
+            PondingRainfallMmText.Font = new Font("Segoe UI", 14F);
+            PondingRainfallMmText.Location = new Point(230, 361);
+            PondingRainfallMmText.Name = "PondingRainfallMmText";
+            PondingRainfallMmText.PlaceholderText = "50";
+            PondingRainfallMmText.Size = new Size(70, 32);
+            PondingRainfallMmText.TabIndex = 49;
             // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(labelPondingRainfall);
+            Controls.Add(PondingRainfallMmText);
+            Controls.Add(labelPondingCurveNumber);
+            Controls.Add(PondingCurveNumberText);
             Controls.Add(label2);
             Controls.Add(TractorColorSelector);
             Controls.Add(ApplyBtn);
@@ -437,7 +483,7 @@ namespace AgGrade.Controls
             Controls.Add(PowerBtn);
             Controls.Add(sectionTitle1);
             Name = "AppSettingsEditor";
-            Size = new Size(843, 417);
+            Size = new Size(843, 450);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -477,5 +523,9 @@ namespace AgGrade.Controls
         private Button ApplyBtn;
         private Label label2;
         private ComboBox TractorColorSelector;
+        private Label labelPondingCurveNumber;
+        private TextBox PondingCurveNumberText;
+        private Label labelPondingRainfall;
+        private TextBox PondingRainfallMmText;
     }
 }
