@@ -46,6 +46,7 @@
             FlowBtn = new Button();
             BenchmarkBtn = new Button();
             SatelliteBtn = new Button();
+            PondingBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -251,11 +252,22 @@
             SatelliteBtn.UseVisualStyleBackColor = true;
             SatelliteBtn.Click += SatelliteBtn_Click;
             // 
+            // PondingBtn
+            // 
+            PondingBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            PondingBtn.Location = new Point(744, 319);
+            PondingBtn.Name = "PondingBtn";
+            PondingBtn.Size = new Size(60, 60);
+            PondingBtn.TabIndex = 15;
+            PondingBtn.UseVisualStyleBackColor = true;
+            PondingBtn.Click += PondingBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(PondingBtn);
             Controls.Add(SatelliteBtn);
             Controls.Add(BenchmarkBtn);
             Controls.Add(FlowBtn);
@@ -293,5 +305,6 @@
         private Button FlowBtn;
         private Button BenchmarkBtn;
         private Button SatelliteBtn;
+        private Button PondingBtn;
     }
 }

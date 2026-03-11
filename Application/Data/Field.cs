@@ -4,6 +4,7 @@ using Microsoft.VisualBasic.Logging;
 using OpenCvSharp;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -23,6 +24,15 @@ namespace AgGrade.Data
         private const double CUBIC_YARDS_PER_CUBIC_METER = 1.30795061931439;
 
         public const double CUT_FILL_RATIO = 1.2;
+
+        /// <summary>No-data value for elevation DEM cells with no height (e.g. zero or missing).</summary>
+        public const float ElevationDemNoDataValue = -9999f;
+
+        /// <summary>Default Gaussian sigma for DEM smoothing (matches Python demgenerator).</summary>
+        private const double ElevationDemDefaultSmoothSigma = 3.0;
+
+        /// <summary>Python helper script to write GeoTIFF via rasterio (same layout as demgenerator).</summary>
+        private const string WRITE_GEOTIFF_SCRIPT = "write_geotiff_from_raw.py";
 
         private Database Db;
 
@@ -1004,6 +1014,283 @@ namespace AgGrade.Data
             // store in database
             Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
             Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
+        }
+
+        /// <summary>
+        /// Builds the elevation grid from this field's bins (row 0 = north). Used by GenerateElevationDEM and by ponding/flow generators that need the grid in memory.
+        /// </summary>
+        /// <param name="elevationType">Initial, Current, or Target elevation</param>
+        /// <param name="enableSmoothing">If true, apply Gaussian smoothing to soften bin edges</param>
+        /// <param name="data">Output DEM raster (nrows x ncols)</param>
+        /// <param name="nrows">Number of rows</param>
+        /// <param name="ncols">Number of columns</param>
+        /// <param name="SWCorner">South-west corner in lat/lon</param>
+        /// <param name="NECorner">North-east corner in lat/lon</param>
+        public void BuildElevationGrid(
+            FlowMapGenerator.ElevationTypes elevationType,
+            bool enableSmoothing,
+            out float[,] data,
+            out int nrows,
+            out int ncols,
+            out Coordinate SWCorner,
+            out Coordinate NECorner)
+        {
+            if (Bins == null || Bins.Count == 0)
+                throw new InvalidOperationException("Field has no bins.");
+
+            int minX = Bins.Min(b => b.X);
+            int maxX = Bins.Max(b => b.X);
+            int minY = Bins.Min(b => b.Y);
+            int maxY = Bins.Max(b => b.Y);
+
+            ncols = maxX - minX + 1;
+            nrows = maxY - minY + 1;
+
+            data = new float[nrows, ncols];
+            for (int r = 0; r < nrows; r++)
+                for (int c = 0; c < ncols; c++)
+                    data[r, c] = ElevationDemNoDataValue;
+
+            foreach (Bin bin in Bins)
+            {
+                double h = elevationType switch
+                {
+                    FlowMapGenerator.ElevationTypes.Initial => bin.InitialElevationM,
+                    FlowMapGenerator.ElevationTypes.Current => bin.CurrentElevationM,
+                    FlowMapGenerator.ElevationTypes.Target => bin.TargetElevationM,
+                    _ => bin.CurrentElevationM
+                };
+                bool treatAsNoData = h == 0.0;
+                float value = treatAsNoData ? ElevationDemNoDataValue : (float)h;
+                int row = maxY - bin.Y;
+                int col = bin.X - minX;
+                if (row >= 0 && row < nrows && col >= 0 && col < ncols)
+                    data[row, col] = value;
+            }
+
+            if (enableSmoothing && ElevationDemDefaultSmoothSigma > 0)
+                data = SmoothDemArray(data, nrows, ncols, ElevationDemNoDataValue, ElevationDemDefaultSmoothSigma);
+
+            double topLeftX = FieldMinX + minX * BIN_SIZE_M;
+            double topLeftY = FieldMinY + (maxY + 1) * BIN_SIZE_M;
+            double swEasting = topLeftX;
+            double swNorthing = topLeftY - nrows * BIN_SIZE_M;
+            double neEasting = topLeftX + ncols * BIN_SIZE_M;
+            double neNorthing = topLeftY;
+            UTM.ToLatLon(UTMZone, IsNorthernHemisphere, swEasting, swNorthing, out double swLat, out double swLon);
+            UTM.ToLatLon(UTMZone, IsNorthernHemisphere, neEasting, neNorthing, out double neLat, out double neLon);
+            SWCorner = new Coordinate(swLat, swLon);
+            NECorner = new Coordinate(neLat, neLon);
+        }
+
+        /// <summary>
+        /// Creates a DEM georeferenced TIFF from this field's bin elevation. The elevation source is
+        /// determined by <paramref name="elevationType"/> (Initial, Current, or Target). Zero elevation is treated as no-data.
+        /// Writes a .tfw world file for UTM georeferencing (same convention as Python demgenerator).
+        /// </summary>
+        /// <param name="elevationType">Type of elevation to use</param>
+        /// <param name="outputFile">Path and name of TIFF to generate</param>
+        /// <param name="SWCorner">On return set to SW corner in latitude and longitude</param>
+        /// <param name="NECorner">On return set to NE corner in latitude and longitude</param>
+        /// <param name="enableSmoothing">If true (default), apply Gaussian smoothing to soften bin edges.</param>
+        public void GenerateElevationDEM(
+            FlowMapGenerator.ElevationTypes elevationType,
+            string outputFile,
+            out Coordinate SWCorner,
+            out Coordinate NECorner,
+            bool enableSmoothing = true)
+        {
+            if (string.IsNullOrWhiteSpace(outputFile))
+                throw new ArgumentException("Output file path is required.", nameof(outputFile));
+
+            BuildElevationGrid(elevationType, enableSmoothing, out float[,] data, out int nrows, out int ncols, out SWCorner, out NECorner);
+
+            double topLeftX = FieldMinX + Bins.Min(b => b.X) * BIN_SIZE_M;
+            double topLeftY = FieldMinY + (Bins.Max(b => b.Y) + 1) * BIN_SIZE_M;
+
+            WriteGeoTiff(data, nrows, ncols, outputFile, topLeftX, topLeftY, UTMZone, IsNorthernHemisphere);
+            WriteWorldFile(outputFile, topLeftX, topLeftY);
+        }
+
+        private static void WriteGeoTiff(float[,] data, int nrows, int ncols, string outputPath,
+            double topLeftEasting, double topLeftNorthing, int utmZone, bool isNorthernHemisphere)
+        {
+            string scriptPath = Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location) + Path.DirectorySeparatorChar + WRITE_GEOTIFF_SCRIPT;
+            string rawPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".bin");
+            string metaPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".json");
+            try
+            {
+                using (var fs = File.Create(rawPath))
+                using (var bw = new BinaryWriter(fs))
+                {
+                    for (int r = 0; r < nrows; r++)
+                        for (int c = 0; c < ncols; c++)
+                            bw.Write(data[r, c]);
+                }
+
+                var inv = CultureInfo.InvariantCulture;
+                string json = "{" +
+                    "\"nrows\":" + nrows + "," +
+                    "\"ncols\":" + ncols + "," +
+                    "\"topLeftEasting\":" + topLeftEasting.ToString("R", inv) + "," +
+                    "\"topLeftNorthing\":" + topLeftNorthing.ToString("R", inv) + "," +
+                    "\"utmZone\":" + utmZone + "," +
+                    "\"isNorthernHemisphere\":" + (isNorthernHemisphere ? "true" : "false") + "," +
+                    "\"nodata\":" + ElevationDemNoDataValue.ToString("R", inv) + "}";
+                File.WriteAllText(metaPath, json);
+
+                string outputFull = Path.GetFullPath(outputPath);
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"\"{scriptPath}\" \"{rawPath}\" \"{metaPath}\" \"{outputFull}\"",
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    WorkingDirectory = Path.GetDirectoryName(scriptPath) ?? ".",
+                };
+
+                using (var process = Process.Start(startInfo))
+                {
+                    if (process == null)
+                        throw new InvalidOperationException("Failed to start Python for GeoTIFF write.");
+                    string stdout = process.StandardOutput.ReadToEnd();
+                    string stderr = process.StandardError.ReadToEnd();
+                    process.WaitForExit();
+                    if (process.ExitCode != 0)
+                    {
+                        string msg = !string.IsNullOrWhiteSpace(stderr) ? stderr : stdout;
+                        throw new InvalidOperationException(
+                            $"GeoTIFF write failed (Python exit {process.ExitCode}). {msg}");
+                    }
+                }
+            }
+            finally
+            {
+                try { if (File.Exists(rawPath)) File.Delete(rawPath); } catch { }
+                try { if (File.Exists(metaPath)) File.Delete(metaPath); } catch { }
+            }
+        }
+
+        private static void WriteWorldFile(string tiffPath, double topLeftX, double topLeftY)
+        {
+            string dir = Path.GetDirectoryName(tiffPath) ?? ".";
+            string baseName = Path.GetFileNameWithoutExtension(tiffPath);
+            string tfwPath = Path.Combine(dir, baseName + ".tfw");
+
+            double halfCell = BIN_SIZE_M * 0.5;
+            double centerX = topLeftX + halfCell;
+            double centerY = topLeftY - halfCell;
+
+            var inv = CultureInfo.InvariantCulture;
+            using (var writer = new StreamWriter(tfwPath, false))
+            {
+                writer.WriteLine(BIN_SIZE_M.ToString("R", inv));
+                writer.WriteLine("0");
+                writer.WriteLine("0");
+                writer.WriteLine((-BIN_SIZE_M).ToString("R", inv));
+                writer.WriteLine(centerX.ToString("R", inv));
+                writer.WriteLine(centerY.ToString("R", inv));
+            }
+        }
+
+        private static float[,] SmoothDemArray(float[,] data, int nrows, int ncols, float nodata, double sigma)
+        {
+            if (sigma <= 0) return data;
+
+            int radius = (int)Math.Ceiling(4.0 * sigma);
+            int kernelSize = 2 * radius + 1;
+            double[] kernel1D = BuildGaussianKernel1D(sigma, kernelSize);
+
+            double[,] v = new double[nrows, ncols];
+            double[,] w = new double[nrows, ncols];
+            for (int r = 0; r < nrows; r++)
+                for (int c = 0; c < ncols; c++)
+                {
+                    bool valid = data[r, c] != nodata;
+                    v[r, c] = valid ? data[r, c] : 0.0;
+                    w[r, c] = valid ? 1.0 : 0.0;
+                }
+
+            Convolve1DRows(v, w, nrows, ncols, kernel1D, kernelSize, radius);
+            Convolve1DCols(v, w, nrows, ncols, kernel1D, kernelSize, radius);
+
+            float[,] result = new float[nrows, ncols];
+            for (int r = 0; r < nrows; r++)
+                for (int c = 0; c < ncols; c++)
+                {
+                    if (data[r, c] == nodata) { result[r, c] = nodata; continue; }
+                    result[r, c] = (float)(v[r, c] / Math.Max(w[r, c], 1e-12));
+                }
+            return result;
+        }
+
+        private static double[] BuildGaussianKernel1D(double sigma, int size)
+        {
+            int half = size / 2;
+            double[] k = new double[size];
+            double sum = 0;
+            for (int i = 0; i < size; i++)
+            {
+                double x = i - half;
+                k[i] = Math.Exp(-(x * x) / (2 * sigma * sigma));
+                sum += k[i];
+            }
+            for (int i = 0; i < size; i++) k[i] /= sum;
+            return k;
+        }
+
+        private static void Convolve1DRows(double[,] v, double[,] w, int nrows, int ncols, double[] kernel, int kSize, int kHalf)
+        {
+            double[] rowV = new double[ncols];
+            double[] rowW = new double[ncols];
+            for (int r = 0; r < nrows; r++)
+            {
+                for (int c = 0; c < ncols; c++)
+                {
+                    double sumV = 0, sumW = 0;
+                    for (int k = 0; k < kSize; k++)
+                    {
+                        int sc = Math.Clamp(c + k - kHalf, 0, ncols - 1);
+                        sumV += v[r, sc] * kernel[k];
+                        sumW += w[r, sc] * kernel[k];
+                    }
+                    rowV[c] = sumV;
+                    rowW[c] = sumW;
+                }
+                for (int c = 0; c < ncols; c++)
+                {
+                    v[r, c] = rowV[c];
+                    w[r, c] = rowW[c];
+                }
+            }
+        }
+
+        private static void Convolve1DCols(double[,] v, double[,] w, int nrows, int ncols, double[] kernel, int kSize, int kHalf)
+        {
+            double[] colV = new double[nrows];
+            double[] colW = new double[nrows];
+            for (int c = 0; c < ncols; c++)
+            {
+                for (int r = 0; r < nrows; r++)
+                {
+                    double sumV = 0, sumW = 0;
+                    for (int k = 0; k < kSize; k++)
+                    {
+                        int sr = Math.Clamp(r + k - kHalf, 0, nrows - 1);
+                        sumV += v[sr, c] * kernel[k];
+                        sumW += w[sr, c] * kernel[k];
+                    }
+                    colV[r] = sumV;
+                    colW[r] = sumW;
+                }
+                for (int r = 0; r < nrows; r++)
+                {
+                    v[r, c] = colV[r];
+                    w[r, c] = colW[r];
+                }
+            }
         }
     }
 }

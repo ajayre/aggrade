@@ -1,4 +1,4 @@
-﻿using AgGrade.Controller;
+using AgGrade.Controller;
 using AgGrade.Data;
 using System;
 using System.Collections;
@@ -35,7 +35,9 @@ namespace AgGrade.Controls
         private Timer RefreshTimer;
         private bool ShowHaulArrows;
         private FlowMapGenerator.ElevationTypes SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
+        private FlowMapGenerator.ElevationTypes PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
         private bool ShowSurfaceFlow;
+        private bool ShowPonding;
         private MapGenerator.MapTypes MapType;
         private MapGenerator.TractorStyles TractorStyle;
         private List<Coordinate> HaulPath = new List<Coordinate>();
@@ -75,6 +77,7 @@ namespace AgGrade.Controls
             MapType = MapGenerator.MapTypes.CutFill;
             TractorStyle = MapGenerator.TractorStyles.Arrow;
             ShowSurfaceFlow = false;
+            ShowPonding = false;
 
             ShowBenchmarks = true;
             ShowSatelliteBasemap = false;
@@ -244,7 +247,7 @@ namespace AgGrade.Controls
             MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix,
                 CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowBenchmarks, ShowSatelliteBasemap);
+                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowPonding, ShowBenchmarks, ShowSatelliteBasemap);
 
 #if SHOW_MAP_PERF
             sw.Stop();
@@ -459,34 +462,6 @@ namespace AgGrade.Controls
                 SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
                 MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
             }
-
-            /*// turn on display, show current
-            if (!ShowSurfaceFlow)
-            {
-                ShowSurfaceFlow = true;
-                SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
-                MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
-            }
-            // cycle through different displays or turn off
-            else
-            {
-                switch (SurfaceFlowElevationType)
-                {
-                    case FlowMapGenerator.ElevationTypes.Current:
-                        SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Target;
-                        MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
-                        break;
-
-                    case FlowMapGenerator.ElevationTypes.Target:
-                        SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Initial;
-                        MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
-                        break;
-
-                    case FlowMapGenerator.ElevationTypes.Initial:
-                        ShowSurfaceFlow = false;
-                        break;
-                }
-            }*/
         }
 
         /// <summary>
@@ -499,9 +474,29 @@ namespace AgGrade.Controls
             ShowBenchmarks = !ShowBenchmarks;
         }
 
+        /// <summary>
+        /// Toggles display of satellite images
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void SatelliteBtn_Click(object sender, EventArgs e)
         {
             ShowSatelliteBasemap = !ShowSatelliteBasemap;
+        }
+
+        /// <summary>
+        /// Toggles display of ponding
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PondingBtn_Click(object sender, EventArgs e)
+        {
+            ShowPonding = !ShowPonding;
+            if (ShowPonding)
+            {
+                PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
+                MapGen.CalculatePonding(PondingElevationType, 85, 50, 50);
+            }
         }
     }
 }

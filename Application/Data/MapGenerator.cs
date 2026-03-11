@@ -198,6 +198,11 @@ namespace AgGrade.Data
         private Coordinate SurfaceFlowSWCorner = new Coordinate();
         private Coordinate SurfaceFlowNECorner = new Coordinate();
         private string? SurfaceFlowImage = null;
+        private bool ShowPonding;
+        private FlowMapGenerator.ElevationTypes PondingElevationType;
+        private Coordinate PondingSWCorner = new Coordinate();
+        private Coordinate PondingNECorner = new Coordinate();
+        private string? PondingImage = null;
         private bool ShowBenchmarks;
         private bool ShowSatelliteBasemap;
         private BruTileBasemapLayer? _bruTileBasemapLayer = null;
@@ -210,6 +215,13 @@ namespace AgGrade.Data
         private double? _surfaceFlowCacheScaleFactor = null;
         private Bitmap? _surfaceFlowImageBitmap = null;
         private string? _surfaceFlowImagePath = null;
+
+        private readonly Dictionary<long, Bitmap> _pondingTileCache = new Dictionary<long, Bitmap>();
+        private readonly Dictionary<(long, int), Bitmap> _pondingRotatedTileCache = new Dictionary<(long, int), Bitmap>();
+        private int _pondingRotationBucket = int.MinValue;
+        private double? _pondingCacheScaleFactor = null;
+        private Bitmap? _pondingImageBitmap = null;
+        private string? _pondingImagePath = null;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long GetTileKey(int tileX, int tileY)
@@ -305,6 +317,7 @@ namespace AgGrade.Data
         /// <param name="TractorStyle">Style of tractor icon</param>
         /// <param name="HaulPath">List of points for current haul path or empty/null for no path</param>
         /// <param name="ShowSurfaceFlow">true to show the surface water flow</param>
+        /// <param name="ShowPonding">true to show the ponding overlay</param>
         /// <param name="ShowBenchmarks">true to show benchmarks</param>
         /// <param name="ShowSatelliteBasemap">true to show satellite basemap</param>
         /// <returns>Generated bitmap</returns>
@@ -327,6 +340,7 @@ namespace AgGrade.Data
             TractorStyles TractorStyle,
             List<Coordinate> HaulPath,
             bool ShowSurfaceFlow,
+            bool ShowPonding,
             bool ShowBenchmarks,
             bool ShowSatelliteBasemap
             )
@@ -365,6 +379,7 @@ namespace AgGrade.Data
             this.TractorStyle = TractorStyle;
 
             this.ShowSurfaceFlow = ShowSurfaceFlow;
+            this.ShowPonding = ShowPonding;
 
             // get size of display in meters
             double ImageWidthM = ImageWidthpx * ScaleFactor;
@@ -405,6 +420,7 @@ namespace AgGrade.Data
                     Cache.ImageHeightpx = ImageHeightpx;
                     Cache.ImageWidthpx = ImageWidthpx;
                     ClearSurfaceFlowTileCache();
+                    ClearPondingTileCache();
                 }
             }
 
@@ -865,6 +881,11 @@ namespace AgGrade.Data
                     RenderSurfaceFlow(g);
                 }
 
+                if (ShowPonding)
+                {
+                    RenderPonding(g);
+                }
+
                 if (ShowBenchmarks)
                 {
                     // draw benchmarks
@@ -1197,7 +1218,7 @@ namespace AgGrade.Data
 
             try
             {
-                FlowGen.GenerateElevationDEM(CurrentField, FlowMapGenerator.ElevationTypes.Current, TempDEM, out SurfaceFlowSWCorner, out SurfaceFlowNECorner, true);
+                CurrentField.GenerateElevationDEM(FlowMapGenerator.ElevationTypes.Current, TempDEM, out SurfaceFlowSWCorner, out SurfaceFlowNECorner, true);
                 FlowGen.GenerateFlowDEM(TempDEM, TempFlowDEM);
                 FlowGen.ConvertFlowDEMtoPNG(TempFlowDEM, TempPNG, true, Opacity);
 
@@ -1213,6 +1234,49 @@ namespace AgGrade.Data
             {
                 if (File.Exists(TempFlowDEM)) { File.Delete(TempFlowDEM); }
                 if (File.Exists(TempDEM)) { File.Delete(TempDEM); }
+            }
+        }
+
+        /// <summary>
+        /// Calculates and generates the ponding overlay (SCS runoff + D8 + fill-spill). Uses Curve Number and rainfall event depth.
+        /// </summary>
+        /// <param name="PondingElevationType">Elevation type to use</param>
+        /// <param name="CurveNumber">SCS Curve Number (e.g. 78, 85)</param>
+        /// <param name="RainfallMm">Event rainfall depth in mm</param>
+        /// <param name="Opacity">PNG transparency: 0=fully opaque, 100=white fully transparent</param>
+        public void CalculatePonding
+            (
+            FlowMapGenerator.ElevationTypes PondingElevationType,
+            double CurveNumber,
+            double RainfallMm,
+            int Opacity = 50
+            )
+        {
+            ClearPondingTileCache();
+            if ((PondingImage != null) && File.Exists(PondingImage))
+            {
+                try { File.Delete(PondingImage); } catch { }
+                PondingImage = null;
+            }
+
+            if (CurrentField == null) return;
+
+            this.PondingElevationType = PondingElevationType;
+
+            var pondGen = new PondingMapGenerator();
+            string TempPNG = Path.GetTempFileName() + ".png";
+
+            try
+            {
+                pondGen.GeneratePondingPNG(CurrentField, PondingElevationType, TempPNG,
+                    out PondingSWCorner, out PondingNECorner,
+                    RainfallMm, CurveNumber, Opacity, true);
+                PondingImage = TempPNG;
+            }
+            catch
+            {
+                if (File.Exists(TempPNG)) { try { File.Delete(TempPNG); } catch { } }
+                PondingImage = null;
             }
         }
 
@@ -1237,6 +1301,192 @@ namespace AgGrade.Data
             _surfaceFlowImageBitmap?.Dispose();
             _surfaceFlowImageBitmap = null;
             _surfaceFlowImagePath = null;
+        }
+
+        /// <summary>
+        /// Clears the ponding tile cache and releases the cached ponding image bitmap.
+        /// </summary>
+        private void ClearPondingTileCache()
+        {
+            foreach (Bitmap bmp in _pondingTileCache.Values)
+                bmp?.Dispose();
+            _pondingTileCache.Clear();
+            foreach (Bitmap bmp in _pondingRotatedTileCache.Values)
+                bmp?.Dispose();
+            _pondingRotatedTileCache.Clear();
+            _pondingRotationBucket = int.MinValue;
+            _pondingCacheScaleFactor = null;
+            _pondingImageBitmap?.Dispose();
+            _pondingImageBitmap = null;
+            _pondingImagePath = null;
+        }
+
+        /// <summary>
+        /// Renders the ponding overlay on the current map (same tile/cache pattern as surface flow).
+        /// </summary>
+        private void RenderPonding(Graphics g)
+        {
+            if (PondingImage == null)
+            {
+                ClearPondingTileCache();
+                return;
+            }
+            if (CurrentField == null) return;
+
+            if (_pondingCacheScaleFactor.HasValue && Math.Abs(CurrentScaleFactor - _pondingCacheScaleFactor.Value) > 1e-9)
+            {
+                foreach (Bitmap bmp in _pondingTileCache.Values)
+                    bmp?.Dispose();
+                _pondingTileCache.Clear();
+            }
+            _pondingCacheScaleFactor = CurrentScaleFactor;
+
+            if (_pondingImagePath != PondingImage)
+            {
+                _pondingImageBitmap?.Dispose();
+                _pondingImageBitmap = null;
+                try
+                {
+                    if (File.Exists(PondingImage))
+                    {
+                        _pondingImageBitmap = new Bitmap(PondingImage);
+                        _pondingImagePath = PondingImage;
+                    }
+                    else
+                    {
+                        _pondingImagePath = null;
+                        return;
+                    }
+                }
+                catch
+                {
+                    _pondingImagePath = null;
+                    return;
+                }
+            }
+
+            if (_pondingImageBitmap == null) return;
+
+            UTM.UTMCoordinate swUtm = UTM.FromLatLon(PondingSWCorner.Latitude, PondingSWCorner.Longitude);
+            UTM.UTMCoordinate neUtm = UTM.FromLatLon(PondingNECorner.Latitude, PondingNECorner.Longitude);
+            double swE = swUtm.Easting;
+            double swN = swUtm.Northing;
+            double neE = neUtm.Easting;
+            double neN = neUtm.Northing;
+            double spanE = neE - swE;
+            double spanN = neN - swN;
+            if (spanE <= 0 || spanN <= 0) return;
+
+            int MapWidthpx = _unrotatedMapWidthpx;
+            int MapHeightpx = _unrotatedMapHeightpx;
+            int Wf = _pondingImageBitmap.Width;
+            int Hf = _pondingImageBitmap.Height;
+            double ScaleFactor = CurrentScaleFactor;
+            double FieldMinX = CurrentField.FieldMinX;
+            double FieldMaxY = CurrentField.FieldMaxY;
+            int ImageWidthpx = Cache.ImageWidthpx;
+            int ImageHeightpx = Cache.ImageHeightpx;
+
+            int tilesX = (int)Math.Ceiling((double)MapWidthpx / TILE_SIZE);
+            int tilesY = (int)Math.Ceiling((double)MapHeightpx / TILE_SIZE);
+
+            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+            int rotationBucket = (int)Math.Round(_tractorHeading / HEADING_BUCKET_DEGREES);
+            double rotationHeading = rotationBucket * HEADING_BUCKET_DEGREES;
+            if (_tractorHeading != 0 && rotationBucket != _pondingRotationBucket)
+            {
+                foreach (Bitmap bmp in _pondingRotatedTileCache.Values)
+                    bmp?.Dispose();
+                _pondingRotatedTileCache.Clear();
+                _pondingRotationBucket = rotationBucket;
+            }
+
+            for (int tileY = 0; tileY < tilesY; tileY++)
+            {
+                for (int tileX = 0; tileX < tilesX; tileX++)
+                {
+                    int tileStartX = tileX * TILE_SIZE;
+                    int tileStartY = tileY * TILE_SIZE;
+                    int tileWidth = Math.Min(TILE_SIZE, MapWidthpx - tileStartX);
+                    int tileHeight = Math.Min(TILE_SIZE, MapHeightpx - tileStartY);
+
+                    if (!IsTileInView(tileStartX, tileStartY, tileWidth, tileHeight, ImageWidthpx, ImageHeightpx))
+                        continue;
+
+                    long tileKey = GetTileKey(tileX, tileY);
+                    if (!_pondingTileCache.TryGetValue(tileKey, out Bitmap? pondTile))
+                    {
+                        double leftUtm = FieldMinX + tileStartX / ScaleFactor;
+                        double rightUtm = FieldMinX + (tileStartX + tileWidth) / ScaleFactor;
+                        double topUtm = FieldMaxY - tileStartY / ScaleFactor;
+                        double bottomUtm = FieldMaxY - (tileStartY + tileHeight) / ScaleFactor;
+                        float srcX = (float)((leftUtm - swE) / spanE * Wf);
+                        float srcY = (float)((neN - topUtm) / spanN * Hf);
+                        float srcW = (float)((rightUtm - leftUtm) / spanE * Wf);
+                        float srcH = (float)((topUtm - bottomUtm) / spanN * Hf);
+                        srcX = Math.Max(0, Math.Min(Wf - 1, srcX));
+                        srcY = Math.Max(0, Math.Min(Hf - 1, srcY));
+                        srcW = Math.Max(1, Math.Min(Wf - srcX, srcW));
+                        srcH = Math.Max(1, Math.Min(Hf - srcY, srcH));
+
+                        pondTile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
+                        using (Graphics tg = Graphics.FromImage(pondTile))
+                        {
+                            tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                            tg.DrawImage(_pondingImageBitmap,
+                                new Rectangle(0, 0, tileWidth, tileHeight),
+                                new RectangleF(srcX, srcY, srcW, srcH),
+                                GraphicsUnit.Pixel);
+                        }
+                        _pondingTileCache[tileKey] = pondTile;
+                    }
+
+                    Bitmap tileToDraw = pondTile;
+                    if (_tractorHeading != 0)
+                    {
+                        var rotatedKey = (tileKey, rotationBucket);
+                        if (!_pondingRotatedTileCache.TryGetValue(rotatedKey, out Bitmap? rotatedTile))
+                        {
+                            rotatedTile = Rotate(pondTile, rotationHeading);
+                            _pondingRotatedTileCache[rotatedKey] = rotatedTile;
+                        }
+                        tileToDraw = rotatedTile;
+                    }
+
+                    int drawX, drawY;
+                    if (_tractorHeading != 0)
+                    {
+                        int centerX = tileStartX + tileWidth / 2;
+                        int centerY = tileStartY + tileHeight / 2;
+                        Point rotatedCenter = UnrotatedMapPixelToFinalImagePixel(centerX, centerY);
+                        drawX = rotatedCenter.X - tileToDraw.Width / 2;
+                        drawY = rotatedCenter.Y - tileToDraw.Height / 2;
+                    }
+                    else
+                    {
+                        drawX = tileStartX + _mapLeftpx;
+                        drawY = tileStartY + _mapToppx;
+                    }
+
+                    int srcRectX = 0, srcRectY = 0, srcRectW = tileToDraw.Width, srcRectH = tileToDraw.Height;
+                    if (drawX < 0) { srcRectX = -drawX; srcRectW -= srcRectX; drawX = 0; }
+                    if (drawY < 0) { srcRectY = -drawY; srcRectH -= srcRectY; drawY = 0; }
+                    int drawW = Math.Min(srcRectW, ImageWidthpx - drawX);
+                    int drawH = Math.Min(srcRectH, ImageHeightpx - drawY);
+                    srcRectW = drawW;
+                    srcRectH = drawH;
+                    if (drawW > 0 && drawH > 0)
+                    {
+                        g.DrawImage(tileToDraw,
+                            new Rectangle(drawX, drawY, drawW, drawH),
+                            new Rectangle(srcRectX, srcRectY, srcRectW, srcRectH),
+                            GraphicsUnit.Pixel);
+                    }
+                }
+            }
         }
 
         /// <summary>
