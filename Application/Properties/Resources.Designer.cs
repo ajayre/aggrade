@@ -73,6 +73,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap blade_48px {
+            get {
+                object obj = ResourceManager.GetObject("blade_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap createnewfield_48px {
             get {
                 object obj = ResourceManager.GetObject("createnewfield_48px", resourceCulture);
@@ -86,6 +96,16 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap cut_48px {
             get {
                 object obj = ResourceManager.GetObject("cut_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap field_48px {
+            get {
+                object obj = ResourceManager.GetObject("field_48px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -244,6 +264,16 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap satellite_48px {
             get {
                 object obj = ResourceManager.GetObject("satellite_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tractor_48px {
+            get {
+                object obj = ResourceManager.GetObject("tractor_48px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

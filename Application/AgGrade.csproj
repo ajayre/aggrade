@@ -31,6 +31,9 @@
     <Compile Update="Controls\FieldChooserPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\ButtonPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\FieldPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
