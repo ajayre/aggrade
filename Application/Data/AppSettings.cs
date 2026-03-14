@@ -12,7 +12,7 @@ namespace AgGrade.Data
 {
     public class AppSettings
     {
-        public enum TractotColors
+        public enum TractorColors
         {
             Red,
             Blue,
@@ -30,7 +30,7 @@ namespace AgGrade.Data
         public int MagneticDeclinationDegrees;
         public uint MagneticDeclinationMinutes;
         public bool LogData;
-        public TractotColors TractorColor;
+        public TractorColors TractorColor;
         /// <summary>SCS Curve Number for ponding (1–100).</summary>
         public double PondingCurveNumber;
         /// <summary>Event rainfall depth in mm for ponding.</summary>
@@ -84,7 +84,7 @@ namespace AgGrade.Data
             MagneticDeclinationDegrees = 0;
             MagneticDeclinationMinutes = 0;
             LogData = true;
-            TractorColor = TractotColors.Green;
+            TractorColor = TractorColors.Green;
             PondingCurveNumber = 85;
             PondingRainfallMm = 50;
         }

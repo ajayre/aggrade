@@ -38,6 +38,7 @@
             RearBladeControlBtn = new AgGrade.Controls.IndicatorButton();
             FrontBladeControlBtn = new AgGrade.Controls.IndicatorButton();
             panel1 = new Panel();
+            OpenFieldBtn = new Button();
             StatusBtn = new Button();
             MapBtn = new Button();
             SurveyBtn = new Button();
@@ -47,7 +48,6 @@
             ContentPanel = new Panel();
             StatusPanel = new Panel();
             StatusBar = new AgGrade.Controls.StatusBar();
-            OpenFieldBtn = new Button();
             panel3.SuspendLayout();
             panel1.SuspendLayout();
             StatusPanel.SuspendLayout();
@@ -55,6 +55,7 @@
             // 
             // panel3
             // 
+            panel3.BackColor = Color.FromArgb(54, 124, 43);
             panel3.Controls.Add(RearPanIndicator);
             panel3.Controls.Add(FrontPanIndicator);
             panel3.Controls.Add(ZoomFitBtn);
@@ -143,6 +144,7 @@
             // 
             // panel1
             // 
+            panel1.BackColor = Color.FromArgb(54, 124, 43);
             panel1.Controls.Add(OpenFieldBtn);
             panel1.Controls.Add(StatusBtn);
             panel1.Controls.Add(MapBtn);
@@ -155,6 +157,17 @@
             panel1.Name = "panel1";
             panel1.Size = new Size(76, 740);
             panel1.TabIndex = 3;
+            // 
+            // OpenFieldBtn
+            // 
+            OpenFieldBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            OpenFieldBtn.Image = (Image)resources.GetObject("OpenFieldBtn.Image");
+            OpenFieldBtn.Location = new Point(8, 476);
+            OpenFieldBtn.Name = "OpenFieldBtn";
+            OpenFieldBtn.Size = new Size(60, 60);
+            OpenFieldBtn.TabIndex = 7;
+            OpenFieldBtn.UseVisualStyleBackColor = true;
+            OpenFieldBtn.Click += OpenFieldBtn_Click;
             // 
             // StatusBtn
             // 
@@ -249,17 +262,6 @@
             StatusBar.ShowEStop = false;
             StatusBar.Size = new Size(893, 26);
             StatusBar.TabIndex = 0;
-            // 
-            // OpenFieldBtn
-            // 
-            OpenFieldBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            OpenFieldBtn.Image = (Image)resources.GetObject("OpenFieldBtn.Image");
-            OpenFieldBtn.Location = new Point(8, 476);
-            OpenFieldBtn.Name = "OpenFieldBtn";
-            OpenFieldBtn.Size = new Size(60, 60);
-            OpenFieldBtn.TabIndex = 7;
-            OpenFieldBtn.UseVisualStyleBackColor = true;
-            OpenFieldBtn.Click += OpenFieldBtn_Click;
             // 
             // MainForm
             // 

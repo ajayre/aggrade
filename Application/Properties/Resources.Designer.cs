@@ -63,6 +63,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap back_48px {
+            get {
+                object obj = ResourceManager.GetObject("back_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap benchmark_48px {
             get {
                 object obj = ResourceManager.GetObject("benchmark_48px", resourceCulture);
@@ -181,6 +191,16 @@ namespace AgGrade.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap location_48px {
+            get {
+                object obj = ResourceManager.GetObject("location_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
         /// </summary>
         internal static System.IO.UnmanagedMemoryStream mixkit_street_public_alarm_997 {
@@ -232,6 +252,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap next_48px {
+            get {
+                object obj = ResourceManager.GetObject("next_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap nolocation_800px {
             get {
                 object obj = ResourceManager.GetObject("nolocation_800px", resourceCulture);
@@ -274,6 +304,16 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap tractor_48px {
             get {
                 object obj = ResourceManager.GetObject("tractor_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tractor_calib_up {
+            get {
+                object obj = ResourceManager.GetObject("tractor_calib_up", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

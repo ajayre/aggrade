@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             sectionTitle1 = new SectionTitle();
-            OptionsTable = new Panel();
+            Content = new Panel();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -41,20 +41,19 @@
             sectionTitle1.TabIndex = 0;
             sectionTitle1.TitleText = "Calibration";
             // 
-            // OptionsTable
+            // Content
             // 
-            OptionsTable.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            OptionsTable.AutoScroll = true;
-            OptionsTable.Location = new Point(20, 64);
-            OptionsTable.Name = "OptionsTable";
-            OptionsTable.Size = new Size(873, 392);
-            OptionsTable.TabIndex = 2;
+            Content.Dock = DockStyle.Fill;
+            Content.Location = new Point(0, 48);
+            Content.Name = "Content";
+            Content.Size = new Size(916, 428);
+            Content.TabIndex = 3;
             // 
             // CalibrationPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(OptionsTable);
+            Controls.Add(Content);
             Controls.Add(sectionTitle1);
             Name = "CalibrationPage";
             Size = new Size(916, 476);
@@ -64,6 +63,6 @@
         #endregion
 
         private SectionTitle sectionTitle1;
-        private Panel OptionsTable;
+        private Panel Content;
     }
 }

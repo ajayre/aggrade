@@ -123,11 +123,11 @@ namespace AgGrade.Controls
 
             switch (_CurrentAppSettings.TractorColor)
             {
-                case AppSettings.TractotColors.Red: MapGen.TractorColor = MapGenerator.TractorColors.Red; break;
+                case AppSettings.TractorColors.Red: MapGen.TractorColor = MapGenerator.TractorColors.Red; break;
                 default:
-                case AppSettings.TractotColors.Green: MapGen.TractorColor = MapGenerator.TractorColors.Green; break;
-                case AppSettings.TractotColors.Blue: MapGen.TractorColor = MapGenerator.TractorColors.Blue; break;
-                case AppSettings.TractotColors.Yellow: MapGen.TractorColor = MapGenerator.TractorColors.Yellow; break;
+                case AppSettings.TractorColors.Green: MapGen.TractorColor = MapGenerator.TractorColors.Green; break;
+                case AppSettings.TractorColors.Blue: MapGen.TractorColor = MapGenerator.TractorColors.Blue; break;
+                case AppSettings.TractorColors.Yellow: MapGen.TractorColor = MapGenerator.TractorColors.Yellow; break;
             }
         }
 

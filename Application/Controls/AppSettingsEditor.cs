@@ -206,10 +206,10 @@ namespace AgGrade.Controls
             switch (TractorColorSelector.SelectedIndex)
             {
                 default:
-                case 0: Settings.TractorColor = AppSettings.TractotColors.Green;  break;
-                case 1: Settings.TractorColor = AppSettings.TractotColors.Red;    break;
-                case 2: Settings.TractorColor = AppSettings.TractotColors.Blue;   break;
-                case 3: Settings.TractorColor = AppSettings.TractotColors.Yellow; break;
+                case 0: Settings.TractorColor = AppSettings.TractorColors.Green;  break;
+                case 1: Settings.TractorColor = AppSettings.TractorColors.Red;    break;
+                case 2: Settings.TractorColor = AppSettings.TractorColors.Blue;   break;
+                case 3: Settings.TractorColor = AppSettings.TractorColors.Yellow; break;
             }
 
             Settings.PondingCurveNumber = ValidatePondingCurveNumber(PondingCurveNumberText.Text);
@@ -302,10 +302,10 @@ namespace AgGrade.Controls
             switch (Settings.TractorColor)
             {
                 default:
-                case AppSettings.TractotColors.Green:  TractorColorSelector.SelectedIndex = 0; break;
-                case AppSettings.TractotColors.Red:    TractorColorSelector.SelectedIndex = 1; break;
-                case AppSettings.TractotColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
-                case AppSettings.TractotColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
+                case AppSettings.TractorColors.Green:  TractorColorSelector.SelectedIndex = 0; break;
+                case AppSettings.TractorColors.Red:    TractorColorSelector.SelectedIndex = 1; break;
+                case AppSettings.TractorColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
+                case AppSettings.TractorColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
             }
 
             PondingCurveNumberText.Text = Settings.PondingCurveNumber.ToString();

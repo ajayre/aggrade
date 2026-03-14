@@ -180,7 +180,7 @@
             // ApplyBtn
             // 
             ApplyBtn.Image = (Image)resources.GetObject("ApplyBtn.Image");
-            ApplyBtn.Location = new Point(246, 7);
+            ApplyBtn.Location = new Point(277, 7);
             ApplyBtn.Name = "ApplyBtn";
             ApplyBtn.Size = new Size(32, 32);
             ApplyBtn.TabIndex = 37;

@@ -373,7 +373,7 @@ namespace AgGrade.Controls
             // ApplyBtn
             // 
             ApplyBtn.Image = (Image)resources.GetObject("ApplyBtn.Image");
-            ApplyBtn.Location = new Point(255, 7);
+            ApplyBtn.Location = new Point(289, 7);
             ApplyBtn.Name = "ApplyBtn";
             ApplyBtn.Size = new Size(32, 32);
             ApplyBtn.TabIndex = 43;

@@ -48,7 +48,7 @@
             // 
             Title.BackColor = Color.PaleGoldenrod;
             Title.Dock = DockStyle.Fill;
-            Title.Font = new Font("Segoe UI", 18F, FontStyle.Bold);
+            Title.Font = new Font("Segoe UI", 20F, FontStyle.Bold);
             Title.Location = new Point(0, 0);
             Title.Name = "Title";
             Title.Padding = new Padding(5, 0, 0, 0);

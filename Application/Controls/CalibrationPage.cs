@@ -14,9 +14,46 @@ namespace AgGrade.Controls
 {
     public partial class CalibrationPage : UserControl
     {
+        Panel? OptionsTable = null;
+        Wizard? Wizard = null;
+
         public CalibrationPage()
         {
             InitializeComponent();
+
+            ShowOptions();
+        }
+
+        /// <summary>
+        /// Hides the list of calibration options
+        /// </summary>
+        private void HideOptions
+            (
+            )
+        {
+            if (OptionsTable != null)
+            {
+                if (Content.Controls.Contains(OptionsTable)) Content.Controls.Remove(OptionsTable);
+                OptionsTable = null;
+            }
+        }
+
+        /// <summary>
+        /// Shows the list of calibration options
+        /// </summary>
+        private void ShowOptions
+            (
+            )
+        {
+            OptionsTable = new Panel();
+            OptionsTable.Width = Content.Width - 44;
+            OptionsTable.Height = Content.Height - 44;
+            OptionsTable.Left = 22;
+            OptionsTable.Top = 22;
+            OptionsTable.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            OptionsTable.Visible = true;
+            OptionsTable.Parent = Content;
+            Content.Controls.Add(OptionsTable);
 
             OptionsTable.Controls.Clear();
 
@@ -31,6 +68,45 @@ namespace AgGrade.Controls
             odd = !odd;
             AddButton("Calibrate Field Location", Properties.Resources.field_48px, odd, CalibrateFieldLocation);
             odd = !odd;
+        }
+
+        /// <summary>
+        /// Hides the wizard
+        /// </summary>
+        private void HideWizard
+            (
+            )
+        {
+            if (Wizard != null)
+            {
+                if (Content.Controls.Contains(Wizard)) { Content.Controls.Remove(Wizard); }
+                Wizard.ExitWizard -= Wizard_ExitWizard;
+                Wizard = null;
+            }
+        }
+
+        /// <summary>
+        /// Shows the wizard
+        /// </summary>
+        private void ShowWizard
+            (
+            )
+        {
+            Wizard = new Wizard();
+            Wizard.Parent = Content;
+            Wizard.Dock = DockStyle.Fill;
+            Wizard.ExitWizard += Wizard_ExitWizard;
+            Content.Controls.Add(Wizard);
+        }
+
+        /// <summary>
+        /// Called when the wizard requests to exit
+        /// </summary>
+        /// <param name="obj"></param>
+        private void Wizard_ExitWizard(object obj)
+        {
+            HideWizard();
+            ShowOptions();
         }
 
         /// <summary>
@@ -54,7 +130,10 @@ namespace AgGrade.Controls
             object Sender
             )
         {
-
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Tractor Antenna Location";
+            Wizard!.Content = new CalibrateTractorAntennaWizard();
         }
 
         /// <summary>
@@ -102,7 +181,7 @@ namespace AgGrade.Controls
             panel.CaptionText = Text;
             panel.DisplayIcon = Icon;
             panel.Dock = DockStyle.Top;
-            OptionsTable.Controls.Add(panel);
+            OptionsTable?.Controls.Add(panel);
         }
     }
 }

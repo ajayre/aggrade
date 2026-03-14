@@ -4,6 +4,9 @@
     <Compile Update="Controls\AppSettingsEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\CalibrateTractorAntennaWizard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\CalibrationPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -32,6 +35,12 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="Controls\SurveyPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\Wizard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\WizardControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="MainForm.cs">
