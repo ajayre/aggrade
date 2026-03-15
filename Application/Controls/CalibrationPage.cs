@@ -19,6 +19,7 @@ namespace AgGrade.Controls
         private Wizard? Wizard = null;
 
         public EquipmentSettings CurrentEquipmentSettings;
+        public EquipmentStatus CurrentEquipmentStatus;
         public Field? CurrentField;
 
         public CalibrationPage()
@@ -106,6 +107,8 @@ namespace AgGrade.Controls
             Wizard = new Wizard();
             Wizard.Parent = Content;
             Wizard.Dock = DockStyle.Fill;
+            Wizard.CurrentEquipmentStatus = CurrentEquipmentStatus;
+            Wizard.CurrentEquipmentSettings = CurrentEquipmentSettings;
             Wizard.ExitWizard += Wizard_ExitWizard;
             Content.Controls.Add(Wizard);
         }

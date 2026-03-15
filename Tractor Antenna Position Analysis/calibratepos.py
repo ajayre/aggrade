@@ -14,7 +14,7 @@ Inputs:
 Output:
   Antenna offset (x_a, y_a) in cm in tractor frame:
     - origin at rear axle center
-    - y forward, x right (left = negative x)
+    - y forward, x left (right = negative x)
     - left hub at (-T/2, 0), right hub at (+T/2, 0)
 """
 import argparse
@@ -69,7 +69,7 @@ def solve_antenna_offset_cm(T_cm, heading1_deg, heading2_deg, lat1, lon1, lat2, 
     Solve for antenna offset p_a = (x_a, y_a) in cm.
 
     Convention: pose 1 = left hub on pole ref, pose 2 = right hub on same ref.
-    Tractor frame: y forward, x right; left hub (-T/2, 0), right hub (+T/2, 0).
+    Tractor frame: y forward, x left (positive x = left of centerline); left hub (-T/2, 0), right hub (+T/2, 0).
 
     If G_cm is given (east_cm, north_cm) in the same local frame as antenna positions
     (origin = mean of pos1, pos2), the second pose is corrected to exactly 180° from
@@ -127,7 +127,8 @@ def solve_antenna_offset_cm(T_cm, heading1_deg, heading2_deg, lat1, lon1, lat2, 
     ]
     x_a_cm = inv[0][0] * rhs[0] + inv[0][1] * rhs[1]
     y_a_cm = inv[1][0] * rhs[0] + inv[1][1] * rhs[1]
-    return x_a_cm, y_a_cm
+    # Report x with positive = left of centerline
+    return -x_a_cm, y_a_cm
 
 
 def main():
@@ -160,7 +161,7 @@ def main():
         G_cm=G_cm,
     )
     print(f"Antenna offset (tractor frame, cm): x_a = {x_a:.3f},  y_a = {y_a:.3f}")
-    print(f"  (x: right positive, left negative; y: forward positive)")
+    print(f"  (x: left positive, right negative; y: forward positive)")
 
 
 def _proof_examples():
@@ -193,8 +194,9 @@ def _proof_examples():
     lat1, lon1 = local_m_to_latlon(e1_m, n1_m, lat0, lon0)
     lat2, lon2 = local_m_to_latlon(e2_m, n2_m, lat0, lon0)
     x_out, y_out = solve_antenna_offset_cm(T1, h1_deg, h2_deg, lat1, lon1, lat2, lon2)
-    err1 = abs(x_out - x_a1) + abs(y_out - y_a1)
-    assert err1 < 0.001, f"Example 1: expected ({x_a1}, {y_a1}), got ({x_out}, {y_out})"
+    # Output convention: positive x = left; forward model used x right positive so expect (-x_a1, y_a1)
+    err1 = abs(x_out - (-x_a1)) + abs(y_out - y_a1)
+    assert err1 < 0.001, f"Example 1: expected ({-x_a1}, {y_a1}), got ({x_out}, {y_out})"
     print("Example 1 (N/S, 10 cm right, 40 cm fwd): OK")
 
     # ---- Example 2: East/West (90° / 270°), antenna 5 cm left, 35 cm forward ----
@@ -215,8 +217,9 @@ def _proof_examples():
     lat1, lon1 = local_m_to_latlon(e1_m, n1_m, lat0, lon0)
     lat2, lon2 = local_m_to_latlon(e2_m, n2_m, lat0, lon0)
     x_out, y_out = solve_antenna_offset_cm(T2, h1_deg, h2_deg, lat1, lon1, lat2, lon2)
-    err2 = abs(x_out - x_a2) + abs(y_out - y_a2)
-    assert err2 < 0.001, f"Example 2: expected ({x_a2}, {y_a2}), got ({x_out}, {y_out})"
+    # Output convention: positive x = left; forward model used x right positive so expect (-x_a2, y_a2)
+    err2 = abs(x_out - (-x_a2)) + abs(y_out - y_a2)
+    assert err2 < 0.001, f"Example 2: expected ({-x_a2}, {y_a2}), got ({x_out}, {y_out})"
     print("Example 2 (E/W, 5 cm left, 35 cm fwd): OK")
     print("Proof: both examples recover antenna offset to <0.001 cm (zero GPS/hub error).")
     _draw_proof_diagram()

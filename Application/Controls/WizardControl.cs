@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgGrade.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +11,9 @@ namespace AgGrade.Controls
     public class WizardControl : UserControl
     {
         public event Action<object> ExitWizard = null;
+
+        public EquipmentStatus? CurrentEquipmentStatus = null;
+        public EquipmentSettings? CurrentEquipmentSettings = null;
 
         /// <summary>
         /// Gets the top-level tab control
@@ -107,6 +111,12 @@ namespace AgGrade.Controls
                 TabControl!.ItemSize = new Size(0, 1);
                 TabControl!.SizeMode = TabSizeMode.Fixed;
             }
+        }
+
+        public virtual void Activated
+            (
+            )
+        {
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AgGrade.Data;
 
 namespace AgGrade.Controls
 {
@@ -21,6 +22,8 @@ namespace AgGrade.Controls
         }
 
         public event Action<object> ExitWizard = null;
+        public EquipmentStatus? CurrentEquipmentStatus = null;
+        public EquipmentSettings? CurrentEquipmentSettings = null;
 
         private WizardControl? _Content;
         public WizardControl? Content
@@ -67,6 +70,9 @@ namespace AgGrade.Controls
                 _Content.Parent = WizardBody;
                 _Content.Dock = DockStyle.Fill;
                 _Content.ExitWizard += _Content_ExitWizard;
+                _Content.CurrentEquipmentStatus = CurrentEquipmentStatus;
+                _Content.CurrentEquipmentSettings = CurrentEquipmentSettings;
+                _Content.Activated();
                 WizardBody.Controls.Add(_Content);
             }
         }

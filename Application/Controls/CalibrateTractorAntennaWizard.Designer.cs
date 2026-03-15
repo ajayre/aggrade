@@ -44,17 +44,20 @@
             tabPage2 = new TabPage();
             textBox8 = new TextBox();
             CapturePose2Btn = new Button();
-            textBox9 = new TextBox();
+            PageTwoInstructions = new TextBox();
             pictureBox2 = new PictureBox();
             tabPage3 = new TabPage();
             ReturnBtn = new Button();
-            textBox10 = new TextBox();
+            ResultMsg = new TextBox();
+            panel1 = new Panel();
+            ErrorMessage = new Label();
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox2).BeginInit();
             tabPage3.SuspendLayout();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // Pages
@@ -66,7 +69,7 @@
             Pages.Location = new Point(0, 0);
             Pages.Name = "Pages";
             Pages.SelectedIndex = 0;
-            Pages.Size = new Size(800, 448);
+            Pages.Size = new Size(800, 462);
             Pages.TabIndex = 0;
             Pages.SelectedIndexChanged += Pages_SelectedIndexChanged;
             // 
@@ -86,7 +89,7 @@
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
             tabPage1.Padding = new Padding(3);
-            tabPage1.Size = new Size(792, 420);
+            tabPage1.Size = new Size(792, 434);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
             // 
@@ -227,12 +230,12 @@
             // 
             tabPage2.Controls.Add(textBox8);
             tabPage2.Controls.Add(CapturePose2Btn);
-            tabPage2.Controls.Add(textBox9);
+            tabPage2.Controls.Add(PageTwoInstructions);
             tabPage2.Controls.Add(pictureBox2);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(792, 420);
+            tabPage2.Size = new Size(792, 434);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "tabPage2";
             // 
@@ -264,20 +267,20 @@
             CapturePose2Btn.UseVisualStyleBackColor = true;
             CapturePose2Btn.Click += CapturePose2Btn_Click;
             // 
-            // textBox9
+            // PageTwoInstructions
             // 
-            textBox9.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textBox9.BackColor = SystemColors.Control;
-            textBox9.BorderStyle = BorderStyle.None;
-            textBox9.Font = new Font("Segoe UI", 16F);
-            textBox9.Location = new Point(6, 9);
-            textBox9.Multiline = true;
-            textBox9.Name = "textBox9";
-            textBox9.ReadOnly = true;
-            textBox9.Size = new Size(385, 159);
-            textBox9.TabIndex = 18;
-            textBox9.TabStop = false;
-            textBox9.Text = "1. Drive tractor ahead, turn around and return to the pole\r\n2. Get D as close as possible to the value you measured (#mm)\r\n3. Tap on button below\r\n";
+            PageTwoInstructions.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            PageTwoInstructions.BackColor = SystemColors.Control;
+            PageTwoInstructions.BorderStyle = BorderStyle.None;
+            PageTwoInstructions.Font = new Font("Segoe UI", 16F);
+            PageTwoInstructions.Location = new Point(6, 9);
+            PageTwoInstructions.Multiline = true;
+            PageTwoInstructions.Name = "PageTwoInstructions";
+            PageTwoInstructions.ReadOnly = true;
+            PageTwoInstructions.Size = new Size(385, 159);
+            PageTwoInstructions.TabIndex = 18;
+            PageTwoInstructions.TabStop = false;
+            PageTwoInstructions.Text = "1. Drive tractor ahead, turn around and return to the pole\r\n2. Get D as close as possible to the value you measured\r\n3. Tap on button below\r\n";
             // 
             // pictureBox2
             // 
@@ -293,11 +296,11 @@
             // 
             tabPage3.BackColor = SystemColors.Control;
             tabPage3.Controls.Add(ReturnBtn);
-            tabPage3.Controls.Add(textBox10);
+            tabPage3.Controls.Add(ResultMsg);
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
             tabPage3.Padding = new Padding(3);
-            tabPage3.Size = new Size(792, 420);
+            tabPage3.Size = new Size(792, 434);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "tabPage3";
             // 
@@ -315,28 +318,52 @@
             ReturnBtn.UseVisualStyleBackColor = true;
             ReturnBtn.Click += ReturnBtn_Click;
             // 
-            // textBox10
+            // ResultMsg
             // 
-            textBox10.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            textBox10.BackColor = SystemColors.Control;
-            textBox10.BorderStyle = BorderStyle.None;
-            textBox10.Font = new Font("Segoe UI", 16F);
-            textBox10.Location = new Point(6, 6);
-            textBox10.Multiline = true;
-            textBox10.Name = "textBox10";
-            textBox10.ReadOnly = true;
-            textBox10.Size = new Size(517, 35);
-            textBox10.TabIndex = 19;
-            textBox10.TabStop = false;
-            textBox10.Text = "Result message\r\n";
+            ResultMsg.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            ResultMsg.BackColor = SystemColors.Control;
+            ResultMsg.BorderStyle = BorderStyle.None;
+            ResultMsg.Font = new Font("Segoe UI", 16F);
+            ResultMsg.Location = new Point(6, 6);
+            ResultMsg.Multiline = true;
+            ResultMsg.Name = "ResultMsg";
+            ResultMsg.ReadOnly = true;
+            ResultMsg.Size = new Size(780, 35);
+            ResultMsg.TabIndex = 19;
+            ResultMsg.TabStop = false;
+            ResultMsg.Text = "Result message\r\n";
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.FromArgb(224, 224, 224);
+            panel1.Controls.Add(ErrorMessage);
+            panel1.Dock = DockStyle.Bottom;
+            panel1.Location = new Point(0, 462);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(800, 44);
+            panel1.TabIndex = 1;
+            // 
+            // ErrorMessage
+            // 
+            ErrorMessage.AutoSize = true;
+            ErrorMessage.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            ErrorMessage.ForeColor = Color.Red;
+            ErrorMessage.Location = new Point(10, 9);
+            ErrorMessage.Name = "ErrorMessage";
+            ErrorMessage.Size = new Size(139, 25);
+            ErrorMessage.TabIndex = 0;
+            ErrorMessage.Text = "Error Message";
+            ErrorMessage.VisibleChanged += ErrorMessage_VisibleChanged;
             // 
             // CalibrateTractorAntennaWizard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(Pages);
+            Controls.Add(panel1);
             Name = "CalibrateTractorAntennaWizard";
-            Size = new Size(800, 448);
+            Size = new Size(800, 506);
+            Load += CalibrateTractorAntennaWizard_Load;
             Pages.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
@@ -346,6 +373,8 @@
             ((System.ComponentModel.ISupportInitialize)pictureBox2).EndInit();
             tabPage3.ResumeLayout(false);
             tabPage3.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -366,11 +395,13 @@
         private TextBox textBox6;
         private TextBox textBox5;
         private Button CapturePose2Btn;
-        private TextBox textBox9;
+        private TextBox PageTwoInstructions;
         private PictureBox pictureBox2;
         private TextBox textBox8;
         private TabPage tabPage3;
-        private TextBox textBox10;
+        private TextBox ResultMsg;
         private Button ReturnBtn;
+        private Panel panel1;
+        private Label ErrorMessage;
     }
 }
