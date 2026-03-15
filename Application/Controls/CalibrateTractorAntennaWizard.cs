@@ -48,6 +48,7 @@ namespace AgGrade.Controls
         {
             switch (Pages.SelectedIndex)
             {
+                // completed first page, validate inputs
                 case 1:
                     T = TInput.Value;
                     D = DInput.Value;
@@ -66,12 +67,15 @@ namespace AgGrade.Controls
                         ValidateStatusAndSettings();
                     }
                     break;
+
+                // completed second page, perform calculation
                 case 2:
                     if (Pose1Valid && Pose2Valid)
                     {
                         if (CurrentEquipmentSettings != null)
                         {
                             PointD Offset = TractorAntennaFinder.Calculate(T, Pose1Heading, Pose2Heading, Pose1Latitude, Pose1Longitude, Pose2Latitude, Pose2Longitude, D);
+
                             ResultMsg.Text = string.Format("Antenna offset is X = {0}mm, Y = {1}mm", (int)Offset.X, (int)Offset.Y);
                             CurrentEquipmentSettings.TractorAntennaLeftOffsetMm = (int)Offset.X;
                             CurrentEquipmentSettings.TractorAntennaForwardOffsetMm = (int)Offset.Y;
