@@ -93,6 +93,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap calibration_48px {
+            get {
+                object obj = ResourceManager.GetObject("calibration_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap createnewfield_48px {
             get {
                 object obj = ResourceManager.GetObject("createnewfield_48px", resourceCulture);
@@ -304,6 +314,16 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap tractor_48px {
             get {
                 object obj = ResourceManager.GetObject("tractor_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap tractor_calib_down {
+            get {
+                object obj = ResourceManager.GetObject("tractor_calib_down", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

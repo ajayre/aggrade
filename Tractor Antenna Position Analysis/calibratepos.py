@@ -64,15 +64,19 @@ def rotation_2d(angle_deg):
     return [[c, -s], [s, c]]
 
 
-def solve_antenna_offset_cm(T_cm, heading1_deg, heading2_deg, lat1, lon1, lat2, lon2):
+def solve_antenna_offset_cm(T_cm, heading1_deg, heading2_deg, lat1, lon1, lat2, lon2, G_cm=None):
     """
     Solve for antenna offset p_a = (x_a, y_a) in cm.
 
     Convention: pose 1 = left hub on pole ref, pose 2 = right hub on same ref.
     Tractor frame: y forward, x right; left hub (-T/2, 0), right hub (+T/2, 0).
-    Hub-on-same-point gives t_2 - t_1 = R_1 h_A - R_2 h_B; no G or D needed.
+
+    If G_cm is given (east_cm, north_cm) in the same local frame as antenna positions
+    (origin = mean of pos1, pos2), the second pose is corrected to exactly 180° from
+    the first by rotating P2 and t2 around G, then the 0°/180° solution is used.
+    This corrects for operator heading error.
     """
-    # Local flat origin = mean of the two antenna positions (arbitrary; cancels)
+    # Local flat origin = mean of the two antenna positions
     lat0 = (lat1 + lat2) / 2
     lon0 = (lon1 + lon2) / 2
     e1, n1 = latlon_to_local_m(lat1, lon1, lat0, lon0)
@@ -81,26 +85,37 @@ def solve_antenna_offset_cm(T_cm, heading1_deg, heading2_deg, lat1, lon1, lat2, 
     P2 = (e2 * 100, n2 * 100)   # cm
 
     # World frame: east = first component, north = second. Tractor +y = forward.
-    # Heading = compass deg (0=North, 90=East, clockwise). R maps tractor to world.
     R1 = rotation_2d(-heading1_deg)
     R2 = rotation_2d(-heading2_deg)
 
-    # Hub positions in tractor frame (cm)
     h_A = (-T_cm / 2, 0)
     h_B = (T_cm / 2, 0)
 
-    # Same hub-on-pole point in both poses => t_2 - t_1 = R_1 h_A - R_2 h_B.
-    # P1 - P2 = (R1 - R2) @ p_a + (t1 - t2). So (R1 - R2) @ p_a = (P1 - P2) - (t1 - t2).
-    # This uses only differences, so it works in any frame (e.g. origin = midpoint).
     def mat_vec(M, v):
         return (M[0][0] * v[0] + M[0][1] * v[1], M[1][0] * v[0] + M[1][1] * v[1])
 
     t1 = (-R1[0][0] * h_A[0] - R1[0][1] * h_A[1], -R1[1][0] * h_A[0] - R1[1][1] * h_A[1])
     t2 = (-R2[0][0] * h_B[0] - R2[0][1] * h_B[1], -R2[1][0] * h_B[0] - R2[1][1] * h_B[1])
+
+    # Optional: correct for heading error using G. Do NOT rotate measured P2. Assume
+    # the second pose's heading should have been 180° and place both axle centers
+    # so the hub is at G: t1 = G - R1*h_A, t2 = G - R2_corrected*h_B. Then heading
+    # error does not create a spurious antenna offset.
+    if G_cm is not None:
+        heading2_deg = heading1_deg + 180
+        R2 = rotation_2d(-heading2_deg)
+        t1 = (
+            G_cm[0] - (R1[0][0] * h_A[0] + R1[0][1] * h_A[1]),
+            G_cm[1] - (R1[1][0] * h_A[0] + R1[1][1] * h_A[1]),
+        )
+        t2 = (
+            G_cm[0] - (R2[0][0] * h_B[0] + R2[0][1] * h_B[1]),
+            G_cm[1] - (R2[1][0] * h_B[0] + R2[1][1] * h_B[1]),
+        )
+
     diff_P = (P1[0] - P2[0], P1[1] - P2[1])
     diff_t = (t1[0] - t2[0], t1[1] - t2[1])
     rhs = (diff_P[0] - diff_t[0], diff_P[1] - diff_t[1])
-    # (R1 - R2) @ p_a = rhs  =>  p_a = (R1 - R2)^{-1} @ rhs
     R1_minus_R2 = [
         [R1[0][0] - R2[0][0], R1[0][1] - R2[0][1]],
         [R1[1][0] - R2[1][0], R1[1][1] - R2[1][1]],
@@ -119,21 +134,30 @@ def main():
     parser = argparse.ArgumentParser(
         description="Compute antenna offset (cm) from T, headings, and two antenna lat/lon."
     )
-    parser.add_argument("--T", type=float, required=True, help="Rear track width (cm)")
+    parser.add_argument("--T", type=float, required=True, help="Rear track width (mm)")
     parser.add_argument("--heading1", type=float, required=True, help="Heading pose 1 (deg)")
     parser.add_argument("--heading2", type=float, required=True, help="Heading pose 2 (deg)")
     parser.add_argument("--pos1", type=float, nargs=2, required=True, metavar=("LAT", "LON"),
                         help="Antenna lat lon at pose 1")
     parser.add_argument("--pos2", type=float, nargs=2, required=True, metavar=("LAT", "LON"),
                         help="Antenna lat lon at pose 2")
+    parser.add_argument("--G", type=float, default=None, metavar="D_MM",
+                        help="Hub for 180° correction: distance D_MM from origin to hub along pole (pose 1 axle). Origin = mean of antenna positions.")
     args = parser.parse_args()
 
     lat1, lon1 = args.pos1
     lat2, lon2 = args.pos2
+    T_cm = args.T / 10.0  # mm -> cm
+    G_cm = None
+    if args.G is not None:
+        D_mm = args.G
+        th_rad = math.radians(args.heading1)
+        G_cm = (D_mm / 10.0 * math.cos(th_rad), -D_mm / 10.0 * math.sin(th_rad))
 
     x_a, y_a = solve_antenna_offset_cm(
-        args.T, args.heading1, args.heading2,
+        T_cm, args.heading1, args.heading2,
         lat1, lon1, lat2, lon2,
+        G_cm=G_cm,
     )
     print(f"Antenna offset (tractor frame, cm): x_a = {x_a:.3f},  y_a = {y_a:.3f}")
     print(f"  (x: right positive, left negative; y: forward positive)")

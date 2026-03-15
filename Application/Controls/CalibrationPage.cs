@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AgGrade.Data;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -14,14 +15,15 @@ namespace AgGrade.Controls
 {
     public partial class CalibrationPage : UserControl
     {
-        Panel? OptionsTable = null;
-        Wizard? Wizard = null;
+        private Panel? OptionsTable = null;
+        private Wizard? Wizard = null;
+
+        public EquipmentSettings CurrentEquipmentSettings;
+        public Field? CurrentField;
 
         public CalibrationPage()
         {
             InitializeComponent();
-
-            ShowOptions();
         }
 
         /// <summary>
@@ -62,12 +64,21 @@ namespace AgGrade.Controls
 
             AddButton("Calibrate Tractor Antenna Location", Properties.Resources.tractor_48px, odd, CalibrateTractorAntenna);
             odd = !odd;
-            AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
-            odd = !odd;
-            AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
-            odd = !odd;
-            AddButton("Calibrate Field Location", Properties.Resources.field_48px, odd, CalibrateFieldLocation);
-            odd = !odd;
+            if (CurrentEquipmentSettings.RearPan.Equipped)
+            {
+                AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
+                odd = !odd;
+            }
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
+            {
+                AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
+                odd = !odd;
+            }
+            if ((CurrentField != null) && (CurrentField.Benchmarks.Count > 0))
+            {
+                AddButton("Calibrate Field Location", Properties.Resources.field_48px, odd, CalibrateFieldLocation);
+                odd = !odd;
+            }
         }
 
         /// <summary>
@@ -182,6 +193,11 @@ namespace AgGrade.Controls
             panel.DisplayIcon = Icon;
             panel.Dock = DockStyle.Top;
             OptionsTable?.Controls.Add(panel);
+        }
+
+        private void CalibrationPage_Load(object sender, EventArgs e)
+        {
+            ShowOptions();
         }
     }
 }

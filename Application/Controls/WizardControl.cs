@@ -9,6 +9,8 @@ namespace AgGrade.Controls
 {
     public class WizardControl : UserControl
     {
+        public event Action<object> ExitWizard = null;
+
         /// <summary>
         /// Gets the top-level tab control
         /// </summary>
@@ -25,6 +27,16 @@ namespace AgGrade.Controls
                     return null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Ecits the wizard
+        /// </summary>
+        public void Exit
+            (
+            )
+        {
+            ExitWizard?.Invoke(this);
         }
 
         /// <summary>

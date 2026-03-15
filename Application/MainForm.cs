@@ -371,6 +371,8 @@ namespace AgGrade
             ClosePage();
 
             CalibrationPage calibrationPage = new CalibrationPage();
+            calibrationPage.CurrentEquipmentSettings = CurrentEquipmentSettings;
+            calibrationPage.CurrentField = CurrentField;
             calibrationPage.Parent = ContentPanel;
             calibrationPage.Dock = DockStyle.Fill;
             calibrationPage.Show();

@@ -49,7 +49,11 @@ namespace AgGrade.Controls
             (
             )
         {
-            if (WizardBody.Controls.Contains(_Content)) WizardBody.Controls.Remove(_Content);
+            if (WizardBody.Controls.Contains(_Content))
+            {
+                WizardBody.Controls.Remove(_Content);
+                _Content.ExitWizard -= _Content_ExitWizard;
+            }
             _Content = null;
         }
 
@@ -62,8 +66,18 @@ namespace AgGrade.Controls
                 _Content.HideTabs();
                 _Content.Parent = WizardBody;
                 _Content.Dock = DockStyle.Fill;
+                _Content.ExitWizard += _Content_ExitWizard;
                 WizardBody.Controls.Add(_Content);
             }
+        }
+
+        /// <summary>
+        /// Called when wizard control requests the wizard exit
+        /// </summary>
+        /// <param name="obj"></param>
+        private void _Content_ExitWizard(object obj)
+        {
+            ExitWizard?.Invoke(this);
         }
 
         /// <summary>

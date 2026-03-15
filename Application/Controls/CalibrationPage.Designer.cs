@@ -57,6 +57,7 @@
             Controls.Add(sectionTitle1);
             Name = "CalibrationPage";
             Size = new Size(916, 476);
+            Load += CalibrationPage_Load;
             ResumeLayout(false);
         }
 
