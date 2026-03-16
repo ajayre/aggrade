@@ -772,10 +772,6 @@ namespace AgGrade
                 Path.DirectorySeparatorChar;
 #endif
 
-            // fixme - allow user to choose file to load
-            //LoadField(@"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\ShopB4");
-            //LoadField(FieldDataFolder + "TheShop2_2ft");
-
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);
             SetRearPanIndicator(PanIndicatorStates.None);
@@ -834,7 +830,6 @@ namespace AgGrade
         /// <param name="Value">Blade height command 0 -> 200</param>
         private void Controller_OnFrontBladeCommandSent(uint Value)
         {
-            // fixme - to do - show requested height
         }
 
         private void Controller_OnRearSlaveOffsetChanged(int Offset)

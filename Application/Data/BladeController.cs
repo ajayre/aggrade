@@ -17,10 +17,6 @@ namespace AgGrade.Data
 
         public const int BLADE_HEIGHT_GROUND_LEVEL = 200;
 
-        // fixme - this needs to go into the settings
-        // height to place blade at when not cutting, e.g. going outside of field
-        private const int MAX_BLADE_HEIGHT_MM = 80;
-
         private Timer CalcTimer;
         private Field? Field;
         private EquipmentSettings? CurrentEquipmentSettings;
@@ -190,7 +186,7 @@ namespace AgGrade.Data
                         // no data for this bin
                         if (CurrentBin.CurrentElevationM == 0)
                         {
-                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                            Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
                         else if (CurrentBin.CurrentElevationM > CurrentBin.TargetElevationM)
@@ -216,7 +212,7 @@ namespace AgGrade.Data
                     // no bin - outside of field
                     else
                     {
-                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                        Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
             }
@@ -240,7 +236,7 @@ namespace AgGrade.Data
                         // no data for this bin
                         if (CurrentBin.CurrentElevationM == 0)
                         {
-                            Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                            Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                         }
                         // need to cut
                         else if (CurrentBin.CurrentElevationM > CurrentBin.TargetElevationM)
@@ -266,7 +262,7 @@ namespace AgGrade.Data
                     // no bin - outside of field
                     else
                     {
-                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                        Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                 }
             }
@@ -280,7 +276,7 @@ namespace AgGrade.Data
                     // no data for this bin
                     if (CurrentBin.CurrentElevationM == 0)
                     {
-                        Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                        Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
                     else if (CurrentBin.CurrentElevationM < CurrentBin.TargetElevationM)
@@ -308,7 +304,7 @@ namespace AgGrade.Data
                 // no bin - outside of field
                 else
                 {
-                    Controller.SetFrontCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                    Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                 }
             }
 
@@ -321,7 +317,7 @@ namespace AgGrade.Data
                     // no data for this bin
                     if (CurrentBin.CurrentElevationM == 0)
                     {
-                        Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                        Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                     }
                     // need to fill
                     else if (CurrentBin.CurrentElevationM < CurrentBin.TargetElevationM)
@@ -347,7 +343,7 @@ namespace AgGrade.Data
                 // no bin - outside of field
                 else
                 {
-                    Controller.SetRearCutValve(MAX_BLADE_HEIGHT_MM + BLADE_HEIGHT_GROUND_LEVEL);
+                    Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                 }
             }
         }
