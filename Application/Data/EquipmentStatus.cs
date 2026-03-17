@@ -19,7 +19,8 @@ namespace AgGrade.Data
 
         public enum BladeMode
         {
-            None,
+            Raised,
+            Manual,
             AutoCutting,
             AutoFilling,
             Floating
@@ -43,7 +44,7 @@ namespace AgGrade.Data
             Fix = new GNSSFix();
 
             CapacityWarningOccurred = false;
-            Mode = BladeMode.None;
+            Mode = BladeMode.Manual;
             LoadLCY = 0;
         }
     }

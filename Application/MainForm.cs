@@ -36,6 +36,16 @@ namespace AgGrade
         private string FieldDataFolder;
         private Timer FieldFixTimer;
 
+        /// <summary>
+        /// Possible states for the pan indicators
+        /// </summary>
+        private enum PanIndicatorStates
+        {
+            None,
+            Cutting,
+            Filling
+        }
+
         public MainForm
             (
             bool Windowed
@@ -789,18 +799,21 @@ namespace AgGrade
         /// <param name="IsDumping">true if dumping</param>
         private void Controller_OnRearDumpingChanged(bool IsDumping)
         {
-            if (IsDumping)
+            if (CurrentEquipmentStatus.RearPan.Mode != PanStatus.BladeMode.Manual)
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoFilling;
-                SetRearPanIndicator(PanIndicatorStates.Filling);
-            }
-            else
-            {
-                BladeCtrl.SetRearToTransportState();
-                SetRearPanIndicator(PanIndicatorStates.None);
-            }
+                if (IsDumping)
+                {
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoFilling;
+                    SetRearPanIndicator(PanIndicatorStates.Filling);
+                }
+                else
+                {
+                    BladeCtrl.SetRearToTransportState();
+                    SetRearPanIndicator(PanIndicatorStates.None);
+                }
 
-            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+                UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
         }
 
         /// <summary>
@@ -809,18 +822,21 @@ namespace AgGrade
         /// <param name="IsDumping">true if dumping</param>
         private void Controller_OnFrontDumpingChanged(bool IsDumping)
         {
-            if (IsDumping)
+            if (CurrentEquipmentStatus.FrontPan.Mode != PanStatus.BladeMode.Manual)
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoFilling;
-                SetFrontPanIndicator(PanIndicatorStates.Filling);
-            }
-            else
-            {
-                BladeCtrl.SetFrontToTransportState();
-                SetFrontPanIndicator(PanIndicatorStates.None);
-            }
+                if (IsDumping)
+                {
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoFilling;
+                    SetFrontPanIndicator(PanIndicatorStates.Filling);
+                }
+                else
+                {
+                    BladeCtrl.SetFrontToTransportState();
+                    SetFrontPanIndicator(PanIndicatorStates.None);
+                }
 
-            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+                UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            }
         }
 
         /// <summary>
@@ -862,18 +878,21 @@ namespace AgGrade
 
         private void Controller_OnRearBladeCuttingChanged(bool IsCutting)
         {
-            if (IsCutting)
+            if (CurrentEquipmentStatus.RearPan.Mode != PanStatus.BladeMode.Manual)
             {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
-                SetRearPanIndicator(PanIndicatorStates.Cutting);
-            }
-            else
-            {
-                BladeCtrl.SetRearToTransportState();
-                SetRearPanIndicator(PanIndicatorStates.None);
-            }
+                if (IsCutting)
+                {
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
+                    SetRearPanIndicator(PanIndicatorStates.Cutting);
+                }
+                else
+                {
+                    BladeCtrl.SetRearToTransportState();
+                    SetRearPanIndicator(PanIndicatorStates.None);
+                }
 
-            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+                UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
         }
 
         /// <summary>
@@ -885,21 +904,24 @@ namespace AgGrade
             PanStatus.BladeMode Mode
             )
         {
+            if (Mode == PanStatus.BladeMode.Manual)
+            {
+                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
+            }
+            else
+            {
+                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
+            }
+
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
-                CurrentEquipmentStatus.RearPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartRearCutting();
-                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
                 GetMap()?.StartRearCutting();
             }
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {
                 FieldUpdater.StartRearFilling();
                 GetMap()?.StartRearFilling();
-            }
-            else
-            {
-                RearBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }
 
@@ -917,16 +939,6 @@ namespace AgGrade
         private void Controller_OnFrontBladePWMChanged(byte PWMValue)
         {
             CurrentEquipmentStatus.FrontPan.BladePWM = PWMValue;
-        }
-
-        /// <summary>
-        /// Possible states for the pan indicators
-        /// </summary>
-        private enum PanIndicatorStates
-        {
-            None,
-            Cutting,
-            Filling
         }
 
         /// <summary>
@@ -1031,18 +1043,21 @@ namespace AgGrade
 
         private void Controller_OnFrontBladeCuttingChanged(bool IsCutting)
         {
-            if (IsCutting)
+            if (CurrentEquipmentStatus.FrontPan.Mode != PanStatus.BladeMode.Manual)
             {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
-                SetFrontPanIndicator(PanIndicatorStates.Cutting);
-            }
-            else
-            {
-                BladeCtrl.SetFrontToTransportState();
-                SetFrontPanIndicator(PanIndicatorStates.None);
-            }
+                if (IsCutting)
+                {
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
+                    SetFrontPanIndicator(PanIndicatorStates.Cutting);
+                }
+                else
+                {
+                    BladeCtrl.SetFrontToTransportState();
+                    SetFrontPanIndicator(PanIndicatorStates.None);
+                }
 
-            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+                UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            }
         }
 
         /// <summary>
@@ -1054,21 +1069,25 @@ namespace AgGrade
             PanStatus.BladeMode Mode
             )
         {
+            if (Mode == PanStatus.BladeMode.Manual)
+            {
+                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
+            }
+            else
+            {
+                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
+            }
+
             if (Mode == PanStatus.BladeMode.AutoCutting)
             {
                 CurrentEquipmentStatus.FrontPan.CapacityWarningOccurred = false;
                 FieldUpdater.StartFrontCutting();
-                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Green;
                 GetMap()?.StartFrontCutting();
             }
             else if (Mode == PanStatus.BladeMode.AutoFilling)
             {
                 FieldUpdater.StartFrontFilling();
                 GetMap()?.StartFrontFilling();
-            }
-            else
-            {
-                FrontBladeControlBtn.Indicator = IndicatorButton.IndicatorColor.Red;
             }
         }
 
@@ -1550,9 +1569,9 @@ namespace AgGrade
         {
             // make sure controller and UI match current state
 
-            Controller.SetRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
-            UpdateRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
             SetRearPanIndicator(PanIndicatorStates.None);
         }
@@ -1564,9 +1583,9 @@ namespace AgGrade
         {
             // make sure controller and UI match current state
 
-            Controller.SetFrontBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
 
-            UpdateFrontBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
 
             SetFrontPanIndicator(PanIndicatorStates.None);
         }
@@ -1579,14 +1598,16 @@ namespace AgGrade
         /// <param name="e"></param>
         private void FrontBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus.FrontPan.Mode != PanStatus.BladeMode.AutoCutting)
-            {
-                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
-                SetFrontPanIndicator(PanIndicatorStates.Cutting);
-            }
-            else
+            // if manual then enter transport state
+            if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.Manual)
             {
                 BladeCtrl.SetFrontToTransportState();
+                SetFrontPanIndicator(PanIndicatorStates.None);
+            }
+            // enter manual
+            else
+            {
+                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Manual;
                 SetFrontPanIndicator(PanIndicatorStates.None);
             }
 
@@ -1603,14 +1624,16 @@ namespace AgGrade
         /// <param name="e"></param>
         private void RearBladeControlBtn_OnButtonClicked(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus.RearPan.Mode != PanStatus.BladeMode.AutoCutting)
-            {
-                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
-                SetRearPanIndicator(PanIndicatorStates.Cutting);
-            }
-            else
+            // if manual then enter transport state
+            if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.Manual)
             {
                 BladeCtrl.SetRearToTransportState();
+                SetRearPanIndicator(PanIndicatorStates.None);
+            }
+            // enter manual
+            else
+            {
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Manual;
                 SetRearPanIndicator(PanIndicatorStates.None);
             }
 
@@ -1624,12 +1647,15 @@ namespace AgGrade
         /// </summary>
         private void BladeCtrl_OnRequestRearBladeStartCutting()
         {
-            CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
-            SetRearPanIndicator(PanIndicatorStates.Cutting);
+            if (CurrentEquipmentStatus.RearPan.Mode != PanStatus.BladeMode.Manual)
+            {
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
+                SetRearPanIndicator(PanIndicatorStates.Cutting);
 
-            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+                Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
-            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+                UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
         }
 
         /// <summary>

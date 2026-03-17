@@ -82,7 +82,7 @@ namespace AgGrade.Data
                 {
                     // raise blade
                     Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Raised;
                 }
             }
             // empty
@@ -98,7 +98,7 @@ namespace AgGrade.Data
                 {
                     // raise blade
                     Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.None;
+                    CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Raised;
                 }
             }
         }
@@ -125,7 +125,7 @@ namespace AgGrade.Data
                 {
                     // raise blade
                     Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Raised;
                 }
             }
             // empty
@@ -141,7 +141,7 @@ namespace AgGrade.Data
                 {
                     // raise blade
                     Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
-                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.None;
+                    CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Raised;
                 }
             }
         }
