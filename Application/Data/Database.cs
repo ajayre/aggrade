@@ -353,6 +353,14 @@ namespace AgGrade.Data
             {
                 // ignore
             }
+            catch (ArgumentOutOfRangeException)
+            {
+                // ignore
+            }
+            catch (InvalidOperationException)
+            {
+                // ignore
+            }
         }
 
         /// <summary>

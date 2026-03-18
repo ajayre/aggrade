@@ -43,7 +43,8 @@ namespace AgGrade
         {
             None,
             Cutting,
-            Filling
+            Filling,
+            Transport
         }
 
         public MainForm
@@ -809,10 +810,14 @@ namespace AgGrade
                 else
                 {
                     BladeCtrl.SetRearToTransportState();
-                    SetRearPanIndicator(PanIndicatorStates.None);
+                    SetRearPanIndicator(PanIndicatorStates.Transport);
                 }
 
                 UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
+            else
+            {
+                SetRearPanIndicator(PanIndicatorStates.None);
             }
         }
 
@@ -832,10 +837,14 @@ namespace AgGrade
                 else
                 {
                     BladeCtrl.SetFrontToTransportState();
-                    SetFrontPanIndicator(PanIndicatorStates.None);
+                    SetFrontPanIndicator(PanIndicatorStates.Transport);
                 }
 
                 UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            }
+            else
+            {
+                SetFrontPanIndicator(PanIndicatorStates.None);
             }
         }
 
@@ -888,10 +897,14 @@ namespace AgGrade
                 else
                 {
                     BladeCtrl.SetRearToTransportState();
-                    SetRearPanIndicator(PanIndicatorStates.None);
+                    SetRearPanIndicator(PanIndicatorStates.Transport);
                 }
 
                 UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
+            else
+            {
+                SetRearPanIndicator(PanIndicatorStates.None);
             }
         }
 
@@ -981,6 +994,10 @@ namespace AgGrade
                     case PanIndicatorStates.Filling:
                         FrontPanIndicator.BackgroundImage = Properties.Resources.fill_48px;
                         break;
+
+                    case PanIndicatorStates.Transport:
+                        FrontPanIndicator.BackgroundImage = Properties.Resources.transport_48px;
+                        break;
                 }
             }
         }
@@ -1025,6 +1042,10 @@ namespace AgGrade
                     case PanIndicatorStates.Filling:
                         RearPanIndicator.BackgroundImage = Properties.Resources.fill_48px;
                         break;
+
+                    case PanIndicatorStates.Transport:
+                        RearPanIndicator.BackgroundImage = Properties.Resources.transport_48px;
+                        break;
                 }
             }
         }
@@ -1053,10 +1074,14 @@ namespace AgGrade
                 else
                 {
                     BladeCtrl.SetFrontToTransportState();
-                    SetFrontPanIndicator(PanIndicatorStates.None);
+                    SetFrontPanIndicator(PanIndicatorStates.Transport);
                 }
 
                 UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            }
+            else
+            {
+                SetFrontPanIndicator(PanIndicatorStates.None);
             }
         }
 
@@ -1573,7 +1598,7 @@ namespace AgGrade
 
             UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
-            SetRearPanIndicator(PanIndicatorStates.None);
+            SetRearPanIndicator(PanIndicatorStates.Transport);
         }
 
         /// <summary>
@@ -1587,7 +1612,7 @@ namespace AgGrade
 
             UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
 
-            SetFrontPanIndicator(PanIndicatorStates.None);
+            SetFrontPanIndicator(PanIndicatorStates.Transport);
         }
 
         /// <summary>
@@ -1602,7 +1627,7 @@ namespace AgGrade
             if (CurrentEquipmentStatus.FrontPan.Mode == PanStatus.BladeMode.Manual)
             {
                 BladeCtrl.SetFrontToTransportState();
-                SetFrontPanIndicator(PanIndicatorStates.None);
+                SetFrontPanIndicator(PanIndicatorStates.Transport);
             }
             // enter manual
             else
@@ -1628,7 +1653,7 @@ namespace AgGrade
             if (CurrentEquipmentStatus.RearPan.Mode == PanStatus.BladeMode.Manual)
             {
                 BladeCtrl.SetRearToTransportState();
-                SetRearPanIndicator(PanIndicatorStates.None);
+                SetRearPanIndicator(PanIndicatorStates.Transport);
             }
             // enter manual
             else
@@ -1655,6 +1680,10 @@ namespace AgGrade
                 Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
                 UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            }
+            else
+            {
+                SetRearPanIndicator(PanIndicatorStates.None);
             }
         }
 
