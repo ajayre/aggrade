@@ -34,7 +34,7 @@ namespace AgGrade
             MainForm Main = new MainForm(Windowed);
             Main.Shown += (sender, e) => { splash?.Close(); };
 
-            Application.Run(new MainForm(Windowed));
+            Application.Run(Main);
         }
     }
 }

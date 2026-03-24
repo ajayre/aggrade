@@ -95,7 +95,7 @@ namespace AgGrade.Controls
         {
             if (FlashState)
             {
-                Indicator = _Indicator;
+                IndicatorPanel.BackColor = Color.Red;
                 FlashState = false;
             }
             else

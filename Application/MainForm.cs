@@ -755,6 +755,9 @@ namespace AgGrade
 
             Controller.OnFrontBladeCommandSent += Controller_OnFrontBladeCommandSent;
 
+            Controller.OnFrontBladeJogged += Controller_OnFrontBladeJogged;
+            Controller.OnRearBladeJogged += Controller_OnRearBladeJogged;
+
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
             StatusBar.SetLedState(StatusBar.Leds.Controller, StatusBar.LedState.Error);
@@ -792,6 +795,62 @@ namespace AgGrade
             // get previous loads in case the application crashed during cutting or filling
             CurrentEquipmentStatus.FrontPan.LoadLCY = Properties.Settings.Default.FrontLoadLCY;
             CurrentEquipmentStatus.RearPan.LoadLCY = Properties.Settings.Default.RearLoadLCY;
+        }
+
+        /// <summary>
+        /// The rear blade has been jogged
+        /// </summary>
+        /// <param name="Up">true if jogged up, false if jogged down</param>
+        private void Controller_OnRearBladeJogged(bool Up)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<bool>(Controller_OnRearBladeJogged), Up);
+                return;
+            }
+
+            CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Manual;
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+
+            SetRearPanIndicator(PanIndicatorStates.None);
+
+            if (Up)
+            {
+                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight + 1);
+            }
+            else
+            {
+                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight - 1);
+            }
+        }
+
+        /// <summary>
+        /// The front blade has been jogged
+        /// </summary>
+        /// <param name="Up">true if jogged up, false if jogged down</param>
+        private void Controller_OnFrontBladeJogged(bool Up)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<bool>(Controller_OnFrontBladeJogged), Up);
+                return;
+            }
+
+            CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Manual;
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+
+            SetFrontPanIndicator(PanIndicatorStates.None);
+
+            if (Up)
+            {
+                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight + 1);
+            }
+            else
+            {
+                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight - 1);
+            }
         }
 
         /// <summary>

@@ -30,6 +30,10 @@ namespace HardwareSim
         PGN_REAR_CUT_VALVE = 0x1001,   // CUTVALVE_MIN -> CUTVALVE_MAX
         PGN_FRONT_ZERO_BLADE_HEIGHT = 0x1002,
         PGN_REAR_ZERO_BLADE_HEIGHT = 0x1003,
+        PGN_FRONT_BLADE_JOG_UP = 0x1004,
+        PGN_FRONT_BLADE_JOG_DOWN = 0x1005,
+        PGN_REAR_BLADE_JOG_UP = 0x1006,
+        PGN_REAR_BLADE_JOG_DOWN = 0x1007,
 
         // blade configuration
         PGN_FRONT_PWM_GAIN_UP = 0x2002,

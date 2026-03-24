@@ -1,4 +1,5 @@
 ﻿using AgGrade.Data;
+using OpenCvSharp;
 using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Text;
@@ -72,6 +73,10 @@ namespace AgGrade.Controller
         public delegate void BladeCommandSent(uint Value);
         public event BladeCommandSent OnFrontBladeCommandSent = null;
         public event BladeCommandSent OnRearBladeCommandSent = null;
+
+        public delegate void BladeJogged(bool Up);
+        public event BladeJogged OnFrontBladeJogged = null;
+        public event BladeJogged OnRearBladeJogged = null;
 
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
@@ -441,6 +446,30 @@ namespace AgGrade.Controller
                                 string Sentence = Encoding.ASCII.GetString(Stat.Data);
                                 ProcessNMEA(Sentence, ref RearFix, ref RearVector, OnRearLocationChanged,
                                     RearScraperIMU, CurrentEquipmentSettings.RearPan.AntennaHeightMm, 0, 0);
+                            }
+                            break;
+
+                        case PGNValues.PGN_FRONT_BLADE_JOG_UP:
+                            {
+                                OnFrontBladeJogged?.Invoke(true);
+                            }
+                            break;
+
+                        case PGNValues.PGN_FRONT_BLADE_JOG_DOWN:
+                            {
+                                OnFrontBladeJogged?.Invoke(false);
+                            }
+                            break;
+
+                        case PGNValues.PGN_REAR_BLADE_JOG_UP:
+                            {
+                                OnRearBladeJogged?.Invoke(true);
+                            }
+                            break;
+
+                        case PGNValues.PGN_REAR_BLADE_JOG_DOWN:
+                            {
+                                OnRearBladeJogged?.Invoke(false);
                             }
                             break;
                     }

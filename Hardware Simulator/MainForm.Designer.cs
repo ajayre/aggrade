@@ -43,6 +43,11 @@
             RearHeightFoundBtn = new Button();
             FrontHeightFoundBtn = new Button();
             GNSSPage = new TabPage();
+            label3 = new Label();
+            FrontJoystickDownBtn = new Button();
+            FrontJoystickUpBtn = new Button();
+            RearToggleDumpingBtn = new Button();
+            FrontToggleDumpingBtn = new Button();
             RearToggleCuttingBtn = new Button();
             FrontToggleCuttingBtn = new Button();
             SteerLeftBtn = new Button();
@@ -54,8 +59,9 @@
             label1 = new Label();
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
-            FrontToggleDumpingBtn = new Button();
-            RearToggleDumpingBtn = new Button();
+            label4 = new Label();
+            RearJoystickDownBtn = new Button();
+            RearJoystickUpBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -216,6 +222,12 @@
             // 
             // GNSSPage
             // 
+            GNSSPage.Controls.Add(label4);
+            GNSSPage.Controls.Add(RearJoystickDownBtn);
+            GNSSPage.Controls.Add(RearJoystickUpBtn);
+            GNSSPage.Controls.Add(label3);
+            GNSSPage.Controls.Add(FrontJoystickDownBtn);
+            GNSSPage.Controls.Add(FrontJoystickUpBtn);
             GNSSPage.Controls.Add(RearToggleDumpingBtn);
             GNSSPage.Controls.Add(FrontToggleDumpingBtn);
             GNSSPage.Controls.Add(RearToggleCuttingBtn);
@@ -236,6 +248,57 @@
             GNSSPage.TabIndex = 1;
             GNSSPage.Text = "GNSS";
             GNSSPage.UseVisualStyleBackColor = true;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Location = new Point(8, 242);
+            label3.Name = "label3";
+            label3.Size = new Size(82, 15);
+            label3.TabIndex = 15;
+            label3.Text = "Front Joystick:";
+            // 
+            // FrontJoystickDownBtn
+            // 
+            FrontJoystickDownBtn.Image = Properties.Resources.down_48px;
+            FrontJoystickDownBtn.Location = new Point(19, 322);
+            FrontJoystickDownBtn.Name = "FrontJoystickDownBtn";
+            FrontJoystickDownBtn.Size = new Size(56, 56);
+            FrontJoystickDownBtn.TabIndex = 14;
+            FrontJoystickDownBtn.UseVisualStyleBackColor = true;
+            FrontJoystickDownBtn.MouseDown += FrontJoystickDownBtn_MouseDown;
+            FrontJoystickDownBtn.MouseUp += FrontJoystickDownBtn_MouseUp;
+            // 
+            // FrontJoystickUpBtn
+            // 
+            FrontJoystickUpBtn.Image = Properties.Resources.up_48px;
+            FrontJoystickUpBtn.Location = new Point(19, 260);
+            FrontJoystickUpBtn.Name = "FrontJoystickUpBtn";
+            FrontJoystickUpBtn.Size = new Size(56, 56);
+            FrontJoystickUpBtn.TabIndex = 13;
+            FrontJoystickUpBtn.UseVisualStyleBackColor = true;
+            FrontJoystickUpBtn.MouseDown += FrontJoystickUpBtn_MouseDown;
+            FrontJoystickUpBtn.MouseUp += FrontJoystickUpBtn_MouseUp;
+            // 
+            // RearToggleDumpingBtn
+            // 
+            RearToggleDumpingBtn.Location = new Point(193, 202);
+            RearToggleDumpingBtn.Name = "RearToggleDumpingBtn";
+            RearToggleDumpingBtn.Size = new Size(148, 23);
+            RearToggleDumpingBtn.TabIndex = 12;
+            RearToggleDumpingBtn.Text = "Rear Toggle Dumping";
+            RearToggleDumpingBtn.UseVisualStyleBackColor = true;
+            RearToggleDumpingBtn.Click += RearToggleDumpingBtn_Click;
+            // 
+            // FrontToggleDumpingBtn
+            // 
+            FrontToggleDumpingBtn.Location = new Point(193, 173);
+            FrontToggleDumpingBtn.Name = "FrontToggleDumpingBtn";
+            FrontToggleDumpingBtn.Size = new Size(148, 23);
+            FrontToggleDumpingBtn.TabIndex = 11;
+            FrontToggleDumpingBtn.Text = "Front Toggle Dumping";
+            FrontToggleDumpingBtn.UseVisualStyleBackColor = true;
+            FrontToggleDumpingBtn.Click += FrontToggleDumpingBtn_Click;
             // 
             // RearToggleCuttingBtn
             // 
@@ -339,25 +402,36 @@
             LatitudeInput.Size = new Size(127, 23);
             LatitudeInput.TabIndex = 0;
             // 
-            // FrontToggleDumpingBtn
+            // label4
             // 
-            FrontToggleDumpingBtn.Location = new Point(193, 173);
-            FrontToggleDumpingBtn.Name = "FrontToggleDumpingBtn";
-            FrontToggleDumpingBtn.Size = new Size(148, 23);
-            FrontToggleDumpingBtn.TabIndex = 11;
-            FrontToggleDumpingBtn.Text = "Front Toggle Dumping";
-            FrontToggleDumpingBtn.UseVisualStyleBackColor = true;
-            FrontToggleDumpingBtn.Click += FrontToggleDumpingBtn_Click;
+            label4.AutoSize = true;
+            label4.Location = new Point(121, 242);
+            label4.Name = "label4";
+            label4.Size = new Size(77, 15);
+            label4.TabIndex = 18;
+            label4.Text = "Rear Joystick:";
             // 
-            // RearToggleDumpingBtn
+            // RearJoystickDownBtn
             // 
-            RearToggleDumpingBtn.Location = new Point(193, 202);
-            RearToggleDumpingBtn.Name = "RearToggleDumpingBtn";
-            RearToggleDumpingBtn.Size = new Size(148, 23);
-            RearToggleDumpingBtn.TabIndex = 12;
-            RearToggleDumpingBtn.Text = "Rear Toggle Dumping";
-            RearToggleDumpingBtn.UseVisualStyleBackColor = true;
-            RearToggleDumpingBtn.Click += RearToggleDumpingBtn_Click;
+            RearJoystickDownBtn.Image = Properties.Resources.down_48px;
+            RearJoystickDownBtn.Location = new Point(132, 322);
+            RearJoystickDownBtn.Name = "RearJoystickDownBtn";
+            RearJoystickDownBtn.Size = new Size(56, 56);
+            RearJoystickDownBtn.TabIndex = 17;
+            RearJoystickDownBtn.UseVisualStyleBackColor = true;
+            RearJoystickDownBtn.MouseDown += RearJoystickDownBtn_MouseDown;
+            RearJoystickDownBtn.MouseUp += RearJoystickDownBtn_MouseUp;
+            // 
+            // RearJoystickUpBtn
+            // 
+            RearJoystickUpBtn.Image = Properties.Resources.up_48px;
+            RearJoystickUpBtn.Location = new Point(132, 260);
+            RearJoystickUpBtn.Name = "RearJoystickUpBtn";
+            RearJoystickUpBtn.Size = new Size(56, 56);
+            RearJoystickUpBtn.TabIndex = 16;
+            RearJoystickUpBtn.UseVisualStyleBackColor = true;
+            RearJoystickUpBtn.MouseDown += RearJoystickUpBtn_MouseDown;
+            RearJoystickUpBtn.MouseUp += RearJoystickUpBtn_MouseUp;
             // 
             // MainForm
             // 
@@ -404,5 +478,11 @@
         private Button RearToggleCuttingBtn;
         private Button RearToggleDumpingBtn;
         private Button FrontToggleDumpingBtn;
+        private Label label3;
+        private Button FrontJoystickDownBtn;
+        private Button FrontJoystickUpBtn;
+        private Label label4;
+        private Button RearJoystickDownBtn;
+        private Button RearJoystickUpBtn;
     }
 }

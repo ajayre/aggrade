@@ -67,10 +67,16 @@ namespace AgGrade.Data
             (
             )
         {
-            if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
+            if ((CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
 
+            // if no field data then raise to max height
+            if (Field == null)
+            {
+                Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
+                CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Raised;
+            }
             // carrying a load
-            if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
+            else if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
             {
                 if (CurrentEquipmentSettings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
                 {
@@ -110,10 +116,16 @@ namespace AgGrade.Data
             (
             )
         {
-            if ((Field == null) || (CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
+            if ((CurrentEquipmentSettings == null) || (CurrentEquipmentStatus == null)) return;
 
+            // if no field data then raise to max height
+            if (Field == null)
+            {
+                Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
+                CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Raised;
+            }
             // carrying a load
-            if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
+            else if (CurrentEquipmentStatus.FrontPan.LoadLCY > 0)
             {
                 if (CurrentEquipmentSettings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float)
                 {
@@ -346,6 +358,40 @@ namespace AgGrade.Data
                     Controller.SetRearCutValve(CurrentEquipmentSettings.RearPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                 }
             }
+        }
+
+        /// <summary>
+        /// Manually sets the height of the front blade
+        /// </summary>
+        /// <param name="HeightMm">New blade height in mm</param>
+        public void SetFrontBladeHeight
+            (
+            int HeightMm
+            )
+        {
+            if (HeightMm > CurrentEquipmentSettings!.FrontPan.MaxHeightMm)
+            {
+                HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MaxHeightMm);
+            }
+
+            Controller.SetFrontCutValve((uint)(BLADE_HEIGHT_GROUND_LEVEL + HeightMm));
+        }
+
+        /// <summary>
+        /// Manually sets the height of the rear blade
+        /// </summary>
+        /// <param name="HeightMm">New blade height in mm</param>
+        public void SetRearBladeHeight
+            (
+            int HeightMm
+            )
+        {
+            if (HeightMm > CurrentEquipmentSettings!.RearPan.MaxHeightMm)
+            {
+                HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MaxHeightMm);
+            }
+
+            Controller.SetRearCutValve((uint)(BLADE_HEIGHT_GROUND_LEVEL + HeightMm));
         }
 
         /// <summary>

@@ -7,8 +7,18 @@ namespace HardwareSim
 {
     public partial class MainForm : Form
     {
+        private enum JogDirections
+        {
+            Up,
+            Down
+        }
+
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
+
+        // time between transmits of jog messages in milliseconds
+        private const int INITIAL_JOG_PERIOD_MS = 250;
+        private const int RECURRING_JOG_PERIOD_MS = 100;
 
         private const double DEFAULT_LATITUDE = 36.446847109944279;
         private const double DEFAULT_LONGITUDE = -90.72286177445794;
@@ -24,6 +34,10 @@ namespace HardwareSim
         private DateTime? LastRxPingTime = null;
         private UInt32 FrontBladeHeight = 200;
         private UInt32 RearBladeHeight = 200;
+        private Timer FrontJogTimer;
+        private Timer RearJogTimer;
+        private JogDirections FrontJogDirection;
+        private JogDirections RearJogDirection;
 
         public MainForm()
         {
@@ -46,6 +60,14 @@ namespace HardwareSim
             PingTimer.Interval = PING_PERIOD_MS;
             PingTimer.Elapsed += PingTimer_Elapsed;
             PingTimer.Start();
+
+            FrontJogTimer = new Timer();
+            FrontJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontJogTimer.Elapsed += FrontJogTimer_Elapsed;
+
+            RearJogTimer = new Timer();
+            RearJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearJogTimer.Elapsed += RearJogTimer_Elapsed;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
@@ -317,6 +339,86 @@ namespace HardwareSim
             byte[] Data = new byte[1];
             Data[0] = (byte)(RearDumping ? 1 : 0);
             SendStatus(new PGNPacket(PGNValues.PGN_REAR_DUMPING, Data));
+        }
+
+        private void FrontJoystickUpBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            FrontJogDirection = JogDirections.Up;
+            FrontJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontJogTimer.Start();
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_JOG_UP));
+        }
+
+        private void FrontJoystickUpBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            FrontJogTimer.Stop();
+        }
+
+        private void FrontJogTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (FrontJogDirection == JogDirections.Up)
+            {
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_JOG_UP));
+            }
+            else
+            {
+                SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_JOG_DOWN));
+            }
+
+            FrontJogTimer.Interval = RECURRING_JOG_PERIOD_MS;
+        }
+
+        private void FrontJoystickDownBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            FrontJogTimer.Stop();
+        }
+
+        private void FrontJoystickDownBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            FrontJogDirection = JogDirections.Down;
+            FrontJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontJogTimer.Start();
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_JOG_DOWN));
+        }
+
+        private void RearJogTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (RearJogDirection == JogDirections.Up)
+            {
+                SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_JOG_UP));
+            }
+            else
+            {
+                SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_JOG_DOWN));
+            }
+
+            RearJogTimer.Interval = RECURRING_JOG_PERIOD_MS;
+        }
+
+        private void RearJoystickUpBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            RearJogTimer.Stop();
+        }
+
+        private void RearJoystickUpBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            RearJogDirection = JogDirections.Up;
+            RearJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearJogTimer.Start();
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_JOG_UP));
+        }
+
+        private void RearJoystickDownBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            RearJogDirection = JogDirections.Down;
+            RearJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearJogTimer.Start();
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_JOG_DOWN));
+        }
+
+        private void RearJoystickDownBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            RearJogTimer.Stop();
         }
     }
 }
