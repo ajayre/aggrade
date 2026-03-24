@@ -1,4 +1,4 @@
-﻿namespace AgGrade.Controls
+namespace AgGrade.Controls
 {
     partial class EquipmentEditor
     {
@@ -54,6 +54,7 @@
             panel1 = new Panel();
             FrontPanEndofFilling = new ComboBox();
             FrontPanEndofFillingLabel = new Label();
+            FrontPanMinHeightLabel = new Label();
             FrontPanMaxHeightLabel = new Label();
             FrontPanStopCuttingWhenFullLabel = new Label();
             FrontPanStopCuttingWhenFull = new ComboBox();
@@ -87,6 +88,8 @@
             FrontPanMaxCutDepthLabel = new Label();
             FrontPanEquippedLabel = new Label();
             FrontPanEquipped = new ComboBox();
+            FrontPanMinHeightUnitsLabel = new Label();
+            FrontPanMinHeight = new NumericInput();
             FrontPanMaxHeightUnitsLabel = new Label();
             FrontPanMaxHeight = new NumericInput();
             FrontPanEndofCutting = new ComboBox();
@@ -106,6 +109,7 @@
             RearPanBladeDistanceToFrontBladeLabel = new Label();
             RearPanAutoCutWhenFrontStopsLabel = new Label();
             RearPanAutoCutWhenFrontStops = new ComboBox();
+            RearPanMinHeightLabel = new Label();
             RearPanMaxHeightLabel = new Label();
             RearPanStopCuttingWhenFullLabel = new Label();
             RearPanStopCuttingWhenFull = new ComboBox();
@@ -139,6 +143,8 @@
             RearPanMaxCutDepth = new NumericInput();
             RearPanMaxCutDepthLabel = new Label();
             RearPanEquipped = new ComboBox();
+            RearPanMinHeightUnitsLabel = new Label();
+            RearPanMinHeight = new NumericInput();
             RearPanMaxHeightUnitsLabel = new Label();
             RearPanMaxHeight = new NumericInput();
             RearPanEndofCutting = new ComboBox();
@@ -400,6 +406,7 @@
             tabPage2.Controls.Add(panel1);
             tabPage2.Controls.Add(FrontPanEndofFilling);
             tabPage2.Controls.Add(FrontPanEndofFillingLabel);
+            tabPage2.Controls.Add(FrontPanMinHeightLabel);
             tabPage2.Controls.Add(FrontPanMaxHeightLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFullLabel);
             tabPage2.Controls.Add(FrontPanStopCuttingWhenFull);
@@ -417,6 +424,8 @@
             tabPage2.Controls.Add(FrontPanMaxCutDepthLabel);
             tabPage2.Controls.Add(FrontPanEquippedLabel);
             tabPage2.Controls.Add(FrontPanEquipped);
+            tabPage2.Controls.Add(FrontPanMinHeightUnitsLabel);
+            tabPage2.Controls.Add(FrontPanMinHeight);
             tabPage2.Controls.Add(FrontPanMaxHeightUnitsLabel);
             tabPage2.Controls.Add(FrontPanMaxHeight);
             tabPage2.Controls.Add(FrontPanEndofCutting);
@@ -463,6 +472,16 @@
             FrontPanEndofFillingLabel.Size = new Size(126, 25);
             FrontPanEndofFillingLabel.TabIndex = 102;
             FrontPanEndofFillingLabel.Text = "End of Filling:";
+            // 
+            // FrontPanMinHeightLabel
+            // 
+            FrontPanMinHeightLabel.AutoSize = true;
+            FrontPanMinHeightLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMinHeightLabel.Location = new Point(489, 20);
+            FrontPanMinHeightLabel.Name = "FrontPanMinHeightLabel";
+            FrontPanMinHeightLabel.Size = new Size(110, 25);
+            FrontPanMinHeightLabel.TabIndex = 105;
+            FrontPanMinHeightLabel.Text = "Min Height:";
             // 
             // FrontPanMaxHeightLabel
             // 
@@ -801,6 +820,25 @@
             FrontPanEquipped.Size = new Size(74, 33);
             FrontPanEquipped.TabIndex = 67;
             // 
+            // FrontPanMinHeightUnitsLabel
+            // 
+            FrontPanMinHeightUnitsLabel.AutoSize = true;
+            FrontPanMinHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            FrontPanMinHeightUnitsLabel.Location = new Point(781, 20);
+            FrontPanMinHeightUnitsLabel.Name = "FrontPanMinHeightUnitsLabel";
+            FrontPanMinHeightUnitsLabel.Size = new Size(44, 25);
+            FrontPanMinHeightUnitsLabel.TabIndex = 74;
+            FrontPanMinHeightUnitsLabel.Text = "mm";
+            // 
+            // FrontPanMinHeight
+            // 
+            FrontPanMinHeight.Location = new Point(608, 12);
+            FrontPanMinHeight.Name = "FrontPanMinHeight";
+            FrontPanMinHeight.Size = new Size(167, 43);
+            FrontPanMinHeight.TabIndex = 73;
+            FrontPanMinHeight.Unsigned = false;
+            FrontPanMinHeight.Value = 0;
+            // 
             // FrontPanMaxHeightUnitsLabel
             // 
             FrontPanMaxHeightUnitsLabel.AutoSize = true;
@@ -910,6 +948,7 @@
             tabPage1.Controls.Add(RearPanBladeDistanceToFrontBladeLabel);
             tabPage1.Controls.Add(RearPanAutoCutWhenFrontStopsLabel);
             tabPage1.Controls.Add(RearPanAutoCutWhenFrontStops);
+            tabPage1.Controls.Add(RearPanMinHeightLabel);
             tabPage1.Controls.Add(RearPanMaxHeightLabel);
             tabPage1.Controls.Add(RearPanStopCuttingWhenFullLabel);
             tabPage1.Controls.Add(RearPanStopCuttingWhenFull);
@@ -927,6 +966,8 @@
             tabPage1.Controls.Add(RearPanMaxCutDepth);
             tabPage1.Controls.Add(RearPanMaxCutDepthLabel);
             tabPage1.Controls.Add(RearPanEquipped);
+            tabPage1.Controls.Add(RearPanMinHeightUnitsLabel);
+            tabPage1.Controls.Add(RearPanMinHeight);
             tabPage1.Controls.Add(RearPanMaxHeightUnitsLabel);
             tabPage1.Controls.Add(RearPanMaxHeight);
             tabPage1.Controls.Add(RearPanEndofCutting);
@@ -1023,6 +1064,16 @@
             RearPanAutoCutWhenFrontStops.Name = "RearPanAutoCutWhenFrontStops";
             RearPanAutoCutWhenFrontStops.Size = new Size(74, 33);
             RearPanAutoCutWhenFrontStops.TabIndex = 105;
+            // 
+            // RearPanMinHeightLabel
+            // 
+            RearPanMinHeightLabel.AutoSize = true;
+            RearPanMinHeightLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMinHeightLabel.Location = new Point(489, 20);
+            RearPanMinHeightLabel.Name = "RearPanMinHeightLabel";
+            RearPanMinHeightLabel.Size = new Size(110, 25);
+            RearPanMinHeightLabel.TabIndex = 113;
+            RearPanMinHeightLabel.Text = "Min Height:";
             // 
             // RearPanMaxHeightLabel
             // 
@@ -1358,6 +1409,25 @@
             RearPanEquipped.Size = new Size(74, 33);
             RearPanEquipped.TabIndex = 85;
             // 
+            // RearPanMinHeightUnitsLabel
+            // 
+            RearPanMinHeightUnitsLabel.AutoSize = true;
+            RearPanMinHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
+            RearPanMinHeightUnitsLabel.Location = new Point(783, 20);
+            RearPanMinHeightUnitsLabel.Name = "RearPanMinHeightUnitsLabel";
+            RearPanMinHeightUnitsLabel.Size = new Size(44, 25);
+            RearPanMinHeightUnitsLabel.TabIndex = 95;
+            RearPanMinHeightUnitsLabel.Text = "mm";
+            // 
+            // RearPanMinHeight
+            // 
+            RearPanMinHeight.Location = new Point(608, 12);
+            RearPanMinHeight.Name = "RearPanMinHeight";
+            RearPanMinHeight.Size = new Size(167, 43);
+            RearPanMinHeight.TabIndex = 94;
+            RearPanMinHeight.Unsigned = false;
+            RearPanMinHeight.Value = 0;
+            // 
             // RearPanMaxHeightUnitsLabel
             // 
             RearPanMaxHeightUnitsLabel.AutoSize = true;
@@ -1596,6 +1666,8 @@
         private Label FrontPanMaxCutDepthLabel;
         private Label FrontPanEquippedLabel;
         private ComboBox FrontPanEquipped;
+        private Label FrontPanMinHeightUnitsLabel;
+        private NumericInput FrontPanMinHeight;
         private Label FrontPanMaxHeightUnitsLabel;
         private NumericInput FrontPanMaxHeight;
         private ComboBox FrontPanEndofCutting;
@@ -1611,6 +1683,8 @@
         private NumericInput RearPanMaxCutDepth;
         private Label RearPanMaxCutDepthLabel;
         private ComboBox RearPanEquipped;
+        private Label RearPanMinHeightUnitsLabel;
+        private NumericInput RearPanMinHeight;
         private Label RearPanMaxHeightUnitsLabel;
         private NumericInput RearPanMaxHeight;
         private ComboBox RearPanEndofCutting;
@@ -1665,7 +1739,9 @@
         private ComboBox FrontPanStopCuttingWhenFull;
         private Label RearPanStopCuttingWhenFullLabel;
         private ComboBox RearPanStopCuttingWhenFull;
+        private Label FrontPanMinHeightLabel;
         private Label FrontPanMaxHeightLabel;
+        private Label RearPanMinHeightLabel;
         private Label RearPanMaxHeightLabel;
         private TabPage tabPage3;
         private Label label7;

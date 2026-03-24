@@ -1,4 +1,4 @@
-﻿using AgGrade.Data;
+using AgGrade.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -79,6 +79,7 @@ namespace AgGrade.Controls
             Settings.FrontPan.EndofFilling = FrontPanEndofFilling.SelectedIndex == 0
                 ? PanSettings.EndOfFillingOptions.Float
                 : PanSettings.EndOfFillingOptions.Raise;
+            Settings.FrontPan.MinHeightMm = FrontPanMinHeight.Value;
             Settings.FrontPan.MaxHeightMm = ValidateUInt(FrontPanMaxHeight.Value, "Front Pan Max Height");
             Settings.FrontPan.MaxCutDepthMm = ValidateUInt(FrontPanMaxCutDepth.Value, "Front Pan Max Cutting Depth");
             Settings.FrontPan.MaxFillDepthMm = ValidateUInt(FrontPanMaxFillDepth.Value, "Front Pan Max Fill Depth");
@@ -95,6 +96,7 @@ namespace AgGrade.Controls
             Settings.RearPan.EndofFilling = RearPanEndofFilling.SelectedIndex == 0
                 ? PanSettings.EndOfFillingOptions.Float
                 : PanSettings.EndOfFillingOptions.Raise;
+            Settings.RearPan.MinHeightMm = RearPanMinHeight.Value;
             Settings.RearPan.MaxHeightMm = ValidateUInt(RearPanMaxHeight.Value, "Rear Pan Max Height");
             Settings.RearPan.MaxCutDepthMm = ValidateUInt(RearPanMaxCutDepth.Value, "Rear Pan Max Cutting Depth");
             Settings.RearPan.MaxFillDepthMm = ValidateUInt(RearPanMaxFillDepth.Value, "Rear Pan Max Fill Depth");
@@ -153,6 +155,7 @@ namespace AgGrade.Controls
             FrontPanWidth.Value = (int)Settings.FrontPan.WidthMm;
             FrontPanEndofCutting.SelectedIndex = Settings.FrontPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             FrontPanEndofFilling.SelectedIndex = Settings.FrontPan.EndofFilling == PanSettings.EndOfFillingOptions.Float ? 0 : 1;
+            FrontPanMinHeight.Value = Settings.FrontPan.MinHeightMm;
             FrontPanMaxHeight.Value = (int)Settings.FrontPan.MaxHeightMm;
             FrontPanMaxCutDepth.Value = (int)Settings.FrontPan.MaxCutDepthMm;
             FrontPanMaxFillDepth.Value = (int)Settings.FrontPan.MaxFillDepthMm;
@@ -167,6 +170,7 @@ namespace AgGrade.Controls
             RearPanWidth.Value = (int)Settings.RearPan.WidthMm;
             RearPanEndofCutting.SelectedIndex = Settings.RearPan.EndofCutting == PanSettings.EndOfCuttingOptions.Float ? 0 : 1;
             RearPanEndofFilling.SelectedIndex = Settings.RearPan.EndofFilling == PanSettings.EndOfFillingOptions.Float ? 0 : 1;
+            RearPanMinHeight.Value = Settings.RearPan.MinHeightMm;
             RearPanMaxHeight.Value = (int)Settings.RearPan.MaxHeightMm;
             RearPanMaxCutDepth.Value = (int)Settings.RearPan.MaxCutDepthMm;
             RearPanMaxFillDepth.Value = (int)Settings.RearPan.MaxFillDepthMm;
@@ -217,6 +221,7 @@ namespace AgGrade.Controls
             FrontPanWidth.Enabled = isEquipped;
             FrontPanEndofCutting.Enabled = isEquipped;
             FrontPanEndofFilling.Enabled = isEquipped;
+            FrontPanMinHeight.Enabled = isEquipped;
             FrontPanMaxHeight.Enabled = isEquipped;
             FrontPanMaxCutDepth.Enabled = isEquipped;
             FrontPanMaxFillDepth.Enabled = isEquipped;
@@ -230,6 +235,8 @@ namespace AgGrade.Controls
             FrontPanWidthLabel.Enabled = isEquipped;
             FrontPanEndofCuttingLabel.Enabled = isEquipped;
             FrontPanEndofFillingLabel.Enabled = isEquipped;
+            FrontPanMinHeightUnitsLabel.Enabled = isEquipped;
+            FrontPanMinHeightLabel.Enabled = isEquipped;
             FrontPanMaxHeightUnitsLabel.Enabled = isEquipped;
             FrontPanMaxCutDepthLabel.Enabled = isEquipped;
             FrontPanMaxFillDepthLabel.Enabled = isEquipped;
@@ -277,6 +284,7 @@ namespace AgGrade.Controls
             RearPanWidth.Enabled = isEquipped;
             RearPanEndofCutting.Enabled = isEquipped;
             RearPanEndofFilling.Enabled = isEquipped;
+            RearPanMinHeight.Enabled = isEquipped;
             RearPanMaxHeight.Enabled = isEquipped;
             RearPanMaxCutDepth.Enabled = isEquipped;
             RearPanMaxFillDepth.Enabled = isEquipped;
@@ -292,6 +300,8 @@ namespace AgGrade.Controls
             RearPanWidthLabel.Enabled = isEquipped;
             RearPanEndofCuttingLabel.Enabled = isEquipped;
             RearPanEndofFillingLabel.Enabled = isEquipped;
+            RearPanMinHeightUnitsLabel.Enabled = isEquipped;
+            RearPanMinHeightLabel.Enabled = isEquipped;
             RearPanMaxHeightUnitsLabel.Enabled = isEquipped;
             RearPanMaxCutDepthLabel.Enabled = isEquipped;
             RearPanMaxFillDepthLabel.Enabled = isEquipped;
