@@ -369,6 +369,11 @@ namespace AgGrade.Data
             int HeightMm
             )
         {
+            if (HeightMm < CurrentEquipmentSettings!.FrontPan.MinHeightMm)
+            {
+                HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MinHeightMm);
+            }
+
             if (HeightMm > CurrentEquipmentSettings!.FrontPan.MaxHeightMm)
             {
                 HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MaxHeightMm);
@@ -386,6 +391,11 @@ namespace AgGrade.Data
             int HeightMm
             )
         {
+            if (HeightMm < CurrentEquipmentSettings!.RearPan.MinHeightMm)
+            {
+                HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MinHeightMm);
+            }
+
             if (HeightMm > CurrentEquipmentSettings!.RearPan.MaxHeightMm)
             {
                 HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MaxHeightMm);

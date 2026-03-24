@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,6 +29,7 @@ namespace AgGrade.Data
         public uint WidthMm;
         public EndOfCuttingOptions EndofCutting;
         public EndOfFillingOptions EndofFilling;
+        public int MinHeightMm;
         public uint MaxHeightMm;
         public uint MaxCutDepthMm;
         public uint MaxFillDepthMm;
@@ -46,6 +47,7 @@ namespace AgGrade.Data
             WidthMm = 0;
             EndofCutting = EndOfCuttingOptions.Raise;
             EndofFilling = EndOfFillingOptions.Raise;
+            MinHeightMm = -61;
             MaxHeightMm = 80;
             MaxCutDepthMm = 61;
             MaxFillDepthMm = 152;
@@ -65,6 +67,7 @@ namespace AgGrade.Data
                 new XElement("WidthMm", WidthMm),
                 new XElement("EndofCutting", EndofCutting.ToString()),
                 new XElement("EndofFilling", EndofFilling.ToString()),
+                new XElement("MinHeightMm", MinHeightMm),
                 new XElement("MaxHeightMm", MaxHeightMm),
                 new XElement("MaxCutDepthMm", MaxCutDepthMm),
                 new XElement("MaxFillDepthMm", MaxFillDepthMm),
@@ -124,6 +127,13 @@ namespace AgGrade.Data
                 {
                     EndofFilling = endOfFilling;
                 }
+            }
+
+            // Parse MinHeightMm
+            XElement? minHeightElement = xml.Element("MinHeightMm");
+            if (minHeightElement != null && int.TryParse(minHeightElement.Value, out int minHeight))
+            {
+                MinHeightMm = minHeight;
             }
 
             // Parse MaxHeightMm
