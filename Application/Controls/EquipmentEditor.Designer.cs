@@ -477,7 +477,7 @@ namespace AgGrade.Controls
             // 
             FrontPanMinHeightLabel.AutoSize = true;
             FrontPanMinHeightLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMinHeightLabel.Location = new Point(489, 20);
+            FrontPanMinHeightLabel.Location = new Point(117, 239);
             FrontPanMinHeightLabel.Name = "FrontPanMinHeightLabel";
             FrontPanMinHeightLabel.Size = new Size(110, 25);
             FrontPanMinHeightLabel.TabIndex = 105;
@@ -547,7 +547,7 @@ namespace AgGrade.Controls
             // 
             FrontPanCapacityUnitsLabel.AutoSize = true;
             FrontPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanCapacityUnitsLabel.Location = new Point(412, 239);
+            FrontPanCapacityUnitsLabel.Location = new Point(784, 286);
             FrontPanCapacityUnitsLabel.Name = "FrontPanCapacityUnitsLabel";
             FrontPanCapacityUnitsLabel.Size = new Size(35, 25);
             FrontPanCapacityUnitsLabel.TabIndex = 95;
@@ -555,7 +555,7 @@ namespace AgGrade.Controls
             // 
             // FrontPanCapacity
             // 
-            FrontPanCapacity.Location = new Point(236, 231);
+            FrontPanCapacity.Location = new Point(608, 278);
             FrontPanCapacity.Name = "FrontPanCapacity";
             FrontPanCapacity.Size = new Size(167, 43);
             FrontPanCapacity.TabIndex = 94;
@@ -566,7 +566,7 @@ namespace AgGrade.Controls
             // 
             FrontPanCapacityLabel.AutoSize = true;
             FrontPanCapacityLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanCapacityLabel.Location = new Point(142, 239);
+            FrontPanCapacityLabel.Location = new Point(514, 286);
             FrontPanCapacityLabel.Name = "FrontPanCapacityLabel";
             FrontPanCapacityLabel.Size = new Size(88, 25);
             FrontPanCapacityLabel.TabIndex = 93;
@@ -774,7 +774,7 @@ namespace AgGrade.Controls
             // 
             FrontPanMaxCutDepthUnitsLabel.AutoSize = true;
             FrontPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMaxCutDepthUnitsLabel.Location = new Point(412, 190);
+            FrontPanMaxCutDepthUnitsLabel.Location = new Point(410, 190);
             FrontPanMaxCutDepthUnitsLabel.Name = "FrontPanMaxCutDepthUnitsLabel";
             FrontPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
             FrontPanMaxCutDepthUnitsLabel.TabIndex = 71;
@@ -824,7 +824,7 @@ namespace AgGrade.Controls
             // 
             FrontPanMinHeightUnitsLabel.AutoSize = true;
             FrontPanMinHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            FrontPanMinHeightUnitsLabel.Location = new Point(781, 20);
+            FrontPanMinHeightUnitsLabel.Location = new Point(409, 239);
             FrontPanMinHeightUnitsLabel.Name = "FrontPanMinHeightUnitsLabel";
             FrontPanMinHeightUnitsLabel.Size = new Size(44, 25);
             FrontPanMinHeightUnitsLabel.TabIndex = 74;
@@ -832,7 +832,7 @@ namespace AgGrade.Controls
             // 
             // FrontPanMinHeight
             // 
-            FrontPanMinHeight.Location = new Point(608, 12);
+            FrontPanMinHeight.Location = new Point(236, 231);
             FrontPanMinHeight.Name = "FrontPanMinHeight";
             FrontPanMinHeight.Size = new Size(167, 43);
             FrontPanMinHeight.TabIndex = 73;
@@ -1019,7 +1019,7 @@ namespace AgGrade.Controls
             // 
             label9.AutoSize = true;
             label9.Font = new Font("Segoe UI", 14F);
-            label9.Location = new Point(411, 327);
+            label9.Location = new Point(784, 336);
             label9.Name = "label9";
             label9.Size = new Size(44, 25);
             label9.TabIndex = 109;
@@ -1027,7 +1027,7 @@ namespace AgGrade.Controls
             // 
             // RearPanBladeDistanceToFrontBlade
             // 
-            RearPanBladeDistanceToFrontBlade.Location = new Point(236, 319);
+            RearPanBladeDistanceToFrontBlade.Location = new Point(609, 328);
             RearPanBladeDistanceToFrontBlade.Name = "RearPanBladeDistanceToFrontBlade";
             RearPanBladeDistanceToFrontBlade.Size = new Size(167, 43);
             RearPanBladeDistanceToFrontBlade.TabIndex = 108;
@@ -1038,7 +1038,7 @@ namespace AgGrade.Controls
             // 
             RearPanBladeDistanceToFrontBladeLabel.AutoSize = true;
             RearPanBladeDistanceToFrontBladeLabel.Font = new Font("Segoe UI", 14F);
-            RearPanBladeDistanceToFrontBladeLabel.Location = new Point(7, 327);
+            RearPanBladeDistanceToFrontBladeLabel.Location = new Point(380, 336);
             RearPanBladeDistanceToFrontBladeLabel.Name = "RearPanBladeDistanceToFrontBladeLabel";
             RearPanBladeDistanceToFrontBladeLabel.Size = new Size(223, 25);
             RearPanBladeDistanceToFrontBladeLabel.TabIndex = 107;
@@ -1048,11 +1048,11 @@ namespace AgGrade.Controls
             // 
             RearPanAutoCutWhenFrontStopsLabel.AutoSize = true;
             RearPanAutoCutWhenFrontStopsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanAutoCutWhenFrontStopsLabel.Location = new Point(361, 283);
+            RearPanAutoCutWhenFrontStopsLabel.Location = new Point(12, 332);
             RearPanAutoCutWhenFrontStopsLabel.Name = "RearPanAutoCutWhenFrontStopsLabel";
-            RearPanAutoCutWhenFrontStopsLabel.Size = new Size(244, 25);
+            RearPanAutoCutWhenFrontStopsLabel.Size = new Size(219, 25);
             RearPanAutoCutWhenFrontStopsLabel.TabIndex = 106;
-            RearPanAutoCutWhenFrontStopsLabel.Text = "Auto Cut When Front Stops:";
+            RearPanAutoCutWhenFrontStopsLabel.Text = "Auto Cut W/ Front Stops:";
             // 
             // RearPanAutoCutWhenFrontStops
             // 
@@ -1060,7 +1060,7 @@ namespace AgGrade.Controls
             RearPanAutoCutWhenFrontStops.Font = new Font("Segoe UI", 14F);
             RearPanAutoCutWhenFrontStops.FormattingEnabled = true;
             RearPanAutoCutWhenFrontStops.Items.AddRange(new object[] { "No", "Yes" });
-            RearPanAutoCutWhenFrontStops.Location = new Point(611, 280);
+            RearPanAutoCutWhenFrontStops.Location = new Point(240, 329);
             RearPanAutoCutWhenFrontStops.Name = "RearPanAutoCutWhenFrontStops";
             RearPanAutoCutWhenFrontStops.Size = new Size(74, 33);
             RearPanAutoCutWhenFrontStops.TabIndex = 105;
@@ -1069,7 +1069,7 @@ namespace AgGrade.Controls
             // 
             RearPanMinHeightLabel.AutoSize = true;
             RearPanMinHeightLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMinHeightLabel.Location = new Point(489, 20);
+            RearPanMinHeightLabel.Location = new Point(117, 239);
             RearPanMinHeightLabel.Name = "RearPanMinHeightLabel";
             RearPanMinHeightLabel.Size = new Size(110, 25);
             RearPanMinHeightLabel.TabIndex = 113;
@@ -1110,7 +1110,7 @@ namespace AgGrade.Controls
             // 
             RearPanMaxFillDepthUnitsLabel.AutoSize = true;
             RearPanMaxFillDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxFillDepthUnitsLabel.Location = new Point(784, 190);
+            RearPanMaxFillDepthUnitsLabel.Location = new Point(782, 190);
             RearPanMaxFillDepthUnitsLabel.Name = "RearPanMaxFillDepthUnitsLabel";
             RearPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
             RearPanMaxFillDepthUnitsLabel.TabIndex = 101;
@@ -1139,7 +1139,7 @@ namespace AgGrade.Controls
             // 
             RearPanCapacityUnitsLabel.AutoSize = true;
             RearPanCapacityUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanCapacityUnitsLabel.Location = new Point(412, 239);
+            RearPanCapacityUnitsLabel.Location = new Point(785, 287);
             RearPanCapacityUnitsLabel.Name = "RearPanCapacityUnitsLabel";
             RearPanCapacityUnitsLabel.Size = new Size(35, 25);
             RearPanCapacityUnitsLabel.TabIndex = 98;
@@ -1147,7 +1147,7 @@ namespace AgGrade.Controls
             // 
             // RearPanCapacity
             // 
-            RearPanCapacity.Location = new Point(236, 231);
+            RearPanCapacity.Location = new Point(609, 279);
             RearPanCapacity.Name = "RearPanCapacity";
             RearPanCapacity.Size = new Size(167, 43);
             RearPanCapacity.TabIndex = 97;
@@ -1158,7 +1158,7 @@ namespace AgGrade.Controls
             // 
             RearPanCapacityLabel.AutoSize = true;
             RearPanCapacityLabel.Font = new Font("Segoe UI", 14F);
-            RearPanCapacityLabel.Location = new Point(142, 239);
+            RearPanCapacityLabel.Location = new Point(515, 287);
             RearPanCapacityLabel.Name = "RearPanCapacityLabel";
             RearPanCapacityLabel.Size = new Size(88, 25);
             RearPanCapacityLabel.TabIndex = 96;
@@ -1363,7 +1363,7 @@ namespace AgGrade.Controls
             // 
             RearPanMaxCutDepthUnitsLabel.AutoSize = true;
             RearPanMaxCutDepthUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxCutDepthUnitsLabel.Location = new Point(412, 190);
+            RearPanMaxCutDepthUnitsLabel.Location = new Point(410, 190);
             RearPanMaxCutDepthUnitsLabel.Name = "RearPanMaxCutDepthUnitsLabel";
             RearPanMaxCutDepthUnitsLabel.Size = new Size(44, 25);
             RearPanMaxCutDepthUnitsLabel.TabIndex = 89;
@@ -1413,7 +1413,7 @@ namespace AgGrade.Controls
             // 
             RearPanMinHeightUnitsLabel.AutoSize = true;
             RearPanMinHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMinHeightUnitsLabel.Location = new Point(783, 20);
+            RearPanMinHeightUnitsLabel.Location = new Point(409, 239);
             RearPanMinHeightUnitsLabel.Name = "RearPanMinHeightUnitsLabel";
             RearPanMinHeightUnitsLabel.Size = new Size(44, 25);
             RearPanMinHeightUnitsLabel.TabIndex = 95;
@@ -1421,7 +1421,7 @@ namespace AgGrade.Controls
             // 
             // RearPanMinHeight
             // 
-            RearPanMinHeight.Location = new Point(608, 12);
+            RearPanMinHeight.Location = new Point(236, 231);
             RearPanMinHeight.Name = "RearPanMinHeight";
             RearPanMinHeight.Size = new Size(167, 43);
             RearPanMinHeight.TabIndex = 94;
@@ -1432,7 +1432,7 @@ namespace AgGrade.Controls
             // 
             RearPanMaxHeightUnitsLabel.AutoSize = true;
             RearPanMaxHeightUnitsLabel.Font = new Font("Segoe UI", 14F);
-            RearPanMaxHeightUnitsLabel.Location = new Point(783, 239);
+            RearPanMaxHeightUnitsLabel.Location = new Point(781, 239);
             RearPanMaxHeightUnitsLabel.Name = "RearPanMaxHeightUnitsLabel";
             RearPanMaxHeightUnitsLabel.Size = new Size(44, 25);
             RearPanMaxHeightUnitsLabel.TabIndex = 84;
