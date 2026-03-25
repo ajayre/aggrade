@@ -28,6 +28,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\CalibrateBladeHeightWizard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\FieldChooserPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

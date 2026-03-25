@@ -159,7 +159,10 @@ namespace AgGrade.Controls
             object Sender
             )
         {
-
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Front Blade Height";
+            Wizard!.Content = new CalibrateBladeHeightWizard();
         }
 
         /// <summary>
@@ -171,7 +174,10 @@ namespace AgGrade.Controls
             object Sender
             )
         {
-
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Rear Blade Height";
+            Wizard!.Content = new CalibrateBladeHeightWizard();
         }
 
         /// <summary>
