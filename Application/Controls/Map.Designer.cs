@@ -278,6 +278,8 @@
             Controls.Add(panel1);
             Name = "Map";
             Size = new Size(881, 599);
+            Load += Map_Load;
+            VisibleChanged += Map_VisibleChanged;
             ((System.ComponentModel.ISupportInitialize)MapCanvas).EndInit();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();

@@ -16,6 +16,9 @@ namespace AgGrade.Controls
     {
         public event Action OnApplySettings = null;
 
+        public Color FrontPanColor = Color.Black;
+        public Color RearPanColor = Color.Black;
+
         public EquipmentEditor()
         {
             InitializeComponent();
@@ -32,6 +35,9 @@ namespace AgGrade.Controls
             // Update UI state when form loads
             UpdateFrontPanUI();
             UpdateRearPanUI();
+
+            FrontPanBanner.BackColor = FrontPanColor;
+            RearPanBanner.BackColor = RearPanColor;
         }
 
         /// <summary>

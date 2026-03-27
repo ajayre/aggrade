@@ -20,6 +20,9 @@ namespace AgGrade
         // how often to send fixes to the field
         private const int FIELD_FIX_PERIOD_MS = 250;
 
+        static Color FRONT_PAN_COLOR = Color.RoyalBlue;
+        static Color REAR_PAN_COLOR = Color.DarkGoldenrod;
+
         private AppSettings CurrentAppSettings;
         private EquipmentSettings CurrentEquipmentSettings;
         private EquipmentStatus CurrentEquipmentStatus;
@@ -35,6 +38,7 @@ namespace AgGrade
         private FieldUpdater FieldUpdater;
         private string FieldDataFolder;
         private Timer FieldFixTimer;
+        private bool EnableBladeLimits;
 
         /// <summary>
         /// Possible states for the pan indicators
@@ -123,6 +127,11 @@ namespace AgGrade
             FieldFixTimer = new Timer();
             FieldFixTimer.Interval = FIELD_FIX_PERIOD_MS;
             FieldFixTimer.Tick += FieldFixTimer_Tick;
+
+            FrontPanIndicator.BackColor = FRONT_PAN_COLOR;
+            RearPanIndicator.BackColor = REAR_PAN_COLOR;
+
+            EnableBladeLimits = true;
 
             ShowMap();
         }
@@ -341,6 +350,8 @@ namespace AgGrade
             ClosePage();
 
             EquipmentEditor equipmentEditor = new EquipmentEditor();
+            equipmentEditor.FrontPanColor = FRONT_PAN_COLOR;
+            equipmentEditor.RearPanColor = REAR_PAN_COLOR;
             equipmentEditor.Parent = ContentPanel;
             equipmentEditor.Dock = DockStyle.Fill;
             equipmentEditor.OnApplySettings += () => { ApplyEquipmentSettings(equipmentEditor); };
@@ -385,9 +396,30 @@ namespace AgGrade
             calibrationPage.CurrentEquipmentSettings = CurrentEquipmentSettings;
             calibrationPage.CurrentField = CurrentField;
             calibrationPage.CurrentEquipmentStatus = CurrentEquipmentStatus;
+            calibrationPage.Controller = Controller;
+            calibrationPage.FrontPanColor = FRONT_PAN_COLOR;
+            calibrationPage.RearPanColor = REAR_PAN_COLOR;
             calibrationPage.Parent = ContentPanel;
             calibrationPage.Dock = DockStyle.Fill;
+            calibrationPage.OnEnableBladeLimits += CalibrationPage_OnEnableBladeLimits;
+            calibrationPage.OnDisableBladeLimits += CalibrationPage_OnDisableBladeLimits;
             calibrationPage.Show();
+        }
+
+        /// <summary>
+        /// Called when the calibration page wants to disable the blade limits
+        /// </summary>
+        private void CalibrationPage_OnDisableBladeLimits()
+        {
+            EnableBladeLimits = false;
+        }
+
+        /// <summary>
+        /// Called when the calibration page wants to enable the blade limits
+        /// </summary>
+        private void CalibrationPage_OnEnableBladeLimits()
+        {
+            EnableBladeLimits = true;
         }
 
         /// <summary>
@@ -434,6 +466,8 @@ namespace AgGrade
             Map map = new Map();
             map.Parent = ContentPanel;
             map.Dock = DockStyle.Fill;
+            map.FrontPanColor = FRONT_PAN_COLOR;
+            map.RearPanColor = REAR_PAN_COLOR;
             map.SetEquipmentSettings(CurrentEquipmentSettings);
             map.SetApplicationSettings(CurrentAppSettings);
             map.SetEquipmentStatus(CurrentEquipmentStatus);
@@ -623,6 +657,14 @@ namespace AgGrade
                 {
                     // remove event handlers
                     (Ctrl as Map)!.OnResetPanLoad -= Map_OnResetPanLoad;
+                }
+                else if (Ctrl is CalibrationPage)
+                {
+                    // remove event handlers
+                    (Ctrl as CalibrationPage)!.OnEnableBladeLimits -= CalibrationPage_OnEnableBladeLimits;
+                    (Ctrl as CalibrationPage)!.OnDisableBladeLimits -= CalibrationPage_OnDisableBladeLimits;
+
+                    CalibrationPage_OnEnableBladeLimits();
                 }
             }
 
@@ -817,11 +859,11 @@ namespace AgGrade
 
             if (Up)
             {
-                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight + 1);
+                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight + 1, EnableBladeLimits);
             }
             else
             {
-                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight - 1);
+                BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight - 1, EnableBladeLimits);
             }
         }
 
@@ -845,11 +887,11 @@ namespace AgGrade
 
             if (Up)
             {
-                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight + 1);
+                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight + 1, EnableBladeLimits);
             }
             else
             {
-                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight - 1);
+                BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight - 1, EnableBladeLimits);
             }
         }
 

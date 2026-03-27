@@ -364,19 +364,24 @@ namespace AgGrade.Data
         /// Manually sets the height of the front blade
         /// </summary>
         /// <param name="HeightMm">New blade height in mm</param>
+        /// <param name="EnforceLimits">true to enforce blade limits, false to ignore limits</param>
         public void SetFrontBladeHeight
             (
-            int HeightMm
+            int HeightMm,
+            bool EnforceLimits = true
             )
         {
-            if (HeightMm < CurrentEquipmentSettings!.FrontPan.MinHeightMm)
+            if (EnforceLimits)
             {
-                HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MinHeightMm);
-            }
+                if (HeightMm < CurrentEquipmentSettings!.FrontPan.MinHeightMm)
+                {
+                    HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MinHeightMm);
+                }
 
-            if (HeightMm > CurrentEquipmentSettings!.FrontPan.MaxHeightMm)
-            {
-                HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MaxHeightMm);
+                if (HeightMm > CurrentEquipmentSettings!.FrontPan.MaxHeightMm)
+                {
+                    HeightMm = (int)(CurrentEquipmentSettings!.FrontPan.MaxHeightMm);
+                }
             }
 
             Controller.SetFrontCutValve((uint)(BLADE_HEIGHT_GROUND_LEVEL + HeightMm));
@@ -386,19 +391,24 @@ namespace AgGrade.Data
         /// Manually sets the height of the rear blade
         /// </summary>
         /// <param name="HeightMm">New blade height in mm</param>
+        /// <param name="EnforceLimits">true to enforce blade limits, false to ignore limits</param>
         public void SetRearBladeHeight
             (
-            int HeightMm
+            int HeightMm,
+            bool EnforceLimits = true
             )
         {
-            if (HeightMm < CurrentEquipmentSettings!.RearPan.MinHeightMm)
+            if (EnforceLimits)
             {
-                HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MinHeightMm);
-            }
+                if (HeightMm < CurrentEquipmentSettings!.RearPan.MinHeightMm)
+                {
+                    HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MinHeightMm);
+                }
 
-            if (HeightMm > CurrentEquipmentSettings!.RearPan.MaxHeightMm)
-            {
-                HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MaxHeightMm);
+                if (HeightMm > CurrentEquipmentSettings!.RearPan.MaxHeightMm)
+                {
+                    HeightMm = (int)(CurrentEquipmentSettings!.RearPan.MaxHeightMm);
+                }
             }
 
             Controller.SetRearCutValve((uint)(BLADE_HEIGHT_GROUND_LEVEL + HeightMm));

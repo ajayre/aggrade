@@ -51,7 +51,7 @@ namespace AgGrade.Controls
             TractorAntennaHeight = new NumericInput();
             label1 = new Label();
             tabPage2 = new TabPage();
-            panel1 = new Panel();
+            FrontPanBanner = new Panel();
             FrontPanEndofFilling = new ComboBox();
             FrontPanEndofFillingLabel = new Label();
             FrontPanMinHeightLabel = new Label();
@@ -101,7 +101,7 @@ namespace AgGrade.Controls
             FrontPanAntennaHeight = new NumericInput();
             FrontPanAntennaHeightLabel = new Label();
             tabPage1 = new TabPage();
-            panel2 = new Panel();
+            RearPanBanner = new Panel();
             RearPanEndofFilling = new ComboBox();
             RearPanEndofFillingLabel = new Label();
             label9 = new Label();
@@ -403,7 +403,7 @@ namespace AgGrade.Controls
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
-            tabPage2.Controls.Add(panel1);
+            tabPage2.Controls.Add(FrontPanBanner);
             tabPage2.Controls.Add(FrontPanEndofFilling);
             tabPage2.Controls.Add(FrontPanEndofFillingLabel);
             tabPage2.Controls.Add(FrontPanMinHeightLabel);
@@ -443,14 +443,14 @@ namespace AgGrade.Controls
             tabPage2.TabIndex = 1;
             tabPage2.Text = "Front Pan";
             // 
-            // panel1
+            // FrontPanBanner
             // 
-            panel1.BackColor = Color.RoyalBlue;
-            panel1.Dock = DockStyle.Top;
-            panel1.Location = new Point(3, 3);
-            panel1.Name = "panel1";
-            panel1.Size = new Size(976, 7);
-            panel1.TabIndex = 104;
+            FrontPanBanner.BackColor = Color.RoyalBlue;
+            FrontPanBanner.Dock = DockStyle.Top;
+            FrontPanBanner.Location = new Point(3, 3);
+            FrontPanBanner.Name = "FrontPanBanner";
+            FrontPanBanner.Size = new Size(976, 7);
+            FrontPanBanner.TabIndex = 104;
             // 
             // FrontPanEndofFilling
             // 
@@ -940,7 +940,7 @@ namespace AgGrade.Controls
             // tabPage1
             // 
             tabPage1.BackColor = SystemColors.Control;
-            tabPage1.Controls.Add(panel2);
+            tabPage1.Controls.Add(RearPanBanner);
             tabPage1.Controls.Add(RearPanEndofFilling);
             tabPage1.Controls.Add(RearPanEndofFillingLabel);
             tabPage1.Controls.Add(label9);
@@ -985,14 +985,14 @@ namespace AgGrade.Controls
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
             // 
-            // panel2
+            // RearPanBanner
             // 
-            panel2.BackColor = Color.DarkGoldenrod;
-            panel2.Dock = DockStyle.Top;
-            panel2.Location = new Point(3, 3);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(976, 7);
-            panel2.TabIndex = 112;
+            RearPanBanner.BackColor = Color.DarkGoldenrod;
+            RearPanBanner.Dock = DockStyle.Top;
+            RearPanBanner.Location = new Point(3, 3);
+            RearPanBanner.Name = "RearPanBanner";
+            RearPanBanner.Size = new Size(976, 7);
+            RearPanBanner.TabIndex = 112;
             // 
             // RearPanEndofFilling
             // 
@@ -1756,8 +1756,8 @@ namespace AgGrade.Controls
         private Label FrontPanEndofFillingLabel;
         private ComboBox RearPanEndofFilling;
         private Label RearPanEndofFillingLabel;
-        private Panel panel1;
-        private Panel panel2;
+        private Panel FrontPanBanner;
+        private Panel RearPanBanner;
         private Label label17;
         private NumericInputF SoilSwellFactor;
     }

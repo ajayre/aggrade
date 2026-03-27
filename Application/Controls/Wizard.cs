@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AgGrade.Data;
+using AgGrade.Controller;
 
 namespace AgGrade.Controls
 {
@@ -24,6 +25,7 @@ namespace AgGrade.Controls
         public event Action<object> ExitWizard = null;
         public EquipmentStatus? CurrentEquipmentStatus = null;
         public EquipmentSettings? CurrentEquipmentSettings = null;
+        public OGController? Controller = null;
 
         private WizardControl? _Content;
         public WizardControl? Content
@@ -72,6 +74,7 @@ namespace AgGrade.Controls
                 _Content.ExitWizard += _Content_ExitWizard;
                 _Content.CurrentEquipmentStatus = CurrentEquipmentStatus;
                 _Content.CurrentEquipmentSettings = CurrentEquipmentSettings;
+                _Content.Controller = Controller;
                 _Content.Activated();
                 WizardBody.Controls.Add(_Content);
             }

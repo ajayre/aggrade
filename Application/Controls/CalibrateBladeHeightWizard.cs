@@ -17,8 +17,25 @@ namespace AgGrade.Controls
         private bool MinPositionValid = false;
         private bool MaxPositionValid = false;
 
-        public CalibrateBladeHeightWizard()
+        public enum Blades
         {
+            Front,
+            Rear
+        }
+
+        public Blades Blade = Blades.Front;
+
+        public Color PanColor = Color.Black;
+
+        public CalibrateBladeHeightWizard
+            (
+            Blades Blade,
+            Color PanColor
+            )
+        {
+            this.Blade = Blade;
+            this.PanColor = PanColor;
+
             InitializeComponent();
         }
 
@@ -65,14 +82,24 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void CaptureZeroBtn_Click(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus != null)
+            if (Controller != null)
             {
                 ZeroPositionValid = true;
+
+                if (Blade == Blades.Front)
+                {
+                    Controller.FrontBladeAtZero();
+                }
+                else
+                {
+                    Controller.RearBladeAtZero();
+                }
             }
         }
 
         private void CalibrateBladeHeightWizard_Load(object sender, EventArgs e)
         {
+            RefreshTimer.Start();
         }
 
         private void ErrorMessage_VisibleChanged(object sender, EventArgs e)
@@ -104,6 +131,8 @@ namespace AgGrade.Controls
             }
 
             CaptureZeroBtn.Enabled = CanExecute;
+            CaptureMaxBtn.Enabled = CanExecute;
+            CaptureMinBtn.Enabled = CanExecute;
         }
 
         /// <summary>
@@ -114,6 +143,10 @@ namespace AgGrade.Controls
             )
         {
             ValidateStatusAndSettings();
+
+            Height1.ForeColor = PanColor;
+            Height2.ForeColor = PanColor;
+            Height3.ForeColor = PanColor;
         }
 
         /// <summary>
@@ -124,6 +157,66 @@ namespace AgGrade.Controls
         private void ReturnBtn_Click(object sender, EventArgs e)
         {
             Exit();
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to set the minimum height 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CaptureMinBtn_Click(object sender, EventArgs e)
+        {
+            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentSettings != null))
+            {
+                if (Blade == Blades.Front)
+                {
+                    CurrentEquipmentSettings.FrontPan.MinHeightMm = CurrentEquipmentStatus.FrontPan.BladeHeight;
+                }
+                else
+                {
+                    CurrentEquipmentSettings.RearPan.MinHeightMm = CurrentEquipmentStatus.RearPan.BladeHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to set the maximum height
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CaptureMaxBtn_Click(object sender, EventArgs e)
+        {
+            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentSettings != null))
+            {
+                if (Blade == Blades.Front)
+                {
+                    CurrentEquipmentSettings.FrontPan.MaxHeightMm = (uint)CurrentEquipmentStatus.FrontPan.BladeHeight;
+                }
+                else
+                {
+                    CurrentEquipmentSettings.RearPan.MaxHeightMm = (uint)CurrentEquipmentStatus.RearPan.BladeHeight;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called periodically to update the height displays
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            if (CurrentEquipmentStatus != null)
+            {
+                if (Blade == Blades.Front)
+                {
+                    Height1.Text = Height2.Text = Height3.Text = CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
+                }
+                else
+                {
+                    Height1.Text = Height2.Text = Height3.Text = CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
+                }
+            }
         }
     }
 }

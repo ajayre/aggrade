@@ -59,6 +59,9 @@ namespace AgGrade.Controls
         public delegate void ResetPanLoad(bool Front);
         public event ResetPanLoad OnResetPanLoad = null;
 
+        public Color FrontPanColor = Color.Black;
+        public Color RearPanColor = Color.Black;
+
         public Map()
         {
             InitializeComponent();
@@ -499,6 +502,18 @@ namespace AgGrade.Controls
                 double rainfallMm = _CurrentAppSettings?.PondingRainfallMm ?? 50;
                 MapGen.CalculatePonding(PondingElevationType, curveNumber, rainfallMm, 50);
             }
+        }
+
+        private void Map_Load(object sender, EventArgs e)
+        {
+        }
+
+        private void Map_VisibleChanged(object sender, EventArgs e)
+        {
+            FrontBladeHeightLabel.ForeColor = FrontPanColor;
+            FrontLoadLabel.ForeColor = FrontPanColor;
+            RearBladeHeightLabel.ForeColor = RearPanColor;
+            RearLoadLabel.ForeColor = RearPanColor;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using AgGrade.Data;
+﻿using AgGrade.Controller;
+using AgGrade.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ namespace AgGrade.Controls
 
         public EquipmentStatus? CurrentEquipmentStatus = null;
         public EquipmentSettings? CurrentEquipmentSettings = null;
+        public OGController? Controller = null;
 
         /// <summary>
         /// Gets the top-level tab control

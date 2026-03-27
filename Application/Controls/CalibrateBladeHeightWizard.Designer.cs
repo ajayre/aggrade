@@ -28,27 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             Pages = new TabControl();
             tabPage1 = new TabPage();
+            Height1 = new TextBox();
             textBox2 = new TextBox();
             CaptureZeroBtn = new Button();
             textBox1 = new TextBox();
             pictureBox1 = new PictureBox();
             tabPage2 = new TabPage();
-            button1 = new Button();
+            Height2 = new TextBox();
+            CaptureMinBtn = new Button();
             pictureBox2 = new PictureBox();
             textBox8 = new TextBox();
             PageTwoInstructions = new TextBox();
             tabPage3 = new TabPage();
+            Height3 = new TextBox();
             pictureBox3 = new PictureBox();
             textBox5 = new TextBox();
-            button2 = new Button();
+            CaptureMaxBtn = new Button();
             textBox4 = new TextBox();
             tabPage4 = new TabPage();
             ReturnBtn = new Button();
             ResultMsg = new TextBox();
             panel1 = new Panel();
             ErrorMessage = new Label();
+            RefreshTimer = new System.Windows.Forms.Timer(components);
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
@@ -76,6 +81,7 @@
             // 
             // tabPage1
             // 
+            tabPage1.Controls.Add(Height1);
             tabPage1.Controls.Add(textBox2);
             tabPage1.Controls.Add(CaptureZeroBtn);
             tabPage1.Controls.Add(textBox1);
@@ -86,6 +92,19 @@
             tabPage1.Size = new Size(792, 434);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
+            // 
+            // Height1
+            // 
+            Height1.BackColor = SystemColors.Control;
+            Height1.BorderStyle = BorderStyle.None;
+            Height1.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            Height1.Location = new Point(269, 153);
+            Height1.Name = "Height1";
+            Height1.ReadOnly = true;
+            Height1.Size = new Size(83, 29);
+            Height1.TabIndex = 27;
+            Height1.TabStop = false;
+            Height1.Text = "0 mm";
             // 
             // textBox2
             // 
@@ -142,7 +161,8 @@
             // 
             // tabPage2
             // 
-            tabPage2.Controls.Add(button1);
+            tabPage2.Controls.Add(Height2);
+            tabPage2.Controls.Add(CaptureMinBtn);
             tabPage2.Controls.Add(pictureBox2);
             tabPage2.Controls.Add(textBox8);
             tabPage2.Controls.Add(PageTwoInstructions);
@@ -153,18 +173,32 @@
             tabPage2.TabIndex = 1;
             tabPage2.Text = "tabPage2";
             // 
-            // button1
+            // Height2
             // 
-            button1.Font = new Font("Segoe UI", 18F);
-            button1.Image = Properties.Resources.height_48px;
-            button1.ImageAlign = ContentAlignment.MiddleLeft;
-            button1.Location = new Point(33, 81);
-            button1.Name = "button1";
-            button1.Size = new Size(228, 60);
-            button1.TabIndex = 22;
-            button1.Text = "Capture Height";
-            button1.TextAlign = ContentAlignment.MiddleRight;
-            button1.UseVisualStyleBackColor = true;
+            Height2.BackColor = SystemColors.Control;
+            Height2.BorderStyle = BorderStyle.None;
+            Height2.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            Height2.Location = new Point(267, 97);
+            Height2.Name = "Height2";
+            Height2.ReadOnly = true;
+            Height2.Size = new Size(83, 29);
+            Height2.TabIndex = 27;
+            Height2.TabStop = false;
+            Height2.Text = "0 mm";
+            // 
+            // CaptureMinBtn
+            // 
+            CaptureMinBtn.Font = new Font("Segoe UI", 18F);
+            CaptureMinBtn.Image = Properties.Resources.height_48px;
+            CaptureMinBtn.ImageAlign = ContentAlignment.MiddleLeft;
+            CaptureMinBtn.Location = new Point(33, 81);
+            CaptureMinBtn.Name = "CaptureMinBtn";
+            CaptureMinBtn.Size = new Size(228, 60);
+            CaptureMinBtn.TabIndex = 22;
+            CaptureMinBtn.Text = "Capture Height";
+            CaptureMinBtn.TextAlign = ContentAlignment.MiddleRight;
+            CaptureMinBtn.UseVisualStyleBackColor = true;
+            CaptureMinBtn.Click += CaptureMinBtn_Click;
             // 
             // pictureBox2
             // 
@@ -208,9 +242,10 @@
             // tabPage3
             // 
             tabPage3.BackColor = SystemColors.Control;
+            tabPage3.Controls.Add(Height3);
             tabPage3.Controls.Add(pictureBox3);
             tabPage3.Controls.Add(textBox5);
-            tabPage3.Controls.Add(button2);
+            tabPage3.Controls.Add(CaptureMaxBtn);
             tabPage3.Controls.Add(textBox4);
             tabPage3.Location = new Point(4, 24);
             tabPage3.Name = "tabPage3";
@@ -218,6 +253,19 @@
             tabPage3.Size = new Size(792, 434);
             tabPage3.TabIndex = 2;
             tabPage3.Text = "tabPage3";
+            // 
+            // Height3
+            // 
+            Height3.BackColor = SystemColors.Control;
+            Height3.BorderStyle = BorderStyle.None;
+            Height3.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            Height3.Location = new Point(267, 97);
+            Height3.Name = "Height3";
+            Height3.ReadOnly = true;
+            Height3.Size = new Size(83, 29);
+            Height3.TabIndex = 26;
+            Height3.TabStop = false;
+            Height3.Text = "0 mm";
             // 
             // pictureBox3
             // 
@@ -243,18 +291,19 @@
             textBox5.TabStop = false;
             textBox5.Text = "3. Tap on Next";
             // 
-            // button2
+            // CaptureMaxBtn
             // 
-            button2.Font = new Font("Segoe UI", 18F);
-            button2.Image = Properties.Resources.height_48px;
-            button2.ImageAlign = ContentAlignment.MiddleLeft;
-            button2.Location = new Point(33, 81);
-            button2.Name = "button2";
-            button2.Size = new Size(228, 60);
-            button2.TabIndex = 23;
-            button2.Text = "Capture Height";
-            button2.TextAlign = ContentAlignment.MiddleRight;
-            button2.UseVisualStyleBackColor = true;
+            CaptureMaxBtn.Font = new Font("Segoe UI", 18F);
+            CaptureMaxBtn.Image = Properties.Resources.height_48px;
+            CaptureMaxBtn.ImageAlign = ContentAlignment.MiddleLeft;
+            CaptureMaxBtn.Location = new Point(33, 81);
+            CaptureMaxBtn.Name = "CaptureMaxBtn";
+            CaptureMaxBtn.Size = new Size(228, 60);
+            CaptureMaxBtn.TabIndex = 23;
+            CaptureMaxBtn.Text = "Capture Height";
+            CaptureMaxBtn.TextAlign = ContentAlignment.MiddleRight;
+            CaptureMaxBtn.UseVisualStyleBackColor = true;
+            CaptureMaxBtn.Click += CaptureMaxBtn_Click;
             // 
             // textBox4
             // 
@@ -334,6 +383,11 @@
             ErrorMessage.Text = "Error Message";
             ErrorMessage.VisibleChanged += ErrorMessage_VisibleChanged;
             // 
+            // RefreshTimer
+            // 
+            RefreshTimer.Interval = 250;
+            RefreshTimer.Tick += RefreshTimer_Tick;
+            // 
             // CalibrateBladeHeightWizard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -375,13 +429,17 @@
         private Panel panel1;
         private Label ErrorMessage;
         private PictureBox pictureBox2;
-        private Button button1;
+        private Button CaptureMinBtn;
         private TabPage tabPage4;
         private Button ReturnBtn;
         private TextBox ResultMsg;
         private TextBox textBox4;
         private TextBox textBox5;
-        private Button button2;
+        private Button CaptureMaxBtn;
         private PictureBox pictureBox3;
+        private TextBox Height3;
+        private TextBox Height1;
+        private TextBox Height2;
+        private System.Windows.Forms.Timer RefreshTimer;
     }
 }

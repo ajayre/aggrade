@@ -16,6 +16,8 @@ namespace HardwareSim
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
 
+        public const int BLADE_HEIGHT_GROUND_LEVEL = 200;
+
         // time between transmits of jog messages in milliseconds
         private const int INITIAL_JOG_PERIOD_MS = 250;
         private const int RECURRING_JOG_PERIOD_MS = 100;
@@ -32,8 +34,8 @@ namespace HardwareSim
         private bool FrontDumping = false;
         private bool RearDumping = false;
         private DateTime? LastRxPingTime = null;
-        private UInt32 FrontBladeHeight = 200;
-        private UInt32 RearBladeHeight = 200;
+        private UInt32 FrontBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
+        private UInt32 RearBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
         private Timer FrontJogTimer;
         private Timer RearJogTimer;
         private JogDirections FrontJogDirection;
@@ -212,6 +214,16 @@ namespace HardwareSim
 
                 case PGNValues.PGN_REAR_BLADE_HEIGHT:
                     // send back the current blade height
+                    SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, RearBladeHeight));
+                    break;
+
+                case PGNValues.PGN_FRONT_ZERO_BLADE_HEIGHT:
+                    FrontBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
+                    SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, FrontBladeHeight));
+                    break;
+
+                case PGNValues.PGN_REAR_ZERO_BLADE_HEIGHT:
+                    RearBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
                     SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, RearBladeHeight));
                     break;
             }

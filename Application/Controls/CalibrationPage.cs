@@ -1,4 +1,5 @@
-﻿using AgGrade.Data;
+﻿using AgGrade.Controller;
+using AgGrade.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +22,13 @@ namespace AgGrade.Controls
         public EquipmentSettings CurrentEquipmentSettings;
         public EquipmentStatus CurrentEquipmentStatus;
         public Field? CurrentField;
+        public OGController Controller;
+
+        public Color FrontPanColor = Color.Black;
+        public Color RearPanColor = Color.Black;
+
+        public event Action OnEnableBladeLimits = null;
+        public event Action OnDisableBladeLimits = null;
 
         public CalibrationPage()
         {
@@ -109,6 +117,7 @@ namespace AgGrade.Controls
             Wizard.Dock = DockStyle.Fill;
             Wizard.CurrentEquipmentStatus = CurrentEquipmentStatus;
             Wizard.CurrentEquipmentSettings = CurrentEquipmentSettings;
+            Wizard.Controller = Controller;
             Wizard.ExitWizard += Wizard_ExitWizard;
             Content.Controls.Add(Wizard);
         }
@@ -121,6 +130,8 @@ namespace AgGrade.Controls
         {
             HideWizard();
             ShowOptions();
+
+            OnEnableBladeLimits?.Invoke();
         }
 
         /// <summary>
@@ -132,7 +143,7 @@ namespace AgGrade.Controls
             object Sender
             )
         {
-
+            OnEnableBladeLimits?.Invoke();
         }
 
         /// <summary>
@@ -148,6 +159,7 @@ namespace AgGrade.Controls
             ShowWizard();
             Wizard!.Name = "Tractor Antenna Location";
             Wizard!.Content = new CalibrateTractorAntennaWizard();
+            OnEnableBladeLimits?.Invoke();
         }
 
         /// <summary>
@@ -162,7 +174,8 @@ namespace AgGrade.Controls
             HideOptions();
             ShowWizard();
             Wizard!.Name = "Front Blade Height";
-            Wizard!.Content = new CalibrateBladeHeightWizard();
+            Wizard!.Content = new CalibrateBladeHeightWizard(CalibrateBladeHeightWizard.Blades.Front, FrontPanColor);
+            OnDisableBladeLimits?.Invoke();
         }
 
         /// <summary>
@@ -177,7 +190,8 @@ namespace AgGrade.Controls
             HideOptions();
             ShowWizard();
             Wizard!.Name = "Rear Blade Height";
-            Wizard!.Content = new CalibrateBladeHeightWizard();
+            Wizard!.Content = new CalibrateBladeHeightWizard(CalibrateBladeHeightWizard.Blades.Rear, RearPanColor);
+            OnDisableBladeLimits?.Invoke();
         }
 
         /// <summary>
