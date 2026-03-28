@@ -1275,7 +1275,7 @@ namespace AgGrade.Data
             {
                 pondGen.GeneratePondingPNG(CurrentField, PondingElevationType, TempPNG,
                     out PondingSWCorner, out PondingNECorner,
-                    RainfallMm, CurveNumber, Opacity, true);
+                    RainfallMm, CurveNumber, Opacity, false);
                 PondingImage = TempPNG;
             }
             catch

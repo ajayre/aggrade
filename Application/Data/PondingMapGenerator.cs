@@ -13,6 +13,13 @@ namespace AgGrade.Data
     /// </summary>
     public class PondingMapGenerator
     {
+        /// <summary>
+        /// Grayscale mapping uses <c>1 - (d/max)^γ</c> instead of <c>1 - d/max</c>.
+        /// γ &lt; 1 boosts contrast for shallow ponding when a single deep cell sets max depth.
+        /// Use 1.0 for linear scaling.
+        /// </summary>
+        private const double POND_DEPTH_GRAYSCALE_EXPONENT = 0.25;
+
         private static readonly (int dr, int dc)[] Neigh8 = new[]
         {
             (-1, -1), (-1, 0), (-1, 1),
@@ -196,7 +203,13 @@ namespace AgGrade.Data
                     if (!valid[i]) { gray[r, c] = 255; continue; }
                     float d = pondDepth[r, c];
                     if (float.IsNaN(d) || d <= 0) gray[r, c] = 255;
-                    else if (maxd > 0) gray[r, c] = (byte)Math.Clamp(255.0 * (1.0 - d / maxd), 0, 255);
+                    else if (maxd > 0)
+                    {
+                        double t = d / maxd;
+                        if (t > 1) t = 1;
+                        double scaled = Math.Pow(t, POND_DEPTH_GRAYSCALE_EXPONENT);
+                        gray[r, c] = (byte)Math.Clamp(255.0 * (1.0 - scaled), 0, 255);
+                    }
                     else gray[r, c] = 255;
                 }
         }
