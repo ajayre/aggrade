@@ -64,7 +64,8 @@ namespace AgGrade.Data
         /// <summary>
         /// Runs the ponding model (SCS runoff, D8 routing, fill-spill). Outputs pond depth and grayscale (black = deeper).
         /// </summary>
-        private static void RunPondingModel(
+        private static void RunPondingModel
+            (
             float[,] dem,
             int nrows,
             int ncols,
@@ -73,7 +74,8 @@ namespace AgGrade.Data
             double rainfallMm,
             double curveNumber,
             out float[,] pondDepth,
-            out byte[,] gray)
+            out byte[,] gray
+            )
         {
             int size = nrows * ncols;
             bool[] valid = new bool[size];

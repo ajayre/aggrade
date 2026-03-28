@@ -242,6 +242,58 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Gets the nearest benchmark to a location
+        /// </summary>
+        /// <param name="Location">Location to check</param>
+        /// <param name="CurrentElevationM">The current elevation in m</param>
+        /// <param name="EastingM">Absolute UTM easting distance to benchmark in m</param>
+        /// <param name="NorthingM">Absolute UTM northing distance to benchmark in m</param>
+        /// <param name="HeightMm">Height difference between current height and nearest benchmark height in mm (negative is benchmark is higher)</param>
+        /// <returns>The nearest benchmark or null for none</returns>
+        public Benchmark? GetNearestBenchmark
+            (
+            Coordinate Location,
+            double CurrentElevationM,
+            out double EastingM,
+            out double NorthingM,
+            out int HeightMm
+            )
+        {
+            EastingM = 0;
+            NorthingM = 0;
+            HeightMm = 0;
+
+            if (Benchmarks == null || Benchmarks.Count == 0)
+                return null;
+
+            Benchmark? nearest = null;
+            double bestM = double.PositiveInfinity;
+
+            foreach (Benchmark b in Benchmarks)
+            {
+                double dM = Haversine.Distance(
+                    Location.Latitude, Location.Longitude,
+                    b.Location.Latitude, b.Location.Longitude);
+                if (dM < bestM)
+                {
+                    bestM = dM;
+                    nearest = b;
+                }
+            }
+
+            if (nearest == null) return nearest;
+
+            UTM.UTMCoordinate posUtm = UTM.FromLatLon(Location.Latitude, Location.Longitude);
+            UTM.UTMCoordinate benchUtm = UTM.FromLatLon(nearest.Location.Latitude, nearest.Location.Longitude);
+
+            EastingM = Math.Abs(benchUtm.Easting - posUtm.Easting);
+            NorthingM = Math.Abs(benchUtm.Northing - posUtm.Northing);
+            HeightMm = (int)Math.Round((CurrentElevationM - nearest.Elevation) * 1000.0);
+
+            return nearest;
+        }
+
+        /// <summary>
         /// Clips a polygon against a rectangle using the Sutherland-Hodgman algorithm
         /// </summary>
         private List<PointD> ClipPolygonToRectangle(List<PointD> polygon, double rectMinX, double rectMinY, double rectMaxX, double rectMaxY)

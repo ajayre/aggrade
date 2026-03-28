@@ -143,6 +143,10 @@ namespace AgGrade.Controls
             object Sender
             )
         {
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Field Location";
+            Wizard!.Content = new CalibrateFieldWizard(CurrentField);
             OnEnableBladeLimits?.Invoke();
         }
 
