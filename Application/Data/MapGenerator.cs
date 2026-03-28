@@ -23,8 +23,8 @@ namespace AgGrade.Data
 
         /// <summary>Pixels of source overlap when extracting flow/ponding tiles to avoid visible seams.</summary>
         private const int OVERLAY_TILE_SOURCE_OVERLAP = 1;
-        /// <summary>Pixels of source overlap for ponding tiles (larger overlap to reduce grid visibility).</summary>
-        private const int PONDING_TILE_SOURCE_OVERLAP = 5;
+        /// <summary>Pixels of source overlap for ponding tiles.</summary>
+        private const int PONDING_TILE_SOURCE_OVERLAP = 1;
         private const int TILE_OVERLAP = 5;
         private const int PROJECTED_PATH_LENGTH_M = 80;
         private const double HEADING_BUCKET_DEGREES = 0.5;
@@ -227,6 +227,11 @@ namespace AgGrade.Data
         private double? _pondingCacheScaleFactor = null;
         private Bitmap? _pondingImageBitmap = null;
         private string? _pondingImagePath = null;
+        private Bitmap? _pondingProjectedMapBitmap = null;
+        private double? _pondingProjectedScaleFactor = null;
+        private string? _pondingProjectedImagePath = null;
+        private int _pondingProjectedMapWidthpx = 0;
+        private int _pondingProjectedMapHeightpx = 0;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static long GetTileKey(int tileX, int tileY)
@@ -1324,6 +1329,12 @@ namespace AgGrade.Data
             _pondingImageBitmap?.Dispose();
             _pondingImageBitmap = null;
             _pondingImagePath = null;
+            _pondingProjectedMapBitmap?.Dispose();
+            _pondingProjectedMapBitmap = null;
+            _pondingProjectedScaleFactor = null;
+            _pondingProjectedImagePath = null;
+            _pondingProjectedMapWidthpx = 0;
+            _pondingProjectedMapHeightpx = 0;
         }
 
         /// <summary>
@@ -1343,6 +1354,11 @@ namespace AgGrade.Data
                 foreach (Bitmap bmp in _pondingTileCache.Values)
                     bmp?.Dispose();
                 _pondingTileCache.Clear();
+                _pondingProjectedMapBitmap?.Dispose();
+                _pondingProjectedMapBitmap = null;
+                _pondingProjectedScaleFactor = null;
+                _pondingProjectedMapWidthpx = 0;
+                _pondingProjectedMapHeightpx = 0;
             }
             _pondingCacheScaleFactor = CurrentScaleFactor;
 
@@ -1350,6 +1366,12 @@ namespace AgGrade.Data
             {
                 _pondingImageBitmap?.Dispose();
                 _pondingImageBitmap = null;
+                _pondingProjectedMapBitmap?.Dispose();
+                _pondingProjectedMapBitmap = null;
+                _pondingProjectedScaleFactor = null;
+                _pondingProjectedImagePath = null;
+                _pondingProjectedMapWidthpx = 0;
+                _pondingProjectedMapHeightpx = 0;
                 try
                 {
                     if (File.Exists(PondingImage))
@@ -1392,6 +1414,45 @@ namespace AgGrade.Data
             int ImageWidthpx = Cache.ImageWidthpx;
             int ImageHeightpx = Cache.ImageHeightpx;
 
+            bool projectedInvalid =
+                _pondingProjectedMapBitmap == null ||
+                !_pondingProjectedScaleFactor.HasValue ||
+                Math.Abs(_pondingProjectedScaleFactor.Value - ScaleFactor) > 1e-9 ||
+                _pondingProjectedImagePath != _pondingImagePath ||
+                _pondingProjectedMapWidthpx != MapWidthpx ||
+                _pondingProjectedMapHeightpx != MapHeightpx;
+
+            if (projectedInvalid)
+            {
+                _pondingProjectedMapBitmap?.Dispose();
+                _pondingProjectedMapBitmap = new Bitmap(MapWidthpx, MapHeightpx, PixelFormat.Format32bppArgb);
+                using (Graphics pg = Graphics.FromImage(_pondingProjectedMapBitmap))
+                {
+                    pg.Clear(Color.Transparent);
+                    pg.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                    pg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    pg.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+
+                    float destX = (float)((swE - FieldMinX) * ScaleFactor);
+                    float destY = (float)((FieldMaxY - neN) * ScaleFactor);
+                    float destW = (float)(spanE * ScaleFactor);
+                    float destH = (float)(spanN * ScaleFactor);
+                    if (destW > 0 && destH > 0)
+                    {
+                        pg.DrawImage(
+                            _pondingImageBitmap,
+                            new RectangleF(destX, destY, destW, destH),
+                            new RectangleF(0, 0, Wf, Hf),
+                            GraphicsUnit.Pixel);
+                    }
+                }
+
+                _pondingProjectedScaleFactor = ScaleFactor;
+                _pondingProjectedImagePath = _pondingImagePath;
+                _pondingProjectedMapWidthpx = MapWidthpx;
+                _pondingProjectedMapHeightpx = MapHeightpx;
+            }
+
             g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
             g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             g.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
@@ -1424,30 +1485,15 @@ namespace AgGrade.Data
                     long tileKey = GetTileKey(tileX, tileY);
                     if (!_pondingTileCache.TryGetValue(tileKey, out Bitmap? pondTile))
                     {
-                        double leftUtm = FieldMinX + tileStartX / ScaleFactor;
-                        double rightUtm = FieldMinX + (tileStartX + tileWidth) / ScaleFactor;
-                        double topUtm = FieldMaxY - tileStartY / ScaleFactor;
-                        double bottomUtm = FieldMaxY - (tileStartY + tileHeight) / ScaleFactor;
-                        float srcX = (float)((leftUtm - swE) / spanE * Wf);
-                        float srcY = (float)((neN - topUtm) / spanN * Hf);
-                        float srcW = (float)((rightUtm - leftUtm) / spanE * Wf);
-                        float srcH = (float)((topUtm - bottomUtm) / spanN * Hf);
-                        float srcX0 = Math.Max(0, srcX - PONDING_TILE_SOURCE_OVERLAP);
-                        float srcY0 = Math.Max(0, srcY - PONDING_TILE_SOURCE_OVERLAP);
-                        float srcW0 = Math.Min(Wf - srcX0, srcW + 2 * PONDING_TILE_SOURCE_OVERLAP);
-                        float srcH0 = Math.Min(Hf - srcY0, srcH + 2 * PONDING_TILE_SOURCE_OVERLAP);
-                        srcX0 = Math.Min(srcX0, Wf - 1);
-                        srcY0 = Math.Min(srcY0, Hf - 1);
-                        srcW0 = Math.Max(1, srcW0);
-                        srcH0 = Math.Max(1, srcH0);
-
                         pondTile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
                         using (Graphics tg = Graphics.FromImage(pondTile))
                         {
-                            tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                            tg.DrawImage(_pondingImageBitmap,
+                            tg.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceCopy;
+                            tg.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.NearestNeighbor;
+                            tg.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.None;
+                            tg.DrawImage(_pondingProjectedMapBitmap!,
                                 new Rectangle(0, 0, tileWidth, tileHeight),
-                                new RectangleF(srcX0, srcY0, srcW0, srcH0),
+                                new Rectangle(tileStartX, tileStartY, tileWidth, tileHeight),
                                 GraphicsUnit.Pixel);
                         }
                         _pondingTileCache[tileKey] = pondTile;
