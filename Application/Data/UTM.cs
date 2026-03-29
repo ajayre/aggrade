@@ -181,6 +181,64 @@ namespace AgGrade.Data
             longitudeDeg = RadiansToDegrees(lonRad);
         }
 
+        /// <summary>
+        /// Offsets a WGS-84 latitude/longitude location by UTM easting/northing meters
+        /// and returns the resulting latitude/longitude location.
+        /// </summary>
+        /// <param name="Location">Location to offset</param>
+        /// <param name="eastingM">Offset in meters in +UTM easting direction (west is negative).</param>
+        /// <param name="northingM">Offset in meters in +UTM northing direction (south is negative).</param>
+        /// <returns>Offset location as latitude/longitude.</returns>
+        public static Coordinate OffsetLocation
+            (
+            Coordinate Location,
+            double eastingM,
+            double northingM
+            )
+        {
+            if ((eastingM == 0) && (northingM == 0)) return Location;
+
+            return OffsetLocation(Location.Latitude, Location.Longitude, eastingM, northingM);
+        }
+
+        /// <summary>
+        /// Offsets a WGS-84 latitude/longitude location by UTM easting/northing meters
+        /// and returns the resulting latitude/longitude location.
+        /// </summary>
+        /// <param name="latitudeDeg">Start latitude in decimal degrees.</param>
+        /// <param name="longitudeDeg">Start longitude in decimal degrees.</param>
+        /// <param name="eastingM">Offset in meters in +UTM easting direction (west is negative).</param>
+        /// <param name="northingM">Offset in meters in +UTM northing direction (south is negative).</param>
+        /// <returns>Offset location as latitude/longitude.</returns>
+        public static Coordinate OffsetLocation
+            (
+            double latitudeDeg,
+            double longitudeDeg,
+            double eastingM,
+            double northingM
+            )
+        {
+            if ((eastingM == 0) && (northingM == 0)) return new Coordinate(latitudeDeg, longitudeDeg);
+
+            UTMCoordinate start = FromLatLon(latitudeDeg, longitudeDeg);
+
+            double offsetEasting = start.Easting + eastingM;
+            double offsetNorthing = start.Northing + northingM;
+
+            ToLatLon(
+                start.Zone,
+                start.IsNorthernHemisphere,
+                offsetEasting,
+                offsetNorthing,
+                out double offsetLatitudeDeg,
+                out double offsetLongitudeDeg);
+
+            // Normalize longitude to [-180, 180) for consistency with FromLatLon input handling.
+            offsetLongitudeDeg = ((offsetLongitudeDeg + 180.0) % 360.0 + 360.0) % 360.0 - 180.0;
+
+            return new Coordinate(offsetLatitudeDeg, offsetLongitudeDeg);
+        }
+
         private static double DegreesToRadians(double degrees)
         {
             return degrees * Math.PI / 180.0;

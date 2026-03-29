@@ -1,5 +1,6 @@
 ﻿using AgGrade.Controller;
 using AgGrade.Data;
+using OpenCvSharp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -102,6 +103,20 @@ namespace AgGrade.Controls
                 if (Content.Controls.Contains(Wizard)) { Content.Controls.Remove(Wizard); }
                 Wizard.ExitWizard -= Wizard_ExitWizard;
                 Wizard = null;
+            }
+        }
+
+        /// <summary>
+        /// Called when the page is being closed
+        /// </summary>
+        public void Closing
+            (
+            )
+        {
+            // if we are currently showing a wizard then tell the wizard we are done
+            if ((Wizard != null) && Content.Controls.Contains(Wizard))
+            {
+                Wizard.Closing();
             }
         }
 

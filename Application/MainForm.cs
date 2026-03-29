@@ -660,6 +660,9 @@ namespace AgGrade
                 }
                 else if (Ctrl is CalibrationPage)
                 {
+                    // tell calibration page it is being closed
+                    (Ctrl as CalibrationPage)!.Closing();
+
                     // remove event handlers
                     (Ctrl as CalibrationPage)!.OnEnableBladeLimits -= CalibrationPage_OnEnableBladeLimits;
                     (Ctrl as CalibrationPage)!.OnDisableBladeLimits -= CalibrationPage_OnDisableBladeLimits;

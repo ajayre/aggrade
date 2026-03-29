@@ -2240,6 +2240,10 @@ def main() -> int:
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("Calibrated", 0),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("HeightOffsetM", float(args.heightoffset)),
     )
     if args.stripping is not None:

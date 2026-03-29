@@ -39,25 +39,9 @@ namespace AgGrade.Controls
                 // completed first page, validate inputs
                 case 1:
                     ValidateStatusAndSettings();
-                    break;
-
-                // completed second page, perform calculation
-                case 2:
                     if (PositionValid)
                     {
-                        if (CurrentEquipmentSettings != null)
-                        {
-                            //CurrentEquipmentSettings.TractorAntennaForwardOffsetMm = (int)Offset.Y;
-                        }
-                        else
-                        {
-                            ErrorMessage.Text = ResultMsg.Text = "Failed to store result";
-                            ErrorMessage.Visible = true;
-                        }
-                    }
-                    else
-                    {
-                        ResultMsg.Text = "Failed to perform measurements";
+                        ResultMsg.Text = "Field calibrated";
                     }
                     break;
             }
@@ -70,8 +54,21 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void CaptureLocationBtn_Click(object sender, EventArgs e)
         {
-            if (Controller != null)
+            if (CurrentField != null)
             {
+                double EastingM;
+                double NorthingM;
+                double HeightM;
+
+                Benchmark? NearestBM = CurrentField.GetNearestBenchmark(CurrentEquipmentStatus.TractorFix.Latitude,
+                    CurrentEquipmentStatus.TractorFix.Longitude,
+                    CurrentEquipmentStatus.TractorFix.Altitude,
+                    out EastingM,
+                    out NorthingM,
+                    out HeightM);
+
+                CurrentField.SetCalibration(new Field.Calibration(EastingM, NorthingM, HeightM));
+
                 PositionValid = true;
             }
         }
@@ -118,7 +115,7 @@ namespace AgGrade.Controls
             }
             else
             {
-                ResultMsg.Text = "Not run";
+                ResultMsg.Text = "No calibration performed";
             }
 
             CaptureLocationBtn.Enabled = CanExecute;
@@ -132,6 +129,14 @@ namespace AgGrade.Controls
             )
         {
             ValidateStatusAndSettings();
+        }
+
+        /// <summary>
+        /// Called when wizard stops being shown
+        /// </summary>
+        public override void Deactivated()
+        {
+            RefreshTimer.Stop();
         }
 
         /// <summary>

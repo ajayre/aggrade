@@ -48,6 +48,19 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Called when the wizard is being closed
+        /// </summary>
+        public void Closing
+            (
+            )
+        {
+            if (_Content != null)
+            {
+                _Content.Deactivated();
+            }
+        }
+
+        /// <summary>
         /// Hides the wizard content
         /// </summary>
         private void HideContent
@@ -86,6 +99,7 @@ namespace AgGrade.Controls
         /// <param name="obj"></param>
         private void _Content_ExitWizard(object obj)
         {
+            _Content.Deactivated();
             ExitWizard?.Invoke(this);
         }
 
@@ -101,6 +115,7 @@ namespace AgGrade.Controls
                 int CurrentPage = _Content.CurrentPage;
                 if (CurrentPage == 0)
                 {
+                    _Content.Deactivated();
                     ExitWizard?.Invoke(this);
                 }
                 else if (CurrentPage > 0)

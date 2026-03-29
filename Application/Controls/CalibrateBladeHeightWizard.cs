@@ -150,6 +150,14 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Called when wizard stops being shown
+        /// </summary>
+        public override void Deactivated()
+        {
+            RefreshTimer.Stop();
+        }
+
+        /// <summary>
         /// Called when user taps on the button to return to the calibration menu
         /// </summary>
         /// <param name="sender"></param>

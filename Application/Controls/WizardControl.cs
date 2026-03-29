@@ -36,7 +36,7 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
-        /// Ecits the wizard
+        /// Exits the wizard
         /// </summary>
         public void Exit
             (
@@ -119,6 +119,13 @@ namespace AgGrade.Controls
             (
             )
         {
+        }
+
+        public virtual void Deactivated
+            (
+            )
+        {
+
         }
     }
 }

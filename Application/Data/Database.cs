@@ -217,8 +217,8 @@ namespace AgGrade.Data
         /// </summary>
         public enum DataNames
         {
-            XOffsetM,
-            YOffsetM,
+            EastingOffsetM,
+            NorthingOffsetM,
             MeanLat,
             MeanLon,
             HeightOffsetM,
@@ -229,7 +229,8 @@ namespace AgGrade.Data
             MinLat,
             MinLon,
             MaxLat,
-            MaxLon
+            MaxLon,
+            Calibrated
         }
 
         /// <summary>
@@ -1268,6 +1269,45 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Upserts a boolean data item
+        /// </summary>
+        /// <param name="Name">Data item to upsert</param>
+        /// <param name="Value">Boolean value</param>
+        public void SetBoolData
+            (
+            DataNames Name,
+            bool Value
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            using (var cmd = _connection.CreateCommand())
+            {
+                try
+                {
+                    // First try to update an existing setting
+                    cmd.CommandText = "UPDATE Data SET Value = @Value WHERE Name = @Name";
+                    cmd.Parameters.AddWithValue("@Name", Name.ToString());
+                    cmd.Parameters.AddWithValue("@Value", Value);
+                    var rows = cmd.ExecuteNonQuery();
+
+                    // If no row was updated, insert a new one
+                    if (rows == 0)
+                    {
+                        cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                catch (SqliteException)
+                {
+                    cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
+                    cmd.Parameters.AddWithValue("@Name", Name.ToString());
+                    cmd.Parameters.AddWithValue("@Value", Value);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the value of a data item
         /// </summary>
         /// <param name="name">Data to get</param>
@@ -1290,6 +1330,34 @@ namespace AgGrade.Data
                 catch (SqliteException)
                 {
                     return 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the value of a boolean data item
+        /// </summary>
+        /// <param name="name">Data to get</param>
+        /// <returns>boolean value</returns>
+        public bool GetBoolData(DataNames name)
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+
+            using (var cmd = _connection.CreateCommand())
+            {
+                try
+                {
+                    cmd.CommandText = "SELECT Value FROM Data WHERE Name = @Name LIMIT 1";
+                    cmd.Parameters.AddWithValue("@Name", name.ToString());
+                    var result = cmd.ExecuteScalar();
+
+                    if (result == null || result is DBNull) return false;
+
+                    return Convert.ToBoolean(result);
+                }
+                catch (SqliteException)
+                {
+                    return false;
                 }
             }
         }
