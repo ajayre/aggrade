@@ -849,9 +849,13 @@ namespace AgGrade.Data
                 Bin NewBin = new Bin();
                 NewBin.X = BinState.X;
                 NewBin.Y = BinState.Y;
-                NewBin.CurrentElevationM = BinState.CurrentHeightM + CurrentCalibration.HeightM;
-                NewBin.InitialElevationM = BinState.InitialHeightM + CurrentCalibration.HeightM;
-                NewBin.TargetElevationM = BinState.TargetHeightM + CurrentCalibration.HeightM;
+                // don't calibrate for bins with no data
+                if (BinState.CurrentHeightM != 0)
+                {
+                    NewBin.CurrentElevationM = BinState.CurrentHeightM + CurrentCalibration.HeightM;
+                    NewBin.InitialElevationM = BinState.InitialHeightM + CurrentCalibration.HeightM;
+                    NewBin.TargetElevationM = BinState.TargetHeightM + CurrentCalibration.HeightM;
+                }
                 NewBin.Centroid = UTM.OffsetLocation(new Coordinate(BinState.CentroidLat, BinState.CentroidLon), CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
                 NewBin.HaulPath = BinState.HaulPath;
                 NewBin.Field = this;
