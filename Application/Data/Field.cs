@@ -244,24 +244,26 @@ namespace AgGrade.Data
         /// <summary>
         /// Gets the nearest benchmark to a location
         /// </summary>
-        /// <param name="Location">Location to check</param>
+        /// <param name="Latitude">Latitude to check</param>
+        /// <param name="Longitude">Longitude to check</param>
         /// <param name="CurrentElevationM">The current elevation in m</param>
         /// <param name="EastingM">Absolute UTM easting distance to benchmark in m</param>
         /// <param name="NorthingM">Absolute UTM northing distance to benchmark in m</param>
-        /// <param name="HeightMm">Height difference between current height and nearest benchmark height in mm (negative is benchmark is higher)</param>
+        /// <param name="HeightM">Height difference between current height and nearest benchmark height in m (negative is benchmark is higher)</param>
         /// <returns>The nearest benchmark or null for none</returns>
         public Benchmark? GetNearestBenchmark
             (
-            Coordinate Location,
+            double Latitude,
+            double Longitude,
             double CurrentElevationM,
             out double EastingM,
             out double NorthingM,
-            out int HeightMm
+            out double HeightM
             )
         {
             EastingM = 0;
             NorthingM = 0;
-            HeightMm = 0;
+            HeightM = 0;
 
             if (Benchmarks == null || Benchmarks.Count == 0)
                 return null;
@@ -272,7 +274,7 @@ namespace AgGrade.Data
             foreach (Benchmark b in Benchmarks)
             {
                 double dM = Haversine.Distance(
-                    Location.Latitude, Location.Longitude,
+                    Latitude, Longitude,
                     b.Location.Latitude, b.Location.Longitude);
                 if (dM < bestM)
                 {
@@ -283,12 +285,12 @@ namespace AgGrade.Data
 
             if (nearest == null) return nearest;
 
-            UTM.UTMCoordinate posUtm = UTM.FromLatLon(Location.Latitude, Location.Longitude);
+            UTM.UTMCoordinate posUtm = UTM.FromLatLon(Latitude, Longitude);
             UTM.UTMCoordinate benchUtm = UTM.FromLatLon(nearest.Location.Latitude, nearest.Location.Longitude);
 
             EastingM = Math.Abs(benchUtm.Easting - posUtm.Easting);
             NorthingM = Math.Abs(benchUtm.Northing - posUtm.Northing);
-            HeightMm = (int)Math.Round((CurrentElevationM - nearest.Elevation) * 1000.0);
+            HeightM = Math.Round(CurrentElevationM - nearest.Elevation);
 
             return nearest;
         }

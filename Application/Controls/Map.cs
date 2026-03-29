@@ -19,7 +19,6 @@ namespace AgGrade.Controls
     {
         private const double MIN_SCALE_FACTOR = 0.5;
         private const double MAX_SCALE_FACTOR = 750.0;
-        private const int DEAD_RECKONING_PERIOD_MS = 50;
         private const int DEFAULT_SCALE_FACTOR = 13;
         private const double ZOOM_FACTOR = 1.3;
         private const int MAX_NAME_LENGTH = 30;
@@ -33,24 +32,26 @@ namespace AgGrade.Controls
         private GNSSFix RearScraperFix;
         private List<Coordinate> TractorLocationHistory = new List<Coordinate>();
         private Timer RefreshTimer;
-        private bool ShowHaulArrows;
         private FlowMapGenerator.ElevationTypes SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
         private FlowMapGenerator.ElevationTypes PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
-        private bool ShowSurfaceFlow;
-        private bool ShowPonding;
-        private MapGenerator.MapTypes MapType;
-        private MapGenerator.TractorStyles TractorStyle;
         private List<Coordinate> HaulPath = new List<Coordinate>();
-        private bool ShowBenchmarks;
-        private bool ShowSatelliteBasemap;
+        private bool FirstRender;
 
-        // maximum number of tractor history points to keep
-        private int MaxTractorHistoryLength = 500;
+        private static bool ShowHaulArrows;
+        private static bool ShowSurfaceFlow;
+        private static bool ShowPonding;
+        private static bool ShowBenchmarks;
+        private static bool ShowSatelliteBasemap;
+        private static MapGenerator.TractorStyles TractorStyle;
+        private static MapGenerator.MapTypes MapType;
 
         /// <summary>
         /// pixels per meter
         /// </summary>
-        public double ScaleFactor { get; private set; }
+        public static double ScaleFactor { get; private set; }
+
+        // maximum number of tractor history points to keep
+        private int MaxTractorHistoryLength = 500;
 
         private EquipmentSettings _CurrentEquipmentSettings;
         private AppSettings _CurrentAppSettings;
@@ -61,6 +62,20 @@ namespace AgGrade.Controls
 
         public Color FrontPanColor = Color.Black;
         public Color RearPanColor = Color.Black;
+
+        static Map()
+        {
+            ScaleFactor = DEFAULT_SCALE_FACTOR;
+
+            ShowHaulArrows = true;
+            MapType = MapGenerator.MapTypes.CutFill;
+            TractorStyle = MapGenerator.TractorStyles.Arrow;
+            ShowSurfaceFlow = false;
+            ShowPonding = false;
+
+            ShowBenchmarks = true;
+            ShowSatelliteBasemap = false;
+        }
 
         public Map()
         {
@@ -74,17 +89,6 @@ namespace AgGrade.Controls
             FrontScraperFix = new GNSSFix();
             RearScraperFix = new GNSSFix();
 
-            ScaleFactor = DEFAULT_SCALE_FACTOR;
-
-            ShowHaulArrows = true;
-            MapType = MapGenerator.MapTypes.CutFill;
-            TractorStyle = MapGenerator.TractorStyles.Arrow;
-            ShowSurfaceFlow = false;
-            ShowPonding = false;
-
-            ShowBenchmarks = true;
-            ShowSatelliteBasemap = false;
-
             FrontBladeHeightLabel.Text = "X mm";
             RearBladeHeightLabel.Text = "X mm";
             FrontLoadLabel.Text = "0.0 LCY";
@@ -92,6 +96,8 @@ namespace AgGrade.Controls
             HeadingLabel.Text = "0" + DegreeSymbol;
             SpeedLabel.Text = "0 MPH";
             FieldNameLabel.Text = "No Field";
+
+            FirstRender = true;
 
             RefreshTimer = new Timer();
             RefreshTimer.Interval = 250;
@@ -163,9 +169,6 @@ namespace AgGrade.Controls
             )
         {
             CurrentField = Field;
-
-            //ScaleFactor = MapGenerator.CalculateScaleFactorToFit(CurrentField, MapCanvas.Width, MapCanvas.Height, TractorHeading());
-            ScaleFactor = DEFAULT_SCALE_FACTOR;
 
             FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
         }
@@ -269,6 +272,21 @@ namespace AgGrade.Controls
 
             HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;
             SpeedLabel.Text = TractorFix.Vector.SpeedMph.ToString("F1") + " MPH";
+
+            if (FirstRender)
+            {
+                FirstRender = false;
+
+                if (ShowPonding)
+                {
+                    ShowPondingMap();
+                }
+
+                if (ShowSurfaceFlow)
+                {
+                    ShowSurfaceFlowMap();
+                }
+            }
         }
 
 #if SHOW_MAP_PERF
@@ -462,9 +480,19 @@ namespace AgGrade.Controls
             ShowSurfaceFlow = !ShowSurfaceFlow;
             if (ShowSurfaceFlow)
             {
-                SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
-                MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
+                ShowSurfaceFlowMap();
             }
+        }
+
+        /// <summary>
+        /// Shows the surface flow map
+        /// </summary>
+        private void ShowSurfaceFlowMap
+            (
+            )
+        {
+            SurfaceFlowElevationType = FlowMapGenerator.ElevationTypes.Current;
+            MapGen.CalculateSurfaceFlow(SurfaceFlowElevationType);
         }
 
         /// <summary>
@@ -497,11 +525,21 @@ namespace AgGrade.Controls
             ShowPonding = !ShowPonding;
             if (ShowPonding)
             {
-                PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
-                double curveNumber = _CurrentAppSettings?.PondingCurveNumber ?? 85;
-                double rainfallMm = _CurrentAppSettings?.PondingRainfallMm ?? 50;
-                MapGen.CalculatePonding(PondingElevationType, curveNumber, rainfallMm, 50);
+                ShowPondingMap();
             }
+        }
+
+        /// <summary>
+        /// Shows the ponding map
+        /// </summary>
+        private void ShowPondingMap
+            (
+            )
+        {
+            PondingElevationType = FlowMapGenerator.ElevationTypes.Current;
+            double curveNumber = _CurrentAppSettings?.PondingCurveNumber ?? 85;
+            double rainfallMm = _CurrentAppSettings?.PondingRainfallMm ?? 50;
+            MapGen.CalculatePonding(PondingElevationType, curveNumber, rainfallMm, 50);
         }
 
         private void Map_Load(object sender, EventArgs e)

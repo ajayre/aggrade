@@ -74,13 +74,14 @@
             // 
             // BMOffset
             // 
+            BMOffset.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             BMOffset.BackColor = SystemColors.Control;
             BMOffset.BorderStyle = BorderStyle.None;
             BMOffset.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            BMOffset.Location = new Point(291, 153);
+            BMOffset.Location = new Point(34, 203);
             BMOffset.Name = "BMOffset";
             BMOffset.ReadOnly = true;
-            BMOffset.Size = new Size(333, 29);
+            BMOffset.Size = new Size(752, 29);
             BMOffset.TabIndex = 27;
             BMOffset.TabStop = false;
             BMOffset.Text = "E = 0 mm, N = 0mm, H = 0mm";
@@ -90,7 +91,7 @@
             textBox2.BackColor = SystemColors.Control;
             textBox2.BorderStyle = BorderStyle.None;
             textBox2.Font = new Font("Segoe UI", 16F);
-            textBox2.Location = new Point(6, 203);
+            textBox2.Location = new Point(3, 238);
             textBox2.Multiline = true;
             textBox2.Name = "textBox2";
             textBox2.ReadOnly = true;

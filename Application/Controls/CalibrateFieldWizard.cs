@@ -151,8 +151,24 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
-            if (CurrentEquipmentStatus != null)
+            if ((CurrentEquipmentStatus != null) && (CurrentField != null))
             {
+                double EastingM;
+                double NorthingM;
+                double HeightM;
+
+                Benchmark? NearestBM = CurrentField.GetNearestBenchmark(CurrentEquipmentStatus.TractorFix.Latitude,
+                    CurrentEquipmentStatus.TractorFix.Longitude,
+                    CurrentEquipmentStatus.TractorFix.Altitude,
+                    out EastingM,
+                    out NorthingM,
+                    out HeightM);
+
+                if (NearestBM != null)
+                {
+                    BMOffset.Text = string.Format("{0} E = {1}mm, N = {2}mm, H = {3}mm", NearestBM.Name,
+                        (int)(EastingM * 1000), (int)(NorthingM * 1000), (int)(HeightM * 1000));
+                }
             }
         }
     }
