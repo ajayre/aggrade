@@ -957,6 +957,9 @@ namespace AgGrade.Data
             FieldMaxX = MaxXY.Easting;
             FieldMaxY = MaxXY.Northing;
 
+            TotalCutCY = Db.GetData(Database.DataNames.TotalCutCY);
+            TotalFillCY = Db.GetData(Database.DataNames.TotalFillCY);
+
             CalculateBinGridSize();
 
             // construct bin grid to access bins vix y, x
@@ -964,6 +967,17 @@ namespace AgGrade.Data
 
             string OutFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar;
             FlowMapGenerator FlowGen = new FlowMapGenerator();
+        }
+
+        /// <summary>
+        /// Gets the percentage complete of the field
+        /// </summary>
+        /// <returns>Percentage complete</returns>
+        public double PercentageComplete
+            (
+            )
+        {
+            return CompletedCutCY / TotalCutCY * 100.0;
         }
 
         /// <summary>

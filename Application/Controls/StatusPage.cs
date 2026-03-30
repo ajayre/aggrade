@@ -29,12 +29,13 @@ namespace AgGrade.Controls
         public void ShowStatus
             (
             EquipmentStatus Status,
-            AppSettings Settings
+            AppSettings Settings,
+            Field? CurrentField
             )
         {
             if (InvokeRequired)
             {
-                BeginInvoke(ShowStatus, Status, Settings);
+                BeginInvoke(ShowStatus, Status, Settings, CurrentField);
                 return;
             }
 
@@ -83,6 +84,16 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.TrackMagneticDeg != Status.RearPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMU.CalibrationStatus != Status.RearPan.IMU.CalibrationStatus);
+
+            if (CurrentField == null)
+            {
+                Pages.Controls.Remove(Field);
+            }
+            else
+            {
+                FieldProgress.Value = (int)CurrentField.PercentageComplete();
+                FieldProgressLabel.Text = string.Format("{0:0.00}%", CurrentField.PercentageComplete());
+            }
 
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus

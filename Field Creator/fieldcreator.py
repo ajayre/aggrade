@@ -24,6 +24,7 @@ from PIL import Image, ImageDraw
 BIN_SIZE_M = 0.6096  # 2 ft
 EARTH_RADIUS_M = 6_378_137.0
 BIN_AREA_M2 = BIN_SIZE_M * BIN_SIZE_M
+M3_TO_CY = 1.307950619314392
 ELEVATION_NO_DATA_SENTINEL_M = -1000.0
 OUTLIER_KEEP_RANGE_WIDTH_SCALE = 3.0
 
@@ -304,6 +305,30 @@ def elevation_range(values: Dict[Tuple[int, int], float]) -> Tuple[float, float]
         elev_min = center - 0.01
         elev_max = center + 0.01
     return elev_min, elev_max
+
+
+def calculate_total_cut_fill_cy(
+    existing_values: Dict[Tuple[int, int], float],
+    target_values: Dict[Tuple[int, int], float],
+) -> Tuple[float, float]:
+    """
+    Compute total cut/fill volume from binned heights.
+    Per-bin volume is bin area * height delta (m^3), converted to cubic yards.
+    """
+    total_cut_m3 = 0.0
+    total_fill_m3 = 0.0
+    all_bins = set(existing_values.keys()) | set(target_values.keys())
+    for key in all_bins:
+        existing = existing_values.get(key)
+        target = target_values.get(key)
+        if existing is None or target is None:
+            continue
+        delta_m = existing - target
+        if delta_m > 0.0:
+            total_cut_m3 += BIN_AREA_M2 * delta_m
+        elif delta_m < 0.0:
+            total_fill_m3 += BIN_AREA_M2 * (-delta_m)
+    return total_cut_m3 * M3_TO_CY, total_fill_m3 * M3_TO_CY
 
 
 # ---------------------------------------------------------------------------
@@ -2003,6 +2028,7 @@ def main() -> int:
         for by in range(grid_height):
             for bx in range(grid_width):
                 existing_filled[(bx, by)] = target_filled.get((bx, by), 0.0) - args.restoring
+    total_cut_cy, total_fill_cy = calculate_total_cut_fill_cy(existing_filled, target_filled)
     values = existing_filled
     palette = generate_palette()
     min_elev, max_elev = elevation_range(values)
@@ -2326,6 +2352,14 @@ def main() -> int:
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",
         ("CompletedFillCY", 0.0),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("TotalCutCY", float(total_cut_cy)),
+    )
+    cur.execute(
+        "INSERT INTO Data (Name, Value) VALUES (?, ?)",
+        ("TotalFillCY", float(total_fill_cy)),
     )
     cur.execute(
         "INSERT INTO Data (Name, Value) VALUES (?, ?)",

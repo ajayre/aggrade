@@ -235,7 +235,9 @@ namespace AgGrade.Data
             MinLon,
             MaxLat,
             MaxLon,
-            Calibrated
+            Calibrated,
+            TotalCutCY,
+            TotalFillCY
         }
 
         public static bool IsCalibrated

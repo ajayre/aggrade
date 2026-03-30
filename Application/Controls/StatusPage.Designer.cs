@@ -115,7 +115,7 @@
             label33 = new Label();
             RearPanLocation = new TextBox();
             label34 = new Label();
-            tabControl1 = new TabControl();
+            Pages = new TabControl();
             TractorPage = new TabPage();
             FrontPage = new TabPage();
             groupBox1 = new GroupBox();
@@ -139,13 +139,18 @@
             RearPanBladeOffset = new TextBox();
             label56 = new Label();
             label57 = new Label();
+            Field = new TabPage();
+            FieldProgressLabel = new Label();
+            FieldProgress = new ProgressBar();
+            label66 = new Label();
             sectionTitle2 = new SectionTitle();
-            tabControl1.SuspendLayout();
+            Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             FrontPage.SuspendLayout();
             groupBox1.SuspendLayout();
             RearPage.SuspendLayout();
             groupBox2.SuspendLayout();
+            Field.SuspendLayout();
             SuspendLayout();
             // 
             // label50
@@ -1018,19 +1023,20 @@
             label34.TabIndex = 0;
             label34.Text = "Location:";
             // 
-            // tabControl1
+            // Pages
             // 
-            tabControl1.Controls.Add(TractorPage);
-            tabControl1.Controls.Add(FrontPage);
-            tabControl1.Controls.Add(RearPage);
-            tabControl1.Dock = DockStyle.Fill;
-            tabControl1.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-            tabControl1.Location = new Point(0, 48);
-            tabControl1.Name = "tabControl1";
-            tabControl1.Padding = new Point(20, 10);
-            tabControl1.SelectedIndex = 0;
-            tabControl1.Size = new Size(869, 530);
-            tabControl1.TabIndex = 23;
+            Pages.Controls.Add(TractorPage);
+            Pages.Controls.Add(FrontPage);
+            Pages.Controls.Add(RearPage);
+            Pages.Controls.Add(Field);
+            Pages.Dock = DockStyle.Fill;
+            Pages.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            Pages.Location = new Point(0, 48);
+            Pages.Name = "Pages";
+            Pages.Padding = new Point(20, 10);
+            Pages.SelectedIndex = 0;
+            Pages.Size = new Size(869, 530);
+            Pages.TabIndex = 23;
             // 
             // TractorPage
             // 
@@ -1103,7 +1109,7 @@
             FrontPage.Location = new Point(4, 48);
             FrontPage.Name = "FrontPage";
             FrontPage.Padding = new Padding(3);
-            FrontPage.Size = new Size(861, 526);
+            FrontPage.Size = new Size(861, 478);
             FrontPage.TabIndex = 1;
             FrontPage.Text = "Front Pan";
             // 
@@ -1253,7 +1259,7 @@
             RearPage.Location = new Point(4, 48);
             RearPage.Name = "RearPage";
             RearPage.Padding = new Padding(3);
-            RearPage.Size = new Size(861, 526);
+            RearPage.Size = new Size(861, 478);
             RearPage.TabIndex = 2;
             RearPage.Text = "Rear Pan";
             // 
@@ -1274,7 +1280,7 @@
             groupBox2.Controls.Add(label17);
             groupBox2.Location = new Point(6, 196);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(849, 324);
+            groupBox2.Size = new Size(849, 276);
             groupBox2.TabIndex = 36;
             groupBox2.TabStop = false;
             groupBox2.Text = "Blade";
@@ -1369,6 +1375,49 @@
             label57.TabIndex = 24;
             label57.Text = "mm";
             // 
+            // Field
+            // 
+            Field.Controls.Add(FieldProgressLabel);
+            Field.Controls.Add(FieldProgress);
+            Field.Controls.Add(label66);
+            Field.Location = new Point(4, 48);
+            Field.Name = "Field";
+            Field.Padding = new Padding(3);
+            Field.Size = new Size(861, 478);
+            Field.TabIndex = 3;
+            Field.Text = "Field";
+            Field.UseVisualStyleBackColor = true;
+            // 
+            // FieldProgressLabel
+            // 
+            FieldProgressLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            FieldProgressLabel.Font = new Font("Segoe UI", 14F);
+            FieldProgressLabel.Location = new Point(768, 9);
+            FieldProgressLabel.Name = "FieldProgressLabel";
+            FieldProgressLabel.Size = new Size(87, 25);
+            FieldProgressLabel.TabIndex = 3;
+            FieldProgressLabel.Text = "100.00%";
+            // 
+            // FieldProgress
+            // 
+            FieldProgress.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            FieldProgress.Location = new Point(101, 6);
+            FieldProgress.Name = "FieldProgress";
+            FieldProgress.Size = new Size(661, 31);
+            FieldProgress.Style = ProgressBarStyle.Continuous;
+            FieldProgress.TabIndex = 2;
+            FieldProgress.Value = 50;
+            // 
+            // label66
+            // 
+            label66.AutoSize = true;
+            label66.Font = new Font("Segoe UI", 14F);
+            label66.Location = new Point(6, 9);
+            label66.Name = "label66";
+            label66.Size = new Size(89, 25);
+            label66.TabIndex = 1;
+            label66.Text = "Progress:";
+            // 
             // sectionTitle2
             // 
             sectionTitle2.Dock = DockStyle.Top;
@@ -1382,12 +1431,12 @@
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(tabControl1);
+            Controls.Add(Pages);
             Controls.Add(sectionTitle2);
             DoubleBuffered = true;
             Name = "StatusPage";
             Size = new Size(869, 578);
-            tabControl1.ResumeLayout(false);
+            Pages.ResumeLayout(false);
             TractorPage.ResumeLayout(false);
             TractorPage.PerformLayout();
             FrontPage.ResumeLayout(false);
@@ -1398,6 +1447,8 @@
             RearPage.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
+            Field.ResumeLayout(false);
+            Field.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1491,7 +1542,7 @@
         private Label label54;
         private TextBox RearPanAltitude;
         private Label label55;
-        private TabControl tabControl1;
+        private TabControl Pages;
         private TabPage TractorPage;
         private TabPage FrontPage;
         private TabPage RearPage;
@@ -1516,5 +1567,9 @@
         private TextBox FrontPanBladePWM;
         private Label label62;
         private SectionTitle sectionTitle2;
+        private TabPage Field;
+        private ProgressBar FieldProgress;
+        private Label label66;
+        private Label FieldProgressLabel;
     }
 }

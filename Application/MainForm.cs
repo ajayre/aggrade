@@ -280,7 +280,7 @@ namespace AgGrade
             FrontHeightFound = false;
             RearHeightFound = false;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             UpdateIMULeds();
             UpdateRTKLeds();
@@ -565,7 +565,7 @@ namespace AgGrade
             statusPage.Dock = DockStyle.Fill;
             statusPage.Show();
 
-            statusPage.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            statusPage.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
         }
 
         /// <summary>
@@ -1230,7 +1230,7 @@ namespace AgGrade
 
             FrontIMUFound = true;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             UpdateIMULeds();
         }
@@ -1245,7 +1245,7 @@ namespace AgGrade
 
             RearIMUFound = true;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             UpdateIMULeds();
         }
@@ -1260,7 +1260,7 @@ namespace AgGrade
 
             TractorIMUFound = true;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             UpdateIMULeds();
         }
@@ -1273,7 +1273,7 @@ namespace AgGrade
         {
             CurrentEquipmentStatus.TractorFix = Fix;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             GetMap()?.SetTractor(Fix);
 
@@ -1288,7 +1288,7 @@ namespace AgGrade
         {
             CurrentEquipmentStatus.RearPan.Fix = Fix;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             GetMap()?.SetRearScraper(Fix);
 
@@ -1303,7 +1303,7 @@ namespace AgGrade
         {
             CurrentEquipmentStatus.FrontPan.Fix = Fix;
 
-            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings, CurrentField);
 
             GetMap()?.SetFrontScraper(Fix);
 
