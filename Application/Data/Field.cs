@@ -144,11 +144,69 @@ namespace AgGrade.Data
             Calibration NewCalib
             )
         {
+            Calibration oldCalib = GetCalibration();
+
             Db.SetData(Database.DataNames.EastingOffsetM,  NewCalib.EastingM);
             Db.SetData(Database.DataNames.NorthingOffsetM, NewCalib.NorthingM);
             Db.SetData(Database.DataNames.HeightOffsetM,   NewCalib.HeightM);
             Db.SetBoolData(Database.DataNames.Calibrated, true);
             Db.RefreshCalibration();
+
+            double deltaEastingM = NewCalib.EastingM - oldCalib.EastingM;
+            double deltaNorthingM = NewCalib.NorthingM - oldCalib.NorthingM;
+            double deltaHeightM = NewCalib.HeightM - oldCalib.HeightM;
+
+            if (deltaEastingM == 0 && deltaNorthingM == 0 && deltaHeightM == 0) return;
+
+            Coordinate shiftedFieldCentroid = UTM.OffsetLocation(FieldCentroidLat, FieldCentroidLon, deltaEastingM, deltaNorthingM);
+            FieldCentroidLat = shiftedFieldCentroid.Latitude;
+            FieldCentroidLon = shiftedFieldCentroid.Longitude;
+            FieldMinX += deltaEastingM;
+            FieldMinY += deltaNorthingM;
+            FieldMaxX += deltaEastingM;
+            FieldMaxY += deltaNorthingM;
+
+            foreach (TopologyPoint point in TopologyPoints)
+            {
+                Coordinate shifted = UTM.OffsetLocation(point.Latitude, point.Longitude, deltaEastingM, deltaNorthingM);
+                point.Latitude = shifted.Latitude;
+                point.Longitude = shifted.Longitude;
+                point.ExistingElevation += deltaHeightM;
+                point.ProposedElevation += deltaHeightM;
+            }
+
+            foreach (Bin bin in Bins)
+            {
+                if (bin.CurrentElevationM != BIN_NO_DATA_SENTINEL) bin.CurrentElevationM += deltaHeightM;
+                if (bin.InitialElevationM != BIN_NO_DATA_SENTINEL) bin.InitialElevationM += deltaHeightM;
+                if (bin.TargetElevationM != BIN_NO_DATA_SENTINEL) bin.TargetElevationM += deltaHeightM;
+
+                if (bin.Centroid != null)
+                {
+                    bin.Centroid = UTM.OffsetLocation(bin.Centroid, deltaEastingM, deltaNorthingM);
+                }
+
+                if (bin.SouthwestCorner != null)
+                {
+                    bin.SouthwestCorner = UTM.OffsetLocation(bin.SouthwestCorner, deltaEastingM, deltaNorthingM);
+                }
+
+                if (bin.NortheastCorner != null)
+                {
+                    bin.NortheastCorner = UTM.OffsetLocation(bin.NortheastCorner, deltaEastingM, deltaNorthingM);
+                }
+            }
+
+            foreach (Benchmark benchmark in Benchmarks)
+            {
+                benchmark.Location = UTM.OffsetLocation(benchmark.Location, deltaEastingM, deltaNorthingM);
+                benchmark.Elevation += deltaHeightM;
+            }
+
+            foreach (HaulDirection direction in HaulDirections)
+            {
+                direction.Location = UTM.OffsetLocation(direction.Location, deltaEastingM, deltaNorthingM);
+            }
         }
 
         /// <summary>
