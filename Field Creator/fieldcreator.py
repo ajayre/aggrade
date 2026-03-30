@@ -24,6 +24,8 @@ from PIL import Image, ImageDraw
 BIN_SIZE_M = 0.6096  # 2 ft
 EARTH_RADIUS_M = 6_378_137.0
 BIN_AREA_M2 = BIN_SIZE_M * BIN_SIZE_M
+ELEVATION_NO_DATA_SENTINEL_M = -1000.0
+OUTLIER_KEEP_RANGE_WIDTH_SCALE = 3.0
 
 # Haul-arrow rendering constants (adapted from render_existing_heights.py)
 ARROW_LENGTH_PX = 12
@@ -898,6 +900,83 @@ def _local_xy_to_latlon(x: float, y: float, lat0: float, lon0: float) -> Tuple[f
     return lat, lon
 
 
+def _filter_elevation_outliers(
+    points: List[Tuple[float, float, float, float]],
+) -> Tuple[List[Tuple[float, float, float, float]], Dict[str, float]]:
+    """
+    Remove implausible elevation outliers using robust field-wide statistics
+    computed from EXISTING elevation only.
+
+    Strategy:
+    1) Compute robust spread on existing elevations via IQR and MAD.
+    2) Build an initial keep window around the mean using the larger robust spread.
+    3) Recompute statistics on retained values and apply a final keep window.
+    """
+    if not points:
+        return points, {}
+
+    existing = np.array([p[2] for p in points], dtype=np.float64)
+
+    def robust_spread(values: np.ndarray) -> Tuple[float, float, float, float, float]:
+        mean = float(np.mean(values))
+        std = float(np.std(values))
+        q1, q3 = np.percentile(values, [25.0, 75.0])
+        iqr = float(q3 - q1)
+        median = float(np.median(values))
+        mad = float(np.median(np.abs(values - median)))
+        robust_sigma = 1.4826 * mad if mad > 1e-12 else std
+        return mean, std, iqr, median, robust_sigma
+
+    mean0, std0, iqr0, _median0, robust_sigma0 = robust_spread(existing)
+    half_window0 = OUTLIER_KEEP_RANGE_WIDTH_SCALE * max(3.0 * robust_sigma0, 1.5 * iqr0, 1.0)
+    low0 = mean0 - half_window0
+    high0 = mean0 + half_window0
+
+    stage1 = [
+        p for p in points
+        if (low0 <= p[2] <= high0)
+    ]
+    if not stage1:
+        # Fail-safe: do not drop everything.
+        return points, {
+            "mean": mean0,
+            "std": std0,
+            "iqr": iqr0,
+            "low": low0,
+            "high": high0,
+            "removed": 0.0,
+        }
+
+    stage1_elev = np.array([p[2] for p in stage1], dtype=np.float64)
+    mean1, std1, iqr1, _median1, robust_sigma1 = robust_spread(stage1_elev)
+    half_window1 = OUTLIER_KEEP_RANGE_WIDTH_SCALE * max(3.0 * robust_sigma1, 1.5 * iqr1, 1.0)
+    low1 = mean1 - half_window1
+    high1 = mean1 + half_window1
+
+    filtered = [
+        p for p in points
+        if (low1 <= p[2] <= high1)
+    ]
+    if not filtered:
+        return stage1, {
+            "mean": mean1,
+            "std": std1,
+            "iqr": iqr1,
+            "low": low1,
+            "high": high1,
+            "removed": float(len(points) - len(stage1)),
+        }
+
+    return filtered, {
+        "mean": mean1,
+        "std": std1,
+        "iqr": iqr1,
+        "low": low1,
+        "high": high1,
+        "removed": float(len(points) - len(filtered)),
+    }
+
+
 def parse_agd_points(
     agd_path: Path,
 ) -> Tuple[List[Tuple[float, float, float, float]], List[Tuple[float, float, str, float]]]:
@@ -905,6 +984,8 @@ def parse_agd_points(
     Parse AGD lines using extract_agd_heights.py rules and return:
     - points: (lat, lon, existing_elevation, target_elevation)
     - benchmarks: (lat, lon, point_name, elevation_m) where code/name contains BM or MB
+    Zero elevations are allowed; implausible outlier elevations are filtered using
+    robust field-wide statistics.
     """
     try:
         text = agd_path.read_text(encoding="utf-8")
@@ -948,14 +1029,25 @@ def parse_agd_points(
             target = float(target_s)
         except ValueError:
             continue
-        # Mirror extract/bin logic: require both non-zero
-        if existing == 0.0 or target == 0.0:
-            continue
         points.append((lat, lon, existing, target))
 
     if not points:
         raise ValueError(f"No valid elevation points parsed from AGD: {agd_path}")
-    return points, benchmarks
+
+    filtered_points, stats = _filter_elevation_outliers(points)
+    if stats:
+        removed = int(stats.get("removed", 0.0))
+        print(
+            "INFO: elevation stats "
+            f"mean={stats['mean']:.3f}m std={stats['std']:.3f}m iqr={stats['iqr']:.3f}m "
+            f"keep_range=[{stats['low']:.3f}, {stats['high']:.3f}]m "
+            f"removed_outliers={removed}/{len(points)}",
+            file=sys.stderr,
+        )
+    if not filtered_points:
+        raise ValueError(f"All AGD points were rejected by outlier filter: {agd_path}")
+
+    return filtered_points, benchmarks
 
 
 def bin_agd_points_2ft(
@@ -1025,13 +1117,10 @@ def bin_agd_points_2ft(
     if grid_width <= 0 or grid_height <= 0:
         raise ValueError("Computed non-positive grid dimensions from AGD data")
 
-    # Aggregate existing/target elevations per bin, mirroring the C# logic that
-    # only bins points with non-zero cut/fill (existing != target).
+    # Aggregate existing/target elevations per bin from all parsed AGD points,
+    # including points where existing == target.
     grouped: Dict[Tuple[int, int], List[Tuple[float, float]]] = {}
     for easting, northing, existing, target in utm_points:
-        cut_fill = existing - target
-        if abs(cut_fill) <= 0.0:
-            continue
         bx = int(math.floor((easting - min_x) / BIN_SIZE_M))
         by = int(math.floor((northing - min_y) / BIN_SIZE_M))
         if bx < 0 or bx >= grid_width or by < 0 or by >= grid_height:
@@ -2165,8 +2254,8 @@ def main() -> int:
     all_bins = [(bx, by) for by in range(grid_height) for bx in range(grid_width)]
     field_rows = []
     for bx, by in all_bins:
-        existing_height_m = existing_filled.get((bx, by), 0.0)
-        target_height_m = target_filled.get((bx, by), 0.0)
+        existing_height_m = existing_filled.get((bx, by), ELEVATION_NO_DATA_SENTINEL_M)
+        target_height_m = target_filled.get((bx, by), ELEVATION_NO_DATA_SENTINEL_M)
         centroid_lat, centroid_lon = centroids.get((bx, by), (0.0, 0.0))
         field_rows.append((bx, by, existing_height_m, existing_height_m, target_height_m, centroid_lat, centroid_lon, 0))
 

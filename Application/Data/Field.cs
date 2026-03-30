@@ -25,6 +25,11 @@ namespace AgGrade.Data
 
         public const double CUT_FILL_RATIO = 1.2;
 
+        /// <summary>
+        /// If a bin has this elevation then it is outside of the field
+        /// </summary>
+        public const int BIN_NO_DATA_SENTINEL = -1000;
+
         /// <summary>No-data value for elevation DEM cells with no height (e.g. zero or missing).</summary>
         public const float ElevationDemNoDataValue = -9999f;
 
@@ -849,13 +854,21 @@ namespace AgGrade.Data
                 Bin NewBin = new Bin();
                 NewBin.X = BinState.X;
                 NewBin.Y = BinState.Y;
+
                 // don't calibrate for bins with no data
-                if (BinState.CurrentHeightM != 0)
+                if (BinState.CurrentHeightM != BIN_NO_DATA_SENTINEL)
                 {
                     NewBin.CurrentElevationM = BinState.CurrentHeightM + CurrentCalibration.HeightM;
                     NewBin.InitialElevationM = BinState.InitialHeightM + CurrentCalibration.HeightM;
                     NewBin.TargetElevationM = BinState.TargetHeightM + CurrentCalibration.HeightM;
                 }
+                else
+                {
+                    NewBin.CurrentElevationM = BinState.CurrentHeightM;
+                    NewBin.InitialElevationM = BinState.InitialHeightM;
+                    NewBin.TargetElevationM = BinState.TargetHeightM;
+                }
+
                 NewBin.Centroid = UTM.OffsetLocation(new Coordinate(BinState.CentroidLat, BinState.CentroidLon), CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
                 NewBin.HaulPath = BinState.HaulPath;
                 NewBin.Field = this;
@@ -1191,7 +1204,7 @@ namespace AgGrade.Data
                     FlowMapGenerator.ElevationTypes.Target => bin.TargetElevationM,
                     _ => bin.CurrentElevationM
                 };
-                bool treatAsNoData = h == 0.0;
+                bool treatAsNoData = h == BIN_NO_DATA_SENTINEL;
                 float value = treatAsNoData ? ElevationDemNoDataValue : (float)h;
                 int row = maxY - bin.Y;
                 int col = bin.X - minX;
@@ -1216,7 +1229,7 @@ namespace AgGrade.Data
 
         /// <summary>
         /// Creates a DEM georeferenced TIFF from this field's bin elevation. The elevation source is
-        /// determined by <paramref name="elevationType"/> (Initial, Current, or Target). Zero elevation is treated as no-data.
+        /// determined by <paramref name="elevationType"/> (Initial, Current, or Target). BIN_NO_DATA_SENTINEL elevation is treated as no-data.
         /// Writes a .tfw world file for UTM georeferencing (same convention as Python demgenerator).
         /// </summary>
         /// <param name="elevationType">Type of elevation to use</param>

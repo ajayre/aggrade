@@ -514,9 +514,9 @@ namespace AgGrade.Data
                 double minElevation = ElevationRange[0];
                 double maxElevation = ElevationRange[1];
 
-                if (minElevation == 0.0 && maxElevation == 0.0)
+                if (minElevation == Field.BIN_NO_DATA_SENTINEL && maxElevation == Field.BIN_NO_DATA_SENTINEL)
                 {
-                    throw new InvalidOperationException("No valid non-zero elevation data found in initial elevation range");
+                    throw new InvalidOperationException("No valid elevation data found in initial elevation range");
                 }
 
                 // If elevation range is too small, add some artificial range for visualization
@@ -2463,7 +2463,7 @@ namespace AgGrade.Data
             return new Point(finalX, finalY);
         }
 
-        // Calculate and set the initial elevation range (ignoring zero elevations)
+        // Calculate and set the initial elevation range (ignoring "no data" elevations)
         private double[] CalculateInitialElevationRange
             (
             Field Field
@@ -2476,7 +2476,7 @@ namespace AgGrade.Data
             foreach (Bin bin in Field.Bins)
             {
                 double elevation = bin.CurrentElevationM;
-                if (elevation == 0.0)
+                if (elevation == Field.BIN_NO_DATA_SENTINEL)
                 {
                     continue;
                 }
@@ -2488,7 +2488,7 @@ namespace AgGrade.Data
 
             if (!found)
             {
-                return new double[] { 0.0, 0.0 };
+                return new double[] { Field.BIN_NO_DATA_SENTINEL, Field.BIN_NO_DATA_SENTINEL };
             }
 
             return new double[] { minElevation, maxElevation };
@@ -2651,7 +2651,7 @@ namespace AgGrade.Data
                             }
                             else
                             {
-                                if (ExistingElevation.HasValue && TargetElevation.HasValue && (ExistingElevation.Value != 0.0) && (TargetElevation.Value != 0.0))
+                                if (ExistingElevation.HasValue && TargetElevation.HasValue && ((ExistingElevation.Value != Field.BIN_NO_DATA_SENTINEL) && (TargetElevation.Value != Field.BIN_NO_DATA_SENTINEL)))
                                 {
                                     double DifferenceM = ExistingElevation.Value - TargetElevation.Value;
 
@@ -2866,7 +2866,7 @@ namespace AgGrade.Data
                         {
                             var elevation = BinGrid[gridY, gridX]?.CurrentElevationM;
 
-                            if (elevation.HasValue && elevation.Value != 0.0)
+                            if (elevation.HasValue && elevation.Value != Field.BIN_NO_DATA_SENTINEL)
                             {
                                 // Normalize elevation to 0-255 range
                                 var normalizedElevation = (elevation.Value - minElevation) / (maxElevation - minElevation);
