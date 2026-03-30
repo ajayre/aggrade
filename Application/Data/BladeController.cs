@@ -196,7 +196,7 @@ namespace AgGrade.Data
                     if (CurrentBin != null)
                     {
                         // no data for this bin
-                        if (CurrentBin.CurrentElevationM == 0)
+                        if (CurrentBin.CurrentElevationM == Field.BIN_NO_DATA_SENTINEL)
                         {
                             Controller.SetFrontCutValve(CurrentEquipmentSettings.FrontPan.MaxHeightMm + BLADE_HEIGHT_GROUND_LEVEL);
                         }
