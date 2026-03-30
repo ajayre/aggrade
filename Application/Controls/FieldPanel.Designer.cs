@@ -51,6 +51,7 @@
             LastModified.BackColor = Color.OldLace;
             LastModified.Dock = DockStyle.Fill;
             LastModified.Font = new Font("Segoe UI", 14F);
+            LastModified.ImageAlign = ContentAlignment.MiddleLeft;
             LastModified.Location = new Point(374, 0);
             LastModified.Name = "LastModified";
             LastModified.Padding = new Padding(5, 0, 0, 0);

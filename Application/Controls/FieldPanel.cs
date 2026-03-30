@@ -49,6 +49,24 @@ namespace AgGrade.Controls
             set { _DbFile = value; }
         }
 
+        private bool _Calibrated;
+        public bool Calibrated
+        {
+            get { return _Calibrated; }
+            set
+            {
+                _Calibrated = value;
+                if (_Calibrated)
+                {
+                    Icon.BackgroundImage = Properties.Resources.calibration_48px;
+                }
+                else
+                {
+                    Icon.BackgroundImage = Properties.Resources.createnewfield_48px;
+                }
+            }
+        }
+
         private bool _Odd;
         public bool Odd
         {
@@ -79,6 +97,7 @@ namespace AgGrade.Controls
             LastModifiedText = "Create New";
 
             DbFile = null;
+            Calibrated = false;
         }
 
         /// <summary>

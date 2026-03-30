@@ -238,6 +238,34 @@ namespace AgGrade.Data
             Calibrated
         }
 
+        public static bool IsCalibrated
+            (
+            string FileName
+            )
+        {
+            try
+            {
+                using (SqliteConnection connection = new SqliteConnection($"Data Source={FileName}"))
+                {
+                    connection.Open();
+                    using (SqliteCommand cmd = connection.CreateCommand())
+                    {
+                        cmd.CommandText = "SELECT Value FROM Data WHERE Name = @Name LIMIT 1";
+                        cmd.Parameters.AddWithValue("@Name", DataNames.Calibrated.ToString());
+                        object? result = cmd.ExecuteScalar();
+                        if (result == null || result is DBNull) return false;
+
+                        double value = Convert.ToDouble(result, CultureInfo.InvariantCulture);
+                        return value == 1;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Opens an existing database file for use. The connection is kept open until Close or Dispose.
         /// </summary>

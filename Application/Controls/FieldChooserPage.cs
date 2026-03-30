@@ -1,3 +1,4 @@
+using AgGrade.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -42,7 +43,7 @@ namespace AgGrade.Controls
             if (string.IsNullOrEmpty(FieldDataFolder) || !Directory.Exists(FieldDataFolder))
                 return;
 
-            var entries = new List<(string FieldName, string FieldNameText, string LastModifiedText, DateTime SortDate, bool ShowIcon, string Folder, string? DbFile)>();
+            var entries = new List<(string FieldName, string FieldNameText, string LastModifiedText, DateTime SortDate, bool ShowIcon, string Folder, string? DbFile, bool Calibrated)>();
 
             foreach (string subDir in Directory.GetDirectories(FieldDataFolder))
             {
@@ -50,16 +51,12 @@ namespace AgGrade.Controls
                 if (string.IsNullOrEmpty(fieldName))
                     continue;
 
-                //// look for AGD files
-                //if (Directory.GetFiles(subDir, "*.agd").Length == 0)
-                //    continue;
-
                 // look for exactly one base database
                 if (Directory.GetFiles(subDir, "*-base.db").Length != 1)
                     continue;
 
                 // Create New panel (sorts last within this field)
-                entries.Add((fieldName, fieldName, "", DateTime.MinValue, true, subDir, null));
+                entries.Add((fieldName, fieldName, "", DateTime.MinValue, true, subDir, null, false));
 
                 // One panel per .db file, newest first for sorting
                 var dbFiles = Directory.GetFiles(subDir, "*.db")
@@ -67,6 +64,10 @@ namespace AgGrade.Controls
                     .OrderByDescending(fi => fi.LastWriteTimeUtc);
                 foreach (var fi in dbFiles)
                 {
+                    bool Calibrated = Database.IsCalibrated(fi.FullName);
+                    bool ShowIcon = false;
+                    if (Calibrated) { ShowIcon = true; }
+
                     string dbFileName = Path.GetFileNameWithoutExtension(fi.FullName);
                     if (dbFileName.Contains("-base")) continue;
                     entries.Add((
@@ -74,9 +75,10 @@ namespace AgGrade.Controls
                         fieldName + " (" + dbFileName + ")",
                         FormatLastModifiedFriendly(fi.LastWriteTime),
                         fi.LastWriteTime,
-                        false,
+                        ShowIcon,
                         subDir,
-                        fi.FullName
+                        fi.FullName,
+                        Calibrated
                     ));
                 }
             }
@@ -98,6 +100,7 @@ namespace AgGrade.Controls
                 panel.FieldNameText = e.FieldNameText;
                 panel.LastModifiedText = e.LastModifiedText;
                 panel.ShowIcon = e.ShowIcon;
+                panel.Calibrated = e.Calibrated;
                 panel.Dock = DockStyle.Top;
                 panel.Folder = e.Folder;
                 panel.DbFile = e.DbFile;
