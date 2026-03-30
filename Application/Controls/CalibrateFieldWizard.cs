@@ -70,6 +70,9 @@ namespace AgGrade.Controls
                 CurrentField.SetCalibration(new Field.Calibration(EastingM, NorthingM, HeightM));
 
                 PositionValid = true;
+
+                CaptureLocationBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CaptureLocationBtn.ForeColor = Color.White;
             }
         }
 

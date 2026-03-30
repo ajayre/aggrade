@@ -107,6 +107,9 @@ namespace AgGrade.Controls
                 Pose1Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
                 Pose1Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackMagneticDeg;
                 Pose1Valid = true;
+
+                CapturePose1Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CapturePose2Btn.ForeColor = Color.White;
             }
         }
 
@@ -123,6 +126,9 @@ namespace AgGrade.Controls
                 Pose2Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
                 Pose2Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackMagneticDeg;
                 Pose2Valid = true;
+
+                CapturePose2Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CapturePose2Btn.ForeColor = Color.White;
             }
         }
 

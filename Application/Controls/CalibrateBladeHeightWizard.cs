@@ -94,6 +94,9 @@ namespace AgGrade.Controls
                 {
                     Controller.RearBladeAtZero();
                 }
+
+                CaptureZeroBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CaptureZeroBtn.ForeColor = Color.White;
             }
         }
 
@@ -184,6 +187,9 @@ namespace AgGrade.Controls
                 {
                     CurrentEquipmentSettings.RearPan.MinHeightMm = CurrentEquipmentStatus.RearPan.BladeHeight;
                 }
+
+                CaptureMinBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CaptureMinBtn.ForeColor = Color.White;
             }
         }
 
@@ -204,6 +210,9 @@ namespace AgGrade.Controls
                 {
                     CurrentEquipmentSettings.RearPan.MaxHeightMm = (uint)CurrentEquipmentStatus.RearPan.BladeHeight;
                 }
+
+                CaptureMaxBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CaptureMaxBtn.ForeColor = Color.White;
             }
         }
 
