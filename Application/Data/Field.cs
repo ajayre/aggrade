@@ -79,7 +79,6 @@ namespace AgGrade.Data
         public double CompletedFillCY;
         private bool IsLevelingOperationActive;
         private Database.LevelingOperationType? ActiveOperationType;
-        private Calibration CurrentCalibration = new Calibration();
 
         public Bin?[,] BinGrid;
         public int GridWidth { get; private set; }
@@ -149,6 +148,7 @@ namespace AgGrade.Data
             Db.SetData(Database.DataNames.NorthingOffsetM, NewCalib.NorthingM);
             Db.SetData(Database.DataNames.HeightOffsetM,   NewCalib.HeightM);
             Db.SetBoolData(Database.DataNames.Calibrated, true);
+            Db.RefreshCalibration();
         }
 
         /// <summary>
@@ -841,12 +841,6 @@ namespace AgGrade.Data
 
             Clear();
 
-            // if field has been calibrated then load it in
-            if (IsCalibrated())
-            {
-                CurrentCalibration = GetCalibration();
-            }
-
             // load in field
             Database.BinState[] BinStates = Db.GetBinStates();
             foreach (Database.BinState BinState in BinStates)
@@ -854,22 +848,10 @@ namespace AgGrade.Data
                 Bin NewBin = new Bin();
                 NewBin.X = BinState.X;
                 NewBin.Y = BinState.Y;
-
-                // don't calibrate for bins with no data
-                if (BinState.CurrentHeightM != BIN_NO_DATA_SENTINEL)
-                {
-                    NewBin.CurrentElevationM = BinState.CurrentHeightM + CurrentCalibration.HeightM;
-                    NewBin.InitialElevationM = BinState.InitialHeightM + CurrentCalibration.HeightM;
-                    NewBin.TargetElevationM = BinState.TargetHeightM + CurrentCalibration.HeightM;
-                }
-                else
-                {
-                    NewBin.CurrentElevationM = BinState.CurrentHeightM;
-                    NewBin.InitialElevationM = BinState.InitialHeightM;
-                    NewBin.TargetElevationM = BinState.TargetHeightM;
-                }
-
-                NewBin.Centroid = UTM.OffsetLocation(new Coordinate(BinState.CentroidLat, BinState.CentroidLon), CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
+                NewBin.CurrentElevationM = BinState.CurrentHeightM;
+                NewBin.InitialElevationM = BinState.InitialHeightM;
+                NewBin.TargetElevationM = BinState.TargetHeightM;
+                NewBin.Centroid = new Coordinate(BinState.CentroidLat, BinState.CentroidLon);
                 NewBin.HaulPath = BinState.HaulPath;
                 NewBin.Field = this;
                 Bins.Add(NewBin);
@@ -883,11 +865,6 @@ namespace AgGrade.Data
             CompletedCutCY = Db.GetData(Database.DataNames.CompletedCutCY);
             CompletedFillCY = Db.GetData(Database.DataNames.CompletedFillCY);
 
-            // offset field centroid
-            Coordinate FieldCentroid = UTM.OffsetLocation(FieldCentroidLat, FieldCentroidLon, CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
-            FieldCentroidLat = FieldCentroid.Latitude;
-            FieldCentroidLon = FieldCentroid.Longitude;
-
             // set field name using folder name and version
             Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
 
@@ -895,26 +872,22 @@ namespace AgGrade.Data
             Database.HaulArrow[] HaulArrows = Db.GetHaulArrows();
             foreach (Database.HaulArrow Arrow in HaulArrows)
             {
-                Coordinate ArrowLoc = UTM.OffsetLocation(Arrow.Latitude, Arrow.Longitude, CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
-
-                HaulDirections.Add(new HaulDirection(ArrowLoc.Latitude, ArrowLoc.Longitude, Arrow.Heading));
+                HaulDirections.Add(new HaulDirection(Arrow.Latitude, Arrow.Longitude, Arrow.Heading));
             }
 
             // load in benchmarks
             Database.BenchMark[] benchMarks = Db.GetBenchMarks();
             foreach (Database.BenchMark BMark in benchMarks)
             {
-                Coordinate BMLoc = UTM.OffsetLocation(new Coordinate(BMark.Latitude, BMark.Longitude), CurrentCalibration.EastingM, CurrentCalibration.NorthingM);
-
-                this.Benchmarks.Add(new Benchmark(BMLoc, BMark.Name, BMark.ElevationM + CurrentCalibration.HeightM));
+                this.Benchmarks.Add(new Benchmark(new Coordinate(BMark.Latitude, BMark.Longitude), BMark.Name, BMark.ElevationM));
             }
 
             // find the Southwest corner (minimum X and Y) to use as origin
             double MinLat = Db.GetData(Database.DataNames.MinLat);
             double MinLon = Db.GetData(Database.DataNames.MinLon);
             UTM.UTMCoordinate MinXY = UTM.FromLatLon(MinLat, MinLon);
-            FieldMinX = MinXY.Easting + CurrentCalibration.EastingM;
-            FieldMinY = MinXY.Northing + CurrentCalibration.NorthingM;
+            FieldMinX = MinXY.Easting;
+            FieldMinY = MinXY.Northing;
 
             UTMZone = MinXY.Zone;
             IsNorthernHemisphere = MinXY.IsNorthernHemisphere;
@@ -923,8 +896,8 @@ namespace AgGrade.Data
             double MaxLat = Db.GetData(Database.DataNames.MaxLat);
             double MaxLon = Db.GetData(Database.DataNames.MaxLon);
             UTM.UTMCoordinate MaxXY = UTM.FromLatLon(MaxLat, MaxLon);
-            FieldMaxX = MaxXY.Easting + CurrentCalibration.EastingM;
-            FieldMaxY = MaxXY.Northing + CurrentCalibration.NorthingM;
+            FieldMaxX = MaxXY.Easting;
+            FieldMaxY = MaxXY.Northing;
 
             CalculateBinGridSize();
 

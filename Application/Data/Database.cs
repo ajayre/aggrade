@@ -20,6 +20,11 @@ namespace AgGrade.Data
         private JournalOperationState? _activeJournalOperation;
         private bool _possibleDataLoss;
         private readonly object _operationSync = new object();
+        private double EastingOffsetM;
+        private double NorthingOffsetM;
+        private double HeightOffsetM;
+        private double LatitudeOffsetDeg;
+        private double LongitudeOffsetDeg;
 
         private const int JOURNAL_HEADER_SIZE = 32;
         private const int JOURNAL_RECORD_SIZE = 32;
@@ -242,6 +247,7 @@ namespace AgGrade.Data
             string FileName
             )
         {
+
             _connection?.Dispose();
             _databaseFilePath = FileName;
             _connection = new SqliteConnection($"Data Source={FileName}");
@@ -249,6 +255,145 @@ namespace AgGrade.Data
             ApplyHistoryWritePragmas();
             EnsureHaulPathsIndex();
             RecoverFromJournal();
+            RefreshCalibration();
+        }
+
+        /// <summary>
+        /// Refreshes the calibration, so it will be used from now on
+        /// </summary>
+        public void RefreshCalibration
+            (
+            )
+        {
+            EastingOffsetM = 0;
+            NorthingOffsetM = 0;
+            HeightOffsetM = 0;
+            LatitudeOffsetDeg = 0;
+            LongitudeOffsetDeg = 0;
+
+            // get current calibration, if there is one
+            if (GetBoolData(DataNames.Calibrated))
+            {
+                EastingOffsetM = GetData(DataNames.EastingOffsetM);
+                NorthingOffsetM = GetData(DataNames.NorthingOffsetM);
+                HeightOffsetM = GetData(DataNames.HeightOffsetM);
+
+                if (TryGetRawData(DataNames.MeanLat, out double meanLat) &&
+                    TryGetRawData(DataNames.MeanLon, out double meanLon))
+                {
+                    Coordinate shifted = UTM.OffsetLocation(meanLat, meanLon, EastingOffsetM, NorthingOffsetM);
+                    LatitudeOffsetDeg = shifted.Latitude - meanLat;
+                    LongitudeOffsetDeg = NormalizeLongitudeDelta(shifted.Longitude - meanLon);
+                }
+            }
+        }
+
+        private static bool IsLatitudeDataName
+            (
+            DataNames name
+            )
+        {
+            return
+                name == DataNames.MeanLat ||
+                name == DataNames.MinLat ||
+                name == DataNames.MaxLat;
+        }
+
+        private static bool IsLongitudeDataName
+            (
+            DataNames name
+            )
+        {
+            return
+                name == DataNames.MeanLon ||
+                name == DataNames.MinLon ||
+                name == DataNames.MaxLon;
+        }
+
+        private static bool IsHeightEventType
+            (
+            Event.EventTypes eventType
+            )
+        {
+            return
+                eventType == Event.EventTypes.FrontBladeHeight ||
+                eventType == Event.EventTypes.RearBladeHeight;
+        }
+
+        private double ToStoredHeight
+            (
+            double heightM
+            )
+        {
+            if (heightM == Field.BIN_NO_DATA_SENTINEL) return heightM;
+            return heightM - HeightOffsetM;
+        }
+
+        private double FromStoredHeight
+            (
+            double storedHeightM
+            )
+        {
+            if (storedHeightM == Field.BIN_NO_DATA_SENTINEL) return storedHeightM;
+            return storedHeightM + HeightOffsetM;
+        }
+
+        private Coordinate ToStoredCoordinate
+            (
+            double latitude,
+            double longitude
+            )
+        {
+            return UTM.OffsetLocation(latitude, longitude, -EastingOffsetM, -NorthingOffsetM);
+        }
+
+        private Coordinate FromStoredCoordinate
+            (
+            double storedLatitude,
+            double storedLongitude
+            )
+        {
+            return UTM.OffsetLocation(storedLatitude, storedLongitude, EastingOffsetM, NorthingOffsetM);
+        }
+
+        private static double NormalizeLongitudeDelta
+            (
+            double deltaLonDeg
+            )
+        {
+            while (deltaLonDeg > 180.0) deltaLonDeg -= 360.0;
+            while (deltaLonDeg < -180.0) deltaLonDeg += 360.0;
+            return deltaLonDeg;
+        }
+
+        private static double NormalizeLongitude
+            (
+            double longitudeDeg
+            )
+        {
+            while (longitudeDeg > 180.0) longitudeDeg -= 360.0;
+            while (longitudeDeg < -180.0) longitudeDeg += 360.0;
+            return longitudeDeg;
+        }
+
+        private bool TryGetRawData
+            (
+            DataNames name,
+            out double value
+            )
+        {
+            value = 0;
+            if (_connection == null) return false;
+
+            using (SqliteCommand cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT Value FROM Data WHERE Name = @Name LIMIT 1";
+                cmd.Parameters.AddWithValue("@Name", name.ToString());
+                object? result = cmd.ExecuteScalar();
+                if (result == null || result is DBNull) return false;
+                value = Convert.ToDouble(result, CultureInfo.InvariantCulture);
+                return true;
+            }
         }
 
         /// <summary>
@@ -343,9 +488,23 @@ namespace AgGrade.Data
                 if (_connection == null) throw new InvalidOperationException("Database is not open.");
                 using (var cmd = _connection.CreateCommand())
                 {
+                    double valueToStore = evt.Value;
+                    if (evt.Type == Event.EventTypes.TractorLat || evt.Type == Event.EventTypes.FrontScraperLat || evt.Type == Event.EventTypes.RearScraperLat)
+                    {
+                        valueToStore = evt.Value - LatitudeOffsetDeg;
+                    }
+                    else if (evt.Type == Event.EventTypes.TractorLon || evt.Type == Event.EventTypes.FrontScraperLon || evt.Type == Event.EventTypes.RearScraperLon)
+                    {
+                        valueToStore = NormalizeLongitude(evt.Value - LongitudeOffsetDeg);
+                    }
+                    else if (IsHeightEventType(evt.Type))
+                    {
+                        valueToStore = ToStoredHeight(evt.Value);
+                    }
+
                     cmd.CommandText = "INSERT INTO Events (Type, Value, Timestamp) VALUES (@Type, @Value, @Timestamp)";
                     cmd.Parameters.AddWithValue("@Type", evt.Type.ToString());
-                    cmd.Parameters.AddWithValue("@Value", evt.Value);
+                    cmd.Parameters.AddWithValue("@Value", valueToStore);
                     cmd.Parameters.AddWithValue("@Timestamp", evt.Timestamp);
                     cmd.ExecuteNonQuery();
                 }
@@ -378,17 +537,18 @@ namespace AgGrade.Data
                 using (var reader = cmd.ExecuteReader())
                 {
                     if (!reader.Read()) return null;
+                    Coordinate centroid = FromStoredCoordinate(reader.GetDouble(6), reader.GetDouble(7));
                     return new BinState
                     {
                         BinID = reader.GetInt32(0),
                         X = reader.GetInt32(1),
                         Y = reader.GetInt32(2),
-                        InitialHeightM = reader.GetDouble(3),
-                        CurrentHeightM = reader.GetDouble(3),
-                        TargetHeightM = reader.GetDouble(3),
-                        CentroidLat = reader.GetDouble(4),
-                        CentroidLon = reader.GetDouble(5),
-                        HaulPath = reader.GetInt32(6)
+                        InitialHeightM = FromStoredHeight(reader.GetDouble(3)),
+                        CurrentHeightM = FromStoredHeight(reader.GetDouble(4)),
+                        TargetHeightM = FromStoredHeight(reader.GetDouble(5)),
+                        CentroidLat = centroid.Latitude,
+                        CentroidLon = centroid.Longitude,
+                        HaulPath = reader.GetInt32(8)
                     };
                 }
             }
@@ -408,7 +568,7 @@ namespace AgGrade.Data
                 cmd.CommandText = "UPDATE FieldState SET CurrentHeightM = @CurrentHeightM WHERE X = @X AND Y = @Y";
                 cmd.Parameters.AddWithValue("@X", x);
                 cmd.Parameters.AddWithValue("@Y", y);
-                cmd.Parameters.AddWithValue("@CurrentHeightM", currentHeightM);
+                cmd.Parameters.AddWithValue("@CurrentHeightM", ToStoredHeight(currentHeightM));
                 cmd.ExecuteNonQuery();
             }
         }
@@ -432,16 +592,17 @@ namespace AgGrade.Data
             )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            Coordinate storedCentroid = ToStoredCoordinate(centroidLat, centroidLon);
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
                 cmd.Parameters.AddWithValue("@X", x);
                 cmd.Parameters.AddWithValue("@Y", y);
-                cmd.Parameters.AddWithValue("@InitialHeightM", initialHeightM);
-                cmd.Parameters.AddWithValue("@CurrentHeightM", currentHeightM);
-                cmd.Parameters.AddWithValue("@TargetHeightM", targetHeightM);
-                cmd.Parameters.AddWithValue("@CentroidLat", centroidLat);
-                cmd.Parameters.AddWithValue("@CentroidLon", centroidLon);
+                cmd.Parameters.AddWithValue("@InitialHeightM", ToStoredHeight(initialHeightM));
+                cmd.Parameters.AddWithValue("@CurrentHeightM", ToStoredHeight(currentHeightM));
+                cmd.Parameters.AddWithValue("@TargetHeightM", ToStoredHeight(targetHeightM));
+                cmd.Parameters.AddWithValue("@CentroidLat", storedCentroid.Latitude);
+                cmd.Parameters.AddWithValue("@CentroidLon", storedCentroid.Longitude);
                 cmd.Parameters.AddWithValue("@HaulPath", haulPath);
                 cmd.ExecuteNonQuery();
             }
@@ -453,16 +614,17 @@ namespace AgGrade.Data
         public void AddBinState(BinState binState)
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            Coordinate storedCentroid = ToStoredCoordinate(binState.CentroidLat, binState.CentroidLon);
             using (var cmd = _connection.CreateCommand())
             {
                 cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
                 cmd.Parameters.AddWithValue("@X", binState.X);
                 cmd.Parameters.AddWithValue("@Y", binState.Y);
-                cmd.Parameters.AddWithValue("@InitialHeightM", binState.InitialHeightM);
-                cmd.Parameters.AddWithValue("@CurrentHeightM", binState.CurrentHeightM);
-                cmd.Parameters.AddWithValue("@TargetHeightM", binState.TargetHeightM);
-                cmd.Parameters.AddWithValue("@CentroidLat", binState.CentroidLat);
-                cmd.Parameters.AddWithValue("@CentroidLon", binState.CentroidLon);
+                cmd.Parameters.AddWithValue("@InitialHeightM", ToStoredHeight(binState.InitialHeightM));
+                cmd.Parameters.AddWithValue("@CurrentHeightM", ToStoredHeight(binState.CurrentHeightM));
+                cmd.Parameters.AddWithValue("@TargetHeightM", ToStoredHeight(binState.TargetHeightM));
+                cmd.Parameters.AddWithValue("@CentroidLat", storedCentroid.Latitude);
+                cmd.Parameters.AddWithValue("@CentroidLon", storedCentroid.Longitude);
                 cmd.Parameters.AddWithValue("@HaulPath", binState.HaulPath);
                 cmd.ExecuteNonQuery();
             }
@@ -485,14 +647,15 @@ namespace AgGrade.Data
                 {
                     while (reader.Read())
                     {
+                        Coordinate centroid = FromStoredCoordinate(reader.GetDouble(5), reader.GetDouble(6));
                         States.Add(new BinState(
                             reader.GetInt32(0),
                             reader.GetInt32(1),
-                            reader.GetDouble(2),
-                            reader.GetDouble(3),
-                            reader.GetDouble(4),
-                            reader.GetDouble(5),
-                            reader.GetDouble(6),
+                            FromStoredHeight(reader.GetDouble(2)),
+                            FromStoredHeight(reader.GetDouble(3)),
+                            FromStoredHeight(reader.GetDouble(4)),
+                            centroid.Latitude,
+                            centroid.Longitude,
                             reader.GetInt32(7)
                         ));
                     }
@@ -519,11 +682,12 @@ namespace AgGrade.Data
                 {
                     while (reader.Read())
                     {
+                        Coordinate location = FromStoredCoordinate(reader.GetDouble(0), reader.GetDouble(1));
                         BenchMarks.Add(new BenchMark(
-                            reader.GetDouble(0),
-                            reader.GetDouble(1),
+                            location.Latitude,
+                            location.Longitude,
                             reader.GetString(2),
-                            reader.GetDouble(3)
+                            FromStoredHeight(reader.GetDouble(3))
                             ));
                     }
                 }
@@ -549,9 +713,10 @@ namespace AgGrade.Data
                 {
                     while (reader.Read())
                     {
+                        Coordinate location = FromStoredCoordinate(reader.GetDouble(0), reader.GetDouble(1));
                         Arrows.Add(new HaulArrow(
-                            reader.GetDouble(0),
-                            reader.GetDouble(1),
+                            location.Latitude,
+                            location.Longitude,
                             reader.GetDouble(2)
                             ));
                     }
@@ -585,14 +750,16 @@ namespace AgGrade.Data
 
                     foreach (Bin b in Bins)
                     {
+                        Coordinate storedCentroid = ToStoredCoordinate(b.Centroid.Latitude, b.Centroid.Longitude);
+
                         // For each row, only update parameter values
                         param1.Value = b.X;
                         param2.Value = b.Y;
-                        param3.Value = b.InitialElevationM;
-                        param4.Value = b.CurrentElevationM;
-                        param5.Value = b.TargetElevationM;
-                        param6.Value = b.Centroid.Latitude;
-                        param7.Value = b.Centroid.Longitude;
+                        param3.Value = ToStoredHeight(b.InitialElevationM);
+                        param4.Value = ToStoredHeight(b.CurrentElevationM);
+                        param5.Value = ToStoredHeight(b.TargetElevationM);
+                        param6.Value = storedCentroid.Latitude;
+                        param7.Value = storedCentroid.Longitude;
                         param8.Value = b.HaulPath;
                         command.ExecuteNonQuery();
                     }
@@ -1241,6 +1408,16 @@ namespace AgGrade.Data
             )
         {
             if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            double valueToStore = Value;
+            if (IsLatitudeDataName(Name))
+            {
+                valueToStore = Value - LatitudeOffsetDeg;
+            }
+            else if (IsLongitudeDataName(Name))
+            {
+                valueToStore = NormalizeLongitude(Value - LongitudeOffsetDeg);
+            }
+
             using (var cmd = _connection.CreateCommand())
             {
                 try
@@ -1248,7 +1425,7 @@ namespace AgGrade.Data
                     // First try to update an existing setting
                     cmd.CommandText = "UPDATE Data SET Value = @Value WHERE Name = @Name";
                     cmd.Parameters.AddWithValue("@Name", Name.ToString());
-                    cmd.Parameters.AddWithValue("@Value", Value);
+                    cmd.Parameters.AddWithValue("@Value", valueToStore);
                     var rows = cmd.ExecuteNonQuery();
 
                     // If no row was updated, insert a new one
@@ -1262,7 +1439,7 @@ namespace AgGrade.Data
                 {
                     cmd.CommandText = "INSERT INTO Data (Name, Value) VALUES (@Name, @Value)";
                     cmd.Parameters.AddWithValue("@Name", Name.ToString());
-                    cmd.Parameters.AddWithValue("@Value", Value);
+                    cmd.Parameters.AddWithValue("@Value", valueToStore);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -1325,7 +1502,18 @@ namespace AgGrade.Data
 
                     if (result == null || result is DBNull) return 0;
 
-                    return Convert.ToDouble(result);
+                    double value = Convert.ToDouble(result);
+                    if (IsLatitudeDataName(name))
+                    {
+                        return value + LatitudeOffsetDeg;
+                    }
+
+                    if (IsLongitudeDataName(name))
+                    {
+                        return NormalizeLongitude(value + LongitudeOffsetDeg);
+                    }
+
+                    return value;
                 }
                 catch (SqliteException)
                 {
@@ -1398,7 +1586,8 @@ namespace AgGrade.Data
                     {
                         while (reader.Read())
                         {
-                            Path.Add(new Coordinate(reader.GetDouble(0), reader.GetDouble(1)));
+                            Coordinate location = FromStoredCoordinate(reader.GetDouble(0), reader.GetDouble(1));
+                            Path.Add(new Coordinate(location.Latitude, location.Longitude));
                         }
                     }
 
