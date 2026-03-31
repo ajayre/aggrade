@@ -28,26 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
             VersionLabel = new Label();
+            pictureBox1 = new PictureBox();
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
-            // 
-            // label1
-            // 
-            label1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            label1.Font = new Font("Segoe UI", 80F);
-            label1.ForeColor = SystemColors.Control;
-            label1.Location = new Point(0, 170);
-            label1.Name = "label1";
-            label1.Size = new Size(964, 182);
-            label1.TabIndex = 0;
-            label1.Text = "AgGrade";
-            label1.TextAlign = ContentAlignment.MiddleCenter;
             // 
             // VersionLabel
             // 
             VersionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            VersionLabel.Font = new Font("Segoe UI", 30F);
+            VersionLabel.Font = new Font("Segoe UI", 22F);
             VersionLabel.ForeColor = SystemColors.Control;
             VersionLabel.Location = new Point(0, 334);
             VersionLabel.Name = "VersionLabel";
@@ -56,14 +45,24 @@
             VersionLabel.Text = "Version X.X.X";
             VersionLabel.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // pictureBox1
+            // 
+            pictureBox1.BackgroundImageLayout = ImageLayout.None;
+            pictureBox1.Image = Properties.Resources.transparent_logo_darkgreen_400px1;
+            pictureBox1.Location = new Point(285, 108);
+            pictureBox1.Name = "pictureBox1";
+            pictureBox1.Size = new Size(405, 223);
+            pictureBox1.TabIndex = 2;
+            pictureBox1.TabStop = false;
+            // 
             // SplashForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Green;
             ClientSize = new Size(964, 510);
+            Controls.Add(pictureBox1);
             Controls.Add(VersionLabel);
-            Controls.Add(label1);
             FormBorderStyle = FormBorderStyle.None;
             MaximizeBox = false;
             MinimizeBox = false;
@@ -74,12 +73,12 @@
             Text = "SplashForm";
             FormClosed += SplashForm_FormClosed;
             Shown += SplashForm_Shown;
+            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
-
-        private Label label1;
         private Label VersionLabel;
+        private PictureBox pictureBox1;
     }
 }
