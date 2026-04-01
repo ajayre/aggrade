@@ -153,7 +153,7 @@ namespace AgGrade.Data
         /// The current scaling in pixels per meter
         /// </summary>
         public double CurrentScaleFactor { get; private set; }
-        public Field CurrentField { get; private set; }
+        public Field? CurrentField { get; private set; }
 
         /// <summary>
         /// Offset of tractor Y position from top of screen in range 0 -> 10 where 5 is middle of screen and 10 is the bottom
@@ -310,7 +310,7 @@ namespace AgGrade.Data
         /// <summary>
         /// Generates the map as a bitmap
         /// </summary>
-        /// <param name="Field">Field to display</param>
+        /// <param name="Field">Field to display or null for no field</param>
         /// <param name="ImageWidthpx">Width of bitmap</param>
         /// <param name="ImageHeightpx">Height of bitmap</param>
         /// <param name="ShowGrid">true to show the bin grid</param>
@@ -333,7 +333,7 @@ namespace AgGrade.Data
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
-            Field Field,
+            Field? Field,
             int ImageWidthpx,
             int ImageHeightpx,
             bool ShowGrid,

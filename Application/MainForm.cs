@@ -484,6 +484,7 @@ namespace AgGrade
             string FileName
             )
         {
+            UnloadField();
             ShowMap();
         }
 
@@ -568,6 +569,25 @@ namespace AgGrade
             // if showing map then update to show field
             GetMap()?.ShowField(CurrentField);
         }*/
+
+        /// <summary>
+        /// Unloads the current field
+        /// </summary>
+        private void UnloadField
+            (
+            )
+        {
+            if (CurrentField != null)
+            {
+                CurrentField = null;
+
+                BladeCtrl.SetField(CurrentField);
+                FieldUpdater.SetField(CurrentField);
+
+                // if showing map then update to show field
+                GetMap()?.ShowField(CurrentField);
+            }
+        }
 
         /// <summary>
         /// Loads a field

@@ -29,7 +29,7 @@ namespace AgGrade.Data
         /// </summary>
         private const int ACCUMULATED_SEGMENTS_MAX = 10;
 
-        private Field Field;
+        private Field? Field;
         private Timer CalcTimer;
         private AppSettings? CurrentAppSettings;
         private EquipmentSettings? CurrentEquipmentSettings;
@@ -63,6 +63,8 @@ namespace AgGrade.Data
             CalcTimer.Elapsed += CalcTimer_Elapsed;
 
             ElapsedTimer = new Stopwatch();
+
+            Field = null;
 
             CalcTimer.Start();
             ElapsedTimer.Start();
@@ -123,10 +125,10 @@ namespace AgGrade.Data
         /// <summary>
         /// Sets the field to work on
         /// </summary>
-        /// <param name="NewField">Field to work on</param>
+        /// <param name="NewField">Field to work on or null for no field</param>
         public void SetField
             (
-            Field NewField
+            Field? NewField
             )
         {
             Field = NewField;

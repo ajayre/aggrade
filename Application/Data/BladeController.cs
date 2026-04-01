@@ -417,10 +417,10 @@ namespace AgGrade.Data
         /// <summary>
         /// Sets the field to cut
         /// </summary>
-        /// <param name="NewField">Field to cut</param>
+        /// <param name="NewField">Field to cut or null for no field</param>
         public void SetField
             (
-            Field NewField
+            Field? NewField
             )
         {
             this.Field = NewField;

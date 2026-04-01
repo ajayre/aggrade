@@ -25,7 +25,7 @@ namespace AgGrade.Controls
 
         private const string DegreeSymbol = "°";
 
-        private Field CurrentField;
+        private Field? CurrentField;
         private MapGenerator MapGen;
         private GNSSFix TractorFix;
         private GNSSFix FrontScraperFix;
@@ -162,15 +162,22 @@ namespace AgGrade.Controls
         /// <summary>
         /// Shows a field on the map
         /// </summary>
-        /// <param name="Field">Field to show</param>
+        /// <param name="Field">Field to show or null for no field</param>
         public void ShowField
             (
-            Field Field
+            Field? Field
             )
         {
             CurrentField = Field;
 
-            FieldNameLabel.Text = Field.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
+            if (CurrentField != null)
+            {
+                FieldNameLabel.Text = Field!.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
+            }
+            else
+            {
+                FieldNameLabel.Text = "No Field";
+            }
         }
 
         /// <summary>
@@ -261,11 +268,14 @@ namespace AgGrade.Controls
             ShowPerf();
 #endif
 
-            FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
-            RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
+            if (CurrentField != null)
+            {
+                FrontBladeHeightLabel.Text = _CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " mm";
+                RearBladeHeightLabel.Text = _CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " mm";
 
-            FrontLoadLabel.Text = _CurrentEquipmentStatus.FrontPan.LoadLCY.ToString("F1") + " LCY";
-            RearLoadLabel.Text = _CurrentEquipmentStatus.RearPan.LoadLCY.ToString("F1") + " LCY";
+                FrontLoadLabel.Text = _CurrentEquipmentStatus.FrontPan.LoadLCY.ToString("F1") + " LCY";
+                RearLoadLabel.Text = _CurrentEquipmentStatus.RearPan.LoadLCY.ToString("F1") + " LCY";
+            }
 
             double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
             if (TrueHeading >= 359.5) TrueHeading = 0;
@@ -277,14 +287,17 @@ namespace AgGrade.Controls
             {
                 FirstRender = false;
 
-                if (ShowPonding)
+                if (CurrentField != null)
                 {
-                    ShowPondingMap();
-                }
+                    if (ShowPonding)
+                    {
+                        ShowPondingMap();
+                    }
 
-                if (ShowSurfaceFlow)
-                {
-                    ShowSurfaceFlowMap();
+                    if (ShowSurfaceFlow)
+                    {
+                        ShowSurfaceFlowMap();
+                    }
                 }
             }
         }
