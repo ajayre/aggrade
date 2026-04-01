@@ -37,6 +37,7 @@ namespace AgGrade
         private Field? CurrentField;
         private FieldUpdater FieldUpdater;
         private string FieldDataFolder;
+        private string SurveyDataFolder;
         private Timer FieldFixTimer;
         private bool EnableBladeLimits;
 
@@ -423,21 +424,6 @@ namespace AgGrade
         }
 
         /// <summary>
-        /// Shows the UI for surveying
-        /// </summary>
-        private void ShowSurveyPage
-            (
-            )
-        {
-            ClosePage();
-
-            SurveyPage surveyPage = new SurveyPage();
-            surveyPage.Parent = ContentPanel;
-            surveyPage.Dock = DockStyle.Fill;
-            surveyPage.Show();
-        }
-
-        /// <summary>
         /// Shows the UI for loading fields
         /// </summary>
         private void ShowFieldChooserPage
@@ -452,6 +438,63 @@ namespace AgGrade
             fieldChooserPage.Dock = DockStyle.Fill;
             fieldChooserPage.OnFieldChosen += (folder, dbfile) => { LoadField(folder, dbfile); };
             fieldChooserPage.Show();
+        }
+
+        /// <summary>
+        /// Shows the UI for creating and loading surveys
+        /// </summary>
+        private void ShowSurveyChooserPage
+            (
+            )
+        {
+            ClosePage();
+
+            SurveyChooserPage surveyChooserPage = new SurveyChooserPage();
+            surveyChooserPage.SurveyDataFolder = SurveyDataFolder;
+            surveyChooserPage.Parent = ContentPanel;
+            surveyChooserPage.Dock = DockStyle.Fill;
+            surveyChooserPage.OnSurveyChosen += (filename) => { LoadSurvey(filename); };
+            surveyChooserPage.OnCreateSurvey += () => { CreateSurvey(); };
+            surveyChooserPage.Show();
+        }
+
+        /// <summary>
+        /// Shows the UI for creating a survey
+        /// </summary>
+        private void ShowCreateSurveyPage
+            (
+            )
+        {
+            ClosePage();
+
+            CreateSurveyPage createSurveyPage = new CreateSurveyPage();
+            createSurveyPage.SurveyDataFolder = SurveyDataFolder;
+            createSurveyPage.Parent = ContentPanel;
+            createSurveyPage.Dock = DockStyle.Fill;
+            createSurveyPage.OnSurveyCreated += (filename) => { LoadSurvey(filename); };
+            createSurveyPage.Show();
+        }
+
+        /// <summary>
+        /// Loads a survey for further editing
+        /// </summary>
+        /// <param name="FileName">Path and name of survey to load</param>
+        private void LoadSurvey
+            (
+            string FileName
+            )
+        {
+            ShowMap();
+        }
+
+        /// <summary>
+        /// Creates a new survey
+        /// </summary>
+        private void CreateSurvey
+            (
+            )
+        {
+            ShowCreateSurveyPage();
         }
 
         /// <summary>
@@ -723,7 +766,7 @@ namespace AgGrade
         /// <param name="e"></param>
         private void SurveyBtn_Click(object sender, EventArgs e)
         {
-            ShowSurveyPage();
+            ShowSurveyChooserPage();
         }
 
         /// <summary>
@@ -826,8 +869,15 @@ namespace AgGrade
             FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
                 Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "FieldData" +
                 Path.DirectorySeparatorChar;
+
+            SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
+                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "SurveyData" +
+                Path.DirectorySeparatorChar;
 #else
             FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "FieldData" +
+                Path.DirectorySeparatorChar;
+
+            SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "SurveyData" +
                 Path.DirectorySeparatorChar;
 #endif
 

@@ -10,17 +10,17 @@ using System.Windows.Forms;
 
 namespace AgGrade.Controls
 {
-    public partial class FieldPanel : UserControl
+    public partial class SurveyPanel : UserControl
     {
         private Color COLOR1 = Color.FromArgb(0xCB, 0x9C, 0x52);
         private Color COLOR2 = Color.FromArgb(0xD6, 0xB2, 0x79);
 
         public event Action<object> OnClicked = null;
 
-        public string FieldNameText
+        public string SurveyNameText
         {
-            get { return FieldName.Text; }
-            set { FieldName.Text = value; }
+            get { return SurveyName.Text; }
+            set { SurveyName.Text = value; }
         }
 
         public string LastModifiedText
@@ -29,42 +29,11 @@ namespace AgGrade.Controls
             set { LastModified.Text = value; }
         }
 
-        public bool ShowIcon
+        private string? _FileName;
+        public string? FileName
         {
-            get { return Icon.Visible; }
-            set { Icon.Visible = value; }
-        }
-
-        private string _Folder;
-        public string Folder
-        {
-            get { return _Folder; }
-            set { _Folder = value; }
-        }
-
-        private string? _DbFile;
-        public string? DbFile
-        {
-            get { return _DbFile; }
-            set { _DbFile = value; }
-        }
-
-        private bool _Calibrated;
-        public bool Calibrated
-        {
-            get { return _Calibrated; }
-            set
-            {
-                _Calibrated = value;
-                if (_Calibrated)
-                {
-                    Icon.BackgroundImage = Properties.Resources.calibration_48px;
-                }
-                else
-                {
-                    Icon.BackgroundImage = Properties.Resources.createnewfield_48px;
-                }
-            }
+            get { return _FileName; }
+            set { _FileName = value; }
         }
 
         private bool _Odd;
@@ -76,28 +45,25 @@ namespace AgGrade.Controls
                 _Odd = value;
                 if (Odd)
                 {
-                    FieldName.BackColor = COLOR1;
+                    SurveyName.BackColor = COLOR1;
                     LastModified.BackColor = COLOR1;
                     Icon.BackColor = COLOR1;
                 }
                 else
                 {
-                    FieldName.BackColor = COLOR2;
+                    SurveyName.BackColor = COLOR2;
                     LastModified.BackColor = COLOR2;
                     Icon.BackColor = COLOR2;
                 }
             }
         }
 
-        public FieldPanel()
+        public SurveyPanel()
         {
             InitializeComponent();
 
-            FieldNameText = "Field Name";
-            LastModifiedText = "Create New";
-
-            DbFile = null;
-            Calibrated = false;
+            SurveyNameText = "Survey Name";
+            LastModifiedText = "";
         }
 
         /// <summary>

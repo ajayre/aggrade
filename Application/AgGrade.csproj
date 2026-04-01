@@ -34,6 +34,15 @@
     <Compile Update="Controls\CalibrateBladeHeightWizard.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\CreateSurveyPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\SurveyPanel.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Update="Controls\SurveyChooserPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\FieldChooserPage.cs">
       <SubType>UserControl</SubType>
     </Compile>

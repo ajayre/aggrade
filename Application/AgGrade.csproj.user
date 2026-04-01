@@ -34,9 +34,6 @@
     <Compile Update="Controls\StatusBar.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="Controls\SurveyPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Update="Controls\Wizard.cs">
       <SubType>UserControl</SubType>
     </Compile>
