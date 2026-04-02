@@ -274,7 +274,7 @@
             // 
             // ToggleSurveyCoverageBtn
             // 
-            ToggleSurveyCoverageBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ToggleSurveyCoverageBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             ToggleSurveyCoverageBtn.Image = Properties.Resources.surveycoverage_48px;
             ToggleSurveyCoverageBtn.Location = new Point(810, 531);
             ToggleSurveyCoverageBtn.Name = "ToggleSurveyCoverageBtn";

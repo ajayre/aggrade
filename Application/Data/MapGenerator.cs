@@ -199,6 +199,8 @@ namespace AgGrade.Data
         private double _invScaleFactor;
         private double _pixelsPerBin;
         private static readonly int[,] ElevationPalette = BuildColorPalette();
+        private static readonly Color[] CutFillBandColors = BuildCutFillBandColors();
+        private static readonly Color CutFillFallbackColor = Color.FromArgb(0x80, 0x80, 0x80);
         private bool ShowSurfaceFlow;
         private FlowMapGenerator.ElevationTypes SurfaceFlowElevationType;
         private Coordinate SurfaceFlowSWCorner = new Coordinate();
@@ -906,7 +908,9 @@ namespace AgGrade.Data
                 // draw survey points
                 if (CurrentSurvey != null)
                 {
-                    Brush PointBrush = new SolidBrush(Color.FromArgb(0xC3, 0x1F, 0x17));
+                    bool hasSurveyElevationRange = TryGetSurveyElevationRange(CurrentSurvey, out double minSurveyElevation, out double maxSurveyElevation);
+                    int defaultSurveyColorIndex = CutFillBandColors.Length / 2;
+                    SolidBrush[] surveyPointBrushes = new SolidBrush[CutFillBandColors.Length];
                     Pen BoundaryPen = new Pen(Color.Gray, 1);
 
                     int PointWidthMm = 1500;
@@ -916,11 +920,43 @@ namespace AgGrade.Data
                     int BoundaryWidthMm = 16000;
                     int BoundaryWidthpx = (int)(BoundaryWidthMm / 1000.0 * CurrentScaleFactor);
 
-                    foreach (TopologyPoint tp in CurrentSurvey.InteriorPoints)
+                    try
                     {
-                        Point pt = LatLonToWorld(new Coordinate(tp.Latitude, tp.Longitude));
-                        g.DrawEllipse(BoundaryPen, pt.X - (BoundaryWidthpx / 2), pt.Y - (BoundaryWidthpx / 2), BoundaryWidthpx, BoundaryWidthpx);
-                        g.FillEllipse(PointBrush, pt.X - (PointWidthpx / 2), pt.Y - (PointWidthpx / 2), PointWidthpx, PointWidthpx);
+                        foreach (TopologyPoint tp in CurrentSurvey.InteriorPoints)
+                        {
+                            int colorIndex = hasSurveyElevationRange
+                                ? GetCutFillBandIndexForSurveyElevation(tp.ExistingElevation, minSurveyElevation, maxSurveyElevation)
+                                : defaultSurveyColorIndex;
+
+                            surveyPointBrushes[colorIndex] ??= new SolidBrush(CutFillBandColors[colorIndex]);
+                            SolidBrush pointBrush = surveyPointBrushes[colorIndex];
+
+                            Point pt = LatLonToWorld(new Coordinate(tp.Latitude, tp.Longitude));
+                            g.DrawEllipse(BoundaryPen, pt.X - (BoundaryWidthpx / 2), pt.Y - (BoundaryWidthpx / 2), BoundaryWidthpx, BoundaryWidthpx);
+                            g.FillEllipse(pointBrush, pt.X - (PointWidthpx / 2), pt.Y - (PointWidthpx / 2), PointWidthpx, PointWidthpx);
+                        }
+
+                        foreach (TopologyPoint tp in CurrentSurvey.BoundaryPoints)
+                        {
+                            int colorIndex = hasSurveyElevationRange
+                                ? GetCutFillBandIndexForSurveyElevation(tp.ExistingElevation, minSurveyElevation, maxSurveyElevation)
+                                : defaultSurveyColorIndex;
+
+                            surveyPointBrushes[colorIndex] ??= new SolidBrush(CutFillBandColors[colorIndex]);
+                            SolidBrush pointBrush = surveyPointBrushes[colorIndex];
+
+                            Point pt = LatLonToWorld(new Coordinate(tp.Latitude, tp.Longitude));
+                            g.FillEllipse(pointBrush, pt.X - (PointWidthpx / 2), pt.Y - (PointWidthpx / 2), PointWidthpx, PointWidthpx);
+                        }
+                    }
+                    finally
+                    {
+                        foreach (SolidBrush? brush in surveyPointBrushes)
+                        {
+                            brush?.Dispose();
+                        }
+
+                        BoundaryPen.Dispose();
                     }
                 }
 
@@ -2542,6 +2578,118 @@ namespace AgGrade.Data
             return palette;
         }
 
+        private static Color[] BuildCutFillBandColors()
+        {
+            // Low to high: violet -> dark red
+            return new[]
+            {
+                Color.FromArgb(0x80, 0x00, 0x80), // violet
+                Color.FromArgb(0x9A, 0x31, 0xFF), // indigo
+                Color.FromArgb(0x00, 0x66, 0xFF), // blue
+                Color.FromArgb(0x36, 0xF5, 0xF5), // cyan
+                Color.FromArgb(0x00, 0xCD, 0x00), // green
+                Color.FromArgb(0xFF, 0xFF, 0x00), // yellow
+                Color.FromArgb(0xFF, 0x80, 0x00), // orange
+                Color.FromArgb(0xFF, 0x00, 0x00), // red
+                Color.FromArgb(0xB4, 0x00, 0x00)  // dark red
+            };
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetCutFillBandIndexForDifference(double differenceM)
+        {
+            if (differenceM < -0.8) return 0;
+            if (differenceM < -0.5) return 1;
+            if (differenceM < -0.05) return 2;
+            if (differenceM < -0.01) return 3;
+            if (differenceM <= 0.01) return 4;
+            if (differenceM <= 0.05) return 5;
+            if (differenceM <= 0.5) return 6;
+            if (differenceM <= 0.8) return 7;
+            if (differenceM > 0.8) return 8;
+
+            return -1;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Color GetCutFillColorForDifference(double differenceM)
+        {
+            int colorIndex = GetCutFillBandIndexForDifference(differenceM);
+            return colorIndex >= 0 ? CutFillBandColors[colorIndex] : CutFillFallbackColor;
+        }
+
+        private static bool TryGetSurveyElevationRange
+            (
+            Survey survey,
+            out double minElevation,
+            out double maxElevation
+            )
+        {
+            minElevation = double.MaxValue;
+            maxElevation = double.MinValue;
+            bool found = false;
+
+            // Treat interior and boundary points as a single dataset.
+            foreach (TopologyPoint point in survey.InteriorPoints)
+            {
+                double elevation = point.ExistingElevation;
+                if (double.IsNaN(elevation) || double.IsInfinity(elevation))
+                {
+                    continue;
+                }
+
+                if (elevation < minElevation) minElevation = elevation;
+                if (elevation > maxElevation) maxElevation = elevation;
+                found = true;
+            }
+
+            foreach (TopologyPoint point in survey.BoundaryPoints)
+            {
+                double elevation = point.ExistingElevation;
+                if (double.IsNaN(elevation) || double.IsInfinity(elevation))
+                {
+                    continue;
+                }
+
+                if (elevation < minElevation) minElevation = elevation;
+                if (elevation > maxElevation) maxElevation = elevation;
+                found = true;
+            }
+
+            if (!found)
+            {
+                minElevation = 0;
+                maxElevation = 0;
+            }
+
+            return found;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int GetCutFillBandIndexForSurveyElevation(double elevation, double minElevation, double maxElevation)
+        {
+            if (double.IsNaN(elevation) || double.IsInfinity(elevation))
+            {
+                return CutFillBandColors.Length / 2;
+            }
+
+            if (maxElevation <= minElevation)
+            {
+                return CutFillBandColors.Length / 2;
+            }
+
+            double normalized = (elevation - minElevation) / (maxElevation - minElevation);
+            normalized = Math.Max(0.0, Math.Min(1.0, normalized));
+
+            int index = (int)Math.Floor(normalized * CutFillBandColors.Length);
+            if (index >= CutFillBandColors.Length)
+            {
+                index = CutFillBandColors.Length - 1;
+            }
+
+            return index;
+        }
+
         private static double[] HsvToRgb(double h, double s, double v)
         {
             h = h % 360.0;
@@ -2686,86 +2834,11 @@ namespace AgGrade.Data
                                 {
                                     double DifferenceM = ExistingElevation.Value - TargetElevation.Value;
 
-                                    if (DifferenceM < -0.8)
-                                    {
-                                        // violet
-                                        r = 0x80;
-                                        g = 0x00;
-                                        b = 0x80;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM >= -0.8) && (DifferenceM < -0.5))
-                                    {
-                                        // indigo
-                                        r = 0x9A;
-                                        g = 0x31;
-                                        b = 0xFF;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM >= -0.5) && (DifferenceM < -0.05))
-                                    {
-                                        // blue
-                                        r = 0x00;
-                                        g = 0x66;
-                                        b = 0xFF;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM >= -0.05) && (DifferenceM < -0.01))
-                                    {
-                                        // cyan
-                                        r = 0x36;
-                                        g = 0xF5;
-                                        b = 0xF5;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM >= -0.01) && (DifferenceM <= 0.01))
-                                    {
-                                        // green
-                                        r = 0x00;
-                                        g = 0xCD;
-                                        b = 0x00;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM > 0.01) && (DifferenceM <= 0.05))
-                                    {
-                                        // yellow
-                                        r = 0xFF;
-                                        g = 0xFF;
-                                        b = 0x00;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM > 0.05) && (DifferenceM <= 0.5))
-                                    {
-                                        // orange
-                                        r = 0xFF;
-                                        g = 0x80;
-                                        b = 0x00;
-                                        a = 255;
-                                    }
-                                    else if ((DifferenceM > 0.5) && (DifferenceM <= 0.8))
-                                    {
-                                        // red
-                                        r = 0xFF;
-                                        g = 0x00;
-                                        b = 0x00;
-                                        a = 255;
-                                    }
-                                    else if (DifferenceM > 0.8)
-                                    {
-                                        // dark red
-                                        r = 0xB4;
-                                        g = 0x00;
-                                        b = 0x00;
-                                        a = 255;
-                                    }
-                                    else
-                                    {
-                                        // grey
-                                        r = 0x80;
-                                        g = 0x80;
-                                        b = 0x80;
-                                        a = 255;
-                                    }
+                                    Color cutFillColor = GetCutFillColorForDifference(DifferenceM);
+                                    r = cutFillColor.R;
+                                    g = cutFillColor.G;
+                                    b = cutFillColor.B;
+                                    a = 255;
                                 }
                                 else
                                 {
