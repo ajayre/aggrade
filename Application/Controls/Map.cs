@@ -26,6 +26,7 @@ namespace AgGrade.Controls
         private const string DegreeSymbol = "°";
 
         private Field? CurrentField;
+        private Survey? CurrentSurvey;
         private MapGenerator MapGen;
         private GNSSFix TractorFix;
         private GNSSFix FrontScraperFix;
@@ -168,6 +169,7 @@ namespace AgGrade.Controls
             Field? Field
             )
         {
+            CurrentSurvey = null;
             CurrentField = Field;
 
             if (CurrentField != null)
@@ -178,6 +180,74 @@ namespace AgGrade.Controls
             {
                 FieldNameLabel.Text = "No Field";
             }
+
+            ShowFieldUI();
+        }
+
+        /// <summary>
+        /// Shows a survey on the map
+        /// </summary>
+        /// <param name="Survey">Survey to show or null for no survey</param>
+        public void ShowSurvey
+            (
+            Survey? Survey
+            )
+        {
+            CurrentField = null;
+            CurrentSurvey = Survey;
+
+            if (CurrentSurvey != null)
+            {
+                FieldNameLabel.Text = Survey!.Name.Substring(0, Survey.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Survey.Name.Length);
+            }
+            else
+            {
+                FieldNameLabel.Text = "No Field";
+            }
+
+            ShowSurveyUI();
+        }
+
+        /// <summary>
+        /// Shows the UI for surveying
+        /// </summary>
+        private void ShowSurveyUI
+            (
+            )
+        {
+            FrontBladeHeightLabel.Visible = false;
+            FrontLoadLabel.Visible = false;
+            RearBladeHeightLabel.Visible = false;
+            RearLoadLabel.Visible = false;
+
+            ElevationMapBtn.Visible = false;
+            CutFillMapBtn.Visible = false;
+            FlowBtn.Visible = false;
+            PondingBtn.Visible = false;
+
+            ToggleHaulArrowsBtn.Visible = false;
+            BenchmarkBtn.Visible = false;
+        }
+
+        /// <summary>
+        /// Shows the UI for fields
+        /// </summary>
+        private void ShowFieldUI
+            (
+            )
+        {
+            FrontBladeHeightLabel.Visible = true;
+            FrontLoadLabel.Visible = true;
+            RearBladeHeightLabel.Visible = true;
+            RearLoadLabel.Visible = true;
+
+            ElevationMapBtn.Visible = true;
+            CutFillMapBtn.Visible = true;
+            FlowBtn.Visible = true;
+            PondingBtn.Visible = true;
+
+            ToggleHaulArrowsBtn.Visible = true;
+            BenchmarkBtn.Visible = true;
         }
 
         /// <summary>

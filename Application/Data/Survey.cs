@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +11,8 @@ namespace AgGrade.Data
 {
     public class Survey
     {
+        private string FileName;
+
         /// <summary>
         /// Only Latitude, Longitude and ExistingElevation are used
         /// </summary>
@@ -21,6 +24,60 @@ namespace AgGrade.Data
         public List<TopologyPoint> BoundaryPoints = new List<TopologyPoint>();
 
         public List<Benchmark> Benchmarks = new List<Benchmark>();
+
+        public string Name
+        {
+            get
+            {
+                return Path.GetFileNameWithoutExtension(FileName);
+            }
+        }
+
+        /// <summary>
+        /// Adds a new benchmark to the survey.
+        /// If this is the first benchmark it is named MB; otherwise it is named
+        /// BMx where x is the next available sequence number starting at 1.
+        /// </summary>
+        /// <param name="Location">Benchmark location as latitude/longitude.</param>
+        /// <param name="ElevationM">Benchmark elevation in meters.</param>
+        /// <returns>The newly created benchmark instance.</returns>
+        public Benchmark AddBenchmark
+            (
+            Coordinate Location,
+            double ElevationM
+            )
+        {
+            if (Location == null)
+                throw new ArgumentNullException(nameof(Location));
+
+            string name;
+            if (Benchmarks.Count == 0)
+            {
+                name = "MB";
+            }
+            else
+            {
+                int maxSequence = 0;
+                foreach (Benchmark existing in Benchmarks)
+                {
+                    if (existing == null || string.IsNullOrWhiteSpace(existing.Name)) continue;
+
+                    Match match = Regex.Match(existing.Name.Trim(), @"^BM(\d+)$", RegexOptions.IgnoreCase);
+                    if (!match.Success) continue;
+
+                    if (int.TryParse(match.Groups[1].Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int sequence))
+                    {
+                        if (sequence > maxSequence) maxSequence = sequence;
+                    }
+                }
+
+                name = $"BM{maxSequence + 1}";
+            }
+
+            Benchmark benchmark = new Benchmark(Location, name, ElevationM);
+            Benchmarks.Add(benchmark);
+            return benchmark;
+        }
 
         /// <summary>
         /// Loads a trimble multiplane file
@@ -36,6 +93,8 @@ namespace AgGrade.Data
 
             if (!File.Exists(FileName))
                 throw new FileNotFoundException("Multiplane file was not found.", FileName);
+
+            this.FileName = FileName;
 
             string[] Lines = File.ReadAllLines(FileName);
             InteriorPoints.Clear();
@@ -57,10 +116,9 @@ namespace AgGrade.Data
             Coordinate BaseMasterLocation = ParseHeaderLocation(HeaderParts[4]);
             Coordinate MasterLocation = UTM.OffsetLocation(BaseMasterLocation, BaseOffsetX, BaseOffsetY);
 
-            // Multiplane normalizes MB to ~100 ft and absolute height is unknown.
-            // Store elevations as meters relative to 100 ft.
-            const double MasterNormalizationFeet = 100.0;
-            double masterElevationMeters = FeetToMeters(BaseHeightFt - MasterNormalizationFeet);
+            // Multiplane elevation values are interpreted directly as feet relative
+            // to the file's internal datum, then converted to meters for storage.
+            double masterElevationMeters = FeetToMeters(BaseHeightFt);
 
             Benchmarks.Add(new Benchmark(MasterLocation, "MB", masterElevationMeters));
 
@@ -79,7 +137,7 @@ namespace AgGrade.Data
                 double elevationFt = ParseDouble(parts[3], $"line {li + 1} elevation");
 
                 string code = parts.Length > 4 ? parts[4].Trim() : string.Empty;
-                double elevationM = FeetToMeters(elevationFt - MasterNormalizationFeet);
+                double elevationM = FeetToMeters(elevationFt);
                 Coordinate pointLocation = UTM.OffsetLocation(MasterLocation, x, y);
 
                 if (IsBenchmarkCode(code))
@@ -103,6 +161,45 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Normalizes survey elevations for multiplane export by forcing the
+        /// master benchmark to 30.48 m (100 ft) and applying the same offset
+        /// to every other stored elevation so relative differences are preserved.
+        /// </summary>
+        public void NormalizeElevationsForMultiplane
+            (
+            )
+        {
+            const double MultiplaneMasterElevationM = 30.48;
+
+            Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
+                b != null &&
+                !string.IsNullOrWhiteSpace(b.Name) &&
+                string.Equals(b.Name.Trim(), "MB", StringComparison.OrdinalIgnoreCase))
+                ?? throw new Exception("Cannot normalize elevations: no master benchmark (MB) exists.");
+
+            double deltaM = MultiplaneMasterElevationM - masterBenchmark.Elevation;
+            if (deltaM == 0) return;
+
+            foreach (Benchmark benchmark in Benchmarks)
+            {
+                if (benchmark == null) continue;
+                benchmark.Elevation += deltaM;
+            }
+
+            foreach (TopologyPoint point in BoundaryPoints)
+            {
+                if (point == null) continue;
+                point.ExistingElevation += deltaM;
+            }
+
+            foreach (TopologyPoint point in InteriorPoints)
+            {
+                if (point == null) continue;
+                point.ExistingElevation += deltaM;
+            }
+        }
+
+        /// <summary>
         /// Saves the survey to a trimble multiplane file
         /// If the file exists then it is overwritten without warning
         /// </summary>
@@ -115,6 +212,8 @@ namespace AgGrade.Data
             if (string.IsNullOrWhiteSpace(FileName))
                 throw new ArgumentException("File name is required.", nameof(FileName));
 
+            NormalizeElevationsForMultiplane();
+
             Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
                 b != null &&
                 !string.IsNullOrWhiteSpace(b.Name) &&
@@ -124,8 +223,7 @@ namespace AgGrade.Data
             Coordinate masterLocation = masterBenchmark.Location
                 ?? throw new Exception("Cannot save multiplane file: master benchmark location is null.");
 
-            const double MasterNormalizationFeet = 100.0;
-            double masterHeightFt = MetersToFeet(masterBenchmark.Elevation) + MasterNormalizationFeet;
+            double masterHeightFt = MetersToFeet(masterBenchmark.Elevation);
 
             List<string> lines = new List<string>();
             lines.Add(string.Format(
@@ -189,8 +287,7 @@ namespace AgGrade.Data
             double relativeX = utm.Easting - MasterUtm.Easting;
             double relativeY = utm.Northing - MasterUtm.Northing;
 
-            const double MasterNormalizationFeet = 100.0;
-            double elevationFt = MetersToFeet(ElevationM) + MasterNormalizationFeet;
+            double elevationFt = MetersToFeet(ElevationM);
 
             return string.Format(
                 CultureInfo.InvariantCulture,

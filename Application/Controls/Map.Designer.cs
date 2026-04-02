@@ -178,7 +178,7 @@
             // ToggleHaulArrowsBtn
             // 
             ToggleHaulArrowsBtn.Image = (Image)resources.GetObject("ToggleHaulArrowsBtn.Image");
-            ToggleHaulArrowsBtn.Location = new Point(11, 55);
+            ToggleHaulArrowsBtn.Location = new Point(11, 121);
             ToggleHaulArrowsBtn.Name = "ToggleHaulArrowsBtn";
             ToggleHaulArrowsBtn.Size = new Size(60, 60);
             ToggleHaulArrowsBtn.TabIndex = 8;
@@ -189,7 +189,7 @@
             // 
             ElevationMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             ElevationMapBtn.Image = (Image)resources.GetObject("ElevationMapBtn.Image");
-            ElevationMapBtn.Location = new Point(810, 55);
+            ElevationMapBtn.Location = new Point(810, 187);
             ElevationMapBtn.Name = "ElevationMapBtn";
             ElevationMapBtn.Size = new Size(60, 60);
             ElevationMapBtn.TabIndex = 9;
@@ -210,7 +210,7 @@
             // TractorStyleBtn
             // 
             TractorStyleBtn.Image = (Image)resources.GetObject("TractorStyleBtn.Image");
-            TractorStyleBtn.Location = new Point(11, 121);
+            TractorStyleBtn.Location = new Point(11, 55);
             TractorStyleBtn.Name = "TractorStyleBtn";
             TractorStyleBtn.Size = new Size(60, 60);
             TractorStyleBtn.TabIndex = 11;
@@ -242,7 +242,7 @@
             // 
             SatelliteBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             SatelliteBtn.Image = Properties.Resources.satellite_48px;
-            SatelliteBtn.Location = new Point(810, 187);
+            SatelliteBtn.Location = new Point(810, 55);
             SatelliteBtn.Name = "SatelliteBtn";
             SatelliteBtn.Size = new Size(60, 60);
             SatelliteBtn.TabIndex = 14;

@@ -18,7 +18,7 @@ namespace AgGrade
         private const int CONTROLLER_TRY_CONNECT_PERIOD_MS = 200;
 
         // how often to send fixes to the field
-        private const int FIELD_FIX_PERIOD_MS = 250;
+        private const int FIX_PERIOD_MS = 250;
 
         static Color FRONT_PAN_COLOR = Color.RoyalBlue;
         static Color REAR_PAN_COLOR = Color.DarkGoldenrod;
@@ -35,10 +35,11 @@ namespace AgGrade
         private Timer ControllerConnectTimer;
         private BladeController BladeCtrl;
         private Field? CurrentField;
+        private Survey? CurrentSurvey;
         private FieldUpdater FieldUpdater;
         private string FieldDataFolder;
         private string SurveyDataFolder;
-        private Timer FieldFixTimer;
+        private Timer FixTimer;
         private bool EnableBladeLimits;
 
         /// <summary>
@@ -124,10 +125,11 @@ namespace AgGrade
             RearHeightFound = false;
 
             CurrentField = null;
+            CurrentSurvey = null;
 
-            FieldFixTimer = new Timer();
-            FieldFixTimer.Interval = FIELD_FIX_PERIOD_MS;
-            FieldFixTimer.Tick += FieldFixTimer_Tick;
+            FixTimer = new Timer();
+            FixTimer.Interval = FIX_PERIOD_MS;
+            FixTimer.Tick += FixTimer_Tick;
 
             FrontPanIndicator.BackColor = FRONT_PAN_COLOR;
             RearPanIndicator.BackColor = REAR_PAN_COLOR;
@@ -138,11 +140,11 @@ namespace AgGrade
         }
 
         /// <summary>
-        /// Called periodically to give fixes to the current field
+        /// Called periodically to give fixes to the current field or survey
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void FieldFixTimer_Tick(object? sender, EventArgs e)
+        private void FixTimer_Tick(object? sender, EventArgs e)
         {
             if (CurrentField != null)
             {
@@ -155,6 +157,11 @@ namespace AgGrade
                 {
                     CurrentField.SetRearScraperFix(CurrentEquipmentStatus.RearPan.Fix);
                 }
+            }
+
+            if (CurrentSurvey != null)
+            {
+                // fixme - to do
             }
         }
 
@@ -476,19 +483,6 @@ namespace AgGrade
         }
 
         /// <summary>
-        /// Loads a survey for further editing
-        /// </summary>
-        /// <param name="FileName">Path and name of survey to load</param>
-        private void LoadSurvey
-            (
-            string FileName
-            )
-        {
-            UnloadField();
-            ShowMap();
-        }
-
-        /// <summary>
         /// Creates a new survey
         /// </summary>
         private void CreateSurvey
@@ -524,6 +518,11 @@ namespace AgGrade
                 map.ShowField(CurrentField);
             }
 
+            if (CurrentSurvey != null)
+            {
+                map.ShowSurvey(CurrentSurvey);
+            }
+
             // give map initial conditions
             map.SetTractor(CurrentEquipmentStatus.TractorFix);
             map.SetFrontScraper(CurrentEquipmentStatus.FrontPan.Fix);
@@ -551,25 +550,6 @@ namespace AgGrade
             }
         }
 
-        /*/// <summary>
-        /// Loads a field
-        /// </summary>
-        /// <param name="Folder">Path of the field data</param>
-        private void LoadField
-            (
-            string Folder
-            )
-        {
-            CurrentField = new Field();
-            CurrentField.Load(Folder);
-
-            BladeCtrl.SetField(CurrentField);
-            FieldUpdater.SetField(CurrentField);
-
-            // if showing map then update to show field
-            GetMap()?.ShowField(CurrentField);
-        }*/
-
         /// <summary>
         /// Unloads the current field
         /// </summary>
@@ -584,9 +564,47 @@ namespace AgGrade
                 BladeCtrl.SetField(CurrentField);
                 FieldUpdater.SetField(CurrentField);
 
-                // if showing map then update to show field
+                // if showing map then update to remove field
                 GetMap()?.ShowField(CurrentField);
+
+                FixTimer.Enabled = false;
             }
+        }
+
+        private void UnloadSurvey
+            (
+            )
+        {
+            if (CurrentSurvey != null)
+            {
+                CurrentSurvey = null;
+
+                // if showing map then update to remove survey
+                GetMap()?.ShowSurvey(CurrentSurvey);
+
+                FixTimer.Enabled = false;
+            }
+        }
+
+        /// <summary>
+        /// Loads a survey for further editing
+        /// </summary>
+        /// <param name="FileName">Path and name of survey to load</param>
+        private void LoadSurvey
+            (
+            string FileName
+            )
+        {
+            UnloadField();
+            ShowMap();
+
+            CurrentSurvey = new Survey();
+            CurrentSurvey.LoadFromMultiplane(FileName);
+
+            // if showing map then update to show survey
+            GetMap()?.ShowSurvey(CurrentSurvey);
+
+            FixTimer.Enabled = true;
         }
 
         /// <summary>
@@ -600,6 +618,7 @@ namespace AgGrade
             string? DbFile
             )
         {
+            UnloadSurvey();
             ShowMap();
 
             CurrentField = new Field();
@@ -611,7 +630,7 @@ namespace AgGrade
             // if showing map then update to show field
             GetMap()?.ShowField(CurrentField);
 
-            FieldFixTimer.Enabled = true;
+            FixTimer.Enabled = true;
         }
 
         /// <summary>
