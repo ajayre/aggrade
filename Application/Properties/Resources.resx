@@ -169,20 +169,20 @@
   <data name="tractor_calib_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\tractor_calib_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="transparent-logo-white-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\transparent-logo-white-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="benchmark_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\benchmark_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="satellite_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\satellite_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="led-off_24px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\led-off_24px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="blade_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\blade_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="joystick_jog" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\joystick_jog.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="surveycoverage_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\surveycoverage_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="public-domain-beep-sound-100267" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Audio\public-domain-beep-sound-100267.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -193,6 +193,9 @@
   <data name="ponding_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\ponding_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="transparent-logo-darkgreen-400px1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\transparent-logo-darkgreen-400px1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="nolocation_800px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\nolocation_800px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -202,8 +205,8 @@
   <data name="navarrow-blue_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-blue_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="transparent-logo-darkgreen-400px1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\transparent-logo-darkgreen-400px1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="transparent-logo-white-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\transparent-logo-white-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tractor_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\tractor_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -211,8 +214,8 @@
   <data name="navarrow-green_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-green_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="blade_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\blade_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="satellite_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\satellite_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="transport_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\transport_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -235,7 +238,7 @@
   <data name="navarrow-yellow_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-yellow_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="surveycoverage_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\surveycoverage_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="basemap_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\basemap_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

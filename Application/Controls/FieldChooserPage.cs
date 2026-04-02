@@ -26,6 +26,7 @@ namespace AgGrade.Controls
         }
 
         public event Action<string, string?> OnFieldChosen = null;
+        public event Action<string, string?> OnDownloadFieldBasemap = null;
 
         public FieldChooserPage()
         {
@@ -96,6 +97,7 @@ namespace AgGrade.Controls
                 var e = sorted[i];
                 var panel = new FieldPanel();
                 panel.OnClicked += Panel_OnClicked;
+                panel.OnDownloadBasemap += Panel_OnDownloadBasemap;
                 panel.Odd = odd;
                 panel.FieldNameText = e.FieldNameText;
                 panel.LastModifiedText = e.LastModifiedText;
@@ -110,9 +112,22 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Called when user has requested to download the basemap for a field
+        /// </summary>
+        /// <param name="sender"></param>
+        private void Panel_OnDownloadBasemap(object sender)
+        {
+            FieldPanel Panel = (FieldPanel)sender;
+            string Folder = Panel.Folder;
+            string? DbFile = Panel.DbFile;
+
+            OnDownloadFieldBasemap?.Invoke(Folder, DbFile);
+        }
+
+        /// <summary>
         /// Called when a panel is tapped
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="sender"></param>
         private void Panel_OnClicked(object sender)
         {
             FieldPanel Panel = (FieldPanel)sender;

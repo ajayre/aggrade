@@ -16,6 +16,7 @@ namespace AgGrade.Controls
         private Color COLOR2 = Color.FromArgb(0xD6, 0xB2, 0x79);
 
         public event Action<object> OnClicked = null;
+        public event Action<object> OnDownloadBasemap = null;
 
         public string FieldNameText
         {
@@ -79,12 +80,14 @@ namespace AgGrade.Controls
                     FieldName.BackColor = COLOR1;
                     LastModified.BackColor = COLOR1;
                     Icon.BackColor = COLOR1;
+                    MapIconBtn.BackColor = COLOR1;
                 }
                 else
                 {
                     FieldName.BackColor = COLOR2;
                     LastModified.BackColor = COLOR2;
                     Icon.BackColor = COLOR2;
+                    MapIconBtn.BackColor = COLOR2;
                 }
             }
         }
@@ -128,6 +131,22 @@ namespace AgGrade.Controls
         private void FieldName_Click(object sender, EventArgs e)
         {
             OnClicked?.Invoke(this);
+        }
+
+        private void MapIconBtn_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// Called when user taps on the basemap button
+        /// Downloads the basemap for offline use
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MapIconBtn_Click(object sender, EventArgs e)
+        {
+            OnDownloadBasemap?.Invoke(this);
         }
     }
 }

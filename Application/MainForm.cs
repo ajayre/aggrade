@@ -444,6 +444,7 @@ namespace AgGrade
             fieldChooserPage.Parent = ContentPanel;
             fieldChooserPage.Dock = DockStyle.Fill;
             fieldChooserPage.OnFieldChosen += (folder, dbfile) => { LoadField(folder, dbfile); };
+            fieldChooserPage.OnDownloadFieldBasemap += (folder, dbfile) => { DownloadFieldBasemap(folder, dbfile); };
             fieldChooserPage.Show();
         }
 
@@ -605,6 +606,20 @@ namespace AgGrade
             GetMap()?.ShowSurvey(CurrentSurvey);
 
             FixTimer.Enabled = true;
+        }
+
+        /// <summary>
+        /// Downloads the basemap for a field
+        /// </summary>
+        /// <param name="Folder">Path to folder containing field data</param>
+        /// <param name="DbFile">Database to load or null to create new field</param>
+        private void DownloadFieldBasemap
+            (
+            string Folder,
+            string? DbFile
+            )
+        {
+
         }
 
         /// <summary>

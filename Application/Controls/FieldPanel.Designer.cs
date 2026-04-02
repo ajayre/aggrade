@@ -32,6 +32,7 @@
             LastModified = new Label();
             FieldName = new Label();
             Icon = new Panel();
+            MapIconBtn = new Panel();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -40,6 +41,7 @@
             panel1.Controls.Add(LastModified);
             panel1.Controls.Add(FieldName);
             panel1.Controls.Add(Icon);
+            panel1.Controls.Add(MapIconBtn);
             panel1.Dock = DockStyle.Top;
             panel1.Location = new Point(0, 0);
             panel1.Name = "panel1";
@@ -52,10 +54,10 @@
             LastModified.Dock = DockStyle.Fill;
             LastModified.Font = new Font("Segoe UI", 14F);
             LastModified.ImageAlign = ContentAlignment.MiddleLeft;
-            LastModified.Location = new Point(374, 0);
+            LastModified.Location = new Point(345, 0);
             LastModified.Name = "LastModified";
             LastModified.Padding = new Padding(5, 0, 0, 0);
-            LastModified.Size = new Size(312, 64);
+            LastModified.Size = new Size(277, 64);
             LastModified.TabIndex = 1;
             LastModified.Text = "Last Modified";
             LastModified.TextAlign = ContentAlignment.MiddleRight;
@@ -69,7 +71,7 @@
             FieldName.Location = new Point(64, 0);
             FieldName.Name = "FieldName";
             FieldName.Padding = new Padding(5, 0, 0, 0);
-            FieldName.Size = new Size(310, 64);
+            FieldName.Size = new Size(281, 64);
             FieldName.TabIndex = 0;
             FieldName.Text = "Field Name";
             FieldName.TextAlign = ContentAlignment.MiddleLeft;
@@ -86,6 +88,19 @@
             Icon.Size = new Size(64, 64);
             Icon.TabIndex = 2;
             Icon.Click += Icon_Click;
+            // 
+            // MapIconBtn
+            // 
+            MapIconBtn.BackColor = Color.OldLace;
+            MapIconBtn.BackgroundImage = Properties.Resources.basemap_48px;
+            MapIconBtn.BackgroundImageLayout = ImageLayout.Center;
+            MapIconBtn.Dock = DockStyle.Right;
+            MapIconBtn.Location = new Point(622, 0);
+            MapIconBtn.Name = "MapIconBtn";
+            MapIconBtn.Size = new Size(64, 64);
+            MapIconBtn.TabIndex = 4;
+            MapIconBtn.Click += MapIconBtn_Click;
+            MapIconBtn.Paint += MapIconBtn_Paint;
             // 
             // FieldPanel
             // 
@@ -104,5 +119,6 @@
         private Label FieldName;
         private Label LastModified;
         private Panel Icon;
+        private Panel MapIconBtn;
     }
 }
