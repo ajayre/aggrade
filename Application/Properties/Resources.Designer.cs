@@ -63,6 +63,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap addbenchmark_48px {
+            get {
+                object obj = ResourceManager.GetObject("addbenchmark_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap back_48px {
             get {
                 object obj = ResourceManager.GetObject("back_48px", resourceCulture);
@@ -364,6 +374,16 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap satellite_48px {
             get {
                 object obj = ResourceManager.GetObject("satellite_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap surveycoverage_48px {
+            get {
+                object obj = ResourceManager.GetObject("surveycoverage_48px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

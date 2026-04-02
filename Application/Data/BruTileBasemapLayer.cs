@@ -59,6 +59,13 @@ namespace AgGrade.Data
             };
             _tileImageAttributes.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
 
+            /*float alpha = Math.Clamp(0.3f, 0f, 1f);
+            var matrix = new ColorMatrix
+            {
+                Matrix33 = alpha // overall image opacity
+            };
+            _tileImageAttributes.SetColorMatrix(matrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);*/
+
             try
             {
                 // Keep an explicit BruTile dependency in the add-on path.

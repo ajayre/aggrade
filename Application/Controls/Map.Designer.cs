@@ -47,6 +47,8 @@
             BenchmarkBtn = new Button();
             SatelliteBtn = new Button();
             PondingBtn = new Button();
+            AddBenchmarkBtn = new Button();
+            ToggleSurveyCoverageBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -260,11 +262,33 @@
             PondingBtn.UseVisualStyleBackColor = true;
             PondingBtn.Click += PondingBtn_Click;
             // 
+            // AddBenchmarkBtn
+            // 
+            AddBenchmarkBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            AddBenchmarkBtn.Image = Properties.Resources.addbenchmark_48px;
+            AddBenchmarkBtn.Location = new Point(11, 531);
+            AddBenchmarkBtn.Name = "AddBenchmarkBtn";
+            AddBenchmarkBtn.Size = new Size(60, 60);
+            AddBenchmarkBtn.TabIndex = 16;
+            AddBenchmarkBtn.UseVisualStyleBackColor = true;
+            // 
+            // ToggleSurveyCoverageBtn
+            // 
+            ToggleSurveyCoverageBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            ToggleSurveyCoverageBtn.Image = Properties.Resources.surveycoverage_48px;
+            ToggleSurveyCoverageBtn.Location = new Point(810, 531);
+            ToggleSurveyCoverageBtn.Name = "ToggleSurveyCoverageBtn";
+            ToggleSurveyCoverageBtn.Size = new Size(60, 60);
+            ToggleSurveyCoverageBtn.TabIndex = 17;
+            ToggleSurveyCoverageBtn.UseVisualStyleBackColor = true;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(ToggleSurveyCoverageBtn);
+            Controls.Add(AddBenchmarkBtn);
             Controls.Add(PondingBtn);
             Controls.Add(SatelliteBtn);
             Controls.Add(BenchmarkBtn);
@@ -306,5 +330,7 @@
         private Button BenchmarkBtn;
         private Button SatelliteBtn;
         private Button PondingBtn;
+        private Button AddBenchmarkBtn;
+        private Button ToggleSurveyCoverageBtn;
     }
 }

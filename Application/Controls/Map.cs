@@ -96,9 +96,11 @@ namespace AgGrade.Controls
             RearLoadLabel.Text = "0.0 LCY";
             HeadingLabel.Text = "0" + DegreeSymbol;
             SpeedLabel.Text = "0 MPH";
-            FieldNameLabel.Text = "No Field";
+            FieldNameLabel.Text = "";
 
             FirstRender = true;
+
+            ShowBasicUI();
 
             RefreshTimer = new Timer();
             RefreshTimer.Interval = 250;
@@ -175,13 +177,14 @@ namespace AgGrade.Controls
             if (CurrentField != null)
             {
                 FieldNameLabel.Text = Field!.Name.Substring(0, Field.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Field.Name.Length);
+                ShowFieldUI();
+                FirstRender = true;
             }
             else
             {
-                FieldNameLabel.Text = "No Field";
+                FieldNameLabel.Text = "";
+                ShowBasicUI();
             }
-
-            ShowFieldUI();
         }
 
         /// <summary>
@@ -199,13 +202,14 @@ namespace AgGrade.Controls
             if (CurrentSurvey != null)
             {
                 FieldNameLabel.Text = Survey!.Name.Substring(0, Survey.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Survey.Name.Length);
+                ShowSurveyUI();
+                FirstRender = true;
             }
             else
             {
-                FieldNameLabel.Text = "No Field";
+                FieldNameLabel.Text = "";
+                ShowBasicUI();
             }
-
-            ShowSurveyUI();
         }
 
         /// <summary>
@@ -227,6 +231,9 @@ namespace AgGrade.Controls
 
             ToggleHaulArrowsBtn.Visible = false;
             BenchmarkBtn.Visible = false;
+
+            AddBenchmarkBtn.Visible = true;
+            ToggleSurveyCoverageBtn.Visible = true;
         }
 
         /// <summary>
@@ -248,6 +255,33 @@ namespace AgGrade.Controls
 
             ToggleHaulArrowsBtn.Visible = true;
             BenchmarkBtn.Visible = true;
+
+            AddBenchmarkBtn.Visible = false;
+            ToggleSurveyCoverageBtn.Visible = false;
+        }
+
+        /// <summary>
+        /// Shows a basic UI for when no field and no survey are loaded
+        /// </summary>
+        private void ShowBasicUI
+            (
+            )
+        {
+            FrontBladeHeightLabel.Visible = false;
+            FrontLoadLabel.Visible = false;
+            RearBladeHeightLabel.Visible = false;
+            RearLoadLabel.Visible = false;
+
+            ElevationMapBtn.Visible = false;
+            CutFillMapBtn.Visible = false;
+            FlowBtn.Visible = false;
+            PondingBtn.Visible = false;
+
+            ToggleHaulArrowsBtn.Visible = false;
+            BenchmarkBtn.Visible = false;
+
+            AddBenchmarkBtn.Visible = false;
+            ToggleSurveyCoverageBtn.Visible = false;
         }
 
         /// <summary>
@@ -327,9 +361,8 @@ namespace AgGrade.Controls
             sw.Start();
 #endif
 
-            MapCanvas.Image = MapGen.Generate(CurrentField, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
-                TractorFix, FrontScraperFix, RearScraperFix,
-                CurrentField != null ? CurrentField.Benchmarks : new List<Benchmark>(), TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
+            MapCanvas.Image = MapGen.Generate(CurrentField, CurrentSurvey, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
+                TractorFix, FrontScraperFix, RearScraperFix, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
                 ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowPonding, ShowBenchmarks, ShowSatelliteBasemap);
 
 #if SHOW_MAP_PERF

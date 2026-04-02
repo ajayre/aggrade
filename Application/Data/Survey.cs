@@ -109,12 +109,15 @@ namespace AgGrade.Data
             if (HeaderParts.Length < 5)
                 throw new Exception("Invalid multiplane header. Expected at least 5 tab-separated columns.");
 
-            double BaseOffsetX = ParseDouble(HeaderParts[1], "header offset X");
-            double BaseOffsetY = ParseDouble(HeaderParts[2], "header offset Y");
+            double BaseOffsetXFt = ParseDouble(HeaderParts[1], "header offset X");
+            double BaseOffsetYFt = ParseDouble(HeaderParts[2], "header offset Y");
             double BaseHeightFt = ParseDouble(HeaderParts[3], "header elevation");
 
             Coordinate BaseMasterLocation = ParseHeaderLocation(HeaderParts[4]);
-            Coordinate MasterLocation = UTM.OffsetLocation(BaseMasterLocation, BaseOffsetX, BaseOffsetY);
+            Coordinate MasterLocation = UTM.OffsetLocation(
+                BaseMasterLocation,
+                FeetToMeters(BaseOffsetXFt),
+                FeetToMeters(BaseOffsetYFt));
 
             // Multiplane elevation values are interpreted directly as feet relative
             // to the file's internal datum, then converted to meters for storage.
@@ -132,13 +135,13 @@ namespace AgGrade.Data
                 if (parts.Length < 4)
                     throw new Exception($"Unable to parse line {li + 1}. Expected at least 4 tab-separated columns.");
 
-                double x = ParseDouble(parts[1], $"line {li + 1} offset X");
-                double y = ParseDouble(parts[2], $"line {li + 1} offset Y");
+                double xFt = ParseDouble(parts[1], $"line {li + 1} offset X");
+                double yFt = ParseDouble(parts[2], $"line {li + 1} offset Y");
                 double elevationFt = ParseDouble(parts[3], $"line {li + 1} elevation");
 
                 string code = parts.Length > 4 ? parts[4].Trim() : string.Empty;
                 double elevationM = FeetToMeters(elevationFt);
-                Coordinate pointLocation = UTM.OffsetLocation(MasterLocation, x, y);
+                Coordinate pointLocation = UTM.OffsetLocation(MasterLocation, FeetToMeters(xFt), FeetToMeters(yFt));
 
                 if (IsBenchmarkCode(code))
                 {
@@ -284,8 +287,10 @@ namespace AgGrade.Data
             if (utm.Zone != MasterUtm.Zone || utm.IsNorthernHemisphere != MasterUtm.IsNorthernHemisphere)
                 throw new Exception($"Point {PointId} is not in the same UTM zone/hemisphere as the master benchmark.");
 
-            double relativeX = utm.Easting - MasterUtm.Easting;
-            double relativeY = utm.Northing - MasterUtm.Northing;
+            double relativeXM = utm.Easting - MasterUtm.Easting;
+            double relativeYM = utm.Northing - MasterUtm.Northing;
+            double relativeXFt = MetersToFeet(relativeXM);
+            double relativeYFt = MetersToFeet(relativeYM);
 
             double elevationFt = MetersToFeet(ElevationM);
 
@@ -293,8 +298,8 @@ namespace AgGrade.Data
                 CultureInfo.InvariantCulture,
                 "{0}\t{1:0.00}\t{2:0.00}\t{3:0.000000}\t{4}",
                 PointId,
-                relativeX,
-                relativeY,
+                relativeXFt,
+                relativeYFt,
                 elevationFt,
                 string.IsNullOrWhiteSpace(Code) ? string.Empty : Code.Trim());
         }
