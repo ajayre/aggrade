@@ -217,7 +217,7 @@ namespace AgGrade.Data
         {
             if (provider == BasemapProviders.OpenStreetMap)
             {
-                return $"https://tile.openstreetmap.org/{zoom}/{x}/{y}.png";
+                return $"https://services.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{zoom}/{y}/{x}";
             }
 
             return $"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}";
