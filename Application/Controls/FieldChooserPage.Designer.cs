@@ -30,6 +30,9 @@
         {
             sectionTitle1 = new SectionTitle();
             FieldTable = new Panel();
+            panel1 = new Panel();
+            ProgressBar = new ProgressBar();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -47,17 +50,36 @@
             FieldTable.AutoScroll = true;
             FieldTable.Location = new Point(20, 64);
             FieldTable.Name = "FieldTable";
-            FieldTable.Size = new Size(873, 392);
+            FieldTable.Size = new Size(873, 404);
             FieldTable.TabIndex = 1;
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.FromArgb(224, 224, 224);
+            panel1.Controls.Add(ProgressBar);
+            panel1.Dock = DockStyle.Bottom;
+            panel1.Location = new Point(0, 474);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(916, 44);
+            panel1.TabIndex = 2;
+            // 
+            // ProgressBar
+            // 
+            ProgressBar.Location = new Point(9, 8);
+            ProgressBar.Name = "ProgressBar";
+            ProgressBar.Size = new Size(403, 28);
+            ProgressBar.TabIndex = 0;
             // 
             // FieldChooserPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(panel1);
             Controls.Add(FieldTable);
             Controls.Add(sectionTitle1);
             Name = "FieldChooserPage";
-            Size = new Size(916, 476);
+            Size = new Size(916, 518);
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -65,5 +87,7 @@
 
         private SectionTitle sectionTitle1;
         private Panel FieldTable;
+        private Panel panel1;
+        private ProgressBar ProgressBar;
     }
 }

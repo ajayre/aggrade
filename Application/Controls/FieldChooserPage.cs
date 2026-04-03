@@ -28,9 +28,26 @@ namespace AgGrade.Controls
         public event Action<string, string?> OnFieldChosen = null;
         public event Action<string, string?> OnDownloadFieldBasemap = null;
 
+        /// <summary>
+        /// Sets the download progress to display
+        /// </summary>
+        public int DownloadProgress
+        {
+            set
+            {
+                if (value == 0)
+                    ProgressBar.Visible = false;
+                else
+                    ProgressBar.Visible = true;
+                    ProgressBar.Value = value;
+            }
+        }
+
         public FieldChooserPage()
         {
             InitializeComponent();
+
+            ProgressBar.Visible = false;
         }
 
         /// <summary>

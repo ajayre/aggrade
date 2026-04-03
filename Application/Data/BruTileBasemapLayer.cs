@@ -86,7 +86,8 @@ namespace AgGrade.Data
             double tractorHeadingDeg,
             double pixelsPerMeter,
             BasemapProviders provider,
-            Func<Coordinate, PointF> latLonToPixel)
+            Func<Coordinate, PointF> latLonToPixel,
+            string? basemapFolderPath)
         {
             if (_disposed || !tractorFix.IsValid || imageWidthPx <= 0 || imageHeightPx <= 0 || pixelsPerMeter <= 0.0)
             {
@@ -118,12 +119,19 @@ namespace AgGrade.Data
                     continue;
                 }
 
+                if (TryLoadTileFromDisk(key, basemapFolderPath, out CacheEntry? diskEntry))
+                {
+                    _tileCache[key] = diskEntry;
+                    DrawTile(graphics, diskEntry.Bitmap, key.Zoom, key.X, key.Y, latLonToPixel);
+                    continue;
+                }
+
                 if (canRequest && inflightCount < MaxInflightRequests && !_inflight.ContainsKey(key))
                 {
                     if (_inflight.TryAdd(key, 0))
                     {
                         inflightCount++;
-                        _ = FetchTileAsync(key);
+                        _ = FetchTileAsync(key, basemapFolderPath);
                     }
                 }
             }
@@ -162,10 +170,17 @@ namespace AgGrade.Data
             }
         }
 
-        private async Task FetchTileAsync(TileKey key)
+        private async Task FetchTileAsync(TileKey key, string? basemapFolderPath)
         {
             try
             {
+                if (TryLoadTileFromDisk(key, basemapFolderPath, out CacheEntry? diskEntry))
+                {
+                    _tileCache[key] = diskEntry;
+                    RegisterSuccess();
+                    return;
+                }
+
                 byte[]? tileBytes = await DownloadTileAsync(key).ConfigureAwait(false);
                 if (tileBytes == null || tileBytes.Length == 0)
                 {
@@ -181,6 +196,7 @@ namespace AgGrade.Data
                     LastAccessUtc = DateTime.UtcNow
                 };
                 _tileCache[key] = newEntry;
+                SaveTileToDisk(tileBytes, key, basemapFolderPath);
                 RegisterSuccess();
             }
             catch
@@ -221,6 +237,82 @@ namespace AgGrade.Data
             }
 
             return $"https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{zoom}/{y}/{x}";
+        }
+
+        private static string ProviderFolderName(BasemapProviders provider)
+        {
+            return provider == BasemapProviders.OpenStreetMap ? "OpenStreetMap" : "SatelliteEsri";
+        }
+
+        private static string? BuildDiskTilePath(TileKey key, string? basemapFolderPath)
+        {
+            if (string.IsNullOrWhiteSpace(basemapFolderPath))
+            {
+                return null;
+            }
+
+            string providerFolder = Path.Combine(basemapFolderPath, ProviderFolderName(key.Provider));
+            return Path.Combine(providerFolder, key.Zoom.ToString(), key.X.ToString(), $"{key.Y}.tile");
+        }
+
+        private static bool TryLoadTileFromDisk(TileKey key, string? basemapFolderPath, out CacheEntry? entry)
+        {
+            entry = null;
+            string? tilePath = BuildDiskTilePath(key, basemapFolderPath);
+            if (string.IsNullOrWhiteSpace(tilePath) || !File.Exists(tilePath))
+            {
+                return false;
+            }
+
+            try
+            {
+                byte[] bytes = File.ReadAllBytes(tilePath);
+                if (bytes.Length == 0)
+                {
+                    return false;
+                }
+
+                using MemoryStream ms = new MemoryStream(bytes);
+                using Bitmap decoded = new Bitmap(ms);
+                entry = new CacheEntry
+                {
+                    Bitmap = new Bitmap(decoded),
+                    LastAccessUtc = DateTime.UtcNow
+                };
+                return true;
+            }
+            catch
+            {
+                // Ignore corrupt/unreadable files and continue fail-soft.
+                return false;
+            }
+        }
+
+        private static void SaveTileToDisk(byte[] tileBytes, TileKey key, string? basemapFolderPath)
+        {
+            string? tilePath = BuildDiskTilePath(key, basemapFolderPath);
+            if (string.IsNullOrWhiteSpace(tilePath))
+            {
+                return;
+            }
+
+            try
+            {
+                string? parent = Path.GetDirectoryName(tilePath);
+                if (string.IsNullOrWhiteSpace(parent))
+                {
+                    return;
+                }
+
+                Directory.CreateDirectory(parent);
+                string tempFile = tilePath + ".tmp";
+                File.WriteAllBytes(tempFile, tileBytes);
+                File.Move(tempFile, tilePath, true);
+            }
+            catch
+            {
+                // Disk persistence must never break rendering.
+            }
         }
 
         private void RegisterSuccess()

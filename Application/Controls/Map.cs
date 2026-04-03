@@ -151,6 +151,14 @@ namespace AgGrade.Controls
             _CurrentEquipmentStatus = Status;
         }
 
+        public void SetBasemapDataFolder
+            (
+            string? basemapDataFolder
+            )
+        {
+            MapGen.BasemapDataFolderPath = basemapDataFolder;
+        }
+
         /// <summary>
         /// Gets the heading of the tractor
         /// </summary>

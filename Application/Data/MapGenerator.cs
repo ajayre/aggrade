@@ -153,6 +153,7 @@ namespace AgGrade.Data
         /// The current scaling in pixels per meter
         /// </summary>
         public double CurrentScaleFactor { get; private set; }
+        public string? BasemapDataFolderPath { get; set; }
         public Field? CurrentField { get; private set; }
         public Survey? CurrentSurvey { get; private set; }
 
@@ -483,7 +484,8 @@ namespace AgGrade.Data
                             _tractorHeading,
                             CurrentScaleFactor,
                             BruTileBasemapLayer.BasemapProviders.SatelliteEsri,
-                            (coord) => LatLonToWorldF(coord));
+                            (coord) => LatLonToWorldF(coord),
+                            BasemapDataFolderPath);
                     }
                 }
                 catch

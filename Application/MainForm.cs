@@ -39,6 +39,7 @@ namespace AgGrade
         private FieldUpdater FieldUpdater;
         private string FieldDataFolder;
         private string SurveyDataFolder;
+        private string BasemapDataFolder;
         private Timer FixTimer;
         private bool EnableBladeLimits;
 
@@ -510,6 +511,7 @@ namespace AgGrade
             map.SetEquipmentSettings(CurrentEquipmentSettings);
             map.SetApplicationSettings(CurrentAppSettings);
             map.SetEquipmentStatus(CurrentEquipmentStatus);
+            map.SetBasemapDataFolder(BasemapDataFolder);
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
@@ -619,7 +621,84 @@ namespace AgGrade
             string? DbFile
             )
         {
+            if (string.IsNullOrWhiteSpace(DbFile))
+            {
+                MessageBox.Show(
+                    "Please choose a saved field version before downloading a basemap.",
+                    "Basemap Download",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return;
+            }
 
+            _ = DownloadFieldBasemapAsync(Folder, DbFile);
+        }
+
+        /// <summary>
+        /// Called during download of a basemap to indicate progress
+        /// </summary>
+        /// <param name="Percentage">Percentage complted</param>
+        private void UpdateDownloadBasemapProgress
+            (
+            double PercentageComplete
+            )
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action<double>(UpdateDownloadBasemapProgress), PercentageComplete);
+                return;
+            }
+
+            if (ContentPanel.Controls.Count == 1)
+            {
+                Control Ctrl = (Control)ContentPanel.Controls[0];
+                if (Ctrl is FieldChooserPage)
+                {
+                    (Ctrl as FieldChooserPage)!.DownloadProgress = (int)PercentageComplete;
+                }
+            }
+        }
+
+        private async Task DownloadFieldBasemapAsync
+            (
+            string folder,
+            string dbFile
+            )
+        {
+            Cursor previousCursor = Cursor.Current;
+            try
+            {
+                UseWaitCursor = true;
+                Cursor.Current = Cursors.WaitCursor;
+
+                BasemapDownloader downloader = new BasemapDownloader();
+                downloader.OnProgressChanged += (pcent) => { UpdateDownloadBasemapProgress(pcent); };
+                BasemapDownloader.DownloadSummary summary = await downloader.DownloadAsync(BasemapDataFolder, dbFile);
+
+                /*MessageBox.Show(
+                    $"Basemap download complete.\n\n" +
+                    $"Requested: {summary.RequestedTiles}\n" +
+                    $"Downloaded: {summary.DownloadedTiles}\n" +
+                    $"Skipped (already present): {summary.SkippedTiles}\n" +
+                    $"Failed: {summary.FailedTiles}\n\n" +
+                    $"Saved in:\n{summary.BasemapFolder}",
+                    "Basemap Download",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);*/
+            }
+            catch (Exception ex)
+            {
+                /*MessageBox.Show(
+                    $"Basemap download failed:\n{ex.Message}",
+                    "Basemap Download",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);*/
+            }
+            finally
+            {
+                UseWaitCursor = false;
+                Cursor.Current = previousCursor;
+            }
         }
 
         /// <summary>
@@ -927,13 +1006,22 @@ namespace AgGrade
             SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
                 Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "SurveyData" +
                 Path.DirectorySeparatorChar;
+
+            BasemapDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
+                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "BasemapData" +
+                Path.DirectorySeparatorChar;
 #else
             FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "FieldData" +
                 Path.DirectorySeparatorChar;
 
             SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "SurveyData" +
                 Path.DirectorySeparatorChar;
+
+            BasemapDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "BasemapData" +
+                Path.DirectorySeparatorChar;
 #endif
+
+            Directory.CreateDirectory(BasemapDataFolder);
 
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);
