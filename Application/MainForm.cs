@@ -845,6 +845,7 @@ namespace AgGrade
             Controller?.SetEquipmentSettings(EquipmentSettings);
             FieldUpdater.SetEquipmentSettings(EquipmentSettings);
             BladeCtrl.SetEquipmentSettings(EquipmentSettings);
+            SurveyUpdater.SetEquipmentSettings(EquipmentSettings);
 
             Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
@@ -1059,6 +1060,7 @@ namespace AgGrade
             Controller.SetEquipmentSettings(CurrentEquipmentSettings);
             FieldUpdater.SetEquipmentSettings(CurrentEquipmentSettings);
             BladeCtrl.SetEquipmentSettings(CurrentEquipmentSettings);
+            SurveyUpdater.SetEquipmentSettings(CurrentEquipmentSettings);
 
             UpdateEnabledLeds();
             UpdateIMULeds();
