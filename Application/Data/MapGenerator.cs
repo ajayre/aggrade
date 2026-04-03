@@ -213,6 +213,7 @@ namespace AgGrade.Data
         private Coordinate PondingNECorner = new Coordinate();
         private string? PondingImage = null;
         private bool ShowBenchmarks;
+        private bool ShowSurveyCoverage;
         private bool ShowSatelliteBasemap;
         private BruTileBasemapLayer? _bruTileBasemapLayer = null;
         private bool _enableBruTileBasemap = false;
@@ -335,6 +336,7 @@ namespace AgGrade.Data
         /// <param name="ShowPonding">true to show the ponding overlay</param>
         /// <param name="ShowBenchmarks">true to show benchmarks</param>
         /// <param name="ShowSatelliteBasemap">true to show satellite basemap</param>
+        /// <param name="ShowSurveyCoverage">true to show the survey coverage</param>
         /// <returns>Generated bitmap</returns>
         public Bitmap Generate
             (
@@ -357,7 +359,8 @@ namespace AgGrade.Data
             bool ShowSurfaceFlow,
             bool ShowPonding,
             bool ShowBenchmarks,
-            bool ShowSatelliteBasemap
+            bool ShowSatelliteBasemap,
+            bool ShowSurveyCoverage
             )
         {
             CurrentField = Field;
@@ -381,6 +384,7 @@ namespace AgGrade.Data
             this.ShowHaulArrows = ShowHaulArrows;
             this.ShowBenchmarks = ShowBenchmarks;
             this.ShowSatelliteBasemap = ShowSatelliteBasemap;
+            this.ShowSurveyCoverage = ShowSurveyCoverage;
 
             this.HaulPath = HaulPath;
 
@@ -934,7 +938,10 @@ namespace AgGrade.Data
                             SolidBrush pointBrush = surveyPointBrushes[colorIndex];
 
                             Point pt = LatLonToWorld(new Coordinate(tp.Latitude, tp.Longitude));
-                            g.DrawEllipse(BoundaryPen, pt.X - (BoundaryWidthpx / 2), pt.Y - (BoundaryWidthpx / 2), BoundaryWidthpx, BoundaryWidthpx);
+                            if (ShowSurveyCoverage)
+                            {
+                                g.DrawEllipse(BoundaryPen, pt.X - (BoundaryWidthpx / 2), pt.Y - (BoundaryWidthpx / 2), BoundaryWidthpx, BoundaryWidthpx);
+                            }
                             g.FillEllipse(pointBrush, pt.X - (PointWidthpx / 2), pt.Y - (PointWidthpx / 2), PointWidthpx, PointWidthpx);
                         }
 

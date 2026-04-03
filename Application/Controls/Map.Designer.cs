@@ -285,6 +285,7 @@
             ToggleSurveyCoverageBtn.Size = new Size(60, 60);
             ToggleSurveyCoverageBtn.TabIndex = 17;
             ToggleSurveyCoverageBtn.UseVisualStyleBackColor = true;
+            ToggleSurveyCoverageBtn.Click += ToggleSurveyCoverageBtn_Click;
             // 
             // StartStopSurveyBtn
             // 

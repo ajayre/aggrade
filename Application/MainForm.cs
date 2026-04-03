@@ -316,6 +316,16 @@ namespace AgGrade
 
             StatusBar.ShowEStop = true;
 
+            CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.Manual;
+            SetFrontPanIndicator(PanIndicatorStates.None);
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            UpdateFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+
+            CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.Manual;
+            SetRearPanIndicator(PanIndicatorStates.None);
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+            UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
+
             SoundControllerAlarm();
         }
 

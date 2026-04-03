@@ -42,6 +42,7 @@ namespace AgGrade.Controls
         private static bool ShowSurfaceFlow;
         private static bool ShowPonding;
         private static bool ShowBenchmarks;
+        private static bool ShowSurveyCoverage;
         private static bool ShowSatelliteBasemap;
         private static MapGenerator.TractorStyles TractorStyle;
         private static MapGenerator.MapTypes MapType;
@@ -92,6 +93,7 @@ namespace AgGrade.Controls
 
             ShowBenchmarks = true;
             ShowSatelliteBasemap = false;
+            ShowSurveyCoverage = true;
         }
 
         public Map()
@@ -452,7 +454,8 @@ namespace AgGrade.Controls
 
             MapCanvas.Image = MapGen.Generate(CurrentField, CurrentSurvey, MapCanvas.Width, MapCanvas.Height, false, ScaleFactor,
                 TractorFix, FrontScraperFix, RearScraperFix, TractorLocationHistory, _CurrentEquipmentSettings, _CurrentAppSettings,
-                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowPonding, ShowBenchmarks, ShowSatelliteBasemap);
+                ShowHaulArrows, MapType, TractorStyle, HaulPath, ShowSurfaceFlow, ShowPonding, ShowBenchmarks, ShowSatelliteBasemap,
+                ShowSurveyCoverage);
 
 #if SHOW_MAP_PERF
             sw.Stop();
@@ -830,6 +833,11 @@ namespace AgGrade.Controls
             {
                 OnStopSurveying?.Invoke();
             }
+        }
+
+        private void ToggleSurveyCoverageBtn_Click(object sender, EventArgs e)
+        {
+            ShowSurveyCoverage = !ShowSurveyCoverage;
         }
     }
 }
