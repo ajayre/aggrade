@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading.Tasks;
+using OpenCvSharp;
 
 namespace AgGrade.Data
 {
@@ -200,6 +201,18 @@ namespace AgGrade.Data
                 if (point == null) continue;
                 point.ExistingElevation += deltaM;
             }
+        }
+
+        /// <summary>
+        /// Saves to current file name
+        /// </summary>
+        public void SaveToMultiplane
+            (
+            )
+        {
+            if (FileName == null) throw new Exception("Survey does not have a file name");
+
+            SaveToMultiplane(FileName);
         }
 
         /// <summary>

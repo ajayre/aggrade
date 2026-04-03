@@ -113,6 +113,46 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap boundary_left_selected48px {
+            get {
+                object obj = ResourceManager.GetObject("boundary_left_selected48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap boundary_left48px {
+            get {
+                object obj = ResourceManager.GetObject("boundary_left48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap boundary_right_selected48px {
+            get {
+                object obj = ResourceManager.GetObject("boundary_right_selected48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap boundary_right48px {
+            get {
+                object obj = ResourceManager.GetObject("boundary_right48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap calibration_48px {
             get {
                 object obj = ResourceManager.GetObject("calibration_48px", resourceCulture);
@@ -384,6 +424,26 @@ namespace AgGrade.Properties {
         internal static System.Drawing.Bitmap satellite_48px {
             get {
                 object obj = ResourceManager.GetObject("satellite_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap start_48px {
+            get {
+                object obj = ResourceManager.GetObject("start_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap stop_48px {
+            get {
+                object obj = ResourceManager.GetObject("stop_48px", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

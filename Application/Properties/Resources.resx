@@ -118,6 +118,9 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="joystick_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\joystick_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="joystick_down1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\joystick_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -145,6 +148,9 @@
   <data name="led-orange_24px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\led-orange_24px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="boundary_left48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\boundary_left48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="location_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\location_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -166,6 +172,9 @@
   <data name="joystick_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\joystick_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="basemap_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\basemap_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="tractor_calib_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\tractor_calib_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -174,6 +183,9 @@
   </data>
   <data name="led-off_24px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\led-off_24px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="stop_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\stop_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="blade_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\blade_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -226,8 +238,8 @@
   <data name="addbenchmark_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\addbenchmark_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="joystick_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\joystick_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="start_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\start_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="transparent-logo-darkgreen-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\transparent-logo-darkgreen-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -238,7 +250,13 @@
   <data name="navarrow-yellow_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-yellow_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="basemap_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\basemap_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="boundary_right48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\boundary_right48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="boundary_left_selected48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\boundary_left_selected48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="boundary_right_selected48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\boundary_right_selected48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

@@ -45,6 +45,15 @@ namespace AgGrade.Controls
         private static bool ShowSatelliteBasemap;
         private static MapGenerator.TractorStyles TractorStyle;
         private static MapGenerator.MapTypes MapType;
+        private BoundaryModes BoundaryMode;
+        private bool SurveyRecording;
+
+        public enum BoundaryModes
+        {
+            None,
+            Left,
+            Right
+        }
 
         /// <summary>
         /// pixels per meter
@@ -60,6 +69,13 @@ namespace AgGrade.Controls
 
         public delegate void ResetPanLoad(bool Front);
         public event ResetPanLoad OnResetPanLoad = null;
+
+        public delegate void StartSurveying(BoundaryModes Mode);
+        public delegate void SurveyBoundaryChanged(BoundaryModes Mode);
+        public event StartSurveying OnStartSurveying = null;
+        public event Action OnStopSurveying = null;
+        public event SurveyBoundaryChanged OnSurveyBoundaryChanged = null;
+        public event Action OnAddBenchmark = null;
 
         public Color FrontPanColor = Color.Black;
         public Color RearPanColor = Color.Black;
@@ -99,6 +115,9 @@ namespace AgGrade.Controls
             FieldNameLabel.Text = "";
 
             FirstRender = true;
+
+            BoundaryMode = BoundaryModes.None;
+            SurveyRecording = false;
 
             ShowBasicUI();
 
@@ -212,11 +231,64 @@ namespace AgGrade.Controls
                 FieldNameLabel.Text = Survey!.Name.Substring(0, Survey.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : Survey.Name.Length);
                 ShowSurveyUI();
                 FirstRender = true;
+
+                BoundaryMode = BoundaryModes.None;
+                ShowBoundaryMode(BoundaryMode);
+
+                SurveyRecording = false;
+                ShowRecordingMode(SurveyRecording);
             }
             else
             {
                 FieldNameLabel.Text = "";
                 ShowBasicUI();
+            }
+        }
+
+        /// <summary>
+        /// Shows a survey recording state in the UI
+        /// </summary>
+        /// <param name="IsRecording">Recording state to show</param>
+        private void ShowRecordingMode
+            (
+            bool IsRecording
+            )
+        {
+            if (IsRecording)
+            {
+                StartStopSurveyBtn.Image = Properties.Resources.stop_48px;
+            }
+            else
+            {
+                StartStopSurveyBtn.Image = Properties.Resources.start_48px;
+            }
+        }
+
+        /// <summary>
+        /// Shows a boundary mode in the UI
+        /// </summary>
+        /// <param name="Mode">The boundary mode to show</param>
+        private void ShowBoundaryMode
+            (
+            BoundaryModes Mode
+            )
+        {
+            switch (Mode)
+            {
+                case BoundaryModes.None:
+                    BoundaryLeftBtn.Image = Properties.Resources.boundary_left48px;
+                    BoundaryRightBtn.Image = Properties.Resources.boundary_right48px;
+                    break;
+
+                case BoundaryModes.Left:
+                    BoundaryLeftBtn.Image = Properties.Resources.boundary_left_selected48px;
+                    BoundaryRightBtn.Image = Properties.Resources.boundary_right48px;
+                    break;
+
+                case BoundaryModes.Right:
+                    BoundaryLeftBtn.Image = Properties.Resources.boundary_left48px;
+                    BoundaryRightBtn.Image = Properties.Resources.boundary_right_selected48px;
+                    break;
             }
         }
 
@@ -242,6 +314,9 @@ namespace AgGrade.Controls
 
             AddBenchmarkBtn.Visible = true;
             ToggleSurveyCoverageBtn.Visible = true;
+            StartStopSurveyBtn.Visible = true;
+            BoundaryLeftBtn.Visible = true;
+            BoundaryRightBtn.Visible = true;
         }
 
         /// <summary>
@@ -266,6 +341,9 @@ namespace AgGrade.Controls
 
             AddBenchmarkBtn.Visible = false;
             ToggleSurveyCoverageBtn.Visible = false;
+            StartStopSurveyBtn.Visible = false;
+            BoundaryLeftBtn.Visible = false;
+            BoundaryRightBtn.Visible = false;
         }
 
         /// <summary>
@@ -290,6 +368,9 @@ namespace AgGrade.Controls
 
             AddBenchmarkBtn.Visible = false;
             ToggleSurveyCoverageBtn.Visible = false;
+            StartStopSurveyBtn.Visible = false;
+            BoundaryLeftBtn.Visible = false;
+            BoundaryRightBtn.Visible = false;
         }
 
         /// <summary>
@@ -676,6 +757,79 @@ namespace AgGrade.Controls
             FrontLoadLabel.ForeColor = FrontPanColor;
             RearBladeHeightLabel.ForeColor = RearPanColor;
             RearLoadLabel.ForeColor = RearPanColor;
+        }
+
+        /// <summary>
+        /// Called when user taps button to add a benchmark to the current survey
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AddBenchmarkBtn_Click(object sender, EventArgs e)
+        {
+            OnAddBenchmark?.Invoke();
+        }
+
+        /// <summary>
+        /// Called when user taps on the left boundary button
+        /// Toggles the setting
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BoundaryLeftBtn_Click(object sender, EventArgs e)
+        {
+            if (BoundaryMode == BoundaryModes.Left)
+            {
+                BoundaryMode = BoundaryModes.None;
+            }
+            else
+            {
+                BoundaryMode = BoundaryModes.Left;
+            }
+
+            ShowBoundaryMode(BoundaryMode);
+
+            OnSurveyBoundaryChanged?.Invoke(BoundaryMode);
+        }
+
+        /// <summary>
+        /// Called when user taps on the right boundary button
+        /// Toggles the setting
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void BoundaryRightBtn_Click(object sender, EventArgs e)
+        {
+            if (BoundaryMode == BoundaryModes.Right)
+            {
+                BoundaryMode = BoundaryModes.None;
+            }
+            else
+            {
+                BoundaryMode = BoundaryModes.Right;
+            }
+
+            ShowBoundaryMode(BoundaryMode);
+            OnSurveyBoundaryChanged?.Invoke(BoundaryMode);
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to start and stop surveying
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void StartStopSurveyBtn_Click(object sender, EventArgs e)
+        {
+            SurveyRecording = !SurveyRecording;
+            ShowRecordingMode(SurveyRecording);
+
+            if (SurveyRecording)
+            {
+                OnStartSurveying?.Invoke(BoundaryMode);
+            }
+            else
+            {
+                OnStopSurveying?.Invoke();
+            }
         }
     }
 }

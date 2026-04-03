@@ -49,6 +49,9 @@
             PondingBtn = new Button();
             AddBenchmarkBtn = new Button();
             ToggleSurveyCoverageBtn = new Button();
+            StartStopSurveyBtn = new Button();
+            BoundaryLeftBtn = new Button();
+            BoundaryRightBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -271,6 +274,7 @@
             AddBenchmarkBtn.Size = new Size(60, 60);
             AddBenchmarkBtn.TabIndex = 16;
             AddBenchmarkBtn.UseVisualStyleBackColor = true;
+            AddBenchmarkBtn.Click += AddBenchmarkBtn_Click;
             // 
             // ToggleSurveyCoverageBtn
             // 
@@ -282,11 +286,47 @@
             ToggleSurveyCoverageBtn.TabIndex = 17;
             ToggleSurveyCoverageBtn.UseVisualStyleBackColor = true;
             // 
+            // StartStopSurveyBtn
+            // 
+            StartStopSurveyBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            StartStopSurveyBtn.Image = Properties.Resources.start_48px;
+            StartStopSurveyBtn.Location = new Point(11, 465);
+            StartStopSurveyBtn.Name = "StartStopSurveyBtn";
+            StartStopSurveyBtn.Size = new Size(60, 60);
+            StartStopSurveyBtn.TabIndex = 18;
+            StartStopSurveyBtn.UseVisualStyleBackColor = true;
+            StartStopSurveyBtn.Click += StartStopSurveyBtn_Click;
+            // 
+            // BoundaryLeftBtn
+            // 
+            BoundaryLeftBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            BoundaryLeftBtn.Image = Properties.Resources.boundary_left48px;
+            BoundaryLeftBtn.Location = new Point(11, 333);
+            BoundaryLeftBtn.Name = "BoundaryLeftBtn";
+            BoundaryLeftBtn.Size = new Size(60, 60);
+            BoundaryLeftBtn.TabIndex = 20;
+            BoundaryLeftBtn.UseVisualStyleBackColor = true;
+            BoundaryLeftBtn.Click += BoundaryLeftBtn_Click;
+            // 
+            // BoundaryRightBtn
+            // 
+            BoundaryRightBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            BoundaryRightBtn.Image = Properties.Resources.boundary_right48px;
+            BoundaryRightBtn.Location = new Point(11, 399);
+            BoundaryRightBtn.Name = "BoundaryRightBtn";
+            BoundaryRightBtn.Size = new Size(60, 60);
+            BoundaryRightBtn.TabIndex = 21;
+            BoundaryRightBtn.UseVisualStyleBackColor = true;
+            BoundaryRightBtn.Click += BoundaryRightBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(BoundaryRightBtn);
+            Controls.Add(BoundaryLeftBtn);
+            Controls.Add(StartStopSurveyBtn);
             Controls.Add(ToggleSurveyCoverageBtn);
             Controls.Add(AddBenchmarkBtn);
             Controls.Add(PondingBtn);
@@ -332,5 +372,8 @@
         private Button PondingBtn;
         private Button AddBenchmarkBtn;
         private Button ToggleSurveyCoverageBtn;
+        private Button StartStopSurveyBtn;
+        private Button BoundaryLeftBtn;
+        private Button BoundaryRightBtn;
     }
 }

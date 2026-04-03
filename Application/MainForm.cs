@@ -37,6 +37,7 @@ namespace AgGrade
         private Field? CurrentField;
         private Survey? CurrentSurvey;
         private FieldUpdater FieldUpdater;
+        private SurveyUpdater SurveyUpdater;
         private string FieldDataFolder;
         private string SurveyDataFolder;
         private string BasemapDataFolder;
@@ -111,6 +112,9 @@ namespace AgGrade
             FieldUpdater.SetApplicationSettings(CurrentAppSettings);
             FieldUpdater.OnFrontVolumeCutUpdated += FieldUpdater_OnFrontVolumeCutUpdated;
             FieldUpdater.OnRearVolumeCutUpdated += FieldUpdater_OnRearVolumeCutUpdated;
+
+            SurveyUpdater = new SurveyUpdater();
+            SurveyUpdater.SetEquipmentStatus(CurrentEquipmentStatus);
 
             BladeCtrl = new BladeController(Controller);
             BladeCtrl.SetEquipmentStatus(CurrentEquipmentStatus);
@@ -533,8 +537,63 @@ namespace AgGrade
 
             // connect events
             map.OnResetPanLoad += Map_OnResetPanLoad;
+            map.OnStartSurveying += Map_OnStartSurveying;
+            map.OnStopSurveying += Map_OnStopSurveying;
+            map.OnSurveyBoundaryChanged += Map_OnSurveyBoundaryChanged;
+            map.OnAddBenchmark += Map_OnAddBenchmark;
 
             map.Show();
+        }
+
+        /// <summary>
+        /// Called when the map requests to add a benchmark to the current survey
+        /// </summary>
+        private void Map_OnAddBenchmark()
+        {
+            SurveyUpdater.AddBenchmark();
+        }
+
+        /// <summary>
+        /// Called when the map changes the boundary mode for surveying
+        /// </summary>
+        /// <param name="Mode"></param>
+        private void Map_OnSurveyBoundaryChanged(Map.BoundaryModes Mode)
+        {
+            switch (Mode)
+            {
+                default:
+                case Map.BoundaryModes.None: SurveyUpdater.BoundaryChanged(SurveyUpdater.BoundaryModes.None); break;
+                case Map.BoundaryModes.Left: SurveyUpdater.BoundaryChanged(SurveyUpdater.BoundaryModes.Left); break;
+                case Map.BoundaryModes.Right: SurveyUpdater.BoundaryChanged(SurveyUpdater.BoundaryModes.Right); break;
+            }
+        }
+
+        /// <summary>
+        /// Called when map requests a stop to surveying
+        /// </summary>
+        private void Map_OnStopSurveying
+            (
+            )
+        {
+            SurveyUpdater.Stop();
+        }
+
+        /// <summary>
+        /// Called when map requests a start to surveying
+        /// </summary>
+        /// <param name="Mode">Boundary mode</param>
+        private void Map_OnStartSurveying
+            (
+            Map.BoundaryModes Mode
+            )
+        {
+            switch (Mode)
+            {
+                default:
+                case Map.BoundaryModes.None: SurveyUpdater.Start(SurveyUpdater.BoundaryModes.None); break;
+                case Map.BoundaryModes.Left: SurveyUpdater.Start(SurveyUpdater.BoundaryModes.Left); break;
+                case Map.BoundaryModes.Right: SurveyUpdater.Start(SurveyUpdater.BoundaryModes.Right); break;
+            }
         }
 
         /// <summary>
@@ -582,6 +641,8 @@ namespace AgGrade
             {
                 CurrentSurvey = null;
 
+                SurveyUpdater.SetSurvey(CurrentSurvey);
+
                 // if showing map then update to remove survey
                 GetMap()?.ShowSurvey(CurrentSurvey);
 
@@ -603,6 +664,8 @@ namespace AgGrade
 
             CurrentSurvey = new Survey();
             CurrentSurvey.LoadFromMultiplane(FileName);
+
+            SurveyUpdater.SetSurvey(CurrentSurvey);
 
             // if showing map then update to show survey
             GetMap()?.ShowSurvey(CurrentSurvey);
@@ -833,6 +896,10 @@ namespace AgGrade
                 {
                     // remove event handlers
                     (Ctrl as Map)!.OnResetPanLoad -= Map_OnResetPanLoad;
+                    (Ctrl as Map)!.OnStartSurveying -= Map_OnStartSurveying;
+                    (Ctrl as Map)!.OnStopSurveying -= Map_OnStopSurveying;
+                    (Ctrl as Map)!.OnSurveyBoundaryChanged -= Map_OnSurveyBoundaryChanged;
+                    (Ctrl as Map)!.OnAddBenchmark -= Map_OnAddBenchmark;
                 }
                 else if (Ctrl is CalibrationPage)
                 {
