@@ -10,9 +10,27 @@ using OpenCvSharp;
 
 namespace AgGrade.Data
 {
+    /// <summary>
+    /// File format used when a survey was loaded or last saved via <see cref="Survey.Load"/> / <see cref="Survey.Save"/>.
+    /// </summary>
+    public enum SurveyFileFormats
+    {
+        /// <summary>No supported format recorded (survey not loaded from .txt or .ags).</summary>
+        None = 0,
+        /// <summary>Trimble multiplane text format (.txt).</summary>
+        MultiplaneTxt = 1,
+        /// <summary>AGS comma-separated format (.ags).</summary>
+        Ags = 2
+    }
+
     public class Survey
     {
         private string FileName;
+
+        /// <summary>
+        /// Format of the file this survey was loaded from (or set by <see cref="LoadFromMultiplane"/> / <see cref="LoadFromAgs"/>).
+        /// </summary>
+        public SurveyFileFormats LoadedFileFormat { get; private set; }
 
         /// <summary>
         /// Only Latitude, Longitude and ExistingElevation are used
@@ -81,6 +99,55 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Loads a survey from disk by extension: <c>.txt</c> uses multiplane format, <c>.ags</c> uses AGS format.
+        /// Sets <see cref="LoadedFileFormat"/> accordingly.
+        /// </summary>
+        /// <param name="FileName">Path and name of the file to load</param>
+        public void Load
+            (
+            string FileName
+            )
+        {
+            if (string.IsNullOrWhiteSpace(FileName))
+                throw new ArgumentException("File name is required.", nameof(FileName));
+
+            if (!File.Exists(FileName))
+                throw new FileNotFoundException("Survey file was not found.", FileName);
+
+            string extension = Path.GetExtension(FileName);
+            if (string.Equals(extension, ".ags", StringComparison.OrdinalIgnoreCase))
+                LoadFromAgs(FileName);
+            else if (string.Equals(extension, ".txt", StringComparison.OrdinalIgnoreCase))
+                LoadFromMultiplane(FileName);
+            else
+                throw new NotSupportedException($"Unsupported survey file extension '{extension}'. Expected .txt or .ags.");
+        }
+
+        /// <summary>
+        /// Saves the survey to the current file path using the format recorded in <see cref="LoadedFileFormat"/>.
+        /// </summary>
+        public void Save
+            (
+            )
+        {
+            if (FileName == null)
+                throw new Exception("Survey does not have a file name.");
+
+            switch (LoadedFileFormat)
+            {
+                case SurveyFileFormats.MultiplaneTxt:
+                    SaveToMultiplane();
+                    break;
+                case SurveyFileFormats.Ags:
+                    SaveToAgs();
+                    break;
+                default:
+                    throw new InvalidOperationException(
+                        "Cannot save: survey format is not set. Load from a .txt or .ags file first.");
+            }
+        }
+
+        /// <summary>
         /// Loads a trimble multiplane file
         /// </summary>
         /// <param name="FileName">Path and name of the file to load</param>
@@ -96,6 +163,7 @@ namespace AgGrade.Data
                 throw new FileNotFoundException("Multiplane file was not found.", FileName);
 
             this.FileName = FileName;
+            LoadedFileFormat = SurveyFileFormats.MultiplaneTxt;
 
             string[] Lines = File.ReadAllLines(FileName);
             InteriorPoints.Clear();
@@ -276,6 +344,161 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Loads an AGS survey file (comma-separated values: latitude, longitude, elevation in meters, optional code).
+        /// Master benchmark rows use a code containing <c>mb</c> (for example 0mb_4g); other benchmarks use a code containing <c>bm</c> (for example BM1).
+        /// Boundary rows use code 2PER; interior rows use 3GRD.
+        /// </summary>
+        /// <param name="FileName">Path and name of the file to load</param>
+        public void LoadFromAgs
+            (
+            string FileName
+            )
+        {
+            if (string.IsNullOrWhiteSpace(FileName))
+                throw new ArgumentException("File name is required.", nameof(FileName));
+
+            if (!File.Exists(FileName))
+                throw new FileNotFoundException("AGS file was not found.", FileName);
+
+            this.FileName = FileName;
+            LoadedFileFormat = SurveyFileFormats.Ags;
+
+            string[] lines = File.ReadAllLines(FileName);
+            InteriorPoints.Clear();
+            BoundaryPoints.Clear();
+            Benchmarks.Clear();
+
+            if (lines.Length == 0 || lines.All(string.IsNullOrWhiteSpace))
+                return;
+
+            for (int li = 0; li < lines.Length; li++)
+            {
+                string line = lines[li];
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                string[] parts = line.Split(',');
+                if (parts.Length < 3)
+                    throw new Exception($"Unable to parse AGS line {li + 1}. Expected at least 3 comma-separated columns (latitude, longitude, elevation).");
+
+                double latitude = ParseDouble(parts[0].Trim(), $"line {li + 1} latitude");
+                double longitude = ParseDouble(parts[1].Trim(), $"line {li + 1} longitude");
+                double elevationM = ParseDouble(parts[2].Trim(), $"line {li + 1} elevation");
+                string code = parts.Length > 3 ? parts[3].Trim() : string.Empty;
+
+                if (IsAgsMasterBenchmarkCode(code))
+                {
+                    Benchmarks.Add(new Benchmark(new Coordinate(latitude, longitude), code, elevationM));
+                    continue;
+                }
+
+                if (IsAgsRegularBenchmarkCode(code))
+                {
+                    Benchmarks.Add(new Benchmark(new Coordinate(latitude, longitude), code, elevationM));
+                    continue;
+                }
+
+                TopologyPoint point = new TopologyPoint
+                {
+                    Latitude = latitude,
+                    Longitude = longitude,
+                    ExistingElevation = elevationM,
+                    Code = string.IsNullOrEmpty(code) ? null : code
+                };
+
+                if (string.Equals(code, "2PER", StringComparison.OrdinalIgnoreCase))
+                    BoundaryPoints.Add(point);
+                else
+                    InteriorPoints.Add(point);
+            }
+        }
+
+        /// <summary>
+        /// Saves to current file name
+        /// </summary>
+        public void SaveToAgs
+            (
+            )
+        {
+            if (FileName == null) throw new Exception("Survey does not have a file name");
+
+            SaveToAgs(FileName);
+        }
+
+        /// <summary>
+        /// Saves the survey to an AGS file (comma-separated values: latitude, longitude, elevation in meters, code).
+        /// Writes the master row first using its stored benchmark name (must contain <c>mb</c>, for example 0mb_4g or MB),
+        /// then other benchmarks (names containing <c>bm</c>, for example BM1), then boundary points as 2PER and interior points as 3GRD.
+        /// If the file exists then it is overwritten without warning.
+        /// </summary>
+        /// <param name="FileName">Path and name of the file to save to</param>
+        public void SaveToAgs
+            (
+            string FileName
+            )
+        {
+            if (string.IsNullOrWhiteSpace(FileName))
+                throw new ArgumentException("File name is required.", nameof(FileName));
+
+            Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
+                b != null &&
+                !string.IsNullOrWhiteSpace(b.Name) &&
+                IsAgsMasterBenchmarkCode(b.Name))
+                ?? throw new Exception("Cannot save AGS file: no master benchmark (name must contain mb, for example MB or 0mb_4g).");
+
+            Coordinate masterLocation = masterBenchmark.Location
+                ?? throw new Exception("Cannot save AGS file: master benchmark location is null.");
+
+            string masterCode = masterBenchmark.Name.Trim();
+
+            List<string> lines = new List<string>();
+            lines.Add(FormatAgsLine(masterLocation.Latitude, masterLocation.Longitude, masterBenchmark.Elevation, masterCode));
+
+            foreach (Benchmark benchmark in Benchmarks)
+            {
+                if (benchmark == null) continue;
+                if (ReferenceEquals(benchmark, masterBenchmark)) continue;
+
+                Coordinate loc = benchmark.Location
+                    ?? throw new Exception($"Cannot save AGS file: benchmark '{benchmark.Name}' has a null location.");
+                lines.Add(FormatAgsLine(loc.Latitude, loc.Longitude, benchmark.Elevation, benchmark.Name.Trim()));
+            }
+
+            foreach (TopologyPoint point in BoundaryPoints)
+            {
+                if (point == null) continue;
+                lines.Add(FormatAgsLine(point.Latitude, point.Longitude, point.ExistingElevation, "2PER"));
+            }
+
+            foreach (TopologyPoint point in InteriorPoints)
+            {
+                if (point == null) continue;
+                lines.Add(FormatAgsLine(point.Latitude, point.Longitude, point.ExistingElevation, "3GRD"));
+            }
+
+            File.WriteAllLines(FileName, lines);
+        }
+
+        /// <summary>
+        /// Formats one AGS data row: latitude, longitude, elevation (meters), optional code.
+        /// </summary>
+        private static string FormatAgsLine
+            (
+            double Latitude,
+            double Longitude,
+            double ElevationM,
+            string Code
+            )
+        {
+            string lat = Latitude.ToString("G17", CultureInfo.InvariantCulture);
+            string lon = Longitude.ToString("G17", CultureInfo.InvariantCulture);
+            string elev = ElevationM.ToString("G17", CultureInfo.InvariantCulture);
+            if (string.IsNullOrEmpty(Code))
+                return string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},", lat, lon, elev);
+            return string.Format(CultureInfo.InvariantCulture, "{0},{1},{2},{3}", lat, lon, elev, Code);
+        }
+
+        /// <summary>
         /// Formats a non-header multiplane point row from a geodetic location and relative elevation.
         /// </summary>
         /// <param name="PointId">Sequential point identifier to write in column 1.</param>
@@ -360,6 +583,31 @@ namespace AgGrade.Data
             if (string.IsNullOrWhiteSpace(Code)) return false;
             string normalized = Code.Trim().ToUpperInvariant();
             return normalized == "MB" || normalized.StartsWith("BM");
+        }
+
+        /// <summary>
+        /// AGS master benchmark: code contains the substring <c>mb</c> (case-insensitive), for example 0mb_4g or MB.
+        /// </summary>
+        private static bool IsAgsMasterBenchmarkCode
+            (
+            string Code
+            )
+        {
+            if (string.IsNullOrWhiteSpace(Code)) return false;
+            return Code.IndexOf("mb", StringComparison.OrdinalIgnoreCase) >= 0;
+        }
+
+        /// <summary>
+        /// AGS non-master benchmark: code contains the substring <c>bm</c> (case-insensitive), for example BM1.
+        /// Checked after <see cref="IsAgsMasterBenchmarkCode"/> so codes that match both resolve as master.
+        /// </summary>
+        private static bool IsAgsRegularBenchmarkCode
+            (
+            string Code
+            )
+        {
+            if (string.IsNullOrWhiteSpace(Code)) return false;
+            return Code.IndexOf("bm", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>

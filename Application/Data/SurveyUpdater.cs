@@ -15,7 +15,7 @@ namespace AgGrade.Data
         private const int UPDATE_PERIOD_MS = 250;
 
         // spacing of points
-        private const double MIN_POINT_SPACING_FT = 16.0;
+        private const double MIN_POINT_SPACING_FT = 10.0;
 
         public enum BoundaryModes
         {
@@ -124,7 +124,7 @@ namespace AgGrade.Data
             if ((Survey != null) && (CurrentEquipmentStatus != null))
             {
                 Survey.AddBenchmark(new Coordinate(CurrentEquipmentStatus.TractorFix.Latitude, CurrentEquipmentStatus.TractorFix.Longitude), CurrentEquipmentStatus.TractorFix.Altitude);
-                Survey.SaveToMultiplane();
+                Survey.Save();
             }
         }
 
@@ -173,7 +173,7 @@ namespace AgGrade.Data
                 ExistingElevation = CurrentEquipmentStatus.TractorFix.Altitude
             });
 
-            Survey.SaveToMultiplane();
+            Survey.Save();
         }
     }
 }

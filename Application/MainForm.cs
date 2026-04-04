@@ -673,7 +673,7 @@ namespace AgGrade
             ShowMap();
 
             CurrentSurvey = new Survey();
-            CurrentSurvey.LoadFromMultiplane(FileName);
+            CurrentSurvey.Load(FileName);
 
             SurveyUpdater.SetSurvey(CurrentSurvey);
 

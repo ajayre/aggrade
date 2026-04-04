@@ -919,11 +919,11 @@ namespace AgGrade.Data
                     SolidBrush[] surveyPointBrushes = new SolidBrush[CutFillBandColors.Length];
                     Pen BoundaryPen = new Pen(Color.Gray, 1);
 
-                    int PointWidthMm = 1500;
+                    int PointWidthMm = 1200;
                     int PointWidthpx = (int)(PointWidthMm / 1000.0 * CurrentScaleFactor);
                     if (PointWidthpx < 2) PointWidthpx = 2;
 
-                    int BoundaryWidthMm = 16000;
+                    int BoundaryWidthMm = 6000;
                     int BoundaryWidthpx = (int)(BoundaryWidthMm / 1000.0 * CurrentScaleFactor);
 
                     try

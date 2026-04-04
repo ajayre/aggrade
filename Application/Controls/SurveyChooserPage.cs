@@ -46,7 +46,8 @@ namespace AgGrade.Controls
 
             var entries = new List<(string FieldName, string FieldNameText, string LastModifiedText, DateTime SortDate, string? FileName)>();
 
-            foreach (string SurveyFile in Directory.GetFiles(SurveyDataFolder, "*.txt"))
+            foreach (string SurveyFile in Directory.GetFiles(SurveyDataFolder, "*.txt")
+                .Concat(Directory.GetFiles(SurveyDataFolder, "*.ags")))
             {
                 string SurveyName = Path.GetFileNameWithoutExtension(SurveyFile);
 
