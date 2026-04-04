@@ -23,6 +23,7 @@ namespace AgGrade.Controls
             InitializeComponent();
 
             ErrorMessage.Visible = false;
+            FileTypeChooser.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -47,7 +48,14 @@ namespace AgGrade.Controls
                 return;
             }
 
-            string FileName = SurveyDataFolder + Name + ".txt";
+            string Ext = string.Empty;
+            switch (FileTypeChooser.SelectedIndex)
+            {
+                case 0: Ext = ".txt"; break;
+                case 1: Ext = ".ags"; break;
+            }
+
+            string FileName = SurveyDataFolder + Name + Ext;
 
             if (File.Exists(FileName))
             {

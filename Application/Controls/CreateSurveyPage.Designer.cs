@@ -34,6 +34,8 @@
             CreateSurveyBtn = new Button();
             panel1 = new Panel();
             ErrorMessage = new Label();
+            FileTypeChooser = new ComboBox();
+            label2 = new Label();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -71,7 +73,7 @@
             CreateSurveyBtn.Font = new Font("Segoe UI", 18F);
             CreateSurveyBtn.Image = Properties.Resources.createnewfield_48px;
             CreateSurveyBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            CreateSurveyBtn.Location = new Point(770, 96);
+            CreateSurveyBtn.Location = new Point(773, 140);
             CreateSurveyBtn.Name = "CreateSurveyBtn";
             CreateSurveyBtn.Size = new Size(143, 60);
             CreateSurveyBtn.TabIndex = 13;
@@ -101,10 +103,34 @@
             ErrorMessage.TabIndex = 0;
             ErrorMessage.Text = "Error Message";
             // 
+            // FileTypeChooser
+            // 
+            FileTypeChooser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            FileTypeChooser.DropDownStyle = ComboBoxStyle.DropDownList;
+            FileTypeChooser.Font = new Font("Segoe UI", 16F);
+            FileTypeChooser.FormattingEnabled = true;
+            FileTypeChooser.Items.AddRange(new object[] { "Ag Survey File (.ags)", "Trimble Multiplane ASCII (.txt)" });
+            FileTypeChooser.Location = new Point(171, 96);
+            FileTypeChooser.Name = "FileTypeChooser";
+            FileTypeChooser.Size = new Size(742, 38);
+            FileTypeChooser.TabIndex = 15;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 16F);
+            label2.Location = new Point(61, 99);
+            label2.Name = "label2";
+            label2.Size = new Size(104, 30);
+            label2.TabIndex = 16;
+            label2.Text = "File Type:";
+            // 
             // CreateSurveyPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(label2);
+            Controls.Add(FileTypeChooser);
             Controls.Add(panel1);
             Controls.Add(CreateSurveyBtn);
             Controls.Add(NameInput);
@@ -126,5 +152,7 @@
         private Button CreateSurveyBtn;
         private Panel panel1;
         private Label ErrorMessage;
+        private ComboBox FileTypeChooser;
+        private Label label2;
     }
 }
