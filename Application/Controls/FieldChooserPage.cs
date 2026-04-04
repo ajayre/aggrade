@@ -27,6 +27,7 @@ namespace AgGrade.Controls
 
         public event Action<string, string?> OnFieldChosen = null;
         public event Action<string, string?> OnDownloadFieldBasemap = null;
+        public event Action OnCreateNewField = null;
 
         /// <summary>
         /// Sets the download progress to display
@@ -69,12 +70,9 @@ namespace AgGrade.Controls
                 if (string.IsNullOrEmpty(fieldName))
                     continue;
 
-                // look for exactly one base database
-                if (Directory.GetFiles(subDir, "*-base.db").Length != 1)
+                // look for exactly one database
+                if (Directory.GetFiles(subDir, "*.db").Length != 1)
                     continue;
-
-                // Create New panel (sorts last within this field)
-                entries.Add((fieldName, fieldName, "", DateTime.MinValue, true, subDir, null, false));
 
                 // One panel per .db file, newest first for sorting
                 var dbFiles = Directory.GetFiles(subDir, "*.db")
@@ -87,10 +85,9 @@ namespace AgGrade.Controls
                     if (Calibrated) { ShowIcon = true; }
 
                     string dbFileName = Path.GetFileNameWithoutExtension(fi.FullName);
-                    if (dbFileName.Contains("-base")) continue;
                     entries.Add((
                         fieldName,
-                        fieldName + " (" + dbFileName + ")",
+                        fieldName,
                         FormatLastModifiedFriendly(fi.LastWriteTime),
                         fi.LastWriteTime,
                         ShowIcon,
@@ -120,12 +117,30 @@ namespace AgGrade.Controls
                 panel.LastModifiedText = e.LastModifiedText;
                 panel.ShowIcon = e.ShowIcon;
                 panel.Calibrated = e.Calibrated;
+                panel.ShowMapButton = true;
                 panel.Dock = DockStyle.Top;
                 panel.Folder = e.Folder;
                 panel.DbFile = e.DbFile;
                 FieldTable.Controls.Add(panel);
                 odd = !odd;
             }
+
+            // create spacer
+            var spacerpanel = new Panel();
+            spacerpanel.Height = 20;
+            spacerpanel.Dock = DockStyle.Top;
+            FieldTable.Controls.Add(spacerpanel);
+
+            // add entry to create a new survey
+            var newpanel = new FieldPanel();
+            newpanel.OnClicked += Panel_OnClicked;
+            newpanel.Odd = odd;
+            newpanel.FieldNameText = "Create New Field";
+            newpanel.LastModifiedText = "";
+            newpanel.ShowMapButton = false;
+            newpanel.Folder = string.Empty;
+            newpanel.Dock = DockStyle.Top;
+            FieldTable.Controls.Add(newpanel);
         }
 
         /// <summary>
@@ -151,7 +166,14 @@ namespace AgGrade.Controls
             string Folder = Panel.Folder;
             string? DbFile = Panel.DbFile;
 
-            OnFieldChosen?.Invoke(Folder, DbFile);
+            if (Folder == string.Empty)
+            {
+                OnCreateNewField?.Invoke();
+            }
+            else
+            {
+                OnFieldChosen?.Invoke(Folder, DbFile);
+            }
         }
 
         /// <summary>

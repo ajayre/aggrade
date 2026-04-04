@@ -460,6 +460,7 @@ namespace AgGrade
             fieldChooserPage.Dock = DockStyle.Fill;
             fieldChooserPage.OnFieldChosen += (folder, dbfile) => { LoadField(folder, dbfile); };
             fieldChooserPage.OnDownloadFieldBasemap += (folder, dbfile) => { DownloadFieldBasemap(folder, dbfile); };
+            fieldChooserPage.OnCreateNewField += () => { CreateField(); };
             fieldChooserPage.Show();
         }
 
@@ -499,6 +500,35 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Shows the UI for creating a field
+        /// </summary>
+        private void ShowCreateFieldPage
+            (
+            )
+        {
+            ClosePage();
+
+            CreateFieldPage createFieldPage = new CreateFieldPage();
+            createFieldPage.SurveyDataFolder = SurveyDataFolder;
+            createFieldPage.Parent = ContentPanel;
+            createFieldPage.Dock = DockStyle.Fill;
+            createFieldPage.OnCreateField += (fielddesign) => { CreateField(fielddesign); };
+            createFieldPage.Show();
+        }
+
+        /// <summary>
+        /// Creates a new field from a design
+        /// </summary>
+        /// <param name="Design">Design to use</param>
+        private void CreateField
+            (
+            FieldDesign Design
+            )
+        {
+
+        }
+
+        /// <summary>
         /// Creates a new survey
         /// </summary>
         private void CreateSurvey
@@ -506,6 +536,16 @@ namespace AgGrade
             )
         {
             ShowCreateSurveyPage();
+        }
+
+        /// <summary>
+        /// Creates a new field
+        /// </summary>
+        private void CreateField
+            (
+            )
+        {
+            ShowCreateFieldPage();
         }
 
         /// <summary>

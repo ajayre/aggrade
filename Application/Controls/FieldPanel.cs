@@ -36,6 +36,12 @@ namespace AgGrade.Controls
             set { Icon.Visible = value; }
         }
 
+        public bool ShowMapButton
+        {
+            get { return MapIconBtn.Visible; }
+            set { MapIconBtn.Visible = value;}
+        }
+
         private string _Folder;
         public string Folder
         {
