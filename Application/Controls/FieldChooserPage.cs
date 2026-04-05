@@ -28,6 +28,7 @@ namespace AgGrade.Controls
         public event Action<string, string?> OnFieldChosen = null;
         public event Action<string, string?> OnDownloadFieldBasemap = null;
         public event Action OnCreateNewField = null;
+        public event Action OnImportField = null;
 
         /// <summary>
         /// Sets the download progress to display
@@ -115,8 +116,15 @@ namespace AgGrade.Controls
                 panel.Odd = odd;
                 panel.FieldNameText = e.FieldNameText;
                 panel.LastModifiedText = e.LastModifiedText;
-                panel.ShowIcon = e.ShowIcon;
-                panel.Calibrated = e.Calibrated;
+                panel.ShowIcon = true;
+                if (e.Calibrated)
+                {
+                    panel.DisplayIcon = Properties.Resources.calibration_48px;
+                }
+                else
+                {
+                    panel.DisplayIcon = Properties.Resources.field_48px;
+                }
                 panel.ShowMapButton = true;
                 panel.Dock = DockStyle.Top;
                 panel.Folder = e.Folder;
@@ -131,12 +139,34 @@ namespace AgGrade.Controls
             spacerpanel.Dock = DockStyle.Top;
             FieldTable.Controls.Add(spacerpanel);
 
-            // add entry to create a new survey
+            // add entry to import a field
             var newpanel = new FieldPanel();
+            newpanel.OnClicked += Panel_OnClicked;
+            newpanel.Odd = odd;
+            newpanel.FieldNameText = "Import a Field";
+            newpanel.LastModifiedText = "";
+            newpanel.ShowMapButton = false;
+            newpanel.ShowIcon = true;
+            newpanel.DisplayIcon = Properties.Resources.import_48px;
+            newpanel.Folder = string.Empty;
+            newpanel.Dock = DockStyle.Top;
+            FieldTable.Controls.Add(newpanel);
+            odd = !odd;
+
+            // create spacer
+            spacerpanel = new Panel();
+            spacerpanel.Height = 20;
+            spacerpanel.Dock = DockStyle.Top;
+            FieldTable.Controls.Add(spacerpanel);
+
+            // add entry to create a new field
+            newpanel = new FieldPanel();
             newpanel.OnClicked += Panel_OnClicked;
             newpanel.Odd = odd;
             newpanel.FieldNameText = "Create New Field";
             newpanel.LastModifiedText = "";
+            newpanel.ShowIcon = true;
+            newpanel.DisplayIcon = Properties.Resources.createnewfield_48px;
             newpanel.ShowMapButton = false;
             newpanel.Folder = string.Empty;
             newpanel.Dock = DockStyle.Top;
@@ -168,7 +198,14 @@ namespace AgGrade.Controls
 
             if (Folder == string.Empty)
             {
-                OnCreateNewField?.Invoke();
+                if (Panel.FieldNameText.ToLower().Contains("import"))
+                {
+                    OnImportField?.Invoke();
+                }
+                else
+                {
+                    OnCreateNewField?.Invoke();
+                }
             }
             else
             {

@@ -167,7 +167,7 @@ namespace AgGrade.Data
 
             // determine if the units in the file are meters or feet based on the filename
             bool Meters = false;
-            if (Path.GetFileNameWithoutExtension(FileName).Contains("_m", StringComparison.InvariantCultureIgnoreCase)) Meters = true;
+            if (Path.GetFileNameWithoutExtension(FileName).ToLower().Contains("_m")) Meters = true;
 
             string[] Lines = File.ReadAllLines(FileName);
             InteriorPoints.Clear();
@@ -302,7 +302,7 @@ namespace AgGrade.Data
 
             // determine if the units in the file are meters or feet based on the filename
             bool Meters = false;
-            if (Path.GetFileNameWithoutExtension(FileName).Contains("_m", StringComparison.InvariantCultureIgnoreCase)) Meters = true;
+            if (Path.GetFileNameWithoutExtension(FileName).ToLower().Contains("_m")) Meters = true;
 
             NormalizeElevationsForMultiplane();
 

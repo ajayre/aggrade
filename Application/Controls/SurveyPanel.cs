@@ -36,6 +36,12 @@ namespace AgGrade.Controls
             set { _FileName = value; }
         }
 
+        public Image? DisplayIcon
+        {
+            get { return Icon.BackgroundImage; }
+            set { Icon.BackgroundImage = value; }
+        }
+
         private bool _Odd;
         public bool Odd
         {

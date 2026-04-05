@@ -61,3 +61,5 @@ Stop by Bismillah from <a href="https://thenounproject.com/browse/icons/term/sto
 Record by Darrin Loeliger from <a href="https://thenounproject.com/browse/icons/term/record/" target="_blank" title="Record Icons">Noun Project</a> (CC BY 3.0)
 
 terrain by ahmad from <a href="https://thenounproject.com/browse/icons/term/terrain/" target="_blank" title="terrain Icons">Noun Project</a> (CC BY 3.0)
+
+import by Reva Muktafa from <a href="https://thenounproject.com/browse/icons/term/import/" target="_blank" title="import Icons">Noun Project</a> (CC BY 3.0)

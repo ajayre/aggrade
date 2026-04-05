@@ -36,6 +36,12 @@ namespace AgGrade.Controls
             set { Icon.Visible = value; }
         }
 
+        public Image? DisplayIcon
+        {
+            get { return Icon.BackgroundImage; }
+            set { Icon.BackgroundImage = value; }
+        }
+
         public bool ShowMapButton
         {
             get { return MapIconBtn.Visible; }
@@ -54,24 +60,6 @@ namespace AgGrade.Controls
         {
             get { return _DbFile; }
             set { _DbFile = value; }
-        }
-
-        private bool _Calibrated;
-        public bool Calibrated
-        {
-            get { return _Calibrated; }
-            set
-            {
-                _Calibrated = value;
-                if (_Calibrated)
-                {
-                    Icon.BackgroundImage = Properties.Resources.calibration_48px;
-                }
-                else
-                {
-                    Icon.BackgroundImage = Properties.Resources.createnewfield_48px;
-                }
-            }
         }
 
         private bool _Odd;
@@ -106,7 +94,6 @@ namespace AgGrade.Controls
             LastModifiedText = "Create New";
 
             DbFile = null;
-            Calibrated = false;
         }
 
         /// <summary>

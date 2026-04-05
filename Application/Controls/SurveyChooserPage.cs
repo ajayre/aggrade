@@ -75,6 +75,7 @@ namespace AgGrade.Controls
                 panel.LastModifiedText = e.LastModifiedText;
                 panel.Dock = DockStyle.Top;
                 panel.FileName = e.FileName;
+                panel.DisplayIcon = Properties.Resources.survey_48px;
                 SurveyTable.Controls.Add(panel);
                 odd = !odd;
             }
@@ -93,6 +94,7 @@ namespace AgGrade.Controls
             newpanel.LastModifiedText = "";
             newpanel.Dock = DockStyle.Top;
             newpanel.FileName = null;
+            newpanel.DisplayIcon = Properties.Resources.createnewfield_48px;
             SurveyTable.Controls.Add(newpanel);
         }
 

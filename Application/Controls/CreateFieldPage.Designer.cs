@@ -77,7 +77,7 @@
             CreateFieldBtn.Text = "Create";
             CreateFieldBtn.TextAlign = ContentAlignment.MiddleRight;
             CreateFieldBtn.UseVisualStyleBackColor = true;
-            CreateFieldBtn.Click += CreateFieldBtn_Click;
+            CreateFieldBtn.Click += this.CreateFieldBtn_Click;
             // 
             // panel1
             // 

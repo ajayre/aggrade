@@ -486,6 +486,7 @@ namespace AgGrade
             fieldChooserPage.OnFieldChosen += (folder, dbfile) => { LoadField(folder, dbfile); };
             fieldChooserPage.OnDownloadFieldBasemap += (folder, dbfile) => { DownloadFieldBasemap(folder, dbfile); };
             fieldChooserPage.OnCreateNewField += () => { CreateField(); };
+            fieldChooserPage.OnImportField += () => { ImportField(); };
             fieldChooserPage.Show();
         }
 
@@ -542,6 +543,21 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Shows the UI import a field
+        /// </summary>
+        private void ShowImportFieldPage
+            (
+            )
+        {
+            ClosePage();
+
+            ImportFieldPage importFieldPage = new ImportFieldPage();
+            importFieldPage.Parent = ContentPanel;
+            importFieldPage.Dock = DockStyle.Fill;
+            importFieldPage.Show();
+        }
+
+        /// <summary>
         /// Creates a new field from a design
         /// </summary>
         /// <param name="Design">Design to use</param>
@@ -571,6 +587,16 @@ namespace AgGrade
             )
         {
             ShowCreateFieldPage();
+        }
+
+        /// <summary>
+        /// Imports a field
+        /// </summary>
+        private void ImportField
+            (
+            )
+        {
+            ShowImportFieldPage();
         }
 
         /// <summary>
