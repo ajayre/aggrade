@@ -165,6 +165,10 @@ namespace AgGrade.Data
             this.FileName = FileName;
             LoadedFileFormat = SurveyFileFormats.MultiplaneTxt;
 
+            // determine if the units in the file are meters or feet based on the filename
+            bool Meters = false;
+            if (Path.GetFileNameWithoutExtension(FileName).Contains("_m", StringComparison.InvariantCultureIgnoreCase)) Meters = true;
+
             string[] Lines = File.ReadAllLines(FileName);
             InteriorPoints.Clear();
             BoundaryPoints.Clear();
@@ -185,12 +189,12 @@ namespace AgGrade.Data
             Coordinate BaseMasterLocation = ParseHeaderLocation(HeaderParts[4]);
             Coordinate MasterLocation = UTM.OffsetLocation(
                 BaseMasterLocation,
-                FeetToMeters(BaseOffsetXFt),
-                FeetToMeters(BaseOffsetYFt));
+                Meters ? BaseOffsetXFt : FeetToMeters(BaseOffsetXFt),
+                Meters ? BaseOffsetYFt : FeetToMeters(BaseOffsetYFt));
 
             // Multiplane elevation values are interpreted directly as feet relative
             // to the file's internal datum, then converted to meters for storage.
-            double masterElevationMeters = FeetToMeters(BaseHeightFt);
+            double masterElevationMeters = Meters ? BaseHeightFt : FeetToMeters(BaseHeightFt);
 
             Benchmarks.Add(new Benchmark(MasterLocation, "MB", masterElevationMeters));
 
@@ -209,8 +213,8 @@ namespace AgGrade.Data
                 double elevationFt = ParseDouble(parts[3], $"line {li + 1} elevation");
 
                 string code = parts.Length > 4 ? parts[4].Trim() : string.Empty;
-                double elevationM = FeetToMeters(elevationFt);
-                Coordinate pointLocation = UTM.OffsetLocation(MasterLocation, FeetToMeters(xFt), FeetToMeters(yFt));
+                double elevationM = Meters ? elevationFt : FeetToMeters(elevationFt);
+                Coordinate pointLocation = UTM.OffsetLocation(MasterLocation, Meters ? xFt : FeetToMeters(xFt), Meters ? yFt : FeetToMeters(yFt));
 
                 if (IsBenchmarkCode(code))
                 {
@@ -296,6 +300,10 @@ namespace AgGrade.Data
             if (string.IsNullOrWhiteSpace(FileName))
                 throw new ArgumentException("File name is required.", nameof(FileName));
 
+            // determine if the units in the file are meters or feet based on the filename
+            bool Meters = false;
+            if (Path.GetFileNameWithoutExtension(FileName).Contains("_m", StringComparison.InvariantCultureIgnoreCase)) Meters = true;
+
             NormalizeElevationsForMultiplane();
 
             Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
@@ -307,7 +315,7 @@ namespace AgGrade.Data
             Coordinate masterLocation = masterBenchmark.Location
                 ?? throw new Exception("Cannot save multiplane file: master benchmark location is null.");
 
-            double masterHeightFt = MetersToFeet(masterBenchmark.Elevation);
+            double masterHeightFt = Meters ? masterBenchmark.Elevation : MetersToFeet(masterBenchmark.Elevation);
 
             List<string> lines = new List<string>();
             lines.Add(string.Format(
@@ -325,19 +333,19 @@ namespace AgGrade.Data
                 if (benchmark == null) continue;
                 if (string.Equals(benchmark.Name?.Trim(), "MB", StringComparison.OrdinalIgnoreCase)) continue;
 
-                lines.Add(FormatPointLine(nextId++, masterUtm, benchmark.Location, benchmark.Elevation, benchmark.Name));
+                lines.Add(FormatPointLine(nextId++, masterUtm, benchmark.Location, benchmark.Elevation, benchmark.Name, Meters));
             }
 
             foreach (TopologyPoint point in BoundaryPoints)
             {
                 if (point == null) continue;
-                lines.Add(FormatPointLine(nextId++, masterUtm, new Coordinate(point.Latitude, point.Longitude), point.ExistingElevation, "B"));
+                lines.Add(FormatPointLine(nextId++, masterUtm, new Coordinate(point.Latitude, point.Longitude), point.ExistingElevation, "B", Meters));
             }
 
             foreach (TopologyPoint point in InteriorPoints)
             {
                 if (point == null) continue;
-                lines.Add(FormatPointLine(nextId++, masterUtm, new Coordinate(point.Latitude, point.Longitude), point.ExistingElevation, string.Empty));
+                lines.Add(FormatPointLine(nextId++, masterUtm, new Coordinate(point.Latitude, point.Longitude), point.ExistingElevation, string.Empty, Meters));
             }
 
             File.WriteAllLines(FileName, lines);
@@ -506,6 +514,7 @@ namespace AgGrade.Data
         /// <param name="Location">Point latitude/longitude location.</param>
         /// <param name="ElevationM">Point elevation in meters relative to the master normalization.</param>
         /// <param name="Code">Point code such as BM1, B, or other survey code.</param>
+        /// <param name="Meters">true to write units in meters, false to write in feet</param>
         /// <returns>One tab-delimited multiplane point line.</returns>
         private static string FormatPointLine
             (
@@ -513,7 +522,8 @@ namespace AgGrade.Data
             UTM.UTMCoordinate MasterUtm,
             Coordinate Location,
             double ElevationM,
-            string Code
+            string Code,
+            bool Meters
             )
         {
             if (Location == null)
@@ -525,10 +535,10 @@ namespace AgGrade.Data
 
             double relativeXM = utm.Easting - MasterUtm.Easting;
             double relativeYM = utm.Northing - MasterUtm.Northing;
-            double relativeXFt = MetersToFeet(relativeXM);
-            double relativeYFt = MetersToFeet(relativeYM);
+            double relativeXFt = Meters ? relativeXM : MetersToFeet(relativeXM);
+            double relativeYFt = Meters ? relativeYM : MetersToFeet(relativeYM);
 
-            double elevationFt = MetersToFeet(ElevationM);
+            double elevationFt = Meters ? ElevationM : MetersToFeet(ElevationM);
 
             return string.Format(
                 CultureInfo.InvariantCulture,

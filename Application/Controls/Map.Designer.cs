@@ -290,7 +290,7 @@
             // StartStopSurveyBtn
             // 
             StartStopSurveyBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            StartStopSurveyBtn.Image = Properties.Resources.start_48px;
+            StartStopSurveyBtn.Image = Properties.Resources.record_48px;
             StartStopSurveyBtn.Location = new Point(11, 465);
             StartStopSurveyBtn.Name = "StartStopSurveyBtn";
             StartStopSurveyBtn.Size = new Size(60, 60);

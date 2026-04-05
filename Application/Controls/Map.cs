@@ -262,7 +262,7 @@ namespace AgGrade.Controls
             }
             else
             {
-                StartStopSurveyBtn.Image = Properties.Resources.start_48px;
+                StartStopSurveyBtn.Image = Properties.Resources.record_48px;
             }
         }
 

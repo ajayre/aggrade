@@ -2,6 +2,7 @@ using AgGrade.Controller;
 using AgGrade.Controls;
 using AgGrade.Data;
 using AgGrade.Properties;
+using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Media;
 using System.Reflection;
@@ -38,6 +39,7 @@ namespace AgGrade
         private Survey? CurrentSurvey;
         private FieldUpdater FieldUpdater;
         private SurveyUpdater SurveyUpdater;
+        private string DataFolder;
         private string FieldDataFolder;
         private string SurveyDataFolder;
         private string BasemapDataFolder;
@@ -411,11 +413,22 @@ namespace AgGrade
             settingsEditor.Dock = DockStyle.Fill;
             settingsEditor.OnPowerOff += () => { Close(); };
             settingsEditor.OnApplySettings += () => { ApplyAppSettings(settingsEditor); };
+            settingsEditor.OnOpenDataFolder += () => { OpenDataFolder(); };
 
             // Load and display settings
             settingsEditor.ShowSettings(CurrentAppSettings);
 
             settingsEditor.Show();
+        }
+
+        /// <summary>
+        /// Opens the data folder in windows explorer
+        /// </summary>
+        private void OpenDataFolder
+            (
+            )
+        {
+            Process.Start("explorer.exe", DataFolder);
         }
 
         /// <summary>
@@ -1129,30 +1142,16 @@ namespace AgGrade
             UpdateHeightLeds();
             UpdateRTKLeds();
 
-#if DEBUG
-            FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
-                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "FieldData" +
-                Path.DirectorySeparatorChar;
+            DataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + Path.DirectorySeparatorChar + "AgGrade" + Path.DirectorySeparatorChar;
 
-            SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
-                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "SurveyData" +
-                Path.DirectorySeparatorChar;
+            FieldDataFolder = DataFolder + "FieldData" + Path.DirectorySeparatorChar;
+            if (!Directory.Exists(FieldDataFolder)) Directory.CreateDirectory(FieldDataFolder);
 
-            BasemapDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + ".." +
-                Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + ".." + Path.DirectorySeparatorChar + "BasemapData" +
-                Path.DirectorySeparatorChar;
-#else
-            FieldDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "FieldData" +
-                Path.DirectorySeparatorChar;
+            SurveyDataFolder = DataFolder + "SurveyData" + Path.DirectorySeparatorChar;
+            if (!Directory.Exists(SurveyDataFolder)) Directory.CreateDirectory(SurveyDataFolder);
 
-            SurveyDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "SurveyData" +
-                Path.DirectorySeparatorChar;
-
-            BasemapDataFolder = System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)! + Path.DirectorySeparatorChar + "BasemapData" +
-                Path.DirectorySeparatorChar;
-#endif
-
-            Directory.CreateDirectory(BasemapDataFolder);
+            BasemapDataFolder = DataFolder + "BasemapData" + Path.DirectorySeparatorChar;
+            if (!Directory.Exists(BasemapDataFolder)) Directory.CreateDirectory(BasemapDataFolder);
 
             // turn off indicators
             SetFrontPanIndicator(PanIndicatorStates.None);

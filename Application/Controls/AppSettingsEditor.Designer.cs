@@ -67,6 +67,7 @@ namespace AgGrade.Controls
             PondingCurveNumberText = new TextBox();
             labelPondingRainfall = new Label();
             PondingRainfallMmText = new TextBox();
+            OpenDataFolderBtn = new Button();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -439,11 +440,26 @@ namespace AgGrade.Controls
             PondingRainfallMmText.Size = new Size(70, 32);
             PondingRainfallMmText.TabIndex = 49;
             // 
+            // OpenDataFolderBtn
+            // 
+            OpenDataFolderBtn.Font = new Font("Segoe UI", 18F);
+            OpenDataFolderBtn.Image = Properties.Resources.folder_48px;
+            OpenDataFolderBtn.ImageAlign = ContentAlignment.MiddleLeft;
+            OpenDataFolderBtn.Location = new Point(230, 399);
+            OpenDataFolderBtn.Name = "OpenDataFolderBtn";
+            OpenDataFolderBtn.Size = new Size(258, 60);
+            OpenDataFolderBtn.TabIndex = 50;
+            OpenDataFolderBtn.Text = "Open Data Folder";
+            OpenDataFolderBtn.TextAlign = ContentAlignment.MiddleRight;
+            OpenDataFolderBtn.UseVisualStyleBackColor = true;
+            OpenDataFolderBtn.Click += OpenDataFolderBtn_Click;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(OpenDataFolderBtn);
             Controls.Add(labelPondingRainfall);
             Controls.Add(PondingRainfallMmText);
             Controls.Add(labelPondingCurveNumber);
@@ -483,7 +499,7 @@ namespace AgGrade.Controls
             Controls.Add(PowerBtn);
             Controls.Add(sectionTitle1);
             Name = "AppSettingsEditor";
-            Size = new Size(843, 450);
+            Size = new Size(843, 534);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -527,5 +543,6 @@ namespace AgGrade.Controls
         private TextBox PondingCurveNumberText;
         private Label labelPondingRainfall;
         private TextBox PondingRainfallMmText;
+        private Button OpenDataFolderBtn;
     }
 }

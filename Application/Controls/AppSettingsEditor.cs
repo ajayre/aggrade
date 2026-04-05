@@ -18,6 +18,7 @@ namespace AgGrade.Controls
         public event PowerOff OnPowerOff;
 
         public event Action OnApplySettings = null;
+        public event Action OnOpenDataFolder = null;
 
         public AppSettingsEditor()
         {
@@ -206,9 +207,9 @@ namespace AgGrade.Controls
             switch (TractorColorSelector.SelectedIndex)
             {
                 default:
-                case 0: Settings.TractorColor = AppSettings.TractorColors.Green;  break;
-                case 1: Settings.TractorColor = AppSettings.TractorColors.Red;    break;
-                case 2: Settings.TractorColor = AppSettings.TractorColors.Blue;   break;
+                case 0: Settings.TractorColor = AppSettings.TractorColors.Green; break;
+                case 1: Settings.TractorColor = AppSettings.TractorColors.Red; break;
+                case 2: Settings.TractorColor = AppSettings.TractorColors.Blue; break;
                 case 3: Settings.TractorColor = AppSettings.TractorColors.Yellow; break;
             }
 
@@ -302,9 +303,9 @@ namespace AgGrade.Controls
             switch (Settings.TractorColor)
             {
                 default:
-                case AppSettings.TractorColors.Green:  TractorColorSelector.SelectedIndex = 0; break;
-                case AppSettings.TractorColors.Red:    TractorColorSelector.SelectedIndex = 1; break;
-                case AppSettings.TractorColors.Blue:   TractorColorSelector.SelectedIndex = 2; break;
+                case AppSettings.TractorColors.Green: TractorColorSelector.SelectedIndex = 0; break;
+                case AppSettings.TractorColors.Red: TractorColorSelector.SelectedIndex = 1; break;
+                case AppSettings.TractorColors.Blue: TractorColorSelector.SelectedIndex = 2; break;
                 case AppSettings.TractorColors.Yellow: TractorColorSelector.SelectedIndex = 3; break;
             }
 
@@ -323,5 +324,14 @@ namespace AgGrade.Controls
             OnApplySettings?.Invoke();
         }
 
+        /// <summary>
+        /// Called when user taps on the button to open the data folder
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenDataFolderBtn_Click(object sender, EventArgs e)
+        {
+            OnOpenDataFolder?.Invoke();
+        }
     }
 }

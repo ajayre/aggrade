@@ -161,8 +161,8 @@
             // OpenFieldBtn
             // 
             OpenFieldBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            OpenFieldBtn.Image = (Image)resources.GetObject("OpenFieldBtn.Image");
-            OpenFieldBtn.Location = new Point(8, 476);
+            OpenFieldBtn.Image = Properties.Resources.field_48px;
+            OpenFieldBtn.Location = new Point(8, 156);
             OpenFieldBtn.Name = "OpenFieldBtn";
             OpenFieldBtn.Size = new Size(60, 60);
             OpenFieldBtn.TabIndex = 7;
@@ -173,7 +173,7 @@
             // 
             StatusBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             StatusBtn.Image = (Image)resources.GetObject("StatusBtn.Image");
-            StatusBtn.Location = new Point(8, 138);
+            StatusBtn.Location = new Point(8, 476);
             StatusBtn.Name = "StatusBtn";
             StatusBtn.Size = new Size(60, 60);
             StatusBtn.TabIndex = 6;
@@ -184,7 +184,7 @@
             // 
             MapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             MapBtn.Image = (Image)resources.GetObject("MapBtn.Image");
-            MapBtn.Location = new Point(8, 72);
+            MapBtn.Location = new Point(8, 6);
             MapBtn.Name = "MapBtn";
             MapBtn.Size = new Size(60, 60);
             MapBtn.TabIndex = 5;
@@ -194,8 +194,8 @@
             // SurveyBtn
             // 
             SurveyBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            SurveyBtn.Image = (Image)resources.GetObject("SurveyBtn.Image");
-            SurveyBtn.Location = new Point(8, 6);
+            SurveyBtn.Image = Properties.Resources.survey_48px;
+            SurveyBtn.Location = new Point(8, 90);
             SurveyBtn.Name = "SurveyBtn";
             SurveyBtn.Size = new Size(60, 60);
             SurveyBtn.TabIndex = 4;

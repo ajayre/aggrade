@@ -78,7 +78,7 @@
             // Icon
             // 
             Icon.BackColor = Color.OldLace;
-            Icon.BackgroundImage = Properties.Resources.field_48px;
+            Icon.BackgroundImage = Properties.Resources.survey_48px;
             Icon.BackgroundImageLayout = ImageLayout.Center;
             Icon.Dock = DockStyle.Left;
             Icon.Location = new Point(0, 0);
