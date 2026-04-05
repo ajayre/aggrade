@@ -141,6 +141,17 @@ namespace AgGrade
 
             EnableBladeLimits = true;
 
+            // fixme - remove
+            /*FieldDesign Design = new FieldDesign();
+            Design.SurveyFileName = @"C:\Users\andy\OneDrive\Documents\AgGrade\Application\SurveyData\Shop.txt";
+            Design.MainSlope = 0.1;
+            Design.MainSlopeDirection = 270;
+            Design.CrossSlope = 0;
+            Design.CutFillRatio = 1.2;
+            Design.ImportToField = 0;
+            Design.ExportFromField = 0;
+            FieldCreator.Statistics Stats = FieldCreator.CreateFromSurveyAndDesign(Design, @"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\Custom\Custom.db");*/
+
             ShowMap();
         }
 

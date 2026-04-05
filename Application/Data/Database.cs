@@ -235,6 +235,14 @@ namespace AgGrade.Data
             MinLon,
             MaxLat,
             MaxLon,
+            /// <summary>UTM easting (m) of southwest topology extent; matches Field Creator DB.</summary>
+            MinX,
+            /// <summary>UTM northing (m) of southwest topology extent.</summary>
+            MinY,
+            /// <summary>UTM easting (m) of northeast topology extent.</summary>
+            MaxX,
+            /// <summary>UTM northing (m) of northeast topology extent.</summary>
+            MaxY,
             Calibrated,
             TotalCutCY,
             TotalFillCY
@@ -286,6 +294,197 @@ namespace AgGrade.Data
             EnsureHaulPathsIndex();
             RecoverFromJournal();
             RefreshCalibration();
+        }
+
+        /// <summary>
+        /// Creates a new SQLite file with the same schema as <c>Field Creator/fieldcreator.py</c> <c>init_sqlite_db</c>,
+        /// opens it, and leaves the connection ready for inserts. Deletes any existing file at <paramref name="filePath"/> first.
+        /// </summary>
+        public void CreateEmptyFieldDatabase
+            (
+            string filePath
+            )
+        {
+            if (string.IsNullOrWhiteSpace(filePath))
+                throw new ArgumentException("Database path is required.", nameof(filePath));
+
+            string fullPath = Path.GetFullPath(filePath);
+            string? dir = Path.GetDirectoryName(fullPath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+                Directory.CreateDirectory(dir);
+
+            if (File.Exists(fullPath))
+                File.Delete(fullPath);
+
+            _connection?.Dispose();
+            _databaseFilePath = fullPath;
+            _connection = new SqliteConnection($"Data Source={fullPath}");
+            _connection.Open();
+
+            foreach (string statement in FieldCreatorSchemaStatements)
+            {
+                using (var cmd = _connection.CreateCommand())
+                {
+                    cmd.CommandText = statement;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+
+            ApplyHistoryWritePragmas();
+            EnsureHaulPathsIndex();
+            RecoverFromJournal();
+            RefreshCalibration();
+        }
+
+        /// <summary>DDL statements matching <c>init_sqlite_db</c> (user_version and tables).</summary>
+        private static readonly string[] FieldCreatorSchemaStatements =
+        {
+            "PRAGMA user_version = 1",
+            """
+            CREATE TABLE IF NOT EXISTS FieldState (
+                BinID INTEGER PRIMARY KEY AUTOINCREMENT,
+                X INTEGER,
+                Y INTEGER,
+                InitialHeightM REAL,
+                CurrentHeightM REAL,
+                TargetHeightM REAL,
+                CentroidLat REAL,
+                CentroidLon REAL,
+                HaulPath INTEGER
+            )
+            """,
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_fieldstate_xy ON FieldState (X, Y)",
+            """
+            CREATE TABLE IF NOT EXISTS LevelingOperation (
+                OperationId INTEGER PRIMARY KEY AUTOINCREMENT,
+                OperationType TEXT NOT NULL CHECK (OperationType IN ('CUT', 'FILL')),
+                StartedAtMs INTEGER NOT NULL,
+                CompletedAtMs INTEGER NOT NULL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS LevelingOperationBin (
+                OperationBinId INTEGER PRIMARY KEY AUTOINCREMENT,
+                OperationId INTEGER NOT NULL,
+                X INTEGER NOT NULL,
+                Y INTEGER NOT NULL,
+                DeltaHeightM REAL NOT NULL,
+                FOREIGN KEY (OperationId) REFERENCES LevelingOperation(OperationId) ON DELETE CASCADE
+            )
+            """,
+            "CREATE INDEX IF NOT EXISTS idx_opbin_operation ON LevelingOperationBin (OperationId)",
+            "CREATE INDEX IF NOT EXISTS idx_opbin_xy ON LevelingOperationBin (X, Y)",
+            """
+            CREATE TABLE IF NOT EXISTS Events (
+                EventID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Type TEXT,
+                Value REAL,
+                Timestamp INTEGER
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS Data (
+                DataID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Name TEXT,
+                Value REAL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS HaulPaths (
+                HaulPathID INTEGER PRIMARY KEY AUTOINCREMENT,
+                HaulPath INTEGER,
+                PointNumber INTEGER,
+                Latitude REAL,
+                Longitude REAL
+            )
+            """,
+            "CREATE INDEX IF NOT EXISTS idx_haulpaths_haul_point ON HaulPaths (HaulPath, PointNumber)",
+            """
+            CREATE TABLE IF NOT EXISTS HaulArrows (
+                ArrowID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Latitude REAL,
+                Longitude REAL,
+                Heading REAL
+            )
+            """,
+            """
+            CREATE TABLE IF NOT EXISTS Benchmarks (
+                BenchMarkID INTEGER PRIMARY KEY AUTOINCREMENT,
+                Latitude REAL,
+                Longitude REAL,
+                Name TEXT,
+                ElevationM REAL
+            )
+            """
+        };
+
+        /// <summary>
+        /// Bulk-inserts field bins in one transaction (same row shape as <see cref="AddBinState(BinState)"/>).
+        /// </summary>
+        public void BulkInsertFieldStateRows
+            (
+            IReadOnlyList<BinState> rows
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            if (rows == null || rows.Count == 0) return;
+
+            using (SqliteTransaction tx = _connection.BeginTransaction())
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO FieldState (X, Y, InitialHeightM, CurrentHeightM, TargetHeightM, CentroidLat, CentroidLon, HaulPath) VALUES (@X, @Y, @InitialHeightM, @CurrentHeightM, @TargetHeightM, @CentroidLat, @CentroidLon, @HaulPath)";
+                var pX = cmd.Parameters.Add("@X", SqliteType.Integer);
+                var pY = cmd.Parameters.Add("@Y", SqliteType.Integer);
+                var pI = cmd.Parameters.Add("@InitialHeightM", SqliteType.Real);
+                var pC = cmd.Parameters.Add("@CurrentHeightM", SqliteType.Real);
+                var pT = cmd.Parameters.Add("@TargetHeightM", SqliteType.Real);
+                var pLa = cmd.Parameters.Add("@CentroidLat", SqliteType.Real);
+                var pLo = cmd.Parameters.Add("@CentroidLon", SqliteType.Real);
+                var pH = cmd.Parameters.Add("@HaulPath", SqliteType.Integer);
+
+                foreach (BinState row in rows)
+                {
+                    Coordinate storedCentroid = ToStoredCoordinate(row.CentroidLat, row.CentroidLon);
+                    pX.Value = row.X;
+                    pY.Value = row.Y;
+                    pI.Value = ToStoredHeight(row.InitialHeightM);
+                    pC.Value = ToStoredHeight(row.CurrentHeightM);
+                    pT.Value = ToStoredHeight(row.TargetHeightM);
+                    pLa.Value = storedCentroid.Latitude;
+                    pLo.Value = storedCentroid.Longitude;
+                    pH.Value = row.HaulPath;
+                    cmd.ExecuteNonQuery();
+                }
+
+                tx.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Inserts one benchmark row (stored using current calibration transforms).
+        /// </summary>
+        public void InsertBenchmarkRow
+            (
+            double latitudeDeg,
+            double longitudeDeg,
+            string name,
+            double elevationM
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Benchmark name is required.", nameof(name));
+
+            Coordinate stored = ToStoredCoordinate(latitudeDeg, longitudeDeg);
+            using (var cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO Benchmarks (Latitude, Longitude, Name, ElevationM) VALUES (@Latitude, @Longitude, @Name, @ElevationM)";
+                cmd.Parameters.AddWithValue("@Latitude", stored.Latitude);
+                cmd.Parameters.AddWithValue("@Longitude", stored.Longitude);
+                cmd.Parameters.AddWithValue("@Name", name);
+                cmd.Parameters.AddWithValue("@ElevationM", ToStoredHeight(elevationM));
+                cmd.ExecuteNonQuery();
+            }
         }
 
         /// <summary>
