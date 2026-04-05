@@ -26,6 +26,15 @@ namespace AgGrade.Data
         private double LatitudeOffsetDeg;
         private double LongitudeOffsetDeg;
 
+        /// <summary>
+        /// Disables connection pooling so closing the connection releases the SQLite file (delete/rename) immediately.
+        /// </summary>
+        private static string SqliteConnectionStringForPath(string filePathOrName)
+        {
+            string full = Path.GetFullPath(filePathOrName);
+            return $"Data Source={full};Pooling=False";
+        }
+
         private const int JOURNAL_HEADER_SIZE = 32;
         private const int JOURNAL_RECORD_SIZE = 32;
         private const int JOURNAL_MAGIC = 0x4A4C4F50; // "JLOP"
@@ -255,7 +264,7 @@ namespace AgGrade.Data
         {
             try
             {
-                using (SqliteConnection connection = new SqliteConnection($"Data Source={FileName}"))
+                using (SqliteConnection connection = new SqliteConnection(SqliteConnectionStringForPath(FileName)))
                 {
                     connection.Open();
                     using (SqliteCommand cmd = connection.CreateCommand())
@@ -286,9 +295,9 @@ namespace AgGrade.Data
             )
         {
 
-            _connection?.Dispose();
+            TearDownConnection();
             _databaseFilePath = FileName;
-            _connection = new SqliteConnection($"Data Source={FileName}");
+            _connection = new SqliteConnection(SqliteConnectionStringForPath(FileName));
             _connection.Open();
             ApplyHistoryWritePragmas();
             EnsureHaulPathsIndex();
@@ -316,9 +325,9 @@ namespace AgGrade.Data
             if (File.Exists(fullPath))
                 File.Delete(fullPath);
 
-            _connection?.Dispose();
+            TearDownConnection();
             _databaseFilePath = fullPath;
-            _connection = new SqliteConnection($"Data Source={fullPath}");
+            _connection = new SqliteConnection(SqliteConnectionStringForPath(fullPath));
             _connection.Open();
 
             foreach (string statement in FieldCreatorSchemaStatements)
@@ -697,14 +706,23 @@ namespace AgGrade.Data
         /// </summary>
         public SqliteConnection? Connection => _connection;
 
+        private void TearDownConnection()
+        {
+            SqliteConnection? c = _connection;
+            _connection = null;
+            if (c == null) return;
+            try { c.Close(); } catch { }
+            try { SqliteConnection.ClearPool(c); } catch { }
+            try { c.Dispose(); } catch { }
+        }
+
         /// <summary>
         /// Closes the database connection if open.
         /// </summary>
         public void Close()
         {
             CleanupActiveJournalOperation();
-            _connection?.Dispose();
-            _connection = null;
+            TearDownConnection();
         }
 
         /// <summary>

@@ -1,13 +1,10 @@
 using AgGrade.Data;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace AgGrade.Controls
@@ -33,8 +30,39 @@ namespace AgGrade.Controls
         {
             InitializeComponent();
 
+            ProgressOutput.ReadOnly = true;
+            ProgressOutput.ScrollBars = ScrollBars.Vertical;
+
             ApplyDefaultFieldValues();
             ErrorMessage.Visible = false;
+        }
+
+        private void RunOnUiThread(Action action)
+        {
+            if (IsDisposed)
+                return;
+            try
+            {
+                if (InvokeRequired)
+                    BeginInvoke(action);
+                else
+                    action();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
+            catch (InvalidOperationException)
+            {
+            }
+        }
+
+        private void AppendProgressLine(string line)
+        {
+            if (ProgressOutput.TextLength > 0)
+                ProgressOutput.AppendText(Environment.NewLine);
+            ProgressOutput.AppendText(line);
+            ProgressOutput.SelectionStart = ProgressOutput.Text.Length;
+            ProgressOutput.ScrollToCaret();
         }
 
         private void ApplyDefaultFieldValues()
@@ -192,7 +220,42 @@ namespace AgGrade.Controls
                 ExportFromField = ExportFromField.Value
             };
 
-            OnCreateField?.Invoke(fieldDesign);
+            string? surveyDir = Path.GetDirectoryName(SurveyFile);
+            string dbPath = Path.Combine(
+                surveyDir ?? string.Empty,
+                Path.GetFileNameWithoutExtension(SurveyFile) + "-base.db");
+
+            ProgressOutput.Clear();
+            CreateFieldBtn.Enabled = false;
+
+            var worker = new Thread(() =>
+            {
+                try
+                {
+                    var fieldCreator = new FieldCreator(msg =>
+                        RunOnUiThread(() => AppendProgressLine(msg)));
+                    fieldCreator.CreateFromSurveyAndDesign(fieldDesign, dbPath);
+
+                    RunOnUiThread(() => OnCreateField?.Invoke(fieldDesign));
+                }
+                catch (Exception ex)
+                {
+                    RunOnUiThread(() =>
+                    {
+                        ErrorMessage.Text = ex.Message;
+                        ErrorMessage.Visible = true;
+                    });
+                }
+                finally
+                {
+                    RunOnUiThread(() => CreateFieldBtn.Enabled = true);
+                }
+            })
+            {
+                IsBackground = true,
+                Name = "CreateField"
+            };
+            worker.Start();
         }
     }
 }

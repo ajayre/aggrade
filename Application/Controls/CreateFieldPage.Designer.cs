@@ -51,6 +51,7 @@
             MainSlope = new NumericInputF();
             CrossSlope = new NumericInputF();
             CutFillRatio = new NumericInputF();
+            ProgressOutput = new TextBox();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -83,7 +84,7 @@
             panel1.BackColor = Color.FromArgb(224, 224, 224);
             panel1.Controls.Add(ErrorMessage);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 476);
+            panel1.Location = new Point(0, 509);
             panel1.Name = "panel1";
             panel1.Size = new Size(916, 44);
             panel1.TabIndex = 14;
@@ -291,12 +292,23 @@
             CutFillRatio.Name = "CutFillRatio";
             CutFillRatio.Size = new Size(167, 41);
             CutFillRatio.TabIndex = 40;
-            CutFillRatio.Value = 0D;
+            CutFillRatio.Value = 0.5D;
+            // 
+            // ProgressOutput
+            // 
+            ProgressOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ProgressOutput.Font = new Font("Segoe UI", 16F);
+            ProgressOutput.Location = new Point(3, 347);
+            ProgressOutput.Multiline = true;
+            ProgressOutput.Name = "ProgressOutput";
+            ProgressOutput.Size = new Size(910, 156);
+            ProgressOutput.TabIndex = 41;
             // 
             // CreateFieldPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(ProgressOutput);
             Controls.Add(CutFillRatio);
             Controls.Add(CrossSlope);
             Controls.Add(MainSlope);
@@ -320,7 +332,7 @@
             Controls.Add(CreateFieldBtn);
             Controls.Add(sectionTitle1);
             Name = "CreateFieldPage";
-            Size = new Size(916, 520);
+            Size = new Size(916, 553);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ResumeLayout(false);
@@ -352,5 +364,6 @@
         private NumericInputF MainSlope;
         private NumericInputF CrossSlope;
         private NumericInputF CutFillRatio;
+        private TextBox ProgressOutput;
     }
 }

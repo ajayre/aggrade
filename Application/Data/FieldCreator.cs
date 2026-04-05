@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 
 namespace AgGrade.Data
@@ -11,9 +12,33 @@ namespace AgGrade.Data
     /// <c>AI Field Design/fielddesign.py</c> <c>build_all_bins</c>, so sparse surveys and dense surveys use one consistent
     /// field-surface construction path before design-plane solve / DB write.
     /// Does not write an AGD file; HaulPaths and HaulArrows tables are left empty.
+    /// Pass <see cref="Progress"/> (constructor) to receive user-facing status strings during long steps.
     /// </summary>
-    public static class FieldCreator
+    public class FieldCreator
     {
+        /// <summary>Optional callback invoked with a short English message as the pipeline advances (UI thread safe is the caller's responsibility).</summary>
+        public Action<string>? Progress { get; }
+
+        public FieldCreator(Action<string>? progress = null)
+        {
+            Progress = progress;
+        }
+
+        private void ReportProgress(string message)
+        {
+            Progress?.Invoke(message);
+        }
+
+        private void ReportStatisticsSummary(Statistics s)
+        {
+            IFormatProvider fp = CultureInfo.InvariantCulture;
+            ReportProgress("Total area: " + s.TotalAreaAcres.ToString("F3", fp) + " acres");
+            ReportProgress("Total cut: " + s.TotalCutCY.ToString("F2", fp) + " cu yd");
+            ReportProgress("Total fill: " + s.TotalFillCY.ToString("F2", fp) + " cu yd");
+            ReportProgress("Composite slope heading: " + s.CompositeSlopeHeadingDeg.ToString("F2", fp) + "°");
+            ReportProgress("Composite slope: " + s.CompositeSlopePercent.ToString("F3", fp) + " %");
+        }
+
         private const double CubicYardsPerCubicMeter = 1.30795061931439;
         /// <summary>International acre (4046.8564224 m²).</summary>
         private const double SquareMetersPerAcre = 4046.8564224;
@@ -37,7 +62,7 @@ namespace AgGrade.Data
         private const int WarpPostTolIters = 6;
 
         /// <summary>
-        /// Summary values from <see cref="CreateFromSurveyAndDesign(FieldDesign, string)"/>.
+        /// Summary values from <see cref="CreateFromSurveyAndDesign"/>.
         /// Composite slope/heading follow <c>AI Field Design/fielddesign.py</c> <c>composite_slope_and_heading</c>
         /// (steepest downhill grade from dz/dE=a, dz/dN=b).
         /// </summary>
@@ -57,12 +82,9 @@ namespace AgGrade.Data
         /// Loads <see cref="FieldDesign.SurveyFileName"/> via <see cref="Survey.Load"/> (.txt multiplane, .ags),
         /// bins at <see cref="Field.BIN_SIZE_M"/>, applies the planar design (same ratio solve as <c>AI Field Design/fielddesign.py</c>),
         /// writes <paramref name="databaseOutputPath"/>, and returns <see cref="Statistics"/> for the UI.
+        /// On success, <see cref="Progress"/> receives one line per statistic (then <c>Done.</c>).
         /// </summary>
-        public static Statistics CreateFromSurveyAndDesign
-            (
-            FieldDesign design,
-            string databaseOutputPath
-            )
+        public Statistics CreateFromSurveyAndDesign(FieldDesign design, string databaseOutputPath)
         {
             if (design == null)
                 throw new ArgumentNullException(nameof(design));
@@ -76,6 +98,7 @@ namespace AgGrade.Data
             if (!File.Exists(path))
                 throw new FileNotFoundException("Survey file was not found.", path);
 
+            ReportProgress("Loading survey file…");
             double ratio = design.CutFillRatio > 0 ? design.CutFillRatio : Field.CUT_FILL_RATIO;
             double importM3 = CubicYardsToM3(design.ImportToField);
             double exportM3 = CubicYardsToM3(design.ExportFromField);
@@ -86,6 +109,7 @@ namespace AgGrade.Data
             if (survey.InteriorPoints.Count == 0 && survey.BoundaryPoints.Count == 0)
                 throw new InvalidDataException("Survey has no interior or boundary topology points.");
 
+            ReportProgress("Building bin grid and existing surface…");
             BuildGrid(
                 survey,
                 design.MainSlopeDirection,
@@ -125,11 +149,12 @@ namespace AgGrade.Data
             UTM.ToLatLon(utmZone, utmNorth, minX, minY, out double dataMinLat, out double dataMinLon);
             UTM.ToLatLon(utmZone, utmNorth, maxX, maxY, out double dataMaxLat, out double dataMaxLon);
 
+            ReportProgress("Writing database…");
             var db = new Database();
-            db.CreateEmptyFieldDatabase(databaseOutputPath);
-
             try
             {
+                db.CreateEmptyFieldDatabase(databaseOutputPath);
+
                 db.BulkInsertFieldStateRows(binRows);
 
                 db.SetData(Database.DataNames.GridWidth, gridW);
@@ -164,11 +189,13 @@ namespace AgGrade.Data
                 db.Close();
             }
 
+            ReportStatisticsSummary(statistics);
+            ReportProgress("Done.");
             return statistics;
         }
 
         /// <summary>Matches <c>fielddesign.composite_slope_and_heading</c>.</summary>
-        private static void CompositeSlopeAndHeading(double a, double b, out double slopePercent, out double downhillHeadingDegCwFromNorth)
+        private void CompositeSlopeAndHeading(double a, double b, out double slopePercent, out double downhillHeadingDegCwFromNorth)
         {
             double mag = Math.Sqrt(a * a + b * b);
             slopePercent = mag * 100.0;
@@ -184,12 +211,12 @@ namespace AgGrade.Data
             downhillHeadingDegCwFromNorth = (h % 360.0 + 360.0) % 360.0;
         }
 
-        private static double CubicYardsToM3(double cubicYards)
+        private double CubicYardsToM3(double cubicYards)
         {
             return cubicYards / CubicYardsPerCubicMeter;
         }
 
-        private static void ComputePlaneSlopes(double mainSlopePct, double crossSlopePct, double headingDeg, out double a, out double b)
+        private void ComputePlaneSlopes(double mainSlopePct, double crossSlopePct, double headingDeg, out double a, out double b)
         {
             double H = headingDeg * Math.PI / 180.0;
             double sM = mainSlopePct / 100.0;
@@ -200,7 +227,7 @@ namespace AgGrade.Data
             b = -sM * cosH - sC * sinH;
         }
 
-        private static void VolumesF(
+        private void VolumesF(
             IReadOnlyList<BinSample> bins,
             double a,
             double b,
@@ -232,7 +259,7 @@ namespace AgGrade.Data
             f = (vCut + importM3) - rTarget * vFill - exportM3;
         }
 
-        private static double SolveC(
+        private double SolveC(
             IReadOnlyList<BinSample> bins,
             double a,
             double b,
@@ -293,7 +320,7 @@ namespace AgGrade.Data
         /// Matches <c>fieldcreator.py</c> <c>fill_missing_bins</c>: a missing bin is filled only if it has at least two
         /// neighbors in the original sparse data; value is the mean of cardinal neighbors present in <paramref name="outDict"/>.
         /// </summary>
-        private static Dictionary<(int Bx, int By), double> FillMissingBins(
+        private Dictionary<(int Bx, int By), double> FillMissingBins(
             Dictionary<(int Bx, int By), double> values,
             int gridWidth,
             int gridHeight)
@@ -362,7 +389,7 @@ namespace AgGrade.Data
             return outDict;
         }
 
-        private static Dictionary<(int Ix, int Iy), List<int>> BuildSpatialHash(double[] pe, double[] pn, int n)
+        private Dictionary<(int Ix, int Iy), List<int>> BuildSpatialHash(double[] pe, double[] pn, int n)
         {
             var d = new Dictionary<(int Ix, int Iy), List<int>>();
             for (int i = 0; i < n; i++)
@@ -382,7 +409,7 @@ namespace AgGrade.Data
             return d;
         }
 
-        private static void GatherKNearest(
+        private void GatherKNearest(
             double cx,
             double cy,
             double[] pe,
@@ -430,7 +457,7 @@ namespace AgGrade.Data
             }
         }
 
-        private static void ConsiderCandidate(
+        private void ConsiderCandidate(
             double cx,
             double cy,
             double[] pe,
@@ -478,7 +505,7 @@ namespace AgGrade.Data
             }
         }
 
-        private static int CountFilled(double[] kd2, int kTarget)
+        private int CountFilled(double[] kd2, int kTarget)
         {
             int n = 0;
             for (int s = 0; s < kTarget; s++)
@@ -490,7 +517,7 @@ namespace AgGrade.Data
             return n;
         }
 
-        private static double WorstFilledD2(double[] kd2, int kTarget)
+        private double WorstFilledD2(double[] kd2, int kTarget)
         {
             double w = 0;
             for (int s = 0; s < kTarget; s++)
@@ -502,7 +529,7 @@ namespace AgGrade.Data
             return w;
         }
 
-        private static bool TrySolve3x3(
+        private bool TrySolve3x3(
             double a00,
             double a01,
             double a02,
@@ -581,7 +608,7 @@ namespace AgGrade.Data
             return double.IsFinite(x0) && double.IsFinite(x1) && double.IsFinite(x2);
         }
 
-        private static double[] BoxBlur1dAxis(double[] arr, int width, int height, int radius, bool axisX)
+        private double[] BoxBlur1dAxis(double[] arr, int width, int height, int radius, bool axisX)
         {
             if (radius <= 0)
             {
@@ -635,7 +662,7 @@ namespace AgGrade.Data
             return outArr;
         }
 
-        private static double[] BoxBlur2d(double[] arr, int width, int height, int radius, int passes)
+        private double[] BoxBlur2d(double[] arr, int width, int height, int radius, int passes)
         {
             var outArr = new double[arr.Length];
             Array.Copy(arr, outArr, arr.Length);
@@ -651,7 +678,7 @@ namespace AgGrade.Data
             return outArr;
         }
 
-        private static double[] NormalizedResidualWarp(
+        private double[] NormalizedResidualWarp(
             double[] residualAtObs,
             bool[] observedMask,
             int width,
@@ -678,13 +705,14 @@ namespace AgGrade.Data
             return corr;
         }
 
-        private static double[] BuildFielddesignSurface(
+        private double[] BuildFielddesignSurface(
             List<(double E, double N, double Z, bool IsBoundary, double Lat, double Lon)> utmPoints,
             double minX,
             double minY,
             int gridW,
             int gridH)
         {
+            ReportProgress($"Interpolating existing elevations (MLS, {gridW}×{gridH} bins)…");
             int nPts = utmPoints.Count;
             var pe = new double[nPts];
             var pn = new double[nPts];
@@ -724,8 +752,11 @@ namespace AgGrade.Data
             var kd2 = new double[kUse];
             var kidx = new int[kUse];
 
+            int reportStep = Math.Max(1, gridH / 10);
             for (int by = 0; by < gridH; by++)
             {
+                if (by % reportStep == 0)
+                    ReportProgress($"MLS interpolation… {by + 1} / {gridH} rows");
                 for (int bx = 0; bx < gridW; bx++)
                 {
                     double cx = minX + (bx + 0.5) * Field.BIN_SIZE_M;
@@ -787,6 +818,7 @@ namespace AgGrade.Data
                 }
             }
 
+            ReportProgress("Smoothing baseline and warping toward survey bins…");
             double[] zSmooth = BoxBlur2d(zMls, gridW, gridH, WarpBaseRadiusBins, WarpBasePasses);
             var residualObs = new double[nCells];
             for (int i = 0; i < nCells; i++)
@@ -871,10 +903,11 @@ namespace AgGrade.Data
                 zFinal[i] = observedValues[i] - eo;
             }
 
+            ReportProgress("Existing surface ready.");
             return zFinal;
         }
 
-        private static void BuildGrid(
+        private void BuildGrid(
             Survey survey,
             int headingDeg,
             double mainSlopePct,
@@ -971,6 +1004,7 @@ namespace AgGrade.Data
 
             double[] filledZ = BuildFielddesignSurface(utmPoints, minX, minY, gridW, gridH);
 
+            ReportProgress("Building per-bin samples and solving design plane…");
             var samples = new List<BinSample>(gridW * gridH);
             for (int by = 0; by < gridH; by++)
             {
@@ -989,8 +1023,10 @@ namespace AgGrade.Data
             ComputePlaneSlopes(mainSlopePct, crossSlopePct, headingDeg, out double a, out double b);
             planeA = a;
             planeB = b;
+            ReportProgress("Solving cut/fill ratio (plane offset)…");
             double cStar = SolveC(samples, a, b, cutFillRatio, e0, n0, importM3, exportM3);
 
+            ReportProgress("Computing per-bin targets and volumes…");
             double binArea = Field.BIN_SIZE_M * Field.BIN_SIZE_M;
             double vCutM3 = 0;
             double vFillM3 = 0;

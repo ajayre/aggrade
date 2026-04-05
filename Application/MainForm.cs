@@ -150,7 +150,8 @@ namespace AgGrade
             Design.CutFillRatio = 1.2;
             Design.ImportToField = 0;
             Design.ExportFromField = 0;
-            FieldCreator.Statistics Stats = FieldCreator.CreateFromSurveyAndDesign(Design, @"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\Custom\Custom.db");*/
+            var fieldCreator = new FieldCreator(msg => System.Diagnostics.Debug.WriteLine(msg));
+            FieldCreator.Statistics Stats = fieldCreator.CreateFromSurveyAndDesign(Design, @"C:\Users\andy\OneDrive\Documents\AgGrade\Application\FieldData\Custom\Custom.db");*/
 
             ShowMap();
         }
