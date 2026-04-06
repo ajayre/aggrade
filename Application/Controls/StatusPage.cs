@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using AgGrade.Data;
 using AgGrade.Controller;
+using Color = System.Drawing.Color;
 
 namespace AgGrade.Controls
 {
@@ -16,10 +17,12 @@ namespace AgGrade.Controls
     {
         private const double KPH_TO_MPH = 0.621371;
         private EquipmentStatus? PreviousStatus = null;
+        private Field? ChartField;
 
         public StatusPage()
         {
             InitializeComponent();
+            Pages.SelectedIndexChanged += Pages_SelectedIndexChanged;
         }
 
         /// <summary>
@@ -88,11 +91,26 @@ namespace AgGrade.Controls
             if (CurrentField == null)
             {
                 Pages.Controls.Remove(Field);
+                ChartField = null;
+                ClearProgressChart();
+                Stats.Text = string.Empty;
             }
             else
             {
+                ChartField = CurrentField;
+
+                if (!Pages.Controls.Contains(Field))
+                {
+                    Pages.Controls.Add(Field);
+                }
+
                 FieldProgress.Value = (int)CurrentField.PercentageComplete();
                 FieldProgressLabel.Text = string.Format("{0:0.00}%", CurrentField.PercentageComplete());
+
+                if (Pages.SelectedTab == Field)
+                {
+                    LoadProgressChart(CurrentField);
+                }
             }
 
             // Store current status for next comparison
@@ -288,6 +306,113 @@ namespace AgGrade.Controls
                         break;
                 }
             }
+        }
+
+        private void Pages_SelectedIndexChanged
+            (
+            object? sender,
+            EventArgs e
+            )
+        {
+            if (Pages.SelectedTab != Field || ChartField == null)
+                return;
+
+            LoadProgressChart(ChartField);
+        }
+
+        private void ClearProgressChart
+            (
+            )
+        {
+            ProgressChart.Plot.Clear();
+            ProgressChart.Refresh();
+        }
+
+        private void LoadProgressChart
+            (
+            Field field
+            )
+        {
+            ChartField = field;
+            List<Database.ProgressHistoryPoint> history = field.GetProgressHistory();
+            UpdateFieldStats(field, history);
+
+            ProgressChart.Plot.Clear();
+
+            if (history.Count == 0)
+            {
+                ProgressChart.Plot.Title("Progress (no cut/fill history yet)");
+                ProgressChart.Plot.XLabel("Time");
+                ProgressChart.Plot.YLabel("Cubic Yards");
+                ProgressChart.Refresh();
+                return;
+            }
+
+            double[] xs = history
+                .Select(point => DateTimeOffset.FromUnixTimeMilliseconds(point.TimestampMs).ToLocalTime().DateTime.ToOADate())
+                .ToArray();
+            double[] cutYs = history
+                .Select(point => point.CompletedCutCY)
+                .ToArray();
+            double[] fillYs = history
+                .Select(point => point.CompletedFillCY)
+                .ToArray();
+
+            var cutSeries = ProgressChart.Plot.Add.Scatter(xs, cutYs);
+            cutSeries.LegendText = "Completed Cut CY";
+            cutSeries.Color = ScottPlot.Colors.Orange;
+
+            var fillSeries = ProgressChart.Plot.Add.Scatter(xs, fillYs);
+            fillSeries.LegendText = "Completed Fill CY";
+            fillSeries.Color = ScottPlot.Colors.DodgerBlue;
+
+            ProgressChart.Plot.Axes.DateTimeTicksBottom();
+            ProgressChart.Plot.XLabel("Time");
+            ProgressChart.Plot.YLabel("Cubic Yards");
+            ProgressChart.Plot.Legend.IsVisible = true;
+            ProgressChart.Plot.Title("Field Progress");
+
+            ProgressChart.Refresh();
+        }
+
+        private void UpdateFieldStats
+            (
+            Field field,
+            List<Database.ProgressHistoryPoint> history
+            )
+        {
+            double cutPerHour = 0;
+            bool hasCutRate = false;
+
+            if (history.Count >= 2)
+            {
+                Database.ProgressHistoryPoint first = history[0];
+                Database.ProgressHistoryPoint last = history[^1];
+
+                double elapsedHours = (last.TimestampMs - first.TimestampMs) / (1000.0 * 60.0 * 60.0);
+                double cutDelta = last.CompletedCutCY - first.CompletedCutCY;
+
+                if (elapsedHours > 0 && cutDelta > 0)
+                {
+                    cutPerHour = cutDelta / elapsedHours;
+                    hasCutRate = true;
+                }
+            }
+
+            if (!hasCutRate)
+            {
+                Stats.Text =
+                    "Cubic yards cut per hour: N/A" + Environment.NewLine +
+                    "Estimated hours to complete all cuts: N/A";
+                return;
+            }
+
+            double remainingCutCY = Math.Max(0, field.TotalCutCY - field.CompletedCutCY);
+            double estimatedHours = remainingCutCY <= 0 ? 0 : remainingCutCY / cutPerHour;
+
+            Stats.Text =
+                $"Cubic yards cut per hour: {cutPerHour:0.00}" + Environment.NewLine +
+                $"Estimated hours to complete all cuts: {estimatedHours:0.00}";
         }
     }
 }

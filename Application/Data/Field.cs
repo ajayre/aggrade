@@ -1,5 +1,4 @@
 using AgGrade.Controller;
-using Microsoft.Data.Sqlite;
 using Microsoft.VisualBasic.Logging;
 using OpenCvSharp;
 using System;
@@ -129,6 +128,16 @@ namespace AgGrade.Data
             )
         {
             return Db.GetBoolData(Database.DataNames.Calibrated);
+        }
+
+        /// <summary>
+        /// Returns field progress history while keeping database access encapsulated in Field.
+        /// </summary>
+        public List<Database.ProgressHistoryPoint> GetProgressHistory
+            (
+            )
+        {
+            return Db.GetProgressHistory();
         }
 
         /// <summary>

@@ -145,6 +145,16 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// One timestamped cut/fill progress sample from the Events table.
+        /// </summary>
+        public struct ProgressHistoryPoint
+        {
+            public long TimestampMs;
+            public double CompletedCutCY;
+            public double CompletedFillCY;
+        }
+
+        /// <summary>
         /// Row from the benchmark table
         /// </summary>
         public class BenchMark
@@ -820,6 +830,57 @@ namespace AgGrade.Data
             {
                 // ignore
             }
+        }
+
+        /// <summary>
+        /// Reads completed cut/fill history from the Events table ordered by time.
+        /// </summary>
+        public List<ProgressHistoryPoint> GetProgressHistory
+            (
+            )
+        {
+            if (_connection == null) throw new InvalidOperationException("Database is not open.");
+            var points = new List<ProgressHistoryPoint>();
+
+            using (SqliteCommand cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText =
+                    """
+                    SELECT
+                        Timestamp,
+                        MAX(CASE WHEN Type = @CutType THEN Value END) AS CompletedCutCY,
+                        MAX(CASE WHEN Type = @FillType THEN Value END) AS CompletedFillCY
+                    FROM Events
+                    WHERE Type = @CutType OR Type = @FillType
+                    GROUP BY Timestamp
+                    ORDER BY Timestamp ASC
+                    """;
+                cmd.Parameters.AddWithValue("@CutType", Event.EventTypes.CompletedCutCY.ToString());
+                cmd.Parameters.AddWithValue("@FillType", Event.EventTypes.CompletedFillCY.ToString());
+
+                using (SqliteDataReader reader = cmd.ExecuteReader())
+                {
+                    double lastCut = 0;
+                    double lastFill = 0;
+                    while (reader.Read())
+                    {
+                        long timestamp = reader.IsDBNull(0) ? 0 : reader.GetInt64(0);
+                        double cut = reader.IsDBNull(1) ? lastCut : reader.GetDouble(1);
+                        double fill = reader.IsDBNull(2) ? lastFill : reader.GetDouble(2);
+                        points.Add(new ProgressHistoryPoint
+                        {
+                            TimestampMs = timestamp,
+                            CompletedCutCY = cut,
+                            CompletedFillCY = fill
+                        });
+
+                        lastCut = cut;
+                        lastFill = fill;
+                    }
+                }
+            }
+
+            return points;
         }
 
         /// <summary>

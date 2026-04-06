@@ -140,6 +140,8 @@
             label56 = new Label();
             label57 = new Label();
             Field = new TabPage();
+            Stats = new Label();
+            ProgressChart = new ScottPlot.WinForms.FormsPlot();
             FieldProgressLabel = new Label();
             FieldProgress = new ProgressBar();
             label66 = new Label();
@@ -1377,6 +1379,8 @@
             // 
             // Field
             // 
+            Field.Controls.Add(Stats);
+            Field.Controls.Add(ProgressChart);
             Field.Controls.Add(FieldProgressLabel);
             Field.Controls.Add(FieldProgress);
             Field.Controls.Add(label66);
@@ -1387,6 +1391,23 @@
             Field.TabIndex = 3;
             Field.Text = "Field";
             Field.UseVisualStyleBackColor = true;
+            // 
+            // Stats
+            // 
+            Stats.Font = new Font("Segoe UI", 14F);
+            Stats.Location = new Point(6, 46);
+            Stats.Name = "Stats";
+            Stats.Size = new Size(849, 54);
+            Stats.TabIndex = 5;
+            Stats.Text = "1\r\n2";
+            // 
+            // ProgressChart
+            // 
+            ProgressChart.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            ProgressChart.Location = new Point(6, 103);
+            ProgressChart.Name = "ProgressChart";
+            ProgressChart.Size = new Size(849, 369);
+            ProgressChart.TabIndex = 4;
             // 
             // FieldProgressLabel
             // 
@@ -1571,5 +1592,7 @@
         private ProgressBar FieldProgress;
         private Label label66;
         private Label FieldProgressLabel;
+        private ScottPlot.WinForms.FormsPlot ProgressChart;
+        private Label Stats;
     }
 }
