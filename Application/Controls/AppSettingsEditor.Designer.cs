@@ -68,6 +68,7 @@ namespace AgGrade.Controls
             labelPondingRainfall = new Label();
             PondingRainfallMmText = new TextBox();
             OpenDataFolderBtn = new Button();
+            VersionLabel = new Label();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -454,11 +455,24 @@ namespace AgGrade.Controls
             OpenDataFolderBtn.UseVisualStyleBackColor = true;
             OpenDataFolderBtn.Click += OpenDataFolderBtn_Click;
             // 
+            // VersionLabel
+            // 
+            VersionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            VersionLabel.BackColor = Color.PaleGoldenrod;
+            VersionLabel.Font = new Font("Segoe UI", 14F);
+            VersionLabel.Location = new Point(572, 14);
+            VersionLabel.Name = "VersionLabel";
+            VersionLabel.Size = new Size(194, 25);
+            VersionLabel.TabIndex = 51;
+            VersionLabel.Text = "Version X.X.X.X";
+            VersionLabel.TextAlign = ContentAlignment.TopRight;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(VersionLabel);
             Controls.Add(OpenDataFolderBtn);
             Controls.Add(labelPondingRainfall);
             Controls.Add(PondingRainfallMmText);
@@ -544,5 +558,6 @@ namespace AgGrade.Controls
         private Label labelPondingRainfall;
         private TextBox PondingRainfallMmText;
         private Button OpenDataFolderBtn;
+        private Label VersionLabel;
     }
 }

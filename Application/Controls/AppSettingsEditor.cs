@@ -1,14 +1,15 @@
+using AgGrade.Data;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net;
-using AgGrade.Data;
 
 namespace AgGrade.Controls
 {
@@ -28,6 +29,8 @@ namespace AgGrade.Controls
 
             Bitmap scaledImage = new Bitmap(PowerBtn.Image!, new Size((int)(PowerBtn.Image!.Width * ScalingFactor), (int)(PowerBtn.Image!.Height * ScalingFactor)));
             PowerBtn.Image = scaledImage;
+
+            VersionLabel.Text = "Version " + Assembly.GetExecutingAssembly().GetName().Version.ToString();
         }
 
         /// <summary>
