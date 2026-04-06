@@ -50,6 +50,7 @@
             FrontToggleDumpingBtn = new Button();
             RearToggleCuttingBtn = new Button();
             FrontToggleCuttingBtn = new Button();
+            AutoDriveBtn = new Button();
             SteerLeftBtn = new Button();
             SteerRightBtn = new Button();
             ReverseBtn = new Button();
@@ -232,6 +233,7 @@
             GNSSPage.Controls.Add(FrontToggleDumpingBtn);
             GNSSPage.Controls.Add(RearToggleCuttingBtn);
             GNSSPage.Controls.Add(FrontToggleCuttingBtn);
+            GNSSPage.Controls.Add(AutoDriveBtn);
             GNSSPage.Controls.Add(SteerLeftBtn);
             GNSSPage.Controls.Add(SteerRightBtn);
             GNSSPage.Controls.Add(ReverseBtn);
@@ -319,6 +321,16 @@
             FrontToggleCuttingBtn.Text = "Front Toggle Cutting";
             FrontToggleCuttingBtn.UseVisualStyleBackColor = true;
             FrontToggleCuttingBtn.Click += FrontToggleCuttingBtn_Click;
+            // 
+            // AutoDriveBtn
+            // 
+            AutoDriveBtn.Location = new Point(220, 70);
+            AutoDriveBtn.Name = "AutoDriveBtn";
+            AutoDriveBtn.Size = new Size(121, 23);
+            AutoDriveBtn.TabIndex = 19;
+            AutoDriveBtn.Text = "Auto Drive";
+            AutoDriveBtn.UseVisualStyleBackColor = true;
+            AutoDriveBtn.Click += AutoDriveBtn_Click;
             // 
             // SteerLeftBtn
             // 
@@ -484,5 +496,6 @@
         private Label label4;
         private Button RearJoystickDownBtn;
         private Button RearJoystickUpBtn;
+        private Button AutoDriveBtn;
     }
 }

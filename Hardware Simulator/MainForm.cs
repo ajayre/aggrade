@@ -25,6 +25,14 @@ namespace HardwareSim
         private const double DEFAULT_LATITUDE = 36.446847109944279;
         private const double DEFAULT_LONGITUDE = -90.72286177445794;
         private const double DEFAULT_ALTITUDE = 0;
+        private const double AUTO_DRIVE_MIN_SPEED_MPH = 1.0;
+        private const double AUTO_DRIVE_MAX_SPEED_MPH = 15.0;
+        private const double AUTO_DRIVE_ACCEL_MPH_PER_SEC = 1.75;
+        private const double AUTO_DRIVE_TURN_DEG_PER_SEC = 12.0;
+        private const int AUTO_DRIVE_PERIOD_MS = 100;
+        private const double AUTO_DRIVE_AREA_ACRES = 40.0;
+        private const double AUTO_DRIVE_EDGE_BUFFER_M = 15.0;
+        private const double AUTO_DRIVE_EDGE_RECOVERY_M = 35.0;
 
         private UDPServer uDPServer;
         private Timer PingTimer;
@@ -40,6 +48,15 @@ namespace HardwareSim
         private Timer RearJogTimer;
         private JogDirections FrontJogDirection;
         private JogDirections RearJogDirection;
+        private readonly Random Randomizer = new Random();
+        private System.Windows.Forms.Timer AutoDriveTimer;
+        private bool AutoDriveEnabled = false;
+        private DateTime AutoDriveNextPlanTime = DateTime.MinValue;
+        private double AutoDriveTargetSpeedMPH = AUTO_DRIVE_MIN_SPEED_MPH;
+        private double AutoDriveTargetHeadingDeg = 0;
+        private double AutoDriveCenterLatitude;
+        private double AutoDriveCenterLongitude;
+        private readonly double AutoDriveSquareHalfSideM = Math.Sqrt(AUTO_DRIVE_AREA_ACRES * 4046.8564224) / 2.0;
 
         public MainForm()
         {
@@ -70,6 +87,10 @@ namespace HardwareSim
             RearJogTimer = new Timer();
             RearJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
             RearJogTimer.Elapsed += RearJogTimer_Elapsed;
+
+            AutoDriveTimer = new System.Windows.Forms.Timer();
+            AutoDriveTimer.Interval = AUTO_DRIVE_PERIOD_MS;
+            AutoDriveTimer.Tick += AutoDriveTimer_Tick;
 
             LatitudeInput.Text = DEFAULT_LATITUDE.ToString();
             LongitudeInput.Text = DEFAULT_LONGITUDE.ToString();
@@ -299,21 +320,25 @@ namespace HardwareSim
 
         private void ForwardsBtn_Click(object sender, EventArgs e)
         {
+            StopAutoDrive();
             GNSSSim.IncreaseSpeed();
         }
 
         private void ReverseBtn_Click(object sender, EventArgs e)
         {
+            StopAutoDrive();
             GNSSSim.DecreaseSpeed();
         }
 
         private void SteerLeftBtn_Click(object sender, EventArgs e)
         {
+            StopAutoDrive();
             GNSSSim.TurnLeft();
         }
 
         private void SteerRightBtn_Click(object sender, EventArgs e)
         {
+            StopAutoDrive();
             GNSSSim.TurnRight();
         }
 
@@ -431,6 +456,202 @@ namespace HardwareSim
         private void RearJoystickDownBtn_MouseUp(object sender, MouseEventArgs e)
         {
             RearJogTimer.Stop();
+        }
+
+        private void AutoDriveBtn_Click(object sender, EventArgs e)
+        {
+            if (AutoDriveEnabled)
+            {
+                StopAutoDrive();
+                return;
+            }
+
+            AutoDriveEnabled = true;
+            AutoDriveBtn.Text = "Stop Auto";
+            AutoDriveCenterLatitude = GNSSSim.TractorGNSS.Latitude;
+            AutoDriveCenterLongitude = GNSSSim.TractorGNSS.Longitude;
+            AutoDriveTargetSpeedMPH = Clamp(Randomizer.NextDouble() * (AUTO_DRIVE_MAX_SPEED_MPH - AUTO_DRIVE_MIN_SPEED_MPH) + AUTO_DRIVE_MIN_SPEED_MPH, AUTO_DRIVE_MIN_SPEED_MPH, AUTO_DRIVE_MAX_SPEED_MPH);
+            AutoDriveTargetHeadingDeg = NormalizeHeading(GNSSSim.TractorGNSS.TrueHeading);
+            AutoDriveNextPlanTime = DateTime.MinValue;
+            AutoDriveTimer.Start();
+        }
+
+        private void StopAutoDrive()
+        {
+            if (!AutoDriveEnabled)
+            {
+                return;
+            }
+
+            AutoDriveEnabled = false;
+            AutoDriveTimer.Stop();
+            AutoDriveBtn.Text = "Auto Drive";
+        }
+
+        private void AutoDriveTimer_Tick(object? sender, EventArgs e)
+        {
+            if (!AutoDriveEnabled)
+            {
+                return;
+            }
+
+            double dtSec = AUTO_DRIVE_PERIOD_MS / 1000.0;
+            (double xM, double yM) = GetOffsetFromCenterMeters(GNSSSim.TractorGNSS.Latitude, GNSSSim.TractorGNSS.Longitude);
+            double nearestEdgeDistanceM = AutoDriveSquareHalfSideM - Math.Max(Math.Abs(xM), Math.Abs(yM));
+
+            bool needsInwardCorrection = nearestEdgeDistanceM <= AUTO_DRIVE_EDGE_RECOVERY_M;
+            bool shouldReplan =
+                (DateTime.UtcNow >= AutoDriveNextPlanTime) ||
+                (Math.Abs(AutoDriveTargetSpeedMPH - GNSSSim.TractorGNSS.SpeedMPH) < 0.5 &&
+                 Math.Abs(ShortestHeadingDeltaDeg(GNSSSim.TractorGNSS.TrueHeading, AutoDriveTargetHeadingDeg)) < 5.0) ||
+                needsInwardCorrection;
+
+            if (shouldReplan)
+            {
+                ChooseNextAutoDrivePlan(xM, yM, needsInwardCorrection);
+            }
+
+            double nextSpeed = MoveTowards(
+                GNSSSim.TractorGNSS.SpeedMPH,
+                AutoDriveTargetSpeedMPH,
+                AUTO_DRIVE_ACCEL_MPH_PER_SEC * dtSec);
+            SetAllVehicleSpeeds(nextSpeed);
+
+            double nextHeading = MoveTowardsHeading(
+                GNSSSim.TractorGNSS.TrueHeading,
+                AutoDriveTargetHeadingDeg,
+                AUTO_DRIVE_TURN_DEG_PER_SEC * dtSec);
+            GNSSSim.TractorGNSS.TrueHeading = nextHeading;
+
+            // Emergency correction if the current point is very close to the boundary.
+            if (nearestEdgeDistanceM <= AUTO_DRIVE_EDGE_BUFFER_M)
+            {
+                AutoDriveTargetHeadingDeg = ComputeInwardHeading(xM, yM);
+                AutoDriveTargetSpeedMPH = Math.Min(AutoDriveTargetSpeedMPH, 6.0);
+            }
+        }
+
+        private void ChooseNextAutoDrivePlan(double xM, double yM, bool forceInwardHeading)
+        {
+            double targetSpeed = Clamp(
+                AUTO_DRIVE_MIN_SPEED_MPH + Randomizer.NextDouble() * (AUTO_DRIVE_MAX_SPEED_MPH - AUTO_DRIVE_MIN_SPEED_MPH),
+                AUTO_DRIVE_MIN_SPEED_MPH,
+                AUTO_DRIVE_MAX_SPEED_MPH);
+
+            double targetHeading;
+            if (forceInwardHeading)
+            {
+                targetHeading = ComputeInwardHeading(xM, yM);
+            }
+            else
+            {
+                targetHeading = FindRandomHeadingInsideBoundary(xM, yM, targetSpeed);
+            }
+
+            AutoDriveTargetSpeedMPH = targetSpeed;
+            AutoDriveTargetHeadingDeg = targetHeading;
+            AutoDriveNextPlanTime = DateTime.UtcNow.AddSeconds(2 + Randomizer.Next(0, 4));
+        }
+
+        private double FindRandomHeadingInsideBoundary(double xM, double yM, double targetSpeedMph)
+        {
+            const int maxAttempts = 20;
+            double horizonSec = 6.0 + Randomizer.NextDouble() * 8.0;
+            double horizonDistanceM = targetSpeedMph * 0.44704 * horizonSec;
+            double maxAxis = AutoDriveSquareHalfSideM - AUTO_DRIVE_EDGE_BUFFER_M;
+
+            for (int i = 0; i < maxAttempts; i++)
+            {
+                double heading = Randomizer.NextDouble() * 360.0;
+                double projectedXM = xM + Math.Sin(ToRadians(heading)) * horizonDistanceM;
+                double projectedYM = yM + Math.Cos(ToRadians(heading)) * horizonDistanceM;
+
+                if (Math.Abs(projectedXM) <= maxAxis && Math.Abs(projectedYM) <= maxAxis)
+                {
+                    return heading;
+                }
+            }
+
+            return ComputeInwardHeading(xM, yM);
+        }
+
+        private double ComputeInwardHeading(double xM, double yM)
+        {
+            double headingToCenter = ToDegrees(Math.Atan2(-xM, -yM));
+            double randomOffset = -25.0 + (Randomizer.NextDouble() * 50.0);
+            return NormalizeHeading(headingToCenter + randomOffset);
+        }
+
+        private (double xM, double yM) GetOffsetFromCenterMeters(double latitude, double longitude)
+        {
+            double meanLatRad = ToRadians((AutoDriveCenterLatitude + latitude) / 2.0);
+            double metersPerDegLat = 111132.0;
+            double metersPerDegLon = 111320.0 * Math.Cos(meanLatRad);
+
+            double yM = (latitude - AutoDriveCenterLatitude) * metersPerDegLat;
+            double xM = (longitude - AutoDriveCenterLongitude) * metersPerDegLon;
+            return (xM, yM);
+        }
+
+        private void SetAllVehicleSpeeds(double speedMph)
+        {
+            double clampedSpeed = Clamp(speedMph, AUTO_DRIVE_MIN_SPEED_MPH, AUTO_DRIVE_MAX_SPEED_MPH);
+            GNSSSim.TractorGNSS.SpeedMPH = clampedSpeed;
+            GNSSSim.FrontGNSS.SpeedMPH = clampedSpeed;
+            GNSSSim.RearGNSS.SpeedMPH = clampedSpeed;
+        }
+
+        private static double MoveTowards(double current, double target, double maxDelta)
+        {
+            if (Math.Abs(target - current) <= maxDelta)
+            {
+                return target;
+            }
+
+            return current + Math.Sign(target - current) * maxDelta;
+        }
+
+        private static double MoveTowardsHeading(double currentDeg, double targetDeg, double maxDeltaDeg)
+        {
+            double delta = ShortestHeadingDeltaDeg(currentDeg, targetDeg);
+            if (Math.Abs(delta) <= maxDeltaDeg)
+            {
+                return NormalizeHeading(targetDeg);
+            }
+
+            return NormalizeHeading(currentDeg + Math.Sign(delta) * maxDeltaDeg);
+        }
+
+        private static double ShortestHeadingDeltaDeg(double currentDeg, double targetDeg)
+        {
+            double delta = NormalizeHeading(targetDeg) - NormalizeHeading(currentDeg);
+            if (delta > 180.0) delta -= 360.0;
+            if (delta < -180.0) delta += 360.0;
+            return delta;
+        }
+
+        private static double NormalizeHeading(double headingDeg)
+        {
+            double normalized = headingDeg % 360.0;
+            if (normalized < 0) normalized += 360.0;
+            return normalized;
+        }
+
+        private static double Clamp(double value, double min, double max)
+        {
+            if (value < min) return min;
+            if (value > max) return max;
+            return value;
+        }
+
+        private static double ToDegrees(double radians)
+        {
+            return radians * 180.0 / Math.PI;
+        }
+
+        private static double ToRadians(double degrees)
+        {
+            return degrees * Math.PI / 180.0;
         }
     }
 }
