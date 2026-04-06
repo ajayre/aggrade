@@ -313,6 +313,7 @@ namespace AgGrade.Controls
 
             ToggleHaulArrowsBtn.Visible = false;
             BenchmarkBtn.Visible = false;
+            ClearActivityBtn.Visible = false;
 
             AddBenchmarkBtn.Visible = true;
             ToggleSurveyCoverageBtn.Visible = true;
@@ -340,6 +341,7 @@ namespace AgGrade.Controls
 
             ToggleHaulArrowsBtn.Visible = true;
             BenchmarkBtn.Visible = true;
+            ClearActivityBtn.Visible = true;
 
             AddBenchmarkBtn.Visible = false;
             ToggleSurveyCoverageBtn.Visible = false;
@@ -367,6 +369,7 @@ namespace AgGrade.Controls
 
             ToggleHaulArrowsBtn.Visible = false;
             BenchmarkBtn.Visible = false;
+            ClearActivityBtn.Visible = false;
 
             AddBenchmarkBtn.Visible = false;
             ToggleSurveyCoverageBtn.Visible = false;
@@ -838,6 +841,35 @@ namespace AgGrade.Controls
         private void ToggleSurveyCoverageBtn_Click(object sender, EventArgs e)
         {
             ShowSurveyCoverage = !ShowSurveyCoverage;
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to clear the acivity from the map
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearActivityBtn_Click(object sender, EventArgs e)
+        {
+            ClearActivity();
+        }
+
+        /// <summary>
+        /// Clears the activity (cuts and fills) from the map
+        /// </summary>
+        private void ClearActivity
+            (
+            )
+        {
+            if (CurrentField != null)
+            {
+                foreach (Bin b in CurrentField.BinGrid)
+                {
+                    b.NumberOfCuts = 0;
+                    b.NumberofFills = 0;
+                }
+
+                MapGen.ClearTileCache();
+            }
         }
     }
 }

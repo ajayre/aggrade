@@ -1367,6 +1367,21 @@ namespace AgGrade.Data
         }
 
         /// <summary>
+        /// Clears all cached map tiles and associated overlay tile caches.
+        /// </summary>
+        public void ClearTileCache()
+        {
+            foreach (MapTile tile in Cache.Tiles.Values)
+            {
+                DisposeTileBitmaps(tile);
+            }
+            Cache.Tiles.Clear();
+
+            ClearSurfaceFlowTileCache();
+            ClearPondingTileCache();
+        }
+
+        /// <summary>
         /// Clears the surface flow tile cache and releases the cached flow image bitmap.
         /// Call when SurfaceFlowImage is null or when zoom/scale changes.
         /// </summary>

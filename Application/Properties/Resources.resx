@@ -118,9 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="joystick_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\joystick_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="joystick_down1" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\joystick_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -133,8 +130,14 @@
   <data name="fill_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\fill_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="folder_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\folder_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="height_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\height_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="transparent-logo-darkgreen-400px1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\transparent-logo-darkgreen-400px1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="back_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\back_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -150,6 +153,9 @@
   </data>
   <data name="led-orange_24px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\led-orange_24px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="import_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\import_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="boundary_left48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\boundary_left48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -184,20 +190,20 @@
   <data name="tractor_calib_down" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\tractor_calib_down.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="transparent-logo-white-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\transparent-logo-white-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="start_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\start_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="benchmark_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\benchmark_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="satellite_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\satellite_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="led-off_24px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\led-off_24px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="stop_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\stop_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="blade_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\blade_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="joystick_jog" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\joystick_jog.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -207,6 +213,9 @@
   </data>
   <data name="public-domain-beep-sound-100267" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Audio\public-domain-beep-sound-100267.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="mixkit-street-public-alarm-997" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Audio\mixkit-street-public-alarm-997.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="flow_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\flow_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -226,8 +235,8 @@
   <data name="navarrow-blue_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-blue_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="transparent-logo-darkgreen-400px1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\transparent-logo-darkgreen-400px1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="transparent-logo-white-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\transparent-logo-white-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="tractor_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\tractor_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -235,23 +244,20 @@
   <data name="navarrow-green_256px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\navarrow-green_256px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="blade_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\blade_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="boundary_right48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\boundary_right48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="satellite_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\satellite_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="transport_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\transport_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="mixkit-street-public-alarm-997" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Audio\mixkit-street-public-alarm-997.wav;System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="boundary_right48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\boundary_right48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="addbenchmark_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\addbenchmark_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="start_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\start_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="joystick_up" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\joystick_up.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="transparent-logo-darkgreen-400px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\transparent-logo-darkgreen-400px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -265,10 +271,7 @@
   <data name="boundary_right_selected48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Graphics\boundary_right_selected48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="folder_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\folder_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="import_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Graphics\import_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="activity_48px" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Graphics\activity_48px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

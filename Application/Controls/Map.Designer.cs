@@ -52,6 +52,7 @@
             StartStopSurveyBtn = new Button();
             BoundaryLeftBtn = new Button();
             BoundaryRightBtn = new Button();
+            ClearActivityBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -320,11 +321,22 @@
             BoundaryRightBtn.UseVisualStyleBackColor = true;
             BoundaryRightBtn.Click += BoundaryRightBtn_Click;
             // 
+            // ClearActivityBtn
+            // 
+            ClearActivityBtn.Image = Properties.Resources.activity_48px;
+            ClearActivityBtn.Location = new Point(11, 253);
+            ClearActivityBtn.Name = "ClearActivityBtn";
+            ClearActivityBtn.Size = new Size(60, 60);
+            ClearActivityBtn.TabIndex = 22;
+            ClearActivityBtn.UseVisualStyleBackColor = true;
+            ClearActivityBtn.Click += ClearActivityBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(ClearActivityBtn);
             Controls.Add(BoundaryRightBtn);
             Controls.Add(BoundaryLeftBtn);
             Controls.Add(StartStopSurveyBtn);
@@ -376,5 +388,6 @@
         private Button StartStopSurveyBtn;
         private Button BoundaryLeftBtn;
         private Button BoundaryRightBtn;
+        private Button ClearActivityBtn;
     }
 }
