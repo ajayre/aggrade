@@ -295,6 +295,264 @@ namespace AgGrade.Data
             return mask;
         }
 
+        private bool[] BinaryDilate(bool[] mask, int width, int height, int passes)
+        {
+            var outMask = new bool[mask.Length];
+            Array.Copy(mask, outMask, mask.Length);
+            for (int p = 0; p < Math.Max(0, passes); p++)
+            {
+                var next = new bool[outMask.Length];
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        bool any = false;
+                        for (int dy = -1; dy <= 1 && !any; dy++)
+                        {
+                            int yy = y + dy;
+                            if (yy < 0 || yy >= height)
+                                continue;
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                int xx = x + dx;
+                                if (xx < 0 || xx >= width)
+                                    continue;
+                                if (outMask[yy * width + xx])
+                                {
+                                    any = true;
+                                    break;
+                                }
+                            }
+                        }
+                        next[y * width + x] = any;
+                    }
+                }
+                outMask = next;
+            }
+            return outMask;
+        }
+
+        private bool[] BinaryErode(bool[] mask, int width, int height, int passes)
+        {
+            var outMask = new bool[mask.Length];
+            Array.Copy(mask, outMask, mask.Length);
+            for (int p = 0; p < Math.Max(0, passes); p++)
+            {
+                var next = new bool[outMask.Length];
+                for (int y = 0; y < height; y++)
+                {
+                    for (int x = 0; x < width; x++)
+                    {
+                        bool all = true;
+                        for (int dy = -1; dy <= 1 && all; dy++)
+                        {
+                            int yy = y + dy;
+                            if (yy < 0 || yy >= height)
+                            {
+                                all = false;
+                                break;
+                            }
+                            for (int dx = -1; dx <= 1; dx++)
+                            {
+                                int xx = x + dx;
+                                if (xx < 0 || xx >= width || !outMask[yy * width + xx])
+                                {
+                                    all = false;
+                                    break;
+                                }
+                            }
+                        }
+                        next[y * width + x] = all;
+                    }
+                }
+                outMask = next;
+            }
+            return outMask;
+        }
+
+        private bool[] FillHoles(bool[] mask, int width, int height)
+        {
+            var inv = new bool[mask.Length];
+            for (int i = 0; i < mask.Length; i++)
+                inv[i] = !mask[i];
+
+            var outside = new bool[mask.Length];
+            var q = new Queue<(int X, int Y)>();
+            void TryEnqueue(int x, int y)
+            {
+                if (x < 0 || x >= width || y < 0 || y >= height)
+                    return;
+                int i = y * width + x;
+                if (!inv[i] || outside[i])
+                    return;
+                outside[i] = true;
+                q.Enqueue((x, y));
+            }
+
+            for (int x = 0; x < width; x++)
+            {
+                TryEnqueue(x, 0);
+                TryEnqueue(x, height - 1);
+            }
+            for (int y = 0; y < height; y++)
+            {
+                TryEnqueue(0, y);
+                TryEnqueue(width - 1, y);
+            }
+
+            while (q.Count > 0)
+            {
+                (int x, int y) = q.Dequeue();
+                TryEnqueue(x - 1, y);
+                TryEnqueue(x + 1, y);
+                TryEnqueue(x, y - 1);
+                TryEnqueue(x, y + 1);
+            }
+
+            var outMask = new bool[mask.Length];
+            for (int i = 0; i < mask.Length; i++)
+            {
+                bool hole = inv[i] && !outside[i];
+                outMask[i] = mask[i] || hole;
+            }
+            return outMask;
+        }
+
+        private bool[] LargestComponent(bool[] mask, int width, int height)
+        {
+            var seen = new bool[mask.Length];
+            var best = new List<int>();
+            int[] nx = new int[8] { -1, 0, 1, -1, 1, -1, 0, 1 };
+            int[] ny = new int[8] { -1, -1, -1, 0, 0, 1, 1, 1 };
+
+            for (int y0 = 0; y0 < height; y0++)
+            {
+                for (int x0 = 0; x0 < width; x0++)
+                {
+                    int i0 = y0 * width + x0;
+                    if (seen[i0] || !mask[i0])
+                        continue;
+                    var comp = new List<int>();
+                    var st = new Stack<(int X, int Y)>();
+                    seen[i0] = true;
+                    st.Push((x0, y0));
+                    while (st.Count > 0)
+                    {
+                        (int x, int y) = st.Pop();
+                        int i = y * width + x;
+                        comp.Add(i);
+                        for (int k = 0; k < 8; k++)
+                        {
+                            int xx = x + nx[k];
+                            int yy = y + ny[k];
+                            if (xx < 0 || xx >= width || yy < 0 || yy >= height)
+                                continue;
+                            int ii = yy * width + xx;
+                            if (seen[ii] || !mask[ii])
+                                continue;
+                            seen[ii] = true;
+                            st.Push((xx, yy));
+                        }
+                    }
+                    if (comp.Count > best.Count)
+                        best = comp;
+                }
+            }
+
+            var outMask = new bool[mask.Length];
+            foreach (int i in best)
+                outMask[i] = true;
+            return outMask;
+        }
+
+        private bool[] BuildValidMaskFromObservedPoints(
+            List<(double E, double N, double Z, bool IsBoundary, double Lat, double Lon)> utmPoints,
+            double minX,
+            double minY,
+            int gridW,
+            int gridH)
+        {
+            int nCells = gridW * gridH;
+            var observed = new bool[nCells];
+            foreach (var p in utmPoints)
+            {
+                int bx = (int)Math.Floor((p.E - minX) / Field.BIN_SIZE_M);
+                int by = (int)Math.Floor((p.N - minY) / Field.BIN_SIZE_M);
+                if (bx < 0 || bx >= gridW || by < 0 || by >= gridH)
+                    continue;
+                observed[by * gridW + bx] = true;
+            }
+
+            bool anyObserved = false;
+            for (int i = 0; i < nCells; i++)
+            {
+                if (observed[i])
+                {
+                    anyObserved = true;
+                    break;
+                }
+            }
+            if (!anyObserved)
+            {
+                var all = new bool[nCells];
+                for (int i = 0; i < nCells; i++)
+                    all[i] = true;
+                return all;
+            }
+
+            var rowFill = new bool[nCells];
+            Array.Copy(observed, rowFill, nCells);
+            for (int by = 0; by < gridH; by++)
+            {
+                int row = by * gridW;
+                int minBx = int.MaxValue;
+                int maxBx = int.MinValue;
+                for (int bx = 0; bx < gridW; bx++)
+                {
+                    if (!observed[row + bx])
+                        continue;
+                    if (bx < minBx) minBx = bx;
+                    if (bx > maxBx) maxBx = bx;
+                }
+                if (minBx != int.MaxValue && maxBx != int.MinValue && maxBx > minBx)
+                {
+                    for (int bx = minBx; bx <= maxBx; bx++)
+                        rowFill[row + bx] = true;
+                }
+            }
+
+            var colFill = new bool[nCells];
+            Array.Copy(observed, colFill, nCells);
+            for (int bx = 0; bx < gridW; bx++)
+            {
+                int minBy = int.MaxValue;
+                int maxBy = int.MinValue;
+                for (int by = 0; by < gridH; by++)
+                {
+                    if (!observed[by * gridW + bx])
+                        continue;
+                    if (by < minBy) minBy = by;
+                    if (by > maxBy) maxBy = by;
+                }
+                if (minBy != int.MaxValue && maxBy != int.MinValue && maxBy > minBy)
+                {
+                    for (int by = minBy; by <= maxBy; by++)
+                        colFill[by * gridW + bx] = true;
+                }
+            }
+
+            var envelope = new bool[nCells];
+            for (int i = 0; i < nCells; i++)
+                envelope[i] = rowFill[i] || colFill[i];
+
+            bool[] closed = BinaryErode(BinaryDilate(envelope, gridW, gridH, 2), gridW, gridH, 2);
+            bool[] filled = FillHoles(closed, gridW, gridH);
+            bool[] main = LargestComponent(filled, gridW, gridH);
+            for (int i = 0; i < nCells; i++)
+                main[i] = main[i] || observed[i];
+            return main;
+        }
+
         private double CubicYardsToM3(double cubicYards)
         {
             return cubicYards / CubicYardsPerCubicMeter;
@@ -1128,7 +1386,10 @@ namespace AgGrade.Data
 
             double e0 = minX;
             double n0 = minY;
-            bool[] validMask = BuildValidMaskFromBoundary(boundaryXY, minX, minY, gridW, gridH);
+            bool[] validMask =
+                boundaryXY.Count >= 3
+                ? BuildValidMaskFromBoundary(boundaryXY, minX, minY, gridW, gridH)
+                : BuildValidMaskFromObservedPoints(utmPoints, minX, minY, gridW, gridH);
 
             double[] filledZ = BuildFielddesignSurface(utmPoints, minX, minY, gridW, gridH, validMask);
 
