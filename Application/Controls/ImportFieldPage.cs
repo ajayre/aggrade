@@ -13,16 +13,16 @@ namespace AgGrade.Controls
     {
         public event Action<FieldDesign> OnCreateField = null;
 
-        private readonly List<string> _surveyFilePaths = new List<string>();
+        private readonly List<string> _sourceFilePaths = new List<string>();
 
-        private string _SurveyDataFolder;
-        public string SurveyDataFolder
+        private string _FieldDataFolder;
+        public string FieldDataFolder
         {
-            get { return _SurveyDataFolder; }
+            get { return _FieldDataFolder; }
             set
             {
-                _SurveyDataFolder = value;
-                ShowSurveys(_SurveyDataFolder);
+                _FieldDataFolder = value;
+                ShowSources(_FieldDataFolder);
             }
         }
 
@@ -35,6 +35,8 @@ namespace AgGrade.Controls
 
             ApplyDefaultFieldValues();
             ErrorMessage.Visible = false;
+
+            HaulPaths.SelectedIndex = 0;
         }
 
         private void RunOnUiThread(Action action)
@@ -75,34 +77,41 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
-        /// Shows the currently available surveys
+        /// Shows the currently available sources
         /// </summary>
-        /// <param name="Folder">Path to folder containing survey data</param>
-        private void ShowSurveys
+        /// <param name="Folder">Path to folder containing field data</param>
+        private void ShowSources
             (
             string Folder
             )
         {
-            SurveyChooser.Items.Clear();
-            _surveyFilePaths.Clear();
+            SourceChooser.Items.Clear();
+            _sourceFilePaths.Clear();
 
             if (string.IsNullOrWhiteSpace(Folder) || !Directory.Exists(Folder))
             {
-                SurveyChooser.SelectedIndex = -1;
+                SourceChooser.SelectedIndex = -1;
+                ImportFieldBtn.Enabled = false;
                 return;
             }
 
+            ImportFieldBtn.Enabled = true;
+
             var paths = new List<string>();
-            paths.AddRange(Directory.EnumerateFiles(Folder, "*.txt", SearchOption.TopDirectoryOnly));
-            paths.AddRange(Directory.EnumerateFiles(Folder, "*.ags", SearchOption.TopDirectoryOnly));
+            paths.AddRange(Directory.EnumerateFiles(Folder, "*.agd", SearchOption.AllDirectories));
 
             foreach (string path in paths.OrderBy(p => Path.GetFileName(p), StringComparer.OrdinalIgnoreCase))
             {
-                _surveyFilePaths.Add(path);
-                SurveyChooser.Items.Add(Path.GetFileNameWithoutExtension(path));
+                _sourceFilePaths.Add(path);
+                SourceChooser.Items.Add(Path.GetFileNameWithoutExtension(path));
             }
 
-            SurveyChooser.SelectedIndex = SurveyChooser.Items.Count > 0 ? 0 : -1;
+            SourceChooser.SelectedIndex = SourceChooser.Items.Count > 0 ? 0 : -1;
+
+            if (SourceChooser.SelectedIndex == -1)
+            {
+                ImportFieldBtn.Enabled = false;
+            }
         }
 
         /// <summary>
@@ -119,39 +128,36 @@ namespace AgGrade.Controls
                 return;
             }
 
-            if (SurveyDataFolder == null)
+            if (FieldDataFolder == null)
             {
-                ErrorMessage.Text = "No survey data folder";
+                ErrorMessage.Text = "No field data folder";
                 ErrorMessage.Visible = true;
                 return;
             }
 
-            if (SurveyChooser.SelectedIndex < 0
-                || SurveyChooser.SelectedIndex >= _surveyFilePaths.Count)
+            if (SourceChooser.SelectedIndex < 0
+                || SourceChooser.SelectedIndex >= _sourceFilePaths.Count)
             {
-                ErrorMessage.Text = "No survey selected";
+                ErrorMessage.Text = "No field source selected";
                 ErrorMessage.Visible = true;
                 return;
             }
 
-            string SurveyFile = _surveyFilePaths[SurveyChooser.SelectedIndex];
+            string SurveyFile = _sourceFilePaths[SourceChooser.SelectedIndex];
 
             if (!File.Exists(SurveyFile))
             {
-                ErrorMessage.Text = "Survey doesn't exist";
+                ErrorMessage.Text = "Field source doesn't exist";
                 ErrorMessage.Visible = true;
                 return;
             }
 
-            FieldDesign fieldDesign = new FieldDesign
-            {
-                SurveyFileName = SurveyFile,
-            };
+            bool GenerateHaulPaths = HaulPaths.SelectedIndex == 0 ? true : false;
 
             string? surveyDir = Path.GetDirectoryName(SurveyFile);
             string dbPath = Path.Combine(
                 surveyDir ?? string.Empty,
-                Path.GetFileNameWithoutExtension(SurveyFile) + "-base.db");
+                Path.GetFileNameWithoutExtension(SurveyFile) + ".db");
 
             ProgressOutput.Clear();
             ImportFieldBtn.Enabled = false;
@@ -160,11 +166,17 @@ namespace AgGrade.Controls
             {
                 try
                 {
-                    var fieldCreator = new FieldCreator(msg =>
-                        RunOnUiThread(() => AppendProgressLine(msg)));
-                    fieldCreator.CreateFromSurveyAndDesign(fieldDesign, dbPath);
+                    string importFolder = surveyDir ?? FieldDataFolder;
+                    if (string.IsNullOrWhiteSpace(importFolder))
+                        throw new InvalidOperationException("Could not determine import folder.");
 
-                    RunOnUiThread(() => OnCreateField?.Invoke(fieldDesign));
+                    var fieldImporter = new FieldImporter(msg =>
+                        RunOnUiThread(() => AppendProgressLine(msg)));
+                    fieldImporter.CreateFromAgd(
+                        importFolder,
+                        Path.GetFileName(SurveyFile),
+                        Path.GetFileName(dbPath),
+                        GenerateHaulPaths);
                 }
                 catch (Exception ex)
                 {

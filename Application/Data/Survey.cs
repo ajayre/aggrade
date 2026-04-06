@@ -379,6 +379,7 @@ namespace AgGrade.Data
             if (lines.Length == 0 || lines.All(string.IsNullOrWhiteSpace))
                 return;
 
+            bool skippedHeaderRow = false;
             for (int li = 0; li < lines.Length; li++)
             {
                 string line = lines[li];
@@ -389,9 +390,18 @@ namespace AgGrade.Data
                 if (parts.Length < 3)
                     throw new Exception($"Unable to parse AGS line {li + 1}. Expected at least 3 comma-separated columns (latitude, longitude, elevation).");
 
-                double latitude = ParseDouble(parts[0].Trim(), $"line {li + 1} latitude");
-                double longitude = ParseDouble(parts[1].Trim(), $"line {li + 1} longitude");
-                double elevationM = ParseDouble(parts[2].Trim(), $"line {li + 1} elevation");
+                if (!TryParseAgsNumericColumns(parts, out double latitude, out double longitude, out double elevationM))
+                {
+                    // Allow a single header row (for example: "Latitude,Longitude,Elevation,...").
+                    if (!skippedHeaderRow)
+                    {
+                        skippedHeaderRow = true;
+                        continue;
+                    }
+
+                    throw new Exception($"Invalid numeric value(s) on AGS line {li + 1}. Expected numeric latitude, longitude, and elevation.");
+                }
+
                 string code = parts.Length > 3 ? parts[3].Trim() : string.Empty;
 
                 if (IsAgsMasterBenchmarkCode(code))
@@ -419,6 +429,27 @@ namespace AgGrade.Data
                 else
                     InteriorPoints.Add(point);
             }
+        }
+
+        private static bool TryParseAgsNumericColumns
+            (
+            string[] Parts,
+            out double Latitude,
+            out double Longitude,
+            out double ElevationM
+            )
+        {
+            Latitude = 0;
+            Longitude = 0;
+            ElevationM = 0;
+
+            if (Parts == null || Parts.Length < 3)
+                return false;
+
+            return
+                double.TryParse(Parts[0]?.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out Latitude) &&
+                double.TryParse(Parts[1]?.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out Longitude) &&
+                double.TryParse(Parts[2]?.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out ElevationM);
         }
 
         /// <summary>

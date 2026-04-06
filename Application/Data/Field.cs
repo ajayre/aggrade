@@ -924,7 +924,7 @@ namespace AgGrade.Data
             CompletedFillCY = Db.GetData(Database.DataNames.CompletedFillCY);
 
             // set field name using folder name and version
-            Name = string.Format("{0} ({1})", Path.GetFileName(Folder), Path.GetFileNameWithoutExtension(DbFile));
+            Name = string.Format("{0}", Path.GetFileNameWithoutExtension(DbFile));
 
             // load in haul arrows
             Database.HaulArrow[] HaulArrows = Db.GetHaulArrows();

@@ -26,6 +26,8 @@ namespace AgGrade.Controls
             }
         }
 
+        public string FieldDataFolder;
+
         public CreateFieldPage()
         {
             InitializeComponent();
@@ -220,10 +222,12 @@ namespace AgGrade.Controls
                 ExportFromField = ExportFromField.Value
             };
 
-            string? surveyDir = Path.GetDirectoryName(SurveyFile);
-            string dbPath = Path.Combine(
-                surveyDir ?? string.Empty,
-                Path.GetFileNameWithoutExtension(SurveyFile) + "-base.db");
+            string SurveyName = Path.GetFileNameWithoutExtension(SurveyFile);
+            string DbName = SurveyName + ".db";
+            string FieldFolder = FieldDataFolder + SurveyName;
+            string dbPath = FieldFolder + Path.DirectorySeparatorChar + DbName;
+
+            if (!Directory.Exists(FieldFolder)) Directory.CreateDirectory(FieldFolder);
 
             ProgressOutput.Clear();
             CreateFieldBtn.Enabled = false;

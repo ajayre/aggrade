@@ -536,6 +536,7 @@ namespace AgGrade
 
             CreateFieldPage createFieldPage = new CreateFieldPage();
             createFieldPage.SurveyDataFolder = SurveyDataFolder;
+            createFieldPage.FieldDataFolder = FieldDataFolder;
             createFieldPage.Parent = ContentPanel;
             createFieldPage.Dock = DockStyle.Fill;
             createFieldPage.OnCreateField += (fielddesign) => { CreateField(fielddesign); };
@@ -554,6 +555,7 @@ namespace AgGrade
             ImportFieldPage importFieldPage = new ImportFieldPage();
             importFieldPage.Parent = ContentPanel;
             importFieldPage.Dock = DockStyle.Fill;
+            importFieldPage.FieldDataFolder = FieldDataFolder;
             importFieldPage.Show();
         }
 

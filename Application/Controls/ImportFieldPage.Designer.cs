@@ -32,9 +32,12 @@
             ImportFieldBtn = new Button();
             panel1 = new Panel();
             ErrorMessage = new Label();
-            SurveyChooser = new ComboBox();
+            SourceChooser = new ComboBox();
             label2 = new Label();
             ProgressOutput = new TextBox();
+            label1 = new Label();
+            HaulPaths = new ComboBox();
+            label3 = new Label();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -53,9 +56,9 @@
             ImportFieldBtn.Font = new Font("Segoe UI", 18F);
             ImportFieldBtn.Image = Properties.Resources.import_48px;
             ImportFieldBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            ImportFieldBtn.Location = new Point(765, 281);
+            ImportFieldBtn.Location = new Point(760, 160);
             ImportFieldBtn.Name = "ImportFieldBtn";
-            ImportFieldBtn.Size = new Size(148, 60);
+            ImportFieldBtn.Size = new Size(153, 60);
             ImportFieldBtn.TabIndex = 29;
             ImportFieldBtn.Text = "Import";
             ImportFieldBtn.TextAlign = ContentAlignment.MiddleRight;
@@ -83,44 +86,78 @@
             ErrorMessage.TabIndex = 0;
             ErrorMessage.Text = "Error Message";
             // 
-            // SurveyChooser
+            // SourceChooser
             // 
-            SurveyChooser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            SurveyChooser.DropDownStyle = ComboBoxStyle.DropDownList;
-            SurveyChooser.Font = new Font("Segoe UI", 14F);
-            SurveyChooser.FormattingEnabled = true;
-            SurveyChooser.Location = new Point(229, 54);
-            SurveyChooser.Name = "SurveyChooser";
-            SurveyChooser.Size = new Size(684, 33);
-            SurveyChooser.TabIndex = 15;
+            SourceChooser.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            SourceChooser.DropDownStyle = ComboBoxStyle.DropDownList;
+            SourceChooser.Font = new Font("Segoe UI", 14F);
+            SourceChooser.FormattingEnabled = true;
+            SourceChooser.Location = new Point(203, 54);
+            SourceChooser.Name = "SourceChooser";
+            SourceChooser.Size = new Size(710, 33);
+            SourceChooser.TabIndex = 15;
             // 
             // label2
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 14F);
-            label2.Location = new Point(151, 57);
+            label2.Location = new Point(123, 57);
             label2.Name = "label2";
-            label2.Size = new Size(72, 25);
+            label2.Size = new Size(74, 25);
             label2.TabIndex = 16;
-            label2.Text = "Survey:";
+            label2.Text = "Source:";
             // 
             // ProgressOutput
             // 
             ProgressOutput.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             ProgressOutput.Font = new Font("Segoe UI", 16F);
-            ProgressOutput.Location = new Point(3, 347);
+            ProgressOutput.Location = new Point(3, 226);
             ProgressOutput.Multiline = true;
             ProgressOutput.Name = "ProgressOutput";
-            ProgressOutput.Size = new Size(910, 156);
+            ProgressOutput.Size = new Size(910, 277);
             ProgressOutput.TabIndex = 41;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 14F);
+            label1.Location = new Point(10, 96);
+            label1.Name = "label1";
+            label1.Size = new Size(187, 25);
+            label1.TabIndex = 43;
+            label1.Text = "Generate Haul Paths:";
+            // 
+            // HaulPaths
+            // 
+            HaulPaths.DropDownStyle = ComboBoxStyle.DropDownList;
+            HaulPaths.Font = new Font("Segoe UI", 14F);
+            HaulPaths.FormattingEnabled = true;
+            HaulPaths.Items.AddRange(new object[] { "Yes", "No" });
+            HaulPaths.Location = new Point(203, 93);
+            HaulPaths.Name = "HaulPaths";
+            HaulPaths.Size = new Size(140, 33);
+            HaulPaths.TabIndex = 42;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 14F);
+            label3.Location = new Point(203, 132);
+            label3.Name = "label3";
+            label3.Size = new Size(332, 25);
+            label3.TabIndex = 44;
+            label3.Text = "Warning: this could take several hours";
             // 
             // ImportFieldPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(label3);
+            Controls.Add(label1);
+            Controls.Add(HaulPaths);
             Controls.Add(ProgressOutput);
             Controls.Add(label2);
-            Controls.Add(SurveyChooser);
+            Controls.Add(SourceChooser);
             Controls.Add(panel1);
             Controls.Add(ImportFieldBtn);
             Controls.Add(sectionTitle1);
@@ -138,8 +175,11 @@
         private Button ImportFieldBtn;
         private Panel panel1;
         private Label ErrorMessage;
-        private ComboBox SurveyChooser;
+        private ComboBox SourceChooser;
         private Label label2;
         private TextBox ProgressOutput;
+        private Label label1;
+        private ComboBox HaulPaths;
+        private Label label3;
     }
 }
