@@ -31,10 +31,10 @@ namespace AgGrade.Data
         public const int BIN_NO_DATA_SENTINEL = -1000;
 
         /// <summary>No-data value for elevation DEM cells with no height (e.g. zero or missing).</summary>
-        public const float ElevationDemNoDataValue = -9999f;
+        public const float ELEVATION_DEM_NO_DATA_VALUE = -9999f;
 
         /// <summary>Default Gaussian sigma for DEM smoothing (matches Python demgenerator).</summary>
-        private const double ElevationDemDefaultSmoothSigma = 3.0;
+        private const double ELEVATION_DEM_DEFAULT_SMOOTH_SIGMA = 3.0;
 
         /// <summary>Python helper script to write GeoTIFF via rasterio (same layout as demgenerator).</summary>
         private const string WRITE_GEOTIFF_SCRIPT = "write_geotiff_from_raw.py";
@@ -79,6 +79,12 @@ namespace AgGrade.Data
         public double CompletedFillCY;
         private bool IsLevelingOperationActive;
         private Database.LevelingOperationType? ActiveOperationType;
+        private bool HasTractorFixBeenStored;
+        private bool WasTractorMoving;
+        private bool HasFrontScraperFixBeenStored;
+        private bool WasFrontScraperMoving;
+        private bool HasRearScraperFixBeenStored;
+        private bool WasRearScraperMoving;
 
         public Bin?[,] BinGrid;
         public int GridWidth { get; private set; }
@@ -92,6 +98,7 @@ namespace AgGrade.Data
             HaulDirections = new List<HaulDirection>();
 
             Db = new Database();
+            Db.OnStatsNeeded += HandleStatsNeeded;
         }
 
         /// <summary>
@@ -105,6 +112,12 @@ namespace AgGrade.Data
             Bins.Clear();
             Benchmarks.Clear();
             HaulDirections.Clear();
+            HasTractorFixBeenStored = false;
+            WasTractorMoving = false;
+            HasFrontScraperFixBeenStored = false;
+            WasFrontScraperMoving = false;
+            HasRearScraperFixBeenStored = false;
+            WasRearScraperMoving = false;
         }
 
         /// <summary>
@@ -1170,11 +1183,21 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            // store in database
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
+            bool isMoving = Fix.Vector.SpeedMph > 0;
+            bool isFirstFixAfterStartup = !HasTractorFixBeenStored;
+            bool justStopped = WasTractorMoving && !isMoving;
+
+            if (isFirstFixAfterStartup || isMoving || justStopped)
+            {
+                // store in database
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
+            }
+
+            HasTractorFixBeenStored = true;
+            WasTractorMoving = isMoving;
         }
 
         /// <summary>
@@ -1186,9 +1209,19 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            // store in database
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLat, Fix.Latitude));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLon, Fix.Longitude));
+            bool isMoving = Fix.Vector.Speedkph > 0;
+            bool isFirstFixAfterStartup = !HasFrontScraperFixBeenStored;
+            bool justStopped = WasFrontScraperMoving && !isMoving;
+
+            if (isFirstFixAfterStartup || isMoving || justStopped)
+            {
+                // store in database
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLat, Fix.Latitude));
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLon, Fix.Longitude));
+            }
+
+            HasFrontScraperFixBeenStored = true;
+            WasFrontScraperMoving = isMoving;
         }
 
         /// <summary>
@@ -1200,9 +1233,45 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            // store in database
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
+            bool isMoving = Fix.Vector.SpeedMph > 0;
+            bool isFirstFixAfterStartup = !HasRearScraperFixBeenStored;
+            bool justStopped = WasRearScraperMoving && !isMoving;
+
+            if (isFirstFixAfterStartup || isMoving || justStopped)
+            {
+                // store in database
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
+                Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
+            }
+
+            HasRearScraperFixBeenStored = true;
+            WasRearScraperMoving = isMoving;
+        }
+
+        /// <summary>
+        /// Stores periodic progress stats when requested by the database timer logic.
+        /// </summary>
+        private void HandleStatsNeeded
+            (
+            object? sender,
+            EventArgs e
+            )
+        {
+            long timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            Db.AddEvent
+                (
+                new Database.Event(Database.Event.EventTypes.CompletedCutCY, CompletedCutCY)
+                {
+                    Timestamp = timestamp
+                }
+                );
+            Db.AddEvent
+                (
+                new Database.Event(Database.Event.EventTypes.CompletedFillCY, CompletedFillCY)
+                {
+                    Timestamp = timestamp
+                }
+                );
         }
 
         /// <summary>
@@ -1238,7 +1307,7 @@ namespace AgGrade.Data
             data = new float[nrows, ncols];
             for (int r = 0; r < nrows; r++)
                 for (int c = 0; c < ncols; c++)
-                    data[r, c] = ElevationDemNoDataValue;
+                    data[r, c] = ELEVATION_DEM_NO_DATA_VALUE;
 
             foreach (Bin bin in Bins)
             {
@@ -1250,15 +1319,15 @@ namespace AgGrade.Data
                     _ => bin.CurrentElevationM
                 };
                 bool treatAsNoData = h == BIN_NO_DATA_SENTINEL;
-                float value = treatAsNoData ? ElevationDemNoDataValue : (float)h;
+                float value = treatAsNoData ? ELEVATION_DEM_NO_DATA_VALUE : (float)h;
                 int row = maxY - bin.Y;
                 int col = bin.X - minX;
                 if (row >= 0 && row < nrows && col >= 0 && col < ncols)
                     data[row, col] = value;
             }
 
-            if (enableSmoothing && ElevationDemDefaultSmoothSigma > 0)
-                data = SmoothDemArray(data, nrows, ncols, ElevationDemNoDataValue, ElevationDemDefaultSmoothSigma);
+            if (enableSmoothing && ELEVATION_DEM_DEFAULT_SMOOTH_SIGMA > 0)
+                data = SmoothDemArray(data, nrows, ncols, ELEVATION_DEM_NO_DATA_VALUE, ELEVATION_DEM_DEFAULT_SMOOTH_SIGMA);
 
             double topLeftX = FieldMinX + minX * BIN_SIZE_M;
             double topLeftY = FieldMinY + (maxY + 1) * BIN_SIZE_M;
@@ -1325,7 +1394,7 @@ namespace AgGrade.Data
                     "\"topLeftNorthing\":" + topLeftNorthing.ToString("R", inv) + "," +
                     "\"utmZone\":" + utmZone + "," +
                     "\"isNorthernHemisphere\":" + (isNorthernHemisphere ? "true" : "false") + "," +
-                    "\"nodata\":" + ElevationDemNoDataValue.ToString("R", inv) + "}";
+                    "\"nodata\":" + ELEVATION_DEM_NO_DATA_VALUE.ToString("R", inv) + "}";
                 File.WriteAllText(metaPath, json);
 
                 string outputFull = Path.GetFullPath(outputPath);

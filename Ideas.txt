@@ -14,8 +14,6 @@
   - north up, tractor up
   - toggle guidance line to nearest lowest area
 
-5. Map edge buffer/clearance - using equipment width show closest centerline to edges of field
-
 6. Transparency option for tractor display
 
 7. Log total amount of cut and fill for field (save between runs) and show percentage complete for field

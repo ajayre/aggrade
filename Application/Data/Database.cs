@@ -25,6 +25,10 @@ namespace AgGrade.Data
         private double HeightOffsetM;
         private double LatitudeOffsetDeg;
         private double LongitudeOffsetDeg;
+        private long _lastStatsWriteTimestampMs;
+
+        //private const long STATS_WRITE_INTERVAL_MS = 60L * 60L * 1000L;
+        private const long STATS_WRITE_INTERVAL_MS = 60L * 1000L;
 
         /// <summary>
         /// Disables connection pooling so closing the connection releases the SQLite file (delete/rename) immediately.
@@ -54,6 +58,11 @@ namespace AgGrade.Data
         /// Raised when PossibleDataLoss transitions from false to true.
         /// </summary>
         public event EventHandler? PossibleDataLossChanged;
+
+        /// <summary>
+        /// Raised after an event write when periodic cut/fill stats should be written.
+        /// </summary>
+        public event EventHandler? OnStatsNeeded;
 
         /// <summary>
         /// Supported operation types for leveling history.
@@ -103,7 +112,9 @@ namespace AgGrade.Data
                 FrontScraperLat,
                 FrontScraperLon,
                 RearScraperLat,
-                RearScraperLon
+                RearScraperLon,
+                CompletedCutCY,
+                CompletedFillCY
             }
 
             public int EventID { get; set; }
@@ -303,6 +314,7 @@ namespace AgGrade.Data
             EnsureHaulPathsIndex();
             RecoverFromJournal();
             RefreshCalibration();
+            _lastStatsWriteTimestampMs = GetLastStatsWriteTimestampMs();
         }
 
         /// <summary>
@@ -343,6 +355,7 @@ namespace AgGrade.Data
             EnsureHaulPathsIndex();
             RecoverFromJournal();
             RefreshCalibration();
+            _lastStatsWriteTimestampMs = GetLastStatsWriteTimestampMs();
         }
 
         /// <summary>DDL statements matching <c>init_sqlite_db</c> (user_version and tables).</summary>
@@ -558,6 +571,16 @@ namespace AgGrade.Data
                 eventType == Event.EventTypes.RearBladeHeight;
         }
 
+        private static bool IsStatsEventType
+            (
+            Event.EventTypes eventType
+            )
+        {
+            return
+                eventType == Event.EventTypes.CompletedCutCY ||
+                eventType == Event.EventTypes.CompletedFillCY;
+        }
+
         private double ToStoredHeight
             (
             double heightM
@@ -631,6 +654,25 @@ namespace AgGrade.Data
                 if (result == null || result is DBNull) return false;
                 value = Convert.ToDouble(result, CultureInfo.InvariantCulture);
                 return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the latest timestamp among stats rows already stored in Events.
+        /// </summary>
+        private long GetLastStatsWriteTimestampMs
+            (
+            )
+        {
+            if (_connection == null) return 0;
+            using (SqliteCommand cmd = _connection.CreateCommand())
+            {
+                cmd.CommandText = "SELECT IFNULL(MAX(Timestamp), 0) FROM Events WHERE Type = @CompletedCutCY OR Type = @CompletedFillCY";
+                cmd.Parameters.AddWithValue("@CompletedCutCY", Event.EventTypes.CompletedCutCY.ToString());
+                cmd.Parameters.AddWithValue("@CompletedFillCY", Event.EventTypes.CompletedFillCY.ToString());
+                object? result = cmd.ExecuteScalar();
+                if (result == null || result is DBNull) return 0;
+                return Convert.ToInt64(result, CultureInfo.InvariantCulture);
             }
         }
 
@@ -733,6 +775,7 @@ namespace AgGrade.Data
             try
             {
                 if (_connection == null) throw new InvalidOperationException("Database is not open.");
+                bool isStatsEvent = IsStatsEventType(evt.Type);
                 using (var cmd = _connection.CreateCommand())
                 {
                     double valueToStore = evt.Value;
@@ -754,6 +797,15 @@ namespace AgGrade.Data
                     cmd.Parameters.AddWithValue("@Value", valueToStore);
                     cmd.Parameters.AddWithValue("@Timestamp", evt.Timestamp);
                     cmd.ExecuteNonQuery();
+                }
+
+                if (isStatsEvent)
+                {
+                    _lastStatsWriteTimestampMs = evt.Timestamp;
+                }
+                else if ((evt.Timestamp - _lastStatsWriteTimestampMs) >= STATS_WRITE_INTERVAL_MS)
+                {
+                    OnStatsNeeded?.Invoke(this, EventArgs.Empty);
                 }
             }
             catch (IndexOutOfRangeException)

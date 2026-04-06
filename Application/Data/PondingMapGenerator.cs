@@ -62,7 +62,7 @@ namespace AgGrade.Data
                 out float[,] dem, out int nrows, out int ncols, out SWCorner, out NECorner);
 
             double cellSizeM = Field.BIN_SIZE_M;
-            RunPondingModel(dem, nrows, ncols, cellSizeM, Field.ElevationDemNoDataValue, rainfallMm, curveNumber,
+            RunPondingModel(dem, nrows, ncols, cellSizeM, Field.ELEVATION_DEM_NO_DATA_VALUE, rainfallMm, curveNumber,
                 out float[,] pondDepth, out byte[,] gray);
 
             ConvertPondingToPNG(gray, nrows, ncols, outputPngPath, true, opacity);
