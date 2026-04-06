@@ -78,12 +78,21 @@ namespace AgGrade.Data
         public double CompletedFillCY;
         private bool IsLevelingOperationActive;
         private Database.LevelingOperationType? ActiveOperationType;
+        private const long FIX_WRITE_MIN_INTERVAL_MS = 1000;
         private bool HasTractorFixBeenStored;
-        private bool WasTractorMoving;
+        private long LastTractorFixWriteTimestampMs;
+        private double LastTractorLat;
+        private double LastTractorLon;
+        private double LastTractorSpeedKph;
+        private double LastTractorHeadingDeg;
         private bool HasFrontScraperFixBeenStored;
-        private bool WasFrontScraperMoving;
+        private long LastFrontScraperFixWriteTimestampMs;
+        private double LastFrontScraperLat;
+        private double LastFrontScraperLon;
         private bool HasRearScraperFixBeenStored;
-        private bool WasRearScraperMoving;
+        private long LastRearScraperFixWriteTimestampMs;
+        private double LastRearScraperLat;
+        private double LastRearScraperLon;
 
         public Bin?[,] BinGrid;
         public int GridWidth { get; private set; }
@@ -112,11 +121,19 @@ namespace AgGrade.Data
             Benchmarks.Clear();
             HaulDirections.Clear();
             HasTractorFixBeenStored = false;
-            WasTractorMoving = false;
+            LastTractorFixWriteTimestampMs = 0;
+            LastTractorLat = 0;
+            LastTractorLon = 0;
+            LastTractorSpeedKph = 0;
+            LastTractorHeadingDeg = 0;
             HasFrontScraperFixBeenStored = false;
-            WasFrontScraperMoving = false;
+            LastFrontScraperFixWriteTimestampMs = 0;
+            LastFrontScraperLat = 0;
+            LastFrontScraperLon = 0;
             HasRearScraperFixBeenStored = false;
-            WasRearScraperMoving = false;
+            LastRearScraperFixWriteTimestampMs = 0;
+            LastRearScraperLat = 0;
+            LastRearScraperLon = 0;
         }
 
         /// <summary>
@@ -1192,21 +1209,30 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            bool isMoving = Fix.Vector.SpeedMph > 0;
             bool isFirstFixAfterStartup = !HasTractorFixBeenStored;
-            bool justStopped = WasTractorMoving && !isMoving;
+            long nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (!isFirstFixAfterStartup && (nowMs - LastTractorFixWriteTimestampMs) < FIX_WRITE_MIN_INTERVAL_MS) return;
 
-            if (isFirstFixAfterStartup || isMoving || justStopped)
-            {
-                // store in database
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
-            }
+            bool hasChanged =
+                isFirstFixAfterStartup ||
+                Fix.Latitude != LastTractorLat ||
+                Fix.Longitude != LastTractorLon ||
+                Fix.Vector.Speedkph != LastTractorSpeedKph ||
+                Fix.Vector.TrackMagneticDeg != LastTractorHeadingDeg;
+            if (!hasChanged) return;
+
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
 
             HasTractorFixBeenStored = true;
-            WasTractorMoving = isMoving;
+            LastTractorFixWriteTimestampMs = nowMs;
+            LastTractorLat = Fix.Latitude;
+            LastTractorLon = Fix.Longitude;
+            LastTractorSpeedKph = Fix.Vector.Speedkph;
+            LastTractorHeadingDeg = Fix.Vector.TrackMagneticDeg;
         }
 
         /// <summary>
@@ -1218,19 +1244,24 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            bool isMoving = Fix.Vector.Speedkph > 0;
             bool isFirstFixAfterStartup = !HasFrontScraperFixBeenStored;
-            bool justStopped = WasFrontScraperMoving && !isMoving;
+            long nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (!isFirstFixAfterStartup && (nowMs - LastFrontScraperFixWriteTimestampMs) < FIX_WRITE_MIN_INTERVAL_MS) return;
 
-            if (isFirstFixAfterStartup || isMoving || justStopped)
-            {
-                // store in database
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLat, Fix.Latitude));
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLon, Fix.Longitude));
-            }
+            bool hasChanged =
+                isFirstFixAfterStartup ||
+                Fix.Latitude != LastFrontScraperLat ||
+                Fix.Longitude != LastFrontScraperLon;
+            if (!hasChanged) return;
+
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.FrontScraperLon, Fix.Longitude));
 
             HasFrontScraperFixBeenStored = true;
-            WasFrontScraperMoving = isMoving;
+            LastFrontScraperFixWriteTimestampMs = nowMs;
+            LastFrontScraperLat = Fix.Latitude;
+            LastFrontScraperLon = Fix.Longitude;
         }
 
         /// <summary>
@@ -1242,19 +1273,24 @@ namespace AgGrade.Data
             GNSSFix Fix
             )
         {
-            bool isMoving = Fix.Vector.SpeedMph > 0;
             bool isFirstFixAfterStartup = !HasRearScraperFixBeenStored;
-            bool justStopped = WasRearScraperMoving && !isMoving;
+            long nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (!isFirstFixAfterStartup && (nowMs - LastRearScraperFixWriteTimestampMs) < FIX_WRITE_MIN_INTERVAL_MS) return;
 
-            if (isFirstFixAfterStartup || isMoving || justStopped)
-            {
-                // store in database
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
-                Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
-            }
+            bool hasChanged =
+                isFirstFixAfterStartup ||
+                Fix.Latitude != LastRearScraperLat ||
+                Fix.Longitude != LastRearScraperLon;
+            if (!hasChanged) return;
+
+            // store in database
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLat, Fix.Latitude));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.RearScraperLon, Fix.Longitude));
 
             HasRearScraperFixBeenStored = true;
-            WasRearScraperMoving = isMoving;
+            LastRearScraperFixWriteTimestampMs = nowMs;
+            LastRearScraperLat = Fix.Latitude;
+            LastRearScraperLon = Fix.Longitude;
         }
 
         /// <summary>

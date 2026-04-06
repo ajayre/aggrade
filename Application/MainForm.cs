@@ -622,6 +622,7 @@ namespace AgGrade
 
             ZoomInBtn.Enabled = true;
             ZoomOutBtn.Enabled = true;
+            ZoomFitBtn.Enabled = true;
 
             if (CurrentField != null)
             {
@@ -1023,6 +1024,7 @@ namespace AgGrade
             // disable controls specific to the map            
             ZoomInBtn.Enabled = false;
             ZoomOutBtn.Enabled = false;
+            ZoomFitBtn.Enabled = false;
 
             return true;
         }
