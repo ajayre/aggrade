@@ -1,0 +1,9 @@
+AGGRADE RELEASE NOTES
+(C) andy@britishideas.com 2026
+GPL V3
+
+
+Version 1.0.0.0
+---------------
+
+- First release.
