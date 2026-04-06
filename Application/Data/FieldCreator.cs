@@ -132,10 +132,11 @@ namespace AgGrade.Data
                 out double totalFillCy,
                 out double planeA,
                 out double planeB,
+                out int validBinCount,
                 out List<Database.BinState> binRows);
 
             CompositeSlopeAndHeading(planeA, planeB, out double compositeSlopePct, out double compositeHeadingDeg);
-            double totalAreaM2 = gridW * gridH * Field.BIN_SIZE_M * Field.BIN_SIZE_M;
+            double totalAreaM2 = validBinCount * Field.BIN_SIZE_M * Field.BIN_SIZE_M;
             double totalAreaAcres = totalAreaM2 / SquareMetersPerAcre;
             var statistics = new Statistics
             {
@@ -209,6 +210,89 @@ namespace AgGrade.Data
 
             double h = Math.Atan2(de, dn) * (180.0 / Math.PI);
             downhillHeadingDegCwFromNorth = (h % 360.0 + 360.0) % 360.0;
+        }
+
+        private List<(double X, double Y)> SortBoundaryRingByAngle(List<(double X, double Y)> points)
+        {
+            if (points.Count <= 2)
+                return points;
+            double cx = 0;
+            double cy = 0;
+            foreach ((double x, double y) in points)
+            {
+                cx += x;
+                cy += y;
+            }
+            cx /= points.Count;
+            cy /= points.Count;
+            points.Sort((a, b) => Math.Atan2(a.Y - cy, a.X - cx).CompareTo(Math.Atan2(b.Y - cy, b.X - cx)));
+            return points;
+        }
+
+        private bool PointInPolygon(double x, double y, List<(double X, double Y)> ring)
+        {
+            int n = ring.Count;
+            if (n < 3)
+                return false;
+            bool inside = false;
+            int j = n - 1;
+            const double eps = 1e-12;
+            for (int i = 0; i < n; i++)
+            {
+                double xi = ring[i].X;
+                double yi = ring[i].Y;
+                double xj = ring[j].X;
+                double yj = ring[j].Y;
+
+                double minX = Math.Min(xi, xj) - eps;
+                double maxX = Math.Max(xi, xj) + eps;
+                double minY = Math.Min(yi, yj) - eps;
+                double maxY = Math.Max(yi, yj) + eps;
+                double cross = (x - xi) * (yj - yi) - (y - yi) * (xj - xi);
+                if (Math.Abs(cross) <= eps && x >= minX && x <= maxX && y >= minY && y <= maxY)
+                    return true;
+
+                bool intersects = (yi > y) != (yj > y);
+                if (intersects)
+                {
+                    double xAtY = (xj - xi) * (y - yi) / ((yj - yi) + eps) + xi;
+                    if (x <= xAtY)
+                        inside = !inside;
+                }
+                j = i;
+            }
+            return inside;
+        }
+
+        private bool[] BuildValidMaskFromBoundary(
+            List<(double X, double Y)> boundaryRing,
+            double minX,
+            double minY,
+            int gridW,
+            int gridH)
+        {
+            int nCells = gridW * gridH;
+            var mask = new bool[nCells];
+            if (boundaryRing.Count < 3)
+            {
+                for (int i = 0; i < nCells; i++)
+                    mask[i] = true;
+                return mask;
+            }
+
+            List<(double X, double Y)> ring = SortBoundaryRingByAngle(boundaryRing);
+            for (int by = 0; by < gridH; by++)
+            {
+                double cy = minY + (by + 0.5) * Field.BIN_SIZE_M;
+                int row = by * gridW;
+                for (int bx = 0; bx < gridW; bx++)
+                {
+                    double cx = minX + (bx + 0.5) * Field.BIN_SIZE_M;
+                    mask[row + bx] = PointInPolygon(cx, cy, ring);
+                }
+            }
+
+            return mask;
         }
 
         private double CubicYardsToM3(double cubicYards)
@@ -710,7 +794,8 @@ namespace AgGrade.Data
             double minX,
             double minY,
             int gridW,
-            int gridH)
+            int gridH,
+            bool[] validMask)
         {
             ReportProgress($"Interpolating existing elevations (MLS, {gridW}×{gridH} bins)…");
             int nPts = utmPoints.Count;
@@ -730,6 +815,8 @@ namespace AgGrade.Data
                 int bx = (int)Math.Floor((t.E - minX) / Field.BIN_SIZE_M);
                 int by = (int)Math.Floor((t.N - minY) / Field.BIN_SIZE_M);
                 if (bx < 0 || bx >= gridW || by < 0 || by >= gridH)
+                    continue;
+                if (!validMask[by * gridW + bx])
                     continue;
                 var key = (bx, by);
                 if (grouped.TryGetValue(key, out var agg))
@@ -759,6 +846,13 @@ namespace AgGrade.Data
                     ReportProgress($"MLS interpolation… {by + 1} / {gridH} rows");
                 for (int bx = 0; bx < gridW; bx++)
                 {
+                    int gi = by * gridW + bx;
+                    if (!validMask[gi])
+                    {
+                        zMls[gi] = Field.BIN_NO_DATA_SENTINEL;
+                        continue;
+                    }
+
                     double cx = minX + (bx + 0.5) * Field.BIN_SIZE_M;
                     double cy = minY + (by + 0.5) * Field.BIN_SIZE_M;
                     GatherKNearest(cx, cy, pe, pn, spatial, maxRing, kUse, kd2, kidx);
@@ -807,7 +901,6 @@ namespace AgGrade.Data
                     if (!solved || !double.IsFinite(c0))
                         c0 = wSum > 0 ? wzSum / wSum : pz[0];
 
-                    int gi = by * gridW + bx;
                     zMls[gi] = c0;
 
                     if (grouped.TryGetValue((bx, by), out var g))
@@ -819,7 +912,23 @@ namespace AgGrade.Data
             }
 
             ReportProgress("Smoothing baseline and warping toward survey bins…");
-            double[] zSmooth = BoxBlur2d(zMls, gridW, gridH, WarpBaseRadiusBins, WarpBasePasses);
+            var zBase = new double[nCells];
+            bool hasValid = false;
+            double sumValid = 0;
+            int cntValid = 0;
+            for (int i = 0; i < nCells; i++)
+            {
+                if (!validMask[i])
+                    continue;
+                hasValid = true;
+                sumValid += zMls[i];
+                cntValid++;
+            }
+            double fillV = hasValid && cntValid > 0 ? sumValid / cntValid : 0.0;
+            for (int i = 0; i < nCells; i++)
+                zBase[i] = validMask[i] ? zMls[i] : fillV;
+
+            double[] zSmooth = BoxBlur2d(zBase, gridW, gridH, WarpBaseRadiusBins, WarpBasePasses);
             var residualObs = new double[nCells];
             for (int i = 0; i < nCells; i++)
             {
@@ -903,6 +1012,12 @@ namespace AgGrade.Data
                 zFinal[i] = observedValues[i] - eo;
             }
 
+            for (int i = 0; i < nCells; i++)
+            {
+                if (!validMask[i])
+                    zFinal[i] = Field.BIN_NO_DATA_SENTINEL;
+            }
+
             ReportProgress("Existing surface ready.");
             return zFinal;
         }
@@ -929,6 +1044,7 @@ namespace AgGrade.Data
             out double totalFillCy,
             out double planeA,
             out double planeB,
+            out int validBinCount,
             out List<Database.BinState> binRows)
         {
             planeA = 0;
@@ -981,6 +1097,7 @@ namespace AgGrade.Data
             minY = double.MaxValue;
             maxX = double.MinValue;
             maxY = double.MinValue;
+            var boundaryXY = new List<(double X, double Y)>();
 
             foreach (var t in utmPoints)
             {
@@ -992,17 +1109,28 @@ namespace AgGrade.Data
                 if (t.E > maxX) maxX = t.E;
                 if (t.N < minY) minY = t.N;
                 if (t.N > maxY) maxY = t.N;
+                if (t.IsBoundary)
+                    boundaryXY.Add((t.E, t.N));
             }
 
-            gridW = (int)Math.Ceiling((maxX - minX) / Field.BIN_SIZE_M);
-            gridH = (int)Math.Ceiling((maxY - minY) / Field.BIN_SIZE_M);
+            // Match fielddesign.py safety padding so edge bins are not clipped.
+            minX -= Field.BIN_SIZE_M;
+            minY -= Field.BIN_SIZE_M;
+            maxX += Field.BIN_SIZE_M;
+            maxY += Field.BIN_SIZE_M;
+
+            gridW = (int)Math.Ceiling((maxX - minX) / Field.BIN_SIZE_M) + 1;
+            gridH = (int)Math.Ceiling((maxY - minY) / Field.BIN_SIZE_M) + 1;
             if (gridW <= 0 || gridH <= 0)
                 throw new InvalidDataException("Computed non-positive grid dimensions from survey extent.");
+            maxX = minX + gridW * Field.BIN_SIZE_M;
+            maxY = minY + gridH * Field.BIN_SIZE_M;
 
             double e0 = minX;
             double n0 = minY;
+            bool[] validMask = BuildValidMaskFromBoundary(boundaryXY, minX, minY, gridW, gridH);
 
-            double[] filledZ = BuildFielddesignSurface(utmPoints, minX, minY, gridW, gridH);
+            double[] filledZ = BuildFielddesignSurface(utmPoints, minX, minY, gridW, gridH, validMask);
 
             ReportProgress("Building per-bin samples and solving design plane…");
             var samples = new List<BinSample>(gridW * gridH);
@@ -1014,9 +1142,11 @@ namespace AgGrade.Data
                     double cy = minY + (by + 0.5) * Field.BIN_SIZE_M;
                     UTM.ToLatLon(utmZone, utmNorth, cx, cy, out double cLat, out double cLon);
 
-                    double zInit = filledZ[by * gridW + bx];
+                    int gi = by * gridW + bx;
+                    bool isValid = validMask[gi];
+                    double zInit = isValid ? filledZ[gi] : Field.BIN_NO_DATA_SENTINEL;
 
-                    samples.Add(new BinSample(bx, by, zInit, cx, cy, cLat, cLon));
+                    samples.Add(new BinSample(bx, by, zInit, cx, cy, cLat, cLon, isValid));
                 }
             }
 
@@ -1032,6 +1162,11 @@ namespace AgGrade.Data
             double vFillM3 = 0;
             foreach (BinSample s in samples)
             {
+                if (!s.IsValid || s.ZInit == Field.BIN_NO_DATA_SENTINEL)
+                {
+                    s.TargetZ = Field.BIN_NO_DATA_SENTINEL;
+                    continue;
+                }
                 double zf = a * (s.EastingC - e0) + b * (s.NorthingC - n0) + cStar;
                 s.TargetZ = zf;
                 double d = s.ZInit - zf;
@@ -1057,6 +1192,11 @@ namespace AgGrade.Data
                     s.CentroidLon,
                     0));
             }
+
+            int validBins = 0;
+            foreach (bool v in validMask)
+                if (v) validBins++;
+            validBinCount = validBins;
         }
 
         private sealed class BinSample
@@ -1069,8 +1209,9 @@ namespace AgGrade.Data
             public double CentroidLat;
             public double CentroidLon;
             public double TargetZ;
+            public bool IsValid;
 
-            public BinSample(int bx, int by, double zInit, double eastingC, double northingC, double centroidLat, double centroidLon)
+            public BinSample(int bx, int by, double zInit, double eastingC, double northingC, double centroidLat, double centroidLon, bool isValid)
             {
                 Bx = bx;
                 By = by;
@@ -1079,6 +1220,7 @@ namespace AgGrade.Data
                 NorthingC = northingC;
                 CentroidLat = centroidLat;
                 CentroidLon = centroidLon;
+                IsValid = isValid;
             }
         }
     }

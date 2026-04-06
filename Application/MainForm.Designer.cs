@@ -160,7 +160,7 @@
             // 
             // OpenFieldBtn
             // 
-            OpenFieldBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+            OpenFieldBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             OpenFieldBtn.Image = Properties.Resources.field_48px;
             OpenFieldBtn.Location = new Point(8, 156);
             OpenFieldBtn.Name = "OpenFieldBtn";
@@ -171,7 +171,7 @@
             // 
             // StatusBtn
             // 
-            StatusBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            StatusBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             StatusBtn.Image = (Image)resources.GetObject("StatusBtn.Image");
             StatusBtn.Location = new Point(8, 476);
             StatusBtn.Name = "StatusBtn";
