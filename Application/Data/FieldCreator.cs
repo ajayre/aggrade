@@ -215,7 +215,7 @@ namespace AgGrade.Data
         private List<(double X, double Y)> SortBoundaryRingByAngle(List<(double X, double Y)> points)
         {
             if (points.Count <= 2)
-                return points;
+                return new List<(double X, double Y)>(points);
             double cx = 0;
             double cy = 0;
             foreach ((double x, double y) in points)
@@ -225,8 +225,33 @@ namespace AgGrade.Data
             }
             cx /= points.Count;
             cy /= points.Count;
-            points.Sort((a, b) => Math.Atan2(a.Y - cy, a.X - cx).CompareTo(Math.Atan2(b.Y - cy, b.X - cx)));
-            return points;
+            var sorted = new List<(double X, double Y)>(points);
+            sorted.Sort((a, b) => Math.Atan2(a.Y - cy, a.X - cx).CompareTo(Math.Atan2(b.Y - cy, b.X - cx)));
+            return sorted;
+        }
+
+        private double ClosedPathLength(List<(double X, double Y)> points)
+        {
+            if (points.Count < 2)
+                return 0.0;
+            double total = 0.0;
+            int n = points.Count;
+            for (int i = 0; i < n; i++)
+            {
+                (double x0, double y0) = points[i];
+                (double x1, double y1) = points[(i + 1) % n];
+                total += Math.Sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+            }
+            return total;
+        }
+
+        private List<(double X, double Y)> ChooseBoundaryRing(List<(double X, double Y)> points)
+        {
+            if (points.Count <= 2)
+                return new List<(double X, double Y)>(points);
+            List<(double X, double Y)> seq = new List<(double X, double Y)>(points);
+            List<(double X, double Y)> ang = SortBoundaryRingByAngle(points);
+            return ClosedPathLength(seq) <= ClosedPathLength(ang) ? seq : ang;
         }
 
         private bool PointInPolygon(double x, double y, List<(double X, double Y)> ring)
@@ -280,7 +305,7 @@ namespace AgGrade.Data
                 return mask;
             }
 
-            List<(double X, double Y)> ring = SortBoundaryRingByAngle(boundaryRing);
+            List<(double X, double Y)> ring = ChooseBoundaryRing(boundaryRing);
             for (int by = 0; by < gridH; by++)
             {
                 double cy = minY + (by + 0.5) * Field.BIN_SIZE_M;
