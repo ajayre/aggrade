@@ -2,28 +2,15 @@
 
 2. Show keyboard button - osk.exe?
 
-3. Settings screen:
-  - enable data logging (on by default)
+3. Map view options:
 
-4. Map view options:
-
-  - toggle cuts and fills on and off
   - existing topo and cut/fill map
   - original topo and cut/fill map
   - cut/fill map shows work that has been completed
   - north up, tractor up
-  - toggle guidance line to nearest lowest area
 
-6. Transparency option for tractor display
+4. Transparency option for tractor display
 
-7. Log total amount of cut and fill for field (save between runs) and show percentage complete for field
-  - keep track of time operating?
-  - give prediction on remaining hours?
-  - show on secondary tablet?
-  - chart
+5. Map showing all cuts and fills (colored according to passes?)
 
-8. Map showing all cuts and fills (colored according to passes?)
-
-9. Every hour of operation or when user shows stats page use database to calculate amount of cu yd moved and percentage complete of field. Calculate projection of remaining time to complete.
-
-10. Fix bug where zeroing loads doesn't stick.
+6. Fix bug where zeroing loads doesn't stick.
