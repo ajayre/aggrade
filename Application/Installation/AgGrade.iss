@@ -37,6 +37,8 @@ Source: "..\bin\Release\net8.0-windows\*.dll"; DestDir: "{app}"; Flags: ignoreve
 Source: "..\bin\Release\net8.0-windows\AgGrade.deps.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows\AgGrade.dll.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\bin\Release\net8.0-windows\*.runtimeconfig.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\DLLs\runtimes\win-x64\native\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\DLLs\*.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\ReleaseNotes.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 ; installer support files

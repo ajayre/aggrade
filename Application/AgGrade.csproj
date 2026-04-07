@@ -11,9 +11,15 @@
 
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
 
+    <ApplicationIcon>Graphics\appicon_48px.ico</ApplicationIcon>
+
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+
+  <ItemGroup>
+    <Content Include="Graphics\appicon_48px.ico" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibTiff.NET" Version="2.4.649" />

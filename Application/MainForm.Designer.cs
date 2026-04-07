@@ -274,6 +274,7 @@
             Controls.Add(panel1);
             Controls.Add(panel3);
             DoubleBuffered = true;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "MainForm";
             Text = "AgGrade";
             FormClosing += MainForm_FormClosing;
