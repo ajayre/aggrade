@@ -520,11 +520,12 @@ namespace AgGrade.Controller
                         Fix.Vector = Vector.Clone();
                     }
 
-                    // fuse with IMU
-                    if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
-                    {
-                        Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
-                    }
+                    // sensor fusing is disabled - it takes place at the microcontroller level instead
+                    //// fuse with IMU
+                    //if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                    //{
+                    //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                    //}
 
                     LocChangedEvent?.Invoke(Fix);
                 }
@@ -542,11 +543,12 @@ namespace AgGrade.Controller
                     {
                         Fix.Vector = Vector.Clone();
 
-                        // fuse with IMU
-                        if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
-                        {
-                            Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
-                        }
+                        // sensor fusing is disabled - it takes place at the microcontroller level instead
+                        //// fuse with IMU
+                        //if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                        //{
+                        //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                        //}
 
                         LocChangedEvent?.Invoke(Fix);
                     }
