@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AgGrade.Controller;
+using AgGrade.Data;
+using AgGrade.Properties;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,8 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using AgGrade.Data;
-using AgGrade.Controller;
 using Color = System.Drawing.Color;
 
 namespace AgGrade.Controls
@@ -26,19 +27,59 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Shows the current field status
+        /// </summary>
+        /// <param name="CurrentField">Current field</param>
+        public void ShowFieldStatus
+            (
+            Field? CurrentField
+            )
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(ShowFieldStatus, CurrentField);
+                return;
+            }
+
+            if (CurrentField == null)
+            {
+                Pages.Controls.Remove(Field);
+                ChartField = null;
+                ClearProgressChart();
+                Stats.Text = string.Empty;
+            }
+            else
+            {
+                ChartField = CurrentField;
+
+                if (!Pages.Controls.Contains(Field))
+                {
+                    Pages.Controls.Add(Field);
+                }
+
+                FieldProgress.Value = (int)CurrentField.PercentageComplete();
+                FieldProgressLabel.Text = string.Format("{0:0.00}%", CurrentField.PercentageComplete());
+
+                if (Pages.SelectedTab == Field)
+                {
+                    LoadProgressChart(CurrentField);
+                }
+            }
+        }
+
+        /// <summary>
         /// Shows the status values
         /// </summary>
         /// <param name="Status">Status to show</param>
         public void ShowStatus
             (
             EquipmentStatus Status,
-            AppSettings Settings,
-            Field? CurrentField
+            AppSettings Settings
             )
         {
             if (InvokeRequired)
             {
-                BeginInvoke(ShowStatus, Status, Settings, CurrentField);
+                BeginInvoke(ShowStatus, Status, Settings);
                 return;
             }
 
@@ -87,31 +128,6 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.TrackMagneticDeg != Status.RearPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMU.CalibrationStatus != Status.RearPan.IMU.CalibrationStatus);
-
-            if (CurrentField == null)
-            {
-                Pages.Controls.Remove(Field);
-                ChartField = null;
-                ClearProgressChart();
-                Stats.Text = string.Empty;
-            }
-            else
-            {
-                ChartField = CurrentField;
-
-                if (!Pages.Controls.Contains(Field))
-                {
-                    Pages.Controls.Add(Field);
-                }
-
-                FieldProgress.Value = (int)CurrentField.PercentageComplete();
-                FieldProgressLabel.Text = string.Format("{0:0.00}%", CurrentField.PercentageComplete());
-
-                if (Pages.SelectedTab == Field)
-                {
-                    LoadProgressChart(CurrentField);
-                }
-            }
 
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus

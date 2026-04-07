@@ -344,8 +344,11 @@ namespace AgGrade.Data
             List<PointD> polygonUTM = new List<PointD>();
             foreach (Coordinate vertex in Vertices)
             {
-                UTM.UTMCoordinate utm = UTM.FromLatLon(vertex.Latitude, vertex.Longitude);
-                polygonUTM.Add(new PointD(utm.Easting, utm.Northing));
+                if (vertex != null)
+                {
+                    UTM.UTMCoordinate utm = UTM.FromLatLon(vertex.Latitude, vertex.Longitude);
+                    polygonUTM.Add(new PointD(utm.Easting, utm.Northing));
+                }
             }
 
             // Find bounding box of the polygon in UTM coordinates
