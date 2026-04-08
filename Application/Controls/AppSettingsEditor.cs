@@ -16,8 +16,9 @@ namespace AgGrade.Controls
     public partial class AppSettingsEditor : UserControl
     {
         public delegate void PowerOff();
-        public event PowerOff OnPowerOff;
 
+        public event PowerOff OnPowerOff = null;
+        public event Action OnCloseApplication = null;
         public event Action OnApplySettings = null;
         public event Action OnOpenDataFolder = null;
 
@@ -335,6 +336,16 @@ namespace AgGrade.Controls
         private void OpenDataFolderBtn_Click(object sender, EventArgs e)
         {
             OnOpenDataFolder?.Invoke();
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to close the application
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DesktopBtn_Click(object sender, EventArgs e)
+        {
+            OnCloseApplication?.Invoke();
         }
     }
 }

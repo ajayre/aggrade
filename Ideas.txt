@@ -12,5 +12,10 @@
 4. Transparency option for tractor display
 
 5. Map showing all cuts and fills (colored according to passes?)
+  - red for bin = original height
+  - green for bin = target height
+  - shaded red to green for bins between original and target heights
 
 6. Fix bug where zeroing loads doesn't stick.
+
+7. Generic basemap downloader - enter centroid.

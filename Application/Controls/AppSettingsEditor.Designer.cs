@@ -69,6 +69,7 @@ namespace AgGrade.Controls
             PondingRainfallMmText = new TextBox();
             OpenDataFolderBtn = new Button();
             VersionLabel = new Label();
+            DesktopBtn = new Button();
             SuspendLayout();
             // 
             // sectionTitle1
@@ -457,21 +458,33 @@ namespace AgGrade.Controls
             // 
             // VersionLabel
             // 
-            VersionLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            VersionLabel.BackColor = Color.PaleGoldenrod;
+            VersionLabel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             VersionLabel.Font = new Font("Segoe UI", 14F);
-            VersionLabel.Location = new Point(572, 14);
+            VersionLabel.Location = new Point(638, 501);
             VersionLabel.Name = "VersionLabel";
             VersionLabel.Size = new Size(194, 25);
             VersionLabel.TabIndex = 51;
             VersionLabel.Text = "Version X.X.X.X";
             VersionLabel.TextAlign = ContentAlignment.TopRight;
             // 
+            // DesktopBtn
+            // 
+            DesktopBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            DesktopBtn.BackColor = Color.White;
+            DesktopBtn.Image = Properties.Resources.desktop_48px;
+            DesktopBtn.Location = new Point(684, 9);
+            DesktopBtn.Name = "DesktopBtn";
+            DesktopBtn.Size = new Size(60, 60);
+            DesktopBtn.TabIndex = 52;
+            DesktopBtn.UseVisualStyleBackColor = false;
+            DesktopBtn.Click += DesktopBtn_Click;
+            // 
             // AppSettingsEditor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = SystemColors.Control;
+            Controls.Add(DesktopBtn);
             Controls.Add(VersionLabel);
             Controls.Add(OpenDataFolderBtn);
             Controls.Add(labelPondingRainfall);
@@ -559,5 +572,6 @@ namespace AgGrade.Controls
         private TextBox PondingRainfallMmText;
         private Button OpenDataFolderBtn;
         private Label VersionLabel;
+        private Button DesktopBtn;
     }
 }

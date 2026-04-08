@@ -411,7 +411,8 @@ namespace AgGrade
             AppSettingsEditor settingsEditor = new AppSettingsEditor();
             settingsEditor.Parent = ContentPanel;
             settingsEditor.Dock = DockStyle.Fill;
-            settingsEditor.OnPowerOff += () => { Close(); };
+            settingsEditor.OnPowerOff += () => { PowerOff(); };
+            settingsEditor.OnCloseApplication += () => { Close(); };
             settingsEditor.OnApplySettings += () => { ApplyAppSettings(settingsEditor); };
             settingsEditor.OnOpenDataFolder += () => { OpenDataFolder(); };
 
@@ -419,6 +420,20 @@ namespace AgGrade
             settingsEditor.ShowSettings(CurrentAppSettings);
 
             settingsEditor.Show();
+        }
+
+        /// <summary>
+        /// Powers off the PC
+        /// </summary>
+        private void PowerOff
+            (
+            )
+        {
+#if DEBUG
+            Close();
+#else
+            Process.Start("shutdown", "/s /f /t 0");
+#endif
         }
 
         /// <summary>
