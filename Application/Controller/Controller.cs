@@ -394,12 +394,12 @@ namespace AgGrade.Controller
                             break;
 
                         // blade auto flags
-                        case PGNValues.PGN_FRONT_CUTTING:
+                        case PGNValues.PGN_FRONT_AUTO:
                             bool Cutting = Stat.GetByte() == 1 ? true : false;
                             OnFrontBladeCuttingChanged?.Invoke(Cutting);
                             break;
 
-                        case PGNValues.PGN_REAR_CUTTING:
+                        case PGNValues.PGN_REAR_AUTO:
                             Cutting = Stat.GetByte() == 1 ? true : false;
                             OnRearBladeCuttingChanged?.Invoke(Cutting);
                             break;
@@ -569,11 +569,11 @@ namespace AgGrade.Controller
             PanStatus.BladeMode Mode
             )
         {
-            byte State = 0;
+            byte State = 1;
 
-            if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
+            if (Mode == PanStatus.BladeMode.Manual) State = 0;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_CUTTING, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_AUTO, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 
@@ -586,11 +586,11 @@ namespace AgGrade.Controller
             PanStatus.BladeMode Mode
             )
         {
-            byte State = 0;
+            byte State = 1;
 
-            if (Mode == PanStatus.BladeMode.AutoCutting) State = 1;
+            if (Mode == PanStatus.BladeMode.Manual) State = 1;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_CUTTING, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_AUTO, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 
@@ -609,6 +609,70 @@ namespace AgGrade.Controller
             SendControllerCommand(TxCmd);
 
             OnFrontBladeCommandSent?.Invoke(Value);
+        }
+
+        /// <summary>
+        /// Sends the tractor antenna location
+        /// </summary>
+        /// <param name="HeightMm">Height of antenna in mm</param>
+        /// <param name="LeftOffsetMm">Left/right offset of antenna in mm (left is positive)</param>
+        /// <param name="ForwardOffsetMm">Forwards/rear offset of antenna in mm (forward is positive)</param>
+        public void SetTractorAntennaLocation
+            (
+            uint HeightMm,
+            int LeftOffsetMm,
+            int ForwardOffsetMm
+            )
+        {
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_TRACTOR_ANTENNA_HEIGHT, HeightMm);
+            SendControllerCommand(TxCmd);
+            TxCmd = new PGNPacket(PGNValues.PGN_TRACTOR_ANTENNA_LEFTOFF, (UInt32)LeftOffsetMm);
+            SendControllerCommand(TxCmd);
+            TxCmd = new PGNPacket(PGNValues.PGN_TRACTOR_ANTENNA_FORWARDOFF, (UInt32)ForwardOffsetMm);
+            SendControllerCommand(TxCmd);
+        }
+
+        /// <summary>
+        /// Sends the magnetic declination
+        /// </summary>
+        /// <param name="Degrees">Declination degrees</param>
+        /// <param name="Minutes">Declination minutes</param>
+        public void SetMagneticDeclination
+            (
+            int Degrees,
+            uint Minutes
+            )
+        {
+            UInt32 Decl = (UInt32)((Degrees + (double)Minutes / 60.0) * 100);
+
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_MAGNETIC_DECLINATION, Decl);
+            SendControllerCommand(TxCmd);
+        }
+
+        /// <summary>
+        /// Sends the height of the front scraper antenna
+        /// </summary>
+        /// <param name="HeightMm">Height in mm</param>
+        public void SetFrontAntennaHeight
+            (
+            uint HeightMm
+            )
+        {
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_ANTENNA_HEIGHT, HeightMm);
+            SendControllerCommand(TxCmd);
+        }
+
+        /// <summary>
+        /// Sends the height of the rear scraper antenna
+        /// </summary>
+        /// <param name="HeightMm">Height in mm</param>
+        public void SetRearAntennaHeight
+            (
+            uint HeightMm
+            )
+        {
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_ANTENNA_HEIGHT, HeightMm);
+            SendControllerCommand(TxCmd);
         }
 
         /// <summary>

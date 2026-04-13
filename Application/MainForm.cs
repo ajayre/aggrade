@@ -969,6 +969,11 @@ namespace AgGrade
 
             Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
+            
+            Controller?.SetTractorAntennaLocation(CurrentEquipmentSettings.TractorAntennaHeightMm, CurrentEquipmentSettings.TractorAntennaLeftOffsetMm, CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
+            Controller?.SetFrontAntennaHeight(CurrentEquipmentSettings.FrontPan.AntennaHeightMm);
+            Controller?.SetRearAntennaHeight(CurrentEquipmentSettings.RearPan.AntennaHeightMm);
+            Controller?.SetMagneticDeclination(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
 
             UpdateEnabledLeds();
             UpdateIMULeds();
@@ -1278,6 +1283,7 @@ namespace AgGrade
                 {
                     CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoFilling;
                     SetRearPanIndicator(PanIndicatorStates.Filling);
+                    Controller.SetRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
                 }
                 else
                 {
@@ -1305,6 +1311,7 @@ namespace AgGrade
                 {
                     CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoFilling;
                     SetFrontPanIndicator(PanIndicatorStates.Filling);
+                    Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
                 }
                 else
                 {
@@ -1365,6 +1372,7 @@ namespace AgGrade
                 {
                     CurrentEquipmentStatus.RearPan.Mode = PanStatus.BladeMode.AutoCutting;
                     SetRearPanIndicator(PanIndicatorStates.Cutting);
+                    Controller.SetRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
                 }
                 else
                 {
@@ -1542,6 +1550,7 @@ namespace AgGrade
                 {
                     CurrentEquipmentStatus.FrontPan.Mode = PanStatus.BladeMode.AutoCutting;
                     SetFrontPanIndicator(PanIndicatorStates.Cutting);
+                    Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
                 }
                 else
                 {
@@ -1729,6 +1738,12 @@ namespace AgGrade
         {
             Controller.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
+
+            Controller.SetTractorAntennaLocation(CurrentEquipmentSettings.TractorAntennaHeightMm, CurrentEquipmentSettings.TractorAntennaLeftOffsetMm, CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
+            Controller.SetFrontAntennaHeight(CurrentEquipmentSettings.FrontPan.AntennaHeightMm);
+            Controller.SetRearAntennaHeight(CurrentEquipmentSettings.RearPan.AntennaHeightMm);
+
+            Controller?.SetMagneticDeclination(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
         }
 
         /// <summary>
