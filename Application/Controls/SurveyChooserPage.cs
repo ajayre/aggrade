@@ -27,6 +27,7 @@ namespace AgGrade.Controls
 
         public event Action<string> OnSurveyChosen = null;
         public event Action OnCreateSurvey = null;
+        public event Action OnDownloadBasemap = null;
 
         public SurveyChooserPage()
         {
@@ -86,8 +87,25 @@ namespace AgGrade.Controls
             spacerpanel.Dock = DockStyle.Top;
             SurveyTable.Controls.Add(spacerpanel);
 
-            // add entry to create a new survey
+            // add entry to download maps
             var newpanel = new SurveyPanel();
+            newpanel.OnClicked += DownloadBasemap_OnClicked;
+            newpanel.Odd = odd;
+            newpanel.SurveyNameText = "Download Basemap";
+            newpanel.LastModifiedText = "";
+            newpanel.Dock = DockStyle.Top;
+            newpanel.FileName = null;
+            newpanel.DisplayIcon = Properties.Resources.basemap_48px;
+            SurveyTable.Controls.Add(newpanel);
+
+            // create spacer
+            spacerpanel = new Panel();
+            spacerpanel.Height = 20;
+            spacerpanel.Dock = DockStyle.Top;
+            SurveyTable.Controls.Add(spacerpanel);
+
+            // add entry to create a new survey
+            newpanel = new SurveyPanel();
             newpanel.OnClicked += Panel_OnClicked;
             newpanel.Odd = odd;
             newpanel.SurveyNameText = "Create New Survey";
@@ -116,6 +134,15 @@ namespace AgGrade.Controls
 
                 OnSurveyChosen?.Invoke(SurveyFile);
             }
+        }
+
+        /// <summary>
+        /// Called when user taps on the option to download a basemap
+        /// </summary>
+        /// <param name="sender"></param>
+        private void DownloadBasemap_OnClicked(object sender)
+        {
+            OnDownloadBasemap?.Invoke();
         }
 
         /// <summary>

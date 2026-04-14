@@ -13,6 +13,12 @@ namespace AgGrade.Data
     /// </summary>
     public sealed class BasemapDownloader
     {
+        /// <summary>International acre in square meters (exact definition).</summary>
+        public const double SquareMetersPerAcre = 4046.8564224;
+
+        /// <summary>Default field size when downloading from a centroid (survey flow).</summary>
+        public const double CentroidDownloadAcres = 40.0;
+
         private const int MinZoom = 14; // top 9 usable zoom levels in app (14..22)
         private const int MaxZoom = 22;
         // For the worst case where the field edge is centered on screen, prefetch at least
@@ -45,6 +51,51 @@ namespace AgGrade.Data
         /// </summary>
         public Action<double>? OnProgressChanged { get; set; }
 
+        /// <summary>
+        /// Square extent (axis-aligned N-S / E-W) centered on <paramref name="centroidLatitudeDeg"/>,
+        /// <paramref name="centroidLongitudeDeg"/> with total area <paramref name="acres"/>.
+        /// </summary>
+        public static (double minLat, double minLon, double maxLat, double maxLon) GetSquareExtentsFromAcres(
+            double centroidLatitudeDeg,
+            double centroidLongitudeDeg,
+            double acres)
+        {
+            if (acres <= 0 || !double.IsFinite(acres))
+            {
+                throw new ArgumentOutOfRangeException(nameof(acres));
+            }
+            if (!double.IsFinite(centroidLatitudeDeg) || !double.IsFinite(centroidLongitudeDeg))
+            {
+                throw new ArgumentException("Centroid must be finite.", nameof(centroidLatitudeDeg));
+            }
+
+            double areaM2 = acres * SquareMetersPerAcre;
+            double sideM = Math.Sqrt(areaM2);
+            double halfM = sideM / 2.0;
+
+            double latRad = centroidLatitudeDeg * (Math.PI / 180.0);
+            const double metersPerDegreeLatitude = 111132.0;
+            double metersPerDegreeLongitude = metersPerDegreeLatitude * Math.Cos(latRad);
+            if (metersPerDegreeLongitude < 1e-3)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(centroidLatitudeDeg),
+                    "Latitude is too close to a pole to form a square extent.");
+            }
+
+            double dLat = halfM / metersPerDegreeLatitude;
+            double dLon = halfM / metersPerDegreeLongitude;
+
+            double minLat = centroidLatitudeDeg - dLat;
+            double maxLat = centroidLatitudeDeg + dLat;
+            double minLon = centroidLongitudeDeg - dLon;
+            double maxLon = centroidLongitudeDeg + dLon;
+
+            minLat = Math.Max(-MaxWebMercatorLat, Math.Min(MaxWebMercatorLat, minLat));
+            maxLat = Math.Max(-MaxWebMercatorLat, Math.Min(MaxWebMercatorLat, maxLat));
+            return (minLat, minLon, maxLat, maxLon);
+        }
+
         public async Task<DownloadSummary> DownloadAsync
             (
             string basemapDataFolder,
@@ -66,6 +117,70 @@ namespace AgGrade.Data
             }
 
             (double minLat, double minLon, double maxLat, double maxLon) = ReadFieldExtents(databaseFile);
+            return await DownloadFromExtentsAsync(
+                basemapDataFolder,
+                minLat,
+                minLon,
+                maxLat,
+                maxLon,
+                Path.GetFileName(databaseFile),
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Downloads tiles covering a square field of <see cref="CentroidDownloadAcres"/> centered on the centroid.
+        /// </summary>
+        public Task<DownloadSummary> DownloadAsync(
+            string basemapDataFolder,
+            double centroidLatitude,
+            double centroidLongitude,
+            CancellationToken cancellationToken = default)
+        {
+            return DownloadAsync(
+                basemapDataFolder,
+                centroidLatitude,
+                centroidLongitude,
+                CentroidDownloadAcres,
+                cancellationToken);
+        }
+
+        /// <summary>
+        /// Downloads tiles covering a square field of <paramref name="fieldAcres"/> centered on the centroid.
+        /// </summary>
+        public async Task<DownloadSummary> DownloadAsync(
+            string basemapDataFolder,
+            double centroidLatitude,
+            double centroidLongitude,
+            double fieldAcres,
+            CancellationToken cancellationToken = default)
+        {
+            if (string.IsNullOrWhiteSpace(basemapDataFolder))
+            {
+                throw new ArgumentException("Basemap data folder is required.", nameof(basemapDataFolder));
+            }
+
+            (double minLat, double minLon, double maxLat, double maxLon) =
+                GetSquareExtentsFromAcres(centroidLatitude, centroidLongitude, fieldAcres);
+
+            return await DownloadFromExtentsAsync(
+                basemapDataFolder,
+                minLat,
+                minLon,
+                maxLat,
+                maxLon,
+                fieldDatabaseForManifest: null,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<DownloadSummary> DownloadFromExtentsAsync(
+            string basemapDataFolder,
+            double minLat,
+            double minLon,
+            double maxLat,
+            double maxLon,
+            string? fieldDatabaseForManifest,
+            CancellationToken cancellationToken)
+        {
             List<TileAddress> tiles = BuildTileList(minLat, minLon, maxLat, maxLon);
 
             string basemapFolder = basemapDataFolder;
@@ -148,8 +263,11 @@ namespace AgGrade.Data
 
             await WriteManifestAsync(
                 basemapFolder,
-                databaseFile,
-                minLat, minLon, maxLat, maxLon,
+                fieldDatabaseForManifest,
+                minLat,
+                minLon,
+                maxLat,
+                maxLon,
                 tiles.Count,
                 downloaded,
                 skipped,
@@ -261,7 +379,7 @@ namespace AgGrade.Data
 
         private static async Task WriteManifestAsync(
             string basemapFolder,
-            string databaseFile,
+            string? fieldDatabaseFileName,
             double minLat,
             double minLon,
             double maxLat,
@@ -272,6 +390,7 @@ namespace AgGrade.Data
             int failed,
             CancellationToken cancellationToken)
         {
+            string fieldDbLabel = string.IsNullOrEmpty(fieldDatabaseFileName) ? "(centroid)" : fieldDatabaseFileName;
             var manifest = new
             {
                 Provider = "SatelliteEsri",
@@ -279,7 +398,7 @@ namespace AgGrade.Data
                 ZoomMax = MaxZoom,
                 TileMarginX = TileMarginX,
                 TileMarginY = TileMarginY,
-                FieldDatabase = Path.GetFileName(databaseFile),
+                FieldDatabase = fieldDbLabel,
                 Extents = new { MinLat = minLat, MinLon = minLon, MaxLat = maxLat, MaxLon = maxLon },
                 RequestedTiles = requested,
                 DownloadedTiles = downloaded,

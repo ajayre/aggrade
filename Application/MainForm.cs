@@ -520,6 +520,7 @@ namespace AgGrade
             surveyChooserPage.Dock = DockStyle.Fill;
             surveyChooserPage.OnSurveyChosen += (filename) => { LoadSurvey(filename); };
             surveyChooserPage.OnCreateSurvey += () => { CreateSurvey(); };
+            surveyChooserPage.OnDownloadBasemap += () => { DownloadBasemap(); };
             surveyChooserPage.Show();
         }
 
@@ -538,6 +539,22 @@ namespace AgGrade
             createSurveyPage.Dock = DockStyle.Fill;
             createSurveyPage.OnSurveyCreated += (filename) => { LoadSurvey(filename); };
             createSurveyPage.Show();
+        }
+
+        /// <summary>
+        /// Shows the UI for downloading a basemap
+        /// </summary>
+        private void ShowDownloadBasemapPage
+            (
+            )
+        {
+            ClosePage();
+
+            DownloadBasemapPage downloadBasemapPage = new DownloadBasemapPage();
+            downloadBasemapPage.OnDownloadBasemap += (lat, lon) => { DownloadBasemap(lat, lon); };
+            downloadBasemapPage.Parent = ContentPanel;
+            downloadBasemapPage.Dock = DockStyle.Fill;
+            downloadBasemapPage.Show();
         }
 
         /// <summary>
@@ -594,6 +611,16 @@ namespace AgGrade
             )
         {
             ShowCreateSurveyPage();
+        }
+
+        /// <summary>
+        /// Prompts user to enter details to download a basemap
+        /// </summary>
+        private void DownloadBasemap
+            (
+            )
+        {
+            ShowDownloadBasemapPage();
         }
 
         /// <summary>
@@ -817,6 +844,46 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Downloads the basemap for an area
+        /// </summary>
+        /// <param name="Latitude">Area centroid latitude</param>
+        /// <param name="Longitude">Area centroid longitude</param>
+        private void DownloadBasemap
+            (
+            double Latitude,
+            double Longitude
+            )
+        {
+            _ = DownloadBasemapAsync(Latitude, Longitude);
+        }
+
+        private async Task DownloadBasemapAsync
+            (
+            double latitude,
+            double longitude
+            )
+        {
+            Cursor? previousCursor = Cursor.Current;
+            try
+            {
+                UseWaitCursor = true;
+                Cursor.Current = Cursors.WaitCursor;
+
+                BasemapDownloader downloader = new BasemapDownloader();
+                downloader.OnProgressChanged += (pcent) => { UpdateDownloadBasemapProgress(pcent); };
+                await downloader.DownloadAsync(BasemapDataFolder, latitude, longitude).ConfigureAwait(true);
+            }
+            catch (Exception)
+            {
+            }
+            finally
+            {
+                UseWaitCursor = false;
+                Cursor.Current = previousCursor;
+            }
+        }
+
+        /// <summary>
         /// Called during download of a basemap to indicate progress
         /// </summary>
         /// <param name="Percentage">Percentage complted</param>
@@ -833,10 +900,14 @@ namespace AgGrade
 
             if (ContentPanel.Controls.Count == 1)
             {
-                Control Ctrl = (Control)ContentPanel.Controls[0];
-                if (Ctrl is FieldChooserPage)
+                Control ctrl = ContentPanel.Controls[0];
+                if (ctrl is FieldChooserPage fieldChooserPage)
                 {
-                    (Ctrl as FieldChooserPage)!.DownloadProgress = (int)PercentageComplete;
+                    fieldChooserPage.DownloadProgress = (int)PercentageComplete;
+                }
+                else if (ctrl is DownloadBasemapPage downloadBasemapPage)
+                {
+                    downloadBasemapPage.DownloadProgress = (int)PercentageComplete;
                 }
             }
         }
