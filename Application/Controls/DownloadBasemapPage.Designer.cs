@@ -37,6 +37,7 @@
             ErrorMessage = new Label();
             LongitudeInput = new TextBox();
             label2 = new Label();
+            miniMap1 = new MiniMap();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -70,11 +71,11 @@
             // 
             // DownloadBtn
             // 
-            DownloadBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            DownloadBtn.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             DownloadBtn.Font = new Font("Segoe UI", 18F);
             DownloadBtn.Image = Properties.Resources.download_48px;
             DownloadBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            DownloadBtn.Location = new Point(734, 140);
+            DownloadBtn.Location = new Point(731, 375);
             DownloadBtn.Name = "DownloadBtn";
             DownloadBtn.Size = new Size(182, 60);
             DownloadBtn.TabIndex = 13;
@@ -89,7 +90,7 @@
             panel1.Controls.Add(ProgressBar);
             panel1.Controls.Add(ErrorMessage);
             panel1.Dock = DockStyle.Bottom;
-            panel1.Location = new Point(0, 432);
+            panel1.Location = new Point(0, 441);
             panel1.Name = "panel1";
             panel1.Size = new Size(916, 44);
             panel1.TabIndex = 14;
@@ -132,10 +133,24 @@
             label2.TabIndex = 16;
             label2.Text = "Longitude:";
             // 
+            // miniMap1
+            // 
+            miniMap1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            miniMap1.BackColor = Color.FromArgb(32, 32, 36);
+            miniMap1.CenterLatitude = 39.8283D;
+            miniMap1.CenterLongitude = -98.5795D;
+            miniMap1.Location = new Point(3, 138);
+            miniMap1.MapMarker = null;
+            miniMap1.Name = "miniMap1";
+            miniMap1.Size = new Size(910, 231);
+            miniMap1.TabIndex = 17;
+            miniMap1.Zoom = 4;
+            // 
             // DownloadBasemapPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(miniMap1);
             Controls.Add(label2);
             Controls.Add(LongitudeInput);
             Controls.Add(panel1);
@@ -144,7 +159,7 @@
             Controls.Add(label1);
             Controls.Add(sectionTitle1);
             Name = "DownloadBasemapPage";
-            Size = new Size(916, 476);
+            Size = new Size(916, 485);
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
             ResumeLayout(false);
@@ -162,5 +177,6 @@
         private TextBox LongitudeInput;
         private Label label2;
         private ProgressBar ProgressBar;
+        private MiniMap miniMap1;
     }
 }

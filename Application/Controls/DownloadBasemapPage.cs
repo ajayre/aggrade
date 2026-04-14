@@ -1,4 +1,5 @@
 using AgGrade.Data;
+using AgGrade.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -38,6 +39,15 @@ namespace AgGrade.Controls
         {
             InitializeComponent();
 
+            ErrorMessage.Visible = false;
+            miniMap1.MapMarker = Resources.location_red_shadow_48px;
+            miniMap1.MarkerLocationChosen += MiniMap1_MarkerLocationChosen;
+        }
+
+        private void MiniMap1_MarkerLocationChosen(double latitude, double longitude)
+        {
+            LatitudeInput.Text = latitude.ToString("F6", CultureInfo.InvariantCulture);
+            LongitudeInput.Text = longitude.ToString("F6", CultureInfo.InvariantCulture);
             ErrorMessage.Visible = false;
         }
 

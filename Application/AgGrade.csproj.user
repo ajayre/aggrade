@@ -22,6 +22,9 @@
     <Compile Update="Controls\Map.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\MiniMap.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\NumericInput.cs">
       <SubType>UserControl</SubType>
     </Compile>

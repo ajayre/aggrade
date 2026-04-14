@@ -19,6 +19,12 @@ namespace AgGrade.Data
         /// <summary>Default field size when downloading from a centroid (survey flow).</summary>
         public const double CentroidDownloadAcres = 40.0;
 
+        /// <summary>
+        /// Extra padding around the centroid field square: half of the field lon span added west and east,
+        /// and half of the field lat span added north and south (total footprint 2× field width × 2× field height in each axis).
+        /// </summary>
+        public const double CentroidPreviewEdgeMarginFraction = 0.5;
+
         private const int MinZoom = 14; // top 9 usable zoom levels in app (14..22)
         private const int MaxZoom = 22;
         // For the worst case where the field edge is centered on screen, prefetch at least
@@ -96,6 +102,106 @@ namespace AgGrade.Data
             return (minLat, minLon, maxLat, maxLon);
         }
 
+        /// <summary>
+        /// Expands axis-aligned extents by <see cref="CentroidPreviewEdgeMarginFraction"/> times the lon span on the left
+        /// and right, and the same fraction times the lat span on the top and bottom.
+        /// </summary>
+        public static (double minLat, double minLon, double maxLat, double maxLon) ExpandExtentsByCentroidPreviewMargin(
+            double minLat,
+            double minLon,
+            double maxLat,
+            double maxLon)
+        {
+            double lonSpan = maxLon - minLon;
+            double latSpan = maxLat - minLat;
+            double m = CentroidPreviewEdgeMarginFraction;
+            minLon -= m * lonSpan;
+            maxLon += m * lonSpan;
+            minLat -= m * latSpan;
+            maxLat += m * latSpan;
+            minLat = Math.Max(-MaxWebMercatorLat, minLat);
+            maxLat = Math.Min(MaxWebMercatorLat, maxLat);
+            return (minLat, minLon, maxLat, maxLon);
+        }
+
+        /// <summary>
+        /// Geographic bounds for map preview: the 40-acre centroid square plus <see cref="ExpandExtentsByCentroidPreviewMargin"/>,
+        /// then snapped to the <see cref="MaxZoom"/> tile grid with the same margins as <see cref="BuildTileList"/> at that zoom.
+        /// </summary>
+        public static (double minLat, double minLon, double maxLat, double maxLon) GetCentroidDownloadTileCoverageBounds(
+            double centroidLatitudeDeg,
+            double centroidLongitudeDeg)
+        {
+            (double minLat, double minLon, double maxLat, double maxLon) =
+                GetSquareExtentsFromAcres(centroidLatitudeDeg, centroidLongitudeDeg, CentroidDownloadAcres);
+            (minLat, minLon, maxLat, maxLon) = ExpandExtentsByCentroidPreviewMargin(minLat, minLon, maxLat, maxLon);
+            return GetTileDownloadGeographicEnvelope(minLat, minLon, maxLat, maxLon, MaxZoom);
+        }
+
+        /// <summary>
+        /// Geographic envelope of tiles at <paramref name="zoom"/> selected like <see cref="BuildTileList"/> for the given field extents.
+        /// Use <see cref="MaxZoom"/> for a tight preview around the field; lower zoom spans much larger areas per tile.
+        /// </summary>
+        public static (double minLat, double minLon, double maxLat, double maxLon) GetTileDownloadGeographicEnvelope(
+            double minLat,
+            double minLon,
+            double maxLat,
+            double maxLon,
+            int zoom)
+        {
+            double clampedMinLat = Math.Max(-MaxWebMercatorLat, Math.Min(MaxWebMercatorLat, minLat));
+            double clampedMaxLat = Math.Max(-MaxWebMercatorLat, Math.Min(MaxWebMercatorLat, maxLat));
+            double westLon = Math.Min(minLon, maxLon);
+            double eastLon = Math.Max(minLon, maxLon);
+            double southLat = Math.Min(clampedMinLat, clampedMaxLat);
+            double northLat = Math.Max(clampedMinLat, clampedMaxLat);
+
+            double envMinLat = double.PositiveInfinity;
+            double envMaxLat = double.NegativeInfinity;
+            double envMinLon = double.PositiveInfinity;
+            double envMaxLon = double.NegativeInfinity;
+
+            (int minX, int minY) = LonLatToTile(westLon, northLat, zoom);
+            (int maxX, int maxY) = LonLatToTile(eastLon, southLat, zoom);
+
+            int tilesPerAxis = 1 << zoom;
+            minX = Math.Max(0, Math.Min(tilesPerAxis - 1, minX - TileMarginX));
+            maxX = Math.Max(0, Math.Min(tilesPerAxis - 1, maxX + TileMarginX));
+            minY = Math.Max(0, Math.Min(tilesPerAxis - 1, minY - TileMarginY));
+            maxY = Math.Max(0, Math.Min(tilesPerAxis - 1, maxY + TileMarginY));
+
+            for (int ty = minY; ty <= maxY; ty++)
+            {
+                for (int tx = minX; tx <= maxX; tx++)
+                {
+                    TileGeographicBounds(zoom, tx, ty, out double w, out double e, out double n, out double s);
+                    envMinLon = Math.Min(envMinLon, w);
+                    envMaxLon = Math.Max(envMaxLon, e);
+                    envMinLat = Math.Min(envMinLat, s);
+                    envMaxLat = Math.Max(envMaxLat, n);
+                }
+            }
+
+            return (envMinLat, envMinLon, envMaxLat, envMaxLon);
+        }
+
+        /// <summary>Web Mercator tile edges in degrees (north edge &gt; south edge latitude).</summary>
+        private static void TileGeographicBounds(int zoom, int tileX, int tileY, out double west, out double east, out double north, out double south)
+        {
+            double n = Math.Pow(2.0, zoom);
+            west = tileX / n * 360.0 - 180.0;
+            east = (tileX + 1) / n * 360.0 - 180.0;
+            north = TileYToLatitudeDeg(tileY, zoom);
+            south = TileYToLatitudeDeg(tileY + 1, zoom);
+        }
+
+        private static double TileYToLatitudeDeg(int tileY, int zoom)
+        {
+            double n = Math.Pow(2.0, zoom);
+            double latRad = Math.Atan(Math.Sinh(Math.PI * (1.0 - 2.0 * tileY / n)));
+            return latRad * 180.0 / Math.PI;
+        }
+
         public async Task<DownloadSummary> DownloadAsync
             (
             string basemapDataFolder,
@@ -161,6 +267,11 @@ namespace AgGrade.Data
 
             (double minLat, double minLon, double maxLat, double maxLon) =
                 GetSquareExtentsFromAcres(centroidLatitude, centroidLongitude, fieldAcres);
+
+            if (fieldAcres == CentroidDownloadAcres)
+            {
+                (minLat, minLon, maxLat, maxLon) = ExpandExtentsByCentroidPreviewMargin(minLat, minLon, maxLat, maxLon);
+            }
 
             return await DownloadFromExtentsAsync(
                 basemapDataFolder,

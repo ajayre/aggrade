@@ -46,6 +46,9 @@
     <Compile Update="Controls\DownloadBasemapPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\MiniMap.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\ImportFieldPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
