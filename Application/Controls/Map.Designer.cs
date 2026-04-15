@@ -53,6 +53,7 @@
             BoundaryLeftBtn = new Button();
             BoundaryRightBtn = new Button();
             ClearActivityBtn = new Button();
+            CompletionMapBtn = new Button();
             ((System.ComponentModel.ISupportInitialize)MapCanvas).BeginInit();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -227,7 +228,7 @@
             // 
             FlowBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             FlowBtn.Image = Properties.Resources.flow_48px;
-            FlowBtn.Location = new Point(810, 253);
+            FlowBtn.Location = new Point(810, 319);
             FlowBtn.Name = "FlowBtn";
             FlowBtn.Size = new Size(60, 60);
             FlowBtn.TabIndex = 12;
@@ -259,7 +260,7 @@
             // 
             PondingBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             PondingBtn.Image = Properties.Resources.ponding_48px;
-            PondingBtn.Location = new Point(810, 319);
+            PondingBtn.Location = new Point(810, 385);
             PondingBtn.Name = "PondingBtn";
             PondingBtn.Size = new Size(60, 60);
             PondingBtn.TabIndex = 15;
@@ -331,11 +332,23 @@
             ClearActivityBtn.UseVisualStyleBackColor = true;
             ClearActivityBtn.Click += ClearActivityBtn_Click;
             // 
+            // CompletionMapBtn
+            // 
+            CompletionMapBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            CompletionMapBtn.Image = Properties.Resources.completion_48px;
+            CompletionMapBtn.Location = new Point(810, 253);
+            CompletionMapBtn.Name = "CompletionMapBtn";
+            CompletionMapBtn.Size = new Size(60, 60);
+            CompletionMapBtn.TabIndex = 23;
+            CompletionMapBtn.UseVisualStyleBackColor = true;
+            CompletionMapBtn.Click += CompletionMapBtn_Click;
+            // 
             // Map
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.LightGray;
+            Controls.Add(CompletionMapBtn);
             Controls.Add(ClearActivityBtn);
             Controls.Add(BoundaryRightBtn);
             Controls.Add(BoundaryLeftBtn);
@@ -389,5 +402,6 @@
         private Button BoundaryLeftBtn;
         private Button BoundaryRightBtn;
         private Button ClearActivityBtn;
+        private Button CompletionMapBtn;
     }
 }

@@ -146,7 +146,8 @@ namespace AgGrade.Data
         public enum MapTypes
         {
             Elevation,
-            CutFill
+            CutFill,
+            Completion
         }
 
         /// <summary>
@@ -654,6 +655,15 @@ namespace AgGrade.Data
 
                                         case MapTypes.CutFill:
                                             NewTile.Bitmap = RenderCutFillTile(
+                                                BinGrid,
+                                                extendedStartX, extendedStartY, extendedWidth, extendedHeight,
+                                                MapWidthpx, MapHeightpx,
+                                                0, 0, gridWidth, gridHeight,
+                                                ShowGrid, ScaleFactor);
+                                            break;
+
+                                        case MapTypes.Completion:
+                                            NewTile.Bitmap = RenderCompletionTile(
                                                 BinGrid,
                                                 extendedStartX, extendedStartY, extendedWidth, extendedHeight,
                                                 MapWidthpx, MapHeightpx,
@@ -2760,6 +2770,157 @@ namespace AgGrade.Data
             double fieldY = CurrentField.FieldMaxY - (pixelY * _invScaleFactor);
             int binY = (int)Math.Floor((fieldY - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
             return new Point(binX, binY);
+        }
+
+        /// <summary>
+        /// Renders a single tile of the completion map
+        /// </summary>
+        /// <param name="BinGrid">2D grid of bins</param>
+        /// <param name="tileStartX">X coordinate of tile start in map pixels</param>
+        /// <param name="tileStartY">Y coordinate of tile start in map pixels</param>
+        /// <param name="tileWidth">Width of tile in pixels</param>
+        /// <param name="tileHeight">Height of tile in pixels</param>
+        /// <param name="mapWidthpx">Total map width in pixels</param>
+        /// <param name="mapHeightpx">Total map height in pixels</param>
+        /// <param name="minX">Minimum X bin index</param>
+        /// <param name="minY">Minimum Y bin index</param>
+        /// <param name="gridWidth">Width of elevation grid</param>
+        /// <param name="gridHeight">Height of elevation grid</param>
+        /// <param name="showGrid">Whether to show grid lines</param>
+        /// <param name="scaleFactor">Scale factor in pixels per meter</param>
+        /// <returns>Rendered tile bitmap</returns>
+        private Bitmap RenderCompletionTile
+            (
+            Bin?[,] BinGrid,
+            int tileStartX,
+            int tileStartY,
+            int tileWidth,
+            int tileHeight,
+            int mapWidthpx,
+            int mapHeightpx,
+            int minX,
+            int minY,
+            int gridWidth,
+            int gridHeight,
+            bool showGrid,
+            double scaleFactor
+            )
+        {
+            Bitmap tile = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
+
+            BitmapData bitmapData = tile.LockBits(
+                new Rectangle(0, 0, tileWidth, tileHeight),
+                ImageLockMode.WriteOnly,
+                PixelFormat.Format32bppArgb);
+
+            try
+            {
+                int stride = bitmapData.Stride;
+                int bytesPerRow = tileWidth * 4;
+
+                byte[] rowData = new byte[bytesPerRow];
+                double pixelsPerBin = CurrentScaleFactor * Field.BIN_SIZE_M;
+                const double heightEpsM = 1e-4;
+
+                for (int y = 0; y < tileHeight; y++)
+                {
+                    int rowOffset = 0;
+                    int bmpY = y;
+                    int mapY = tileStartY + y;
+
+                    for (int x = 0; x < tileWidth; x++)
+                    {
+                        int mapX = tileStartX + x;
+
+                        int binGridX = (int)Math.Floor(mapX / pixelsPerBin);
+                        int binGridY = (int)Math.Floor((CurrentField.FieldMaxY - mapY / CurrentScaleFactor - CurrentField.FieldMinY) / Field.BIN_SIZE_M);
+                        int gridX = binGridX - minX;
+                        int gridY = binGridY - minY;
+
+                        byte r, g, b, a;
+
+                        if (gridX >= 0 && gridX < gridWidth && gridY >= 0 && gridY < gridHeight)
+                        {
+                            Bin? bin = BinGrid[gridY, gridX];
+                            if (bin != null)
+                            {
+                                double cur = bin.CurrentElevationM;
+                                double tgt = bin.TargetElevationM;
+                                double init = bin.InitialElevationM;
+
+                                if (cur != Field.BIN_NO_DATA_SENTINEL &&
+                                    tgt != Field.BIN_NO_DATA_SENTINEL &&
+                                    init != Field.BIN_NO_DATA_SENTINEL)
+                                {
+                                    bool atTarget = Math.Abs(cur - tgt) <= heightEpsM;
+                                    bool atInitial = Math.Abs(cur - init) <= heightEpsM;
+
+                                    if (atTarget)
+                                    {
+                                        r = TractorGreen.R;
+                                        g = TractorGreen.G;
+                                        b = TractorGreen.B;
+                                        a = 255;
+                                    }
+                                    else if (atInitial)
+                                    {
+                                        r = TractorRed.R;
+                                        g = TractorRed.G;
+                                        b = TractorRed.B;
+                                        a = 255;
+                                    }
+                                    else
+                                    {
+                                        // Same orange as cut/fill band palette (in-progress work)
+                                        r = 0xFF;
+                                        g = 0x80;
+                                        b = 0x00;
+                                        a = 255;
+                                    }
+                                }
+                                else
+                                {
+                                    r = g = b = 0;
+                                    a = 0;
+                                }
+                            }
+                            else
+                            {
+                                r = g = b = 0;
+                                a = 0;
+                            }
+                        }
+                        else
+                        {
+                            r = g = b = 0;
+                            a = 0;
+                        }
+
+                        if (showGrid && a > 0)
+                        {
+                            if ((mapX % scaleFactor == 0) || (mapY % scaleFactor == 0))
+                            {
+                                r = g = b = 0x40;
+                            }
+                        }
+
+                        rowData[rowOffset + 0] = b;
+                        rowData[rowOffset + 1] = g;
+                        rowData[rowOffset + 2] = r;
+                        rowData[rowOffset + 3] = a;
+                        rowOffset += 4;
+                    }
+
+                    IntPtr rowPtr = new IntPtr(bitmapData.Scan0.ToInt64() + (bmpY * stride));
+                    Marshal.Copy(rowData, 0, rowPtr, bytesPerRow);
+                }
+            }
+            finally
+            {
+                tile.UnlockBits(bitmapData);
+            }
+
+            return tile;
         }
 
         /// <summary>

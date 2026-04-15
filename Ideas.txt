@@ -17,5 +17,3 @@
   - shaded red to green for bins between original and target heights
 
 6. Fix bug where zeroing loads doesn't stick.
-
-7. Generic basemap downloader - enter centroid.

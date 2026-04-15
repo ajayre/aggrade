@@ -308,6 +308,7 @@ namespace AgGrade.Controls
 
             ElevationMapBtn.Visible = false;
             CutFillMapBtn.Visible = false;
+            CompletionMapBtn.Visible = false;
             FlowBtn.Visible = false;
             PondingBtn.Visible = false;
 
@@ -336,6 +337,7 @@ namespace AgGrade.Controls
 
             ElevationMapBtn.Visible = true;
             CutFillMapBtn.Visible = true;
+            CompletionMapBtn.Visible = true;
             FlowBtn.Visible = true;
             PondingBtn.Visible = true;
 
@@ -364,6 +366,7 @@ namespace AgGrade.Controls
 
             ElevationMapBtn.Visible = false;
             CutFillMapBtn.Visible = false;
+            CompletionMapBtn.Visible = false;
             FlowBtn.Visible = false;
             PondingBtn.Visible = false;
 
@@ -661,6 +664,16 @@ namespace AgGrade.Controls
         private void ElevationMapBtn_Click(object sender, EventArgs e)
         {
             MapType = MapGenerator.MapTypes.Elevation;
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to show the completion map
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CompletionMapBtn_Click(object sender, EventArgs e)
+        {
+            MapType = MapGenerator.MapTypes.Completion;
         }
 
         /// <summary>
