@@ -1,19 +1,9 @@
-1. Key press that closes app
+1. Show keyboard button - osk.exe?
 
-2. Show keyboard button - osk.exe?
-
-3. Map view options:
+2. Map view options:
 
   - existing topo and cut/fill map
   - original topo and cut/fill map
-  - cut/fill map shows work that has been completed
   - north up, tractor up
 
-4. Transparency option for tractor display
-
-5. Map showing all cuts and fills (colored according to passes?)
-  - red for bin = original height
-  - green for bin = target height
-  - shaded red to green for bins between original and target heights
-
-6. Fix bug where zeroing loads doesn't stick.
+3. Fix bug where zeroing loads doesn't stick.
