@@ -2820,7 +2820,7 @@ namespace AgGrade.Data
 
                 byte[] rowData = new byte[bytesPerRow];
                 double pixelsPerBin = CurrentScaleFactor * Field.BIN_SIZE_M;
-                const double heightEpsM = 1e-4;
+                const double heightEpsM = 0.01;
 
                 for (int y = 0; y < tileHeight; y++)
                 {
