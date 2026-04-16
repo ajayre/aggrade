@@ -26,7 +26,9 @@ namespace AgGrade.Data
             Floating
         }
 
-        public IMUValue IMU; 
+        public IMUValue IMU;
+        public IMUValue ApronIMU;
+        public IMUValue BucketIMU;
         public GNSSFix Fix;
         public int BladeHeight;
         public int BladeOffset;
@@ -41,6 +43,8 @@ namespace AgGrade.Data
             )
         {
             IMU = new IMUValue();
+            ApronIMU = new IMUValue();
+            BucketIMU = new IMUValue();
             Fix = new GNSSFix();
 
             CapacityWarningOccurred = false;

@@ -44,6 +44,9 @@
             ControllerLed = new PictureBox();
             EStopBanner = new Panel();
             label5 = new Label();
+            FrontApronLed = new PictureBox();
+            FrontBucketLed = new PictureBox();
+            RearBucketLed = new PictureBox();
             ((System.ComponentModel.ISupportInitialize)TractorRTKLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)FrontRTKLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)RearRTKLed).BeginInit();
@@ -54,6 +57,9 @@
             ((System.ComponentModel.ISupportInitialize)RearHeightLed).BeginInit();
             ((System.ComponentModel.ISupportInitialize)ControllerLed).BeginInit();
             EStopBanner.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)FrontApronLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)FrontBucketLed).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)RearBucketLed).BeginInit();
             SuspendLayout();
             // 
             // TractorRTKLed
@@ -113,7 +119,7 @@
             // FrontHeightLed
             // 
             FrontHeightLed.Image = (Image)resources.GetObject("FrontHeightLed.Image");
-            FrontHeightLed.Location = new Point(396, 0);
+            FrontHeightLed.Location = new Point(477, 0);
             FrontHeightLed.Name = "FrontHeightLed";
             FrontHeightLed.Size = new Size(24, 24);
             FrontHeightLed.TabIndex = 6;
@@ -122,7 +128,7 @@
             // RearHeightLed
             // 
             RearHeightLed.Image = (Image)resources.GetObject("RearHeightLed.Image");
-            RearHeightLed.Location = new Point(423, 0);
+            RearHeightLed.Location = new Point(504, 0);
             RearHeightLed.Name = "RearHeightLed";
             RearHeightLed.Size = new Size(24, 24);
             RearHeightLed.TabIndex = 7;
@@ -152,7 +158,7 @@
             // 
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 12F);
-            label3.Location = new Point(329, 1);
+            label3.Location = new Point(410, 1);
             label3.Name = "label3";
             label3.Size = new Size(66, 21);
             label3.TabIndex = 10;
@@ -199,10 +205,40 @@
             label5.Text = "EMERGENCY STOP";
             label5.TextAlign = ContentAlignment.MiddleCenter;
             // 
+            // FrontApronLed
+            // 
+            FrontApronLed.Image = (Image)resources.GetObject("FrontApronLed.Image");
+            FrontApronLed.Location = new Point(326, 0);
+            FrontApronLed.Name = "FrontApronLed";
+            FrontApronLed.Size = new Size(24, 24);
+            FrontApronLed.TabIndex = 14;
+            FrontApronLed.TabStop = false;
+            // 
+            // FrontBucketLed
+            // 
+            FrontBucketLed.Image = (Image)resources.GetObject("FrontBucketLed.Image");
+            FrontBucketLed.Location = new Point(353, 0);
+            FrontBucketLed.Name = "FrontBucketLed";
+            FrontBucketLed.Size = new Size(24, 24);
+            FrontBucketLed.TabIndex = 15;
+            FrontBucketLed.TabStop = false;
+            // 
+            // RearBucketLed
+            // 
+            RearBucketLed.Image = (Image)resources.GetObject("RearBucketLed.Image");
+            RearBucketLed.Location = new Point(380, 0);
+            RearBucketLed.Name = "RearBucketLed";
+            RearBucketLed.Size = new Size(24, 24);
+            RearBucketLed.TabIndex = 16;
+            RearBucketLed.TabStop = false;
+            // 
             // StatusBar
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(RearBucketLed);
+            Controls.Add(FrontBucketLed);
+            Controls.Add(FrontApronLed);
             Controls.Add(EStopBanner);
             Controls.Add(ControllerLed);
             Controls.Add(label4);
@@ -229,6 +265,9 @@
             ((System.ComponentModel.ISupportInitialize)RearHeightLed).EndInit();
             ((System.ComponentModel.ISupportInitialize)ControllerLed).EndInit();
             EStopBanner.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)FrontApronLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)FrontBucketLed).EndInit();
+            ((System.ComponentModel.ISupportInitialize)RearBucketLed).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -250,5 +289,8 @@
         private PictureBox ControllerLed;
         private Panel EStopBanner;
         private Label label5;
+        private PictureBox FrontApronLed;
+        private PictureBox FrontBucketLed;
+        private PictureBox RearBucketLed;
     }
 }

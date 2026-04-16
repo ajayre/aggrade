@@ -30,7 +30,10 @@ namespace AgGrade
         private OGController Controller;
         private bool TractorIMUFound;
         private bool FrontIMUFound;
+        private bool FrontApronIMUFound;
+        private bool FrontBucketIMUFound;
         private bool RearIMUFound;
+        private bool RearBucketIMUFound;
         private bool FrontHeightFound;
         private bool RearHeightFound;
         private Timer ControllerConnectTimer;
@@ -126,7 +129,10 @@ namespace AgGrade
 
             TractorIMUFound = false;
             FrontIMUFound = false;
+            FrontApronIMUFound = false;
+            FrontBucketIMUFound = false;
             RearIMUFound = false;
+            RearBucketIMUFound = false;
 
             FrontHeightFound = false;
             RearHeightFound = false;
@@ -298,10 +304,16 @@ namespace AgGrade
             // no longer have IMU
             CurrentEquipmentStatus.TractorIMU.CalibrationStatus = IMUValue.Calibration.None;
             CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus = IMUValue.Calibration.None;
+            CurrentEquipmentStatus.FrontPan.ApronIMU.CalibrationStatus = IMUValue.Calibration.None;
+            CurrentEquipmentStatus.FrontPan.BucketIMU.CalibrationStatus = IMUValue.Calibration.None;
             CurrentEquipmentStatus.RearPan.IMU.CalibrationStatus = IMUValue.Calibration.None;
+            CurrentEquipmentStatus.RearPan.BucketIMU.CalibrationStatus = IMUValue.Calibration.None;
             TractorIMUFound = false;
             FrontIMUFound = false;
+            FrontApronIMUFound = false;
+            FrontBucketIMUFound = false;
             RearIMUFound = false;
+            RearBucketIMUFound = false;
 
             // no longer have height
             FrontHeightFound = false;
@@ -1222,7 +1234,10 @@ namespace AgGrade
 
             Controller.OnTractorIMUChanged += Controller_OnTractorIMUChanged;
             Controller.OnFrontIMUChanged += Controller_OnFrontIMUChanged;
+            Controller.OnFrontApronIMUChanged += Controller_OnFrontApronIMUChanged;
+            Controller.OnFrontBucketIMUChanged += Controller_OnFrontBucketIMUChanged;
             Controller.OnRearIMUChanged += Controller_OnRearIMUChanged;
+            Controller.OnRearBucketIMUChanged += Controller_OnRearBucketIMUChanged;
 
             Controller.OnFrontBladeCuttingChanged += Controller_OnFrontBladeCuttingChanged;
             Controller.OnFrontBladeDirectionChanged += Controller_OnFrontBladeDirectionChanged;
@@ -1243,6 +1258,8 @@ namespace AgGrade
 
             Controller.OnFrontBladeJogged += Controller_OnFrontBladeJogged;
             Controller.OnRearBladeJogged += Controller_OnRearBladeJogged;
+
+            Controller.OnEnableSecondaryTabletMode += Controller_EnableSecondaryTabletMode;
 
             // initally we don't know if there is a controller or not
             // and we don't know status of tractor RTK and IMU
@@ -1457,6 +1474,26 @@ namespace AgGrade
             {
                 SetRearPanIndicator(PanIndicatorStates.None);
             }
+        }
+
+        /// <summary>
+        /// Called when controller tells tablet it is the secondary tablet
+        /// </summary>
+        private void Controller_EnableSecondaryTabletMode
+            (
+            )
+        {
+            SwitchToSecondaryMode();
+        }
+
+        /// <summary>
+        /// Switches to secondary tablet mode
+        /// </summary>
+        private void SwitchToSecondaryMode
+            (
+            )
+        {
+            // fixme - to do
         }
 
         /// <summary>
@@ -1683,6 +1720,39 @@ namespace AgGrade
             UpdateIMULeds();
         }
 
+        private void Controller_OnFrontApronIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.FrontPan.ApronIMU = Value;
+
+            FrontApronIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
+        }
+
+        private void Controller_OnFrontBucketIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.FrontPan.BucketIMU = Value;
+
+            FrontBucketIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
+        }
+
+        private void Controller_OnRearBucketIMUChanged(IMUValue Value)
+        {
+            CurrentEquipmentStatus.RearPan.BucketIMU = Value;
+
+            RearBucketIMUFound = true;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
+            UpdateIMULeds();
+        }
+
         /// <summary>
         /// Received IMU data for the front scraper
         /// </summary>
@@ -1873,9 +1943,12 @@ namespace AgGrade
 
             switch (Equip)
             {
-                case EquipType.Tractor: TractorIMUFound = false; break;
-                case EquipType.Front: FrontIMUFound = false; break;
-                case EquipType.Rear: RearIMUFound = false; break;
+                case EquipType.Tractor:     TractorIMUFound     = false; break;
+                case EquipType.Front:       FrontIMUFound       = false; break;
+                case EquipType.FrontApron:  FrontApronIMUFound  = false; break;
+                case EquipType.FrontBucket: FrontBucketIMUFound = false; break;
+                case EquipType.Rear:        RearIMUFound        = false; break;
+                case EquipType.RearBucket:  RearBucketIMUFound  = false; break;
             }
 
             UpdateIMULeds();
@@ -1895,9 +1968,12 @@ namespace AgGrade
 
             switch (Equip)
             {
-                case EquipType.Tractor: TractorIMUFound = true; break;
-                case EquipType.Front: FrontIMUFound = true; break;
-                case EquipType.Rear: RearIMUFound = true; break;
+                case EquipType.Tractor:     TractorIMUFound     = true; break;
+                case EquipType.Front:       FrontIMUFound       = true; break;
+                case EquipType.FrontApron:  FrontApronIMUFound  = true; break;
+                case EquipType.FrontBucket: FrontBucketIMUFound = true; break;
+                case EquipType.Rear:        RearIMUFound        = true; break;
+                case EquipType.RearBucket:  RearBucketIMUFound  = true; break;
             }
 
             UpdateIMULeds();
@@ -2047,10 +2123,46 @@ namespace AgGrade
                 {
                     StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Error);
                 }
+
+                if (FrontApronIMUFound)
+                {
+                    if ((CurrentEquipmentStatus.FrontPan.ApronIMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                        (CurrentEquipmentStatus.FrontPan.ApronIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.OK);
+                    }
+                    else
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Warning);
+                    }
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Error);
+                }
+
+                if (FrontBucketIMUFound)
+                {
+                    if ((CurrentEquipmentStatus.FrontPan.BucketIMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                        (CurrentEquipmentStatus.FrontPan.BucketIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontBucketIMU, StatusBar.LedState.OK);
+                    }
+                    else
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.FrontBucketIMU, StatusBar.LedState.Warning);
+                    }
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.FrontBucketIMU, StatusBar.LedState.Error);
+                }
             }
             else
             {
                 StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.FrontBucketIMU, StatusBar.LedState.Disabled);
             }
 
             if (CurrentEquipmentSettings.RearPan.Equipped)
@@ -2071,10 +2183,28 @@ namespace AgGrade
                 {
                     StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Error);
                 }
+
+                if (RearBucketIMUFound)
+                {
+                    if ((CurrentEquipmentStatus.RearPan.BucketIMU.CalibrationStatus == IMUValue.Calibration.Good) ||
+                        (CurrentEquipmentStatus.RearPan.BucketIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.RearBucketIMU, StatusBar.LedState.OK);
+                    }
+                    else
+                    {
+                        StatusBar.SetLedState(StatusBar.Leds.RearBucketIMU, StatusBar.LedState.Warning);
+                    }
+                }
+                else
+                {
+                    StatusBar.SetLedState(StatusBar.Leds.RearBucketIMU, StatusBar.LedState.Error);
+                }
             }
             else
             {
                 StatusBar.SetLedState(StatusBar.Leds.RearIMU, StatusBar.LedState.Disabled);
+                StatusBar.SetLedState(StatusBar.Leds.RearBucketIMU, StatusBar.LedState.Disabled);
             }
         }
 

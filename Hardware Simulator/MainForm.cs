@@ -108,7 +108,7 @@ namespace HardwareSim
         {
             byte[] Data = new byte[PGNPacket.MAX_LEN];
             PGNPacket Packet = new PGNPacket();
-            Packet.PGN = PGNValues.PGN_FRONT_IMU;
+            Packet.PGN = PGNValues.PGN_REAR_IMU;
             Packet.SetUInt32(0, (UInt32)(Value.Pitch * 100));
             Packet.SetUInt32(4, (UInt32)(Value.Roll * 100));
             Packet.SetUInt32(8, (UInt32)(Value.Heading * 100));
@@ -121,7 +121,7 @@ namespace HardwareSim
         {
             byte[] Data = new byte[PGNPacket.MAX_LEN];
             PGNPacket Packet = new PGNPacket();
-            Packet.PGN = PGNValues.PGN_REAR_IMU;
+            Packet.PGN = PGNValues.PGN_FRONT_IMU;
             Packet.SetUInt32(0, (UInt32)(Value.Pitch * 100));
             Packet.SetUInt32(4, (UInt32)(Value.Roll * 100));
             Packet.SetUInt32(8, (UInt32)(Value.Heading * 100));
@@ -652,6 +652,41 @@ namespace HardwareSim
         private static double ToRadians(double degrees)
         {
             return degrees * Math.PI / 180.0;
+        }
+
+        private void SecondaryTabletBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_YOU_ARE_SECONDARY));
+        }
+
+        private void FrontApronFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_APRON_IMU_FOUND));
+        }
+
+        private void FrontApronLostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_APRON_IMU_LOST));
+        }
+
+        private void FrontBucketFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BUCKET_IMU_FOUND));
+        }
+
+        private void FrontBucketLostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BUCKET_IMU_LOST));
+        }
+
+        private void RearBucketFoundBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_BUCKET_IMU_FOUND));
+        }
+
+        private void RearBucketLostBtn_Click(object sender, EventArgs e)
+        {
+            SendStatus(new PGNPacket(PGNValues.PGN_REAR_BUCKET_IMU_LOST));
         }
     }
 }

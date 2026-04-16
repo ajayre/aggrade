@@ -11,7 +11,10 @@ namespace AgGrade.Controller
     {
         Tractor,
         Front,
-        Rear
+        FrontApron,
+        FrontBucket,
+        Rear,
+        RearBucket
     }
 
     public class OGController
@@ -23,6 +26,8 @@ namespace AgGrade.Controller
 
         public event Action OnControllerLost = null;
         public event Action OnControllerFound = null;
+
+        public event Action OnEnableSecondaryTabletMode = null;
 
         public event Action<EquipType> OnIMUFound = null;
         public event Action<EquipType> OnIMULost = null;
@@ -59,7 +64,10 @@ namespace AgGrade.Controller
         public delegate void IMUChanged(IMUValue Value);
         public event IMUChanged OnTractorIMUChanged = null;
         public event IMUChanged OnFrontIMUChanged = null;
+        public event IMUChanged OnFrontApronIMUChanged = null;
+        public event IMUChanged OnFrontBucketIMUChanged = null;
         public event IMUChanged OnRearIMUChanged = null;
+        public event IMUChanged OnRearBucketIMUChanged = null;
 
         public delegate void LocationChanged(GNSSFix Fix);
         public event LocationChanged OnTractorLocationChanged = null;
@@ -87,7 +95,10 @@ namespace AgGrade.Controller
         private UDPTransfer ControllerChannel;
         private IMUValue TractorIMU = new IMUValue();
         private IMUValue FrontScraperIMU = new IMUValue();
+        private IMUValue FrontScraperApronIMU = new IMUValue();
+        private IMUValue FrontScraperBucketIMU = new IMUValue();
         private IMUValue RearScraperIMU = new IMUValue();
+        private IMUValue RearScraperBucketIMU = new IMUValue();
 
         private DateTime LastRxPingTime;
         private Thread WorkThread = null;
@@ -312,12 +323,36 @@ namespace AgGrade.Controller
                             OnIMULost?.Invoke(EquipType.Front);
                             break;
 
+                        case PGNValues.PGN_FRONT_APRON_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.FrontApron);
+                            break;
+
+                        case PGNValues.PGN_FRONT_APRON_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.FrontApron);
+                            break;
+
+                        case PGNValues.PGN_FRONT_BUCKET_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.FrontBucket);
+                            break;
+
+                        case PGNValues.PGN_FRONT_BUCKET_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.FrontBucket);
+                            break;
+
                         case PGNValues.PGN_REAR_IMU_FOUND:
                             OnIMUFound?.Invoke(EquipType.Rear);
                             break;
 
                         case PGNValues.PGN_REAR_IMU_LOST:
                             OnIMULost?.Invoke(EquipType.Rear);
+                            break;
+
+                        case PGNValues.PGN_REAR_BUCKET_IMU_FOUND:
+                            OnIMUFound?.Invoke(EquipType.RearBucket);
+                            break;
+
+                        case PGNValues.PGN_REAR_BUCKET_IMU_LOST:
+                            OnIMULost?.Invoke(EquipType.RearBucket);
                             break;
 
                         case PGNValues.PGN_FRONT_HEIGHT_FOUND:
@@ -373,6 +408,24 @@ namespace AgGrade.Controller
                             OnFrontIMUChanged?.Invoke(FrontScraperIMU);
                             break;
 
+                        case PGNValues.PGN_FRONT_APRON_IMU:
+                            FrontScraperApronIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            FrontScraperApronIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            FrontScraperApronIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            FrontScraperApronIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            FrontScraperApronIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
+                            OnFrontApronIMUChanged?.Invoke(FrontScraperApronIMU);
+                            break;
+
+                        case PGNValues.PGN_FRONT_BUCKET_IMU:
+                            FrontScraperBucketIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            FrontScraperBucketIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            FrontScraperBucketIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            FrontScraperBucketIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            FrontScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
+                            OnFrontBucketIMUChanged?.Invoke(FrontScraperBucketIMU);
+                            break;
+
                         case PGNValues.PGN_REAR_IMU:
                             RearScraperIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
                             RearScraperIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
@@ -382,6 +435,15 @@ namespace AgGrade.Controller
                             OnRearIMUChanged?.Invoke(RearScraperIMU);
                             break;
 
+                        case PGNValues.PGN_REAR_BUCKET_IMU:
+                            RearScraperBucketIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
+                            RearScraperBucketIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
+                            RearScraperBucketIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
+                            RearScraperBucketIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
+                            RearScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
+                            OnRearBucketIMUChanged?.Invoke(RearScraperBucketIMU);
+                            break;
+                            
                         // scraper dumping flags
                         case PGNValues.PGN_FRONT_DUMPING:
                             bool Dumping = Stat.GetByte() == 1 ? true : false;
@@ -470,6 +532,12 @@ namespace AgGrade.Controller
                         case PGNValues.PGN_REAR_BLADE_JOG_DOWN:
                             {
                                 OnRearBladeJogged?.Invoke(false);
+                            }
+                            break;
+
+                        case PGNValues.PGN_YOU_ARE_SECONDARY:
+                            {
+                                OnEnableSecondaryTabletMode?.Invoke();
                             }
                             break;
                     }

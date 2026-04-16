@@ -38,11 +38,21 @@
             RearIMUFoundBtn = new Button();
             tabControl1 = new TabControl();
             MiscPage = new TabPage();
+            RearBucketLostBtn = new Button();
+            RearBucketFoundBtn = new Button();
+            FrontBucketLostBtn = new Button();
+            FrontBucketFoundBtn = new Button();
+            FrontApronLostBtn = new Button();
+            FrontApronFoundBtn = new Button();
+            SecondaryTabletBtn = new Button();
             RearHeightLostBtn = new Button();
             FrontHeightLostBtn = new Button();
             RearHeightFoundBtn = new Button();
             FrontHeightFoundBtn = new Button();
             GNSSPage = new TabPage();
+            label4 = new Label();
+            RearJoystickDownBtn = new Button();
+            RearJoystickUpBtn = new Button();
             label3 = new Label();
             FrontJoystickDownBtn = new Button();
             FrontJoystickUpBtn = new Button();
@@ -60,9 +70,6 @@
             label1 = new Label();
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
-            label4 = new Label();
-            RearJoystickDownBtn = new Button();
-            RearJoystickUpBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
@@ -161,6 +168,13 @@
             // 
             // MiscPage
             // 
+            MiscPage.Controls.Add(RearBucketLostBtn);
+            MiscPage.Controls.Add(RearBucketFoundBtn);
+            MiscPage.Controls.Add(FrontBucketLostBtn);
+            MiscPage.Controls.Add(FrontBucketFoundBtn);
+            MiscPage.Controls.Add(FrontApronLostBtn);
+            MiscPage.Controls.Add(FrontApronFoundBtn);
+            MiscPage.Controls.Add(SecondaryTabletBtn);
             MiscPage.Controls.Add(RearHeightLostBtn);
             MiscPage.Controls.Add(FrontHeightLostBtn);
             MiscPage.Controls.Add(RearHeightFoundBtn);
@@ -180,6 +194,76 @@
             MiscPage.TabIndex = 0;
             MiscPage.Text = "Misc";
             MiscPage.UseVisualStyleBackColor = true;
+            // 
+            // RearBucketLostBtn
+            // 
+            RearBucketLostBtn.Location = new Point(173, 238);
+            RearBucketLostBtn.Name = "RearBucketLostBtn";
+            RearBucketLostBtn.Size = new Size(159, 23);
+            RearBucketLostBtn.TabIndex = 18;
+            RearBucketLostBtn.Text = "Rear Bucket IMU Lost";
+            RearBucketLostBtn.UseVisualStyleBackColor = true;
+            RearBucketLostBtn.Click += RearBucketLostBtn_Click;
+            // 
+            // RearBucketFoundBtn
+            // 
+            RearBucketFoundBtn.Location = new Point(8, 238);
+            RearBucketFoundBtn.Name = "RearBucketFoundBtn";
+            RearBucketFoundBtn.Size = new Size(159, 23);
+            RearBucketFoundBtn.TabIndex = 17;
+            RearBucketFoundBtn.Text = "Rear Bucket IMU Found";
+            RearBucketFoundBtn.UseVisualStyleBackColor = true;
+            RearBucketFoundBtn.Click += RearBucketFoundBtn_Click;
+            // 
+            // FrontBucketLostBtn
+            // 
+            FrontBucketLostBtn.Location = new Point(173, 209);
+            FrontBucketLostBtn.Name = "FrontBucketLostBtn";
+            FrontBucketLostBtn.Size = new Size(159, 23);
+            FrontBucketLostBtn.TabIndex = 16;
+            FrontBucketLostBtn.Text = "Front Bucket IMU Lost";
+            FrontBucketLostBtn.UseVisualStyleBackColor = true;
+            FrontBucketLostBtn.Click += FrontBucketLostBtn_Click;
+            // 
+            // FrontBucketFoundBtn
+            // 
+            FrontBucketFoundBtn.Location = new Point(8, 209);
+            FrontBucketFoundBtn.Name = "FrontBucketFoundBtn";
+            FrontBucketFoundBtn.Size = new Size(159, 23);
+            FrontBucketFoundBtn.TabIndex = 15;
+            FrontBucketFoundBtn.Text = "Front Bucket IMU Found";
+            FrontBucketFoundBtn.UseVisualStyleBackColor = true;
+            FrontBucketFoundBtn.Click += FrontBucketFoundBtn_Click;
+            // 
+            // FrontApronLostBtn
+            // 
+            FrontApronLostBtn.Location = new Point(173, 180);
+            FrontApronLostBtn.Name = "FrontApronLostBtn";
+            FrontApronLostBtn.Size = new Size(159, 23);
+            FrontApronLostBtn.TabIndex = 14;
+            FrontApronLostBtn.Text = "Front Apron IMU Lost";
+            FrontApronLostBtn.UseVisualStyleBackColor = true;
+            FrontApronLostBtn.Click += FrontApronLostBtn_Click;
+            // 
+            // FrontApronFoundBtn
+            // 
+            FrontApronFoundBtn.Location = new Point(8, 180);
+            FrontApronFoundBtn.Name = "FrontApronFoundBtn";
+            FrontApronFoundBtn.Size = new Size(159, 23);
+            FrontApronFoundBtn.TabIndex = 13;
+            FrontApronFoundBtn.Text = "Front Apron IMU Found";
+            FrontApronFoundBtn.UseVisualStyleBackColor = true;
+            FrontApronFoundBtn.Click += FrontApronFoundBtn_Click;
+            // 
+            // SecondaryTabletBtn
+            // 
+            SecondaryTabletBtn.Location = new Point(292, 6);
+            SecondaryTabletBtn.Name = "SecondaryTabletBtn";
+            SecondaryTabletBtn.Size = new Size(127, 23);
+            SecondaryTabletBtn.TabIndex = 12;
+            SecondaryTabletBtn.Text = "Secondary Tablet";
+            SecondaryTabletBtn.UseVisualStyleBackColor = true;
+            SecondaryTabletBtn.Click += SecondaryTabletBtn_Click;
             // 
             // RearHeightLostBtn
             // 
@@ -250,6 +334,37 @@
             GNSSPage.TabIndex = 1;
             GNSSPage.Text = "GNSS";
             GNSSPage.UseVisualStyleBackColor = true;
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Location = new Point(121, 242);
+            label4.Name = "label4";
+            label4.Size = new Size(77, 15);
+            label4.TabIndex = 18;
+            label4.Text = "Rear Joystick:";
+            // 
+            // RearJoystickDownBtn
+            // 
+            RearJoystickDownBtn.Image = Properties.Resources.down_48px;
+            RearJoystickDownBtn.Location = new Point(132, 322);
+            RearJoystickDownBtn.Name = "RearJoystickDownBtn";
+            RearJoystickDownBtn.Size = new Size(56, 56);
+            RearJoystickDownBtn.TabIndex = 17;
+            RearJoystickDownBtn.UseVisualStyleBackColor = true;
+            RearJoystickDownBtn.MouseDown += RearJoystickDownBtn_MouseDown;
+            RearJoystickDownBtn.MouseUp += RearJoystickDownBtn_MouseUp;
+            // 
+            // RearJoystickUpBtn
+            // 
+            RearJoystickUpBtn.Image = Properties.Resources.up_48px;
+            RearJoystickUpBtn.Location = new Point(132, 260);
+            RearJoystickUpBtn.Name = "RearJoystickUpBtn";
+            RearJoystickUpBtn.Size = new Size(56, 56);
+            RearJoystickUpBtn.TabIndex = 16;
+            RearJoystickUpBtn.UseVisualStyleBackColor = true;
+            RearJoystickUpBtn.MouseDown += RearJoystickUpBtn_MouseDown;
+            RearJoystickUpBtn.MouseUp += RearJoystickUpBtn_MouseUp;
             // 
             // label3
             // 
@@ -414,37 +529,6 @@
             LatitudeInput.Size = new Size(127, 23);
             LatitudeInput.TabIndex = 0;
             // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(121, 242);
-            label4.Name = "label4";
-            label4.Size = new Size(77, 15);
-            label4.TabIndex = 18;
-            label4.Text = "Rear Joystick:";
-            // 
-            // RearJoystickDownBtn
-            // 
-            RearJoystickDownBtn.Image = Properties.Resources.down_48px;
-            RearJoystickDownBtn.Location = new Point(132, 322);
-            RearJoystickDownBtn.Name = "RearJoystickDownBtn";
-            RearJoystickDownBtn.Size = new Size(56, 56);
-            RearJoystickDownBtn.TabIndex = 17;
-            RearJoystickDownBtn.UseVisualStyleBackColor = true;
-            RearJoystickDownBtn.MouseDown += RearJoystickDownBtn_MouseDown;
-            RearJoystickDownBtn.MouseUp += RearJoystickDownBtn_MouseUp;
-            // 
-            // RearJoystickUpBtn
-            // 
-            RearJoystickUpBtn.Image = Properties.Resources.up_48px;
-            RearJoystickUpBtn.Location = new Point(132, 260);
-            RearJoystickUpBtn.Name = "RearJoystickUpBtn";
-            RearJoystickUpBtn.Size = new Size(56, 56);
-            RearJoystickUpBtn.TabIndex = 16;
-            RearJoystickUpBtn.UseVisualStyleBackColor = true;
-            RearJoystickUpBtn.MouseDown += RearJoystickUpBtn_MouseDown;
-            RearJoystickUpBtn.MouseUp += RearJoystickUpBtn_MouseUp;
-            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -497,5 +581,12 @@
         private Button RearJoystickDownBtn;
         private Button RearJoystickUpBtn;
         private Button AutoDriveBtn;
+        private Button SecondaryTabletBtn;
+        private Button FrontApronFoundBtn;
+        private Button RearBucketLostBtn;
+        private Button RearBucketFoundBtn;
+        private Button FrontBucketLostBtn;
+        private Button FrontBucketFoundBtn;
+        private Button FrontApronLostBtn;
     }
 }
