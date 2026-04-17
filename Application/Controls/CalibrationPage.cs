@@ -76,11 +76,17 @@ namespace AgGrade.Controls
             odd = !odd;
             if (CurrentEquipmentSettings.RearPan.Equipped)
             {
+                AddButton("Calibrate Rear Bucket Angle", Properties.Resources.angle_48px, odd, CalibrateRearBucketAngle);
+                odd = !odd;
                 AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
                 odd = !odd;
             }
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
+                AddButton("Calibrate Front Bucket Angle", Properties.Resources.angle_48px, odd, CalibrateFrontBucketAngle);
+                odd = !odd;
+                AddButton("Calibrate Front Apron Angle", Properties.Resources.angle_48px, odd, CalibrateFrontApronAngle);
+                odd = !odd;
                 AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
                 odd = !odd;
             }
@@ -211,6 +217,51 @@ namespace AgGrade.Controls
             Wizard!.Name = "Rear Blade Height";
             Wizard!.Content = new CalibrateBladeHeightWizard(CalibrateBladeHeightWizard.Blades.Rear, RearPanColor);
             OnDisableBladeLimits?.Invoke();
+        }
+
+        /// <summary>
+        /// Called when the user taps on the buttom to calibrate the front bucket angle
+        /// </summary>
+        /// <param name="Sender"></param>
+        private void CalibrateFrontBucketAngle
+            (
+            object Sender
+            )
+        {
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Front Bucket Angle";
+            Wizard!.Content = new CalibrateBucketAngleWizard(CalibrateBucketAngleWizard.Blades.Front, FrontPanColor);
+        }
+
+        /// <summary>
+        /// Called when the user taps on the buttom to calibrate the rear bucket angle
+        /// </summary>
+        /// <param name="Sender"></param>
+        private void CalibrateRearBucketAngle
+            (
+            object Sender
+            )
+        {
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Rear Bucket Angle";
+            Wizard!.Content = new CalibrateBucketAngleWizard(CalibrateBucketAngleWizard.Blades.Rear, FrontPanColor);
+        }
+
+        /// <summary>
+        /// Called when the user taps on the button to calibrate the front apron angle
+        /// </summary>
+        /// <param name="Sender"></param>
+        private void CalibrateFrontApronAngle
+            (
+            object Sender
+            )
+        {
+            HideOptions();
+            ShowWizard();
+            Wizard!.Name = "Front Apron Angle";
+            Wizard!.Content = new CalibrateApronAngleWizard(CalibrateApronAngleWizard.Blades.Front, FrontPanColor);
         }
 
         /// <summary>

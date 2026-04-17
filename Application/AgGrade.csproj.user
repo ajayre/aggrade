@@ -4,6 +4,9 @@
     <Compile Update="Controls\AppSettingsEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Update="Controls\CalibrateApronAngleWizard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\CalibrateTractorAntennaWizard.cs">
       <SubType>UserControl</SubType>
     </Compile>
