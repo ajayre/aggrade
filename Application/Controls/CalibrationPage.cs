@@ -76,22 +76,40 @@ namespace AgGrade.Controls
             odd = !odd;
             if (CurrentEquipmentSettings.RearPan.Equipped)
             {
-                AddButton("Calibrate Rear Bucket Angle", Properties.Resources.angle_48px, odd, CalibrateRearBucketAngle);
+                // create spacer
+                var spacerpanel = new Panel();
+                spacerpanel.Height = 20;
+                spacerpanel.Dock = DockStyle.Top;
+                OptionsTable.Controls.Add(spacerpanel);
+
+                AddButton("Calibrate Rear Bucket Angle", Properties.Resources.lever_48px, odd, CalibrateRearBucketAngle);
                 odd = !odd;
                 AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
                 odd = !odd;
             }
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
-                AddButton("Calibrate Front Bucket Angle", Properties.Resources.angle_48px, odd, CalibrateFrontBucketAngle);
+                // create spacer
+                var spacerpanel = new Panel();
+                spacerpanel.Height = 20;
+                spacerpanel.Dock = DockStyle.Top;
+                OptionsTable.Controls.Add(spacerpanel);
+
+                AddButton("Calibrate Front Bucket Angle", Properties.Resources.lever_48px, odd, CalibrateFrontBucketAngle);
                 odd = !odd;
-                AddButton("Calibrate Front Apron Angle", Properties.Resources.angle_48px, odd, CalibrateFrontApronAngle);
+                AddButton("Calibrate Front Apron Angle", Properties.Resources.lever_48px, odd, CalibrateFrontApronAngle);
                 odd = !odd;
                 AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
                 odd = !odd;
             }
             if ((CurrentField != null) && (CurrentField.Benchmarks.Count > 0))
             {
+                // create spacer
+                var spacerpanel = new Panel();
+                spacerpanel.Height = 20;
+                spacerpanel.Dock = DockStyle.Top;
+                OptionsTable.Controls.Add(spacerpanel);
+
                 AddButton("Calibrate Field Location", Properties.Resources.field_48px, odd, CalibrateFieldLocation);
                 odd = !odd;
             }

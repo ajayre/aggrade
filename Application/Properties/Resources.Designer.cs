@@ -393,6 +393,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap lever_48px {
+            get {
+                object obj = ResourceManager.GetObject("lever_48px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap location_48px {
             get {
                 object obj = ResourceManager.GetObject("location_48px", resourceCulture);
