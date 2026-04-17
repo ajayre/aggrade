@@ -26,10 +26,8 @@ namespace AgGrade.Data
         public int LocalPort;
         [XmlIgnore]
         public IPAddress SubnetMask;
-        public bool UseSecondaryTablet;
         public int MagneticDeclinationDegrees;
         public uint MagneticDeclinationMinutes;
-        public bool LogData;
         public TractorColors TractorColor;
         /// <summary>SCS Curve Number for ponding (1–100).</summary>
         public double PondingCurveNumber;
@@ -80,10 +78,8 @@ namespace AgGrade.Data
             ControllerPort = 5000;
             SubnetMask = new IPAddress(new byte[] { 255, 255, 255, 0 });
             LocalPort = 5001;
-            UseSecondaryTablet = false;
             MagneticDeclinationDegrees = 0;
             MagneticDeclinationMinutes = 0;
-            LogData = true;
             TractorColor = TractorColors.Green;
             PondingCurveNumber = 85;
             PondingRainfallMm = 50;
@@ -158,10 +154,8 @@ namespace AgGrade.Data
                         ControllerPort = loadedSettings.ControllerPort;
                         SubnetMask = loadedSettings.SubnetMask;
                         LocalPort = loadedSettings.LocalPort;
-                        UseSecondaryTablet = loadedSettings.UseSecondaryTablet;
                         MagneticDeclinationDegrees = loadedSettings.MagneticDeclinationDegrees;
                         MagneticDeclinationMinutes = loadedSettings.MagneticDeclinationMinutes;
-                        LogData = loadedSettings.LogData;
                         TractorColor = loadedSettings.TractorColor;
                         PondingCurveNumber = loadedSettings.PondingCurveNumber;
                         PondingRainfallMm = loadedSettings.PondingRainfallMm;

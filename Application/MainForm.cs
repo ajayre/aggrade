@@ -1493,7 +1493,31 @@ namespace AgGrade
             (
             )
         {
-            // fixme - to do
+            if (InvokeRequired)
+            {
+                BeginInvoke(new Action(SwitchToSecondaryMode));
+                return;
+            }
+
+            ShowMap();
+
+            FrontBladeControlBtn.Visible = false;
+            RearBladeControlBtn.Visible = false;
+
+            FrontPanIndicator.Visible = false;
+            RearPanIndicator.Visible = false;
+
+            MapBtn.Visible = false;
+            SurveyBtn.Visible = false;
+            OpenFieldBtn.Visible = false;
+
+            StatusBtn.Visible = false;
+            CalibrationBtn.Visible = false;
+
+            EditSettingsBtn.Visible = false;
+            EditEquipmentBtn.Visible = false;
+
+            StatusBar.HideLeds();
         }
 
         /// <summary>

@@ -195,17 +195,11 @@ namespace AgGrade.Controls
             Settings.ControllerPort = ValidatePort(RemotePortNum.Text);
             Settings.LocalPort = ValidatePort(LocalPortNum.Text);
 
-            // Parse secondary tablet selector (ComboBox: 0 = "No", 1 = "Yes")
-            Settings.UseSecondaryTablet = SecondaryTabletSelector.SelectedIndex == 1;
-
             // Validate and parse magnetic declination degrees (can be positive or negative)
             Settings.MagneticDeclinationDegrees = ValidateMagneticDeclinationDegrees(MagDeclinationDeg.Text);
 
             // Validate and parse magnetic declination minutes (must be positive)
             Settings.MagneticDeclinationMinutes = ValidateMagneticDeclinationMinutes(MagDeclinationMin.Text);
-
-            // Parse log data selector (ComboBox: 0 = "No", 1 = "Yes")
-            Settings.LogData = LogDataSelector.SelectedIndex == 1;
 
             // Perse tractor color
             switch (TractorColorSelector.SelectedIndex)
@@ -291,17 +285,11 @@ namespace AgGrade.Controls
 
             LocalPortNum.Text = Settings.LocalPort.ToString();
 
-            // Display secondary tablet selector
-            SecondaryTabletSelector.SelectedIndex = Settings.UseSecondaryTablet ? 1 : 0;
-
             // Display magnetic declination degrees
             MagDeclinationDeg.Text = Settings.MagneticDeclinationDegrees.ToString();
 
             // Display magnetic declination minutes
             MagDeclinationMin.Text = Settings.MagneticDeclinationMinutes.ToString();
-
-            // Display log data selector
-            LogDataSelector.SelectedIndex = Settings.LogData ? 1 : 0;
 
             // Display tractor color
             switch (Settings.TractorColor)

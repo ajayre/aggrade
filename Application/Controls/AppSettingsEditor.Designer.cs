@@ -49,15 +49,11 @@ namespace AgGrade.Controls
             label12 = new Label();
             RemotePortNum = new TextBox();
             label14 = new Label();
-            SecondaryTabletSelector = new ComboBox();
-            label15 = new Label();
             MagDeclinationDeg = new TextBox();
             label16 = new Label();
             label17 = new Label();
             label18 = new Label();
             MagDeclinationMin = new TextBox();
-            label19 = new Label();
-            LogDataSelector = new ComboBox();
             LocalPortNum = new TextBox();
             label1 = new Label();
             ApplyBtn = new Button();
@@ -264,31 +260,10 @@ namespace AgGrade.Controls
             label14.TabIndex = 31;
             label14.Text = "Port:";
             // 
-            // SecondaryTabletSelector
-            // 
-            SecondaryTabletSelector.DropDownStyle = ComboBoxStyle.DropDownList;
-            SecondaryTabletSelector.Font = new Font("Segoe UI", 14F);
-            SecondaryTabletSelector.FormattingEnabled = true;
-            SecondaryTabletSelector.Items.AddRange(new object[] { "No", "Yes" });
-            SecondaryTabletSelector.Location = new Point(230, 168);
-            SecondaryTabletSelector.Name = "SecondaryTabletSelector";
-            SecondaryTabletSelector.Size = new Size(94, 33);
-            SecondaryTabletSelector.TabIndex = 32;
-            // 
-            // label15
-            // 
-            label15.AutoSize = true;
-            label15.Font = new Font("Segoe UI", 14F);
-            label15.Location = new Point(29, 171);
-            label15.Name = "label15";
-            label15.Size = new Size(195, 25);
-            label15.TabIndex = 33;
-            label15.Text = "Use Secondary Tablet:";
-            // 
             // MagDeclinationDeg
             // 
             MagDeclinationDeg.Font = new Font("Segoe UI", 14F);
-            MagDeclinationDeg.Location = new Point(230, 207);
+            MagDeclinationDeg.Location = new Point(230, 168);
             MagDeclinationDeg.Name = "MagDeclinationDeg";
             MagDeclinationDeg.PlaceholderText = "+-0";
             MagDeclinationDeg.Size = new Size(70, 32);
@@ -298,7 +273,7 @@ namespace AgGrade.Controls
             // 
             label16.AutoSize = true;
             label16.Font = new Font("Segoe UI", 14F);
-            label16.Location = new Point(28, 210);
+            label16.Location = new Point(28, 171);
             label16.Name = "label16";
             label16.Size = new Size(196, 25);
             label16.TabIndex = 35;
@@ -308,7 +283,7 @@ namespace AgGrade.Controls
             // 
             label17.AutoSize = true;
             label17.Font = new Font("Segoe UI", 14F);
-            label17.Location = new Point(306, 210);
+            label17.Location = new Point(306, 171);
             label17.Name = "label17";
             label17.Size = new Size(79, 25);
             label17.TabIndex = 36;
@@ -318,7 +293,7 @@ namespace AgGrade.Controls
             // 
             label18.AutoSize = true;
             label18.Font = new Font("Segoe UI", 14F);
-            label18.Location = new Point(468, 210);
+            label18.Location = new Point(468, 171);
             label18.Name = "label18";
             label18.Size = new Size(79, 25);
             label18.TabIndex = 38;
@@ -327,32 +302,11 @@ namespace AgGrade.Controls
             // MagDeclinationMin
             // 
             MagDeclinationMin.Font = new Font("Segoe UI", 14F);
-            MagDeclinationMin.Location = new Point(392, 207);
+            MagDeclinationMin.Location = new Point(392, 168);
             MagDeclinationMin.Name = "MagDeclinationMin";
             MagDeclinationMin.PlaceholderText = "0";
             MagDeclinationMin.Size = new Size(70, 32);
             MagDeclinationMin.TabIndex = 37;
-            // 
-            // label19
-            // 
-            label19.AutoSize = true;
-            label19.Font = new Font("Segoe UI", 14F);
-            label19.Location = new Point(133, 248);
-            label19.Name = "label19";
-            label19.Size = new Size(91, 25);
-            label19.TabIndex = 40;
-            label19.Text = "Log Data:";
-            // 
-            // LogDataSelector
-            // 
-            LogDataSelector.DropDownStyle = ComboBoxStyle.DropDownList;
-            LogDataSelector.Font = new Font("Segoe UI", 14F);
-            LogDataSelector.FormattingEnabled = true;
-            LogDataSelector.Items.AddRange(new object[] { "No", "Yes" });
-            LogDataSelector.Location = new Point(230, 245);
-            LogDataSelector.Name = "LogDataSelector";
-            LogDataSelector.Size = new Size(94, 33);
-            LogDataSelector.TabIndex = 39;
             // 
             // LocalPortNum
             // 
@@ -387,7 +341,7 @@ namespace AgGrade.Controls
             // 
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 14F);
-            label2.Location = new Point(99, 287);
+            label2.Location = new Point(99, 209);
             label2.Name = "label2";
             label2.Size = new Size(125, 25);
             label2.TabIndex = 45;
@@ -399,7 +353,7 @@ namespace AgGrade.Controls
             TractorColorSelector.Font = new Font("Segoe UI", 14F);
             TractorColorSelector.FormattingEnabled = true;
             TractorColorSelector.Items.AddRange(new object[] { "Green", "Red", "Blue", "Yellow" });
-            TractorColorSelector.Location = new Point(230, 284);
+            TractorColorSelector.Location = new Point(230, 206);
             TractorColorSelector.Name = "TractorColorSelector";
             TractorColorSelector.Size = new Size(127, 33);
             TractorColorSelector.TabIndex = 44;
@@ -408,7 +362,7 @@ namespace AgGrade.Controls
             // 
             labelPondingCurveNumber.AutoSize = true;
             labelPondingCurveNumber.Font = new Font("Segoe UI", 14F);
-            labelPondingCurveNumber.Location = new Point(16, 326);
+            labelPondingCurveNumber.Location = new Point(16, 248);
             labelPondingCurveNumber.Name = "labelPondingCurveNumber";
             labelPondingCurveNumber.Size = new Size(208, 25);
             labelPondingCurveNumber.TabIndex = 46;
@@ -417,7 +371,7 @@ namespace AgGrade.Controls
             // PondingCurveNumberText
             // 
             PondingCurveNumberText.Font = new Font("Segoe UI", 14F);
-            PondingCurveNumberText.Location = new Point(230, 323);
+            PondingCurveNumberText.Location = new Point(230, 245);
             PondingCurveNumberText.Name = "PondingCurveNumberText";
             PondingCurveNumberText.PlaceholderText = "85";
             PondingCurveNumberText.Size = new Size(70, 32);
@@ -427,7 +381,7 @@ namespace AgGrade.Controls
             // 
             labelPondingRainfall.AutoSize = true;
             labelPondingRainfall.Font = new Font("Segoe UI", 14F);
-            labelPondingRainfall.Location = new Point(25, 364);
+            labelPondingRainfall.Location = new Point(25, 286);
             labelPondingRainfall.Name = "labelPondingRainfall";
             labelPondingRainfall.Size = new Size(199, 25);
             labelPondingRainfall.TabIndex = 48;
@@ -436,7 +390,7 @@ namespace AgGrade.Controls
             // PondingRainfallMmText
             // 
             PondingRainfallMmText.Font = new Font("Segoe UI", 14F);
-            PondingRainfallMmText.Location = new Point(230, 361);
+            PondingRainfallMmText.Location = new Point(230, 283);
             PondingRainfallMmText.Name = "PondingRainfallMmText";
             PondingRainfallMmText.PlaceholderText = "50";
             PondingRainfallMmText.Size = new Size(70, 32);
@@ -447,7 +401,7 @@ namespace AgGrade.Controls
             OpenDataFolderBtn.Font = new Font("Segoe UI", 18F);
             OpenDataFolderBtn.Image = Properties.Resources.folder_48px;
             OpenDataFolderBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            OpenDataFolderBtn.Location = new Point(230, 399);
+            OpenDataFolderBtn.Location = new Point(230, 321);
             OpenDataFolderBtn.Name = "OpenDataFolderBtn";
             OpenDataFolderBtn.Size = new Size(258, 60);
             OpenDataFolderBtn.TabIndex = 50;
@@ -496,15 +450,11 @@ namespace AgGrade.Controls
             Controls.Add(ApplyBtn);
             Controls.Add(LocalPortNum);
             Controls.Add(label1);
-            Controls.Add(label19);
-            Controls.Add(LogDataSelector);
             Controls.Add(label18);
             Controls.Add(MagDeclinationMin);
             Controls.Add(label17);
             Controls.Add(MagDeclinationDeg);
             Controls.Add(label16);
-            Controls.Add(label15);
-            Controls.Add(SecondaryTabletSelector);
             Controls.Add(RemotePortNum);
             Controls.Add(label14);
             Controls.Add(label9);
@@ -552,15 +502,11 @@ namespace AgGrade.Controls
         private Label label12;
         private TextBox RemotePortNum;
         private Label label14;
-        private ComboBox SecondaryTabletSelector;
-        private Label label15;
         private TextBox MagDeclinationDeg;
         private Label label16;
         private Label label17;
         private Label label18;
         private TextBox MagDeclinationMin;
-        private Label label19;
-        private ComboBox LogDataSelector;
         private TextBox LocalPortNum;
         private Label label1;
         private Button ApplyBtn;

@@ -12,6 +12,7 @@ using System.Windows.Forms;
 using System.Threading;
 
 using Timer = System.Timers.Timer;
+using System.DirectoryServices.ActiveDirectory;
 
 namespace AgGrade.Controls
 {
@@ -176,6 +177,24 @@ namespace AgGrade.Controls
             FlashTimer.Start();
 
             EStopBanner.Visible = false;
+        }
+
+        /// <summary>
+        /// Hides the LEDs
+        /// </summary>
+        public void HideLeds
+            (
+            )
+        {
+            foreach (Led led in SupportedLeds)
+            {
+                led.UI.Visible = false;
+            }
+
+            CtrlLabel.Visible = false;
+            RtkLabel.Visible = false;
+            HeightLabel.Visible = false;
+            ImuLabel.Visible = false;
         }
 
         /// <summary>
