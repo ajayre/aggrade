@@ -34,6 +34,19 @@ namespace HardwareSim
         private const double AUTO_DRIVE_EDGE_BUFFER_M = 15.0;
         private const double AUTO_DRIVE_EDGE_RECOVERY_M = 35.0;
 
+        /// <summary>Maximum rear bucket pitch angle (degrees) for simulator hyd jog.</summary>
+        private const double REAR_BUCKET_MAX_PITCH_ANGLE_DEG = 40.0;
+
+        private const double REAR_BUCKET_PITCH_JOG_STEP_DEG = 1.0;
+
+        /// <summary>Maximum front apron pitch (degrees) before bucket motion begins when jogging up.</summary>
+        private const double FRONT_APRON_MAX_PITCH_ANGLE_DEG = 10.0;
+
+        /// <summary>Maximum front bucket pitch (degrees) after apron is at max when jogging up.</summary>
+        private const double FRONT_BUCKET_MAX_PITCH_ANGLE_DEG = 40.0;
+
+        private const double FRONT_HYD_PITCH_JOG_STEP_DEG = 1.0;
+
         private UDPServer uDPServer;
         private Timer PingTimer;
         private GNSS GNSSSim;
@@ -46,8 +59,15 @@ namespace HardwareSim
         private UInt32 RearBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
         private Timer FrontJogTimer;
         private Timer RearJogTimer;
+        private Timer RearBucketHydJogTimer;
+        private Timer FrontHydJogTimer;
         private JogDirections FrontJogDirection;
         private JogDirections RearJogDirection;
+        private JogDirections RearBucketHydJogDirection;
+        private JogDirections FrontHydJogDirection;
+        private readonly IMUValue RearBucketIMU = new IMUValue();
+        private readonly IMUValue FrontApronIMU = new IMUValue();
+        private readonly IMUValue FrontBucketIMU = new IMUValue();
         private readonly Random Randomizer = new Random();
         private System.Windows.Forms.Timer AutoDriveTimer;
         private bool AutoDriveEnabled = false;
@@ -88,6 +108,32 @@ namespace HardwareSim
             RearJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
             RearJogTimer.Elapsed += RearJogTimer_Elapsed;
 
+            RearBucketHydJogTimer = new Timer();
+            RearBucketHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearBucketHydJogTimer.Elapsed += RearBucketHydJogTimer_Elapsed;
+
+            FrontHydJogTimer = new Timer();
+            FrontHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontHydJogTimer.Elapsed += FrontHydJogTimer_Elapsed;
+
+            RearBucketIMU.Pitch = 0;
+            RearBucketIMU.Roll = 0;
+            RearBucketIMU.Heading = 0;
+            RearBucketIMU.YawRate = 0;
+            RearBucketIMU.CalibrationStatus = IMUValue.Calibration.Good;
+
+            FrontApronIMU.Pitch = 0;
+            FrontApronIMU.Roll = 0;
+            FrontApronIMU.Heading = 0;
+            FrontApronIMU.YawRate = 0;
+            FrontApronIMU.CalibrationStatus = IMUValue.Calibration.Good;
+
+            FrontBucketIMU.Pitch = 0;
+            FrontBucketIMU.Roll = 0;
+            FrontBucketIMU.Heading = 0;
+            FrontBucketIMU.YawRate = 0;
+            FrontBucketIMU.CalibrationStatus = IMUValue.Calibration.Good;
+
             AutoDriveTimer = new System.Windows.Forms.Timer();
             AutoDriveTimer.Interval = AUTO_DRIVE_PERIOD_MS;
             AutoDriveTimer.Tick += AutoDriveTimer_Tick;
@@ -115,6 +161,92 @@ namespace HardwareSim
             Packet.SetUInt32(12, (UInt32)(Value.YawRate * 100));
             Packet.Data[16] = (byte)Value.CalibrationStatus;
             SendStatus(Packet);
+        }
+
+        /// <summary>
+        /// Same payload layout as <see cref="GNSSSim_OnNewRearIMU"/> / PGN_REAR_IMU (Application Controller).
+        /// </summary>
+        private void SendRearBucketIMUStatus()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_REAR_BUCKET_IMU;
+            Packet.SetUInt32(0, (UInt32)(RearBucketIMU.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(RearBucketIMU.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(RearBucketIMU.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(RearBucketIMU.YawRate * 100));
+            Packet.Data[16] = (byte)RearBucketIMU.CalibrationStatus;
+            SendStatus(Packet);
+        }
+
+        private void AdjustRearBucketPitchAndSend(bool increase)
+        {
+            if (increase)
+            {
+                RearBucketIMU.Pitch = Math.Min(REAR_BUCKET_MAX_PITCH_ANGLE_DEG, RearBucketIMU.Pitch + REAR_BUCKET_PITCH_JOG_STEP_DEG);
+            }
+            else
+            {
+                RearBucketIMU.Pitch = Math.Max(0.0, RearBucketIMU.Pitch - REAR_BUCKET_PITCH_JOG_STEP_DEG);
+            }
+
+            SendRearBucketIMUStatus();
+        }
+
+        private void SendFrontApronIMUStatus()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_FRONT_APRON_IMU;
+            Packet.SetUInt32(0, (UInt32)(FrontApronIMU.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(FrontApronIMU.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(FrontApronIMU.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(FrontApronIMU.YawRate * 100));
+            Packet.Data[16] = (byte)FrontApronIMU.CalibrationStatus;
+            SendStatus(Packet);
+        }
+
+        private void SendFrontBucketIMUStatus()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_FRONT_BUCKET_IMU;
+            Packet.SetUInt32(0, (UInt32)(FrontBucketIMU.Pitch * 100));
+            Packet.SetUInt32(4, (UInt32)(FrontBucketIMU.Roll * 100));
+            Packet.SetUInt32(8, (UInt32)(FrontBucketIMU.Heading * 100));
+            Packet.SetUInt32(12, (UInt32)(FrontBucketIMU.YawRate * 100));
+            Packet.Data[16] = (byte)FrontBucketIMU.CalibrationStatus;
+            SendStatus(Packet);
+        }
+
+        /// <summary>
+        /// Jog up: apron 0→<see cref="FRONT_APRON_MAX_PITCH_ANGLE_DEG"/>, then bucket 0→<see cref="FRONT_BUCKET_MAX_PITCH_ANGLE_DEG"/>.
+        /// Jog down: bucket→0, then apron→0. Either axis only moves when it is the active stage (e.g. apron-only if bucket stayed 0).
+        /// </summary>
+        private void AdjustFrontHydPitchAndSend(bool increase)
+        {
+            if (increase)
+            {
+                if (FrontApronIMU.Pitch < FRONT_APRON_MAX_PITCH_ANGLE_DEG)
+                {
+                    FrontApronIMU.Pitch = Math.Min(FRONT_APRON_MAX_PITCH_ANGLE_DEG, FrontApronIMU.Pitch + FRONT_HYD_PITCH_JOG_STEP_DEG);
+                }
+                else
+                {
+                    FrontBucketIMU.Pitch = Math.Min(FRONT_BUCKET_MAX_PITCH_ANGLE_DEG, FrontBucketIMU.Pitch + FRONT_HYD_PITCH_JOG_STEP_DEG);
+                }
+            }
+            else
+            {
+                if (FrontBucketIMU.Pitch > 0.0)
+                {
+                    FrontBucketIMU.Pitch = Math.Max(0.0, FrontBucketIMU.Pitch - FRONT_HYD_PITCH_JOG_STEP_DEG);
+                }
+                else
+                {
+                    FrontApronIMU.Pitch = Math.Max(0.0, FrontApronIMU.Pitch - FRONT_HYD_PITCH_JOG_STEP_DEG);
+                }
+            }
+
+            SendFrontApronIMUStatus();
+            SendFrontBucketIMUStatus();
         }
 
         private void GNSSSim_OnNewFrontIMU(IMUValue Value)
@@ -458,6 +590,34 @@ namespace HardwareSim
             RearJogTimer.Stop();
         }
 
+        private void RearBucketHydJogTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (RearBucketHydJogDirection == JogDirections.Up)
+            {
+                AdjustRearBucketPitchAndSend(true);
+            }
+            else
+            {
+                AdjustRearBucketPitchAndSend(false);
+            }
+
+            RearBucketHydJogTimer.Interval = RECURRING_JOG_PERIOD_MS;
+        }
+
+        private void FrontHydJogTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (FrontHydJogDirection == JogDirections.Up)
+            {
+                AdjustFrontHydPitchAndSend(true);
+            }
+            else
+            {
+                AdjustFrontHydPitchAndSend(false);
+            }
+
+            FrontHydJogTimer.Interval = RECURRING_JOG_PERIOD_MS;
+        }
+
         private void AutoDriveBtn_Click(object sender, EventArgs e)
         {
             if (AutoDriveEnabled)
@@ -687,6 +847,58 @@ namespace HardwareSim
         private void RearBucketLostBtn_Click(object sender, EventArgs e)
         {
             SendStatus(new PGNPacket(PGNValues.PGN_REAR_BUCKET_IMU_LOST));
+        }
+
+        private void FrontHydUpBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            FrontHydJogTimer.Stop();
+        }
+
+        private void FrontHydUpBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            FrontHydJogDirection = JogDirections.Up;
+            FrontHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontHydJogTimer.Start();
+            AdjustFrontHydPitchAndSend(true);
+        }
+
+        private void FrontHydDownBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            FrontHydJogTimer.Stop();
+        }
+
+        private void FrontHydDownBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            FrontHydJogDirection = JogDirections.Down;
+            FrontHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            FrontHydJogTimer.Start();
+            AdjustFrontHydPitchAndSend(false);
+        }
+
+        private void RearHydUpBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            RearBucketHydJogTimer.Stop();
+        }
+
+        private void RearHydUpBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            RearBucketHydJogDirection = JogDirections.Up;
+            RearBucketHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearBucketHydJogTimer.Start();
+            AdjustRearBucketPitchAndSend(true);
+        }
+
+        private void RearHydDownBtn_MouseUp(object sender, MouseEventArgs e)
+        {
+            RearBucketHydJogTimer.Stop();
+        }
+
+        private void RearHydDownBtn_MouseDown(object sender, MouseEventArgs e)
+        {
+            RearBucketHydJogDirection = JogDirections.Down;
+            RearBucketHydJogTimer.Interval = INITIAL_JOG_PERIOD_MS;
+            RearBucketHydJogTimer.Start();
+            AdjustRearBucketPitchAndSend(false);
         }
     }
 }

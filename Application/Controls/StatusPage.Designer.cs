@@ -145,6 +145,52 @@
             FieldProgressLabel = new Label();
             FieldProgress = new ProgressBar();
             label66 = new Label();
+            IMUPage = new TabPage();
+            groupBox5 = new GroupBox();
+            label89 = new Label();
+            RearBucketPitch = new TextBox();
+            label91 = new Label();
+            label92 = new Label();
+            RearBucketRoll = new TextBox();
+            RearBucketCalibration = new TextBox();
+            label94 = new Label();
+            label95 = new Label();
+            label96 = new Label();
+            label97 = new Label();
+            RearBucketYawRate = new TextBox();
+            RearBucketHeading = new TextBox();
+            label98 = new Label();
+            label99 = new Label();
+            groupBox4 = new GroupBox();
+            label78 = new Label();
+            FrontBucketPitch = new TextBox();
+            label80 = new Label();
+            label81 = new Label();
+            FrontBucketRoll = new TextBox();
+            FrontBucketCalibration = new TextBox();
+            label83 = new Label();
+            label84 = new Label();
+            label85 = new Label();
+            label86 = new Label();
+            FrontBucketYawRate = new TextBox();
+            FrontBucketHeading = new TextBox();
+            label87 = new Label();
+            label88 = new Label();
+            groupBox3 = new GroupBox();
+            label67 = new Label();
+            FrontApronPitch = new TextBox();
+            label69 = new Label();
+            label70 = new Label();
+            FrontApronRoll = new TextBox();
+            FrontApronCalibration = new TextBox();
+            label72 = new Label();
+            label73 = new Label();
+            label74 = new Label();
+            label75 = new Label();
+            FrontApronYawRate = new TextBox();
+            FrontApronHeading = new TextBox();
+            label76 = new Label();
+            label77 = new Label();
             sectionTitle2 = new SectionTitle();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
@@ -153,6 +199,10 @@
             RearPage.SuspendLayout();
             groupBox2.SuspendLayout();
             Field.SuspendLayout();
+            IMUPage.SuspendLayout();
+            groupBox5.SuspendLayout();
+            groupBox4.SuspendLayout();
+            groupBox3.SuspendLayout();
             SuspendLayout();
             // 
             // label50
@@ -1031,6 +1081,7 @@
             Pages.Controls.Add(FrontPage);
             Pages.Controls.Add(RearPage);
             Pages.Controls.Add(Field);
+            Pages.Controls.Add(IMUPage);
             Pages.Dock = DockStyle.Fill;
             Pages.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
             Pages.Location = new Point(0, 48);
@@ -1379,6 +1430,7 @@
             // 
             // Field
             // 
+            Field.BackColor = SystemColors.Control;
             Field.Controls.Add(Stats);
             Field.Controls.Add(ProgressChart);
             Field.Controls.Add(FieldProgressLabel);
@@ -1390,7 +1442,6 @@
             Field.Size = new Size(861, 478);
             Field.TabIndex = 3;
             Field.Text = "Field";
-            Field.UseVisualStyleBackColor = true;
             // 
             // Stats
             // 
@@ -1439,6 +1490,511 @@
             label66.TabIndex = 1;
             label66.Text = "Progress:";
             // 
+            // IMUPage
+            // 
+            IMUPage.BackColor = SystemColors.Control;
+            IMUPage.Controls.Add(groupBox5);
+            IMUPage.Controls.Add(groupBox4);
+            IMUPage.Controls.Add(groupBox3);
+            IMUPage.Location = new Point(4, 48);
+            IMUPage.Name = "IMUPage";
+            IMUPage.Padding = new Padding(3);
+            IMUPage.Size = new Size(861, 478);
+            IMUPage.TabIndex = 4;
+            IMUPage.Text = "IMUs";
+            // 
+            // groupBox5
+            // 
+            groupBox5.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox5.Controls.Add(label89);
+            groupBox5.Controls.Add(RearBucketPitch);
+            groupBox5.Controls.Add(label91);
+            groupBox5.Controls.Add(label92);
+            groupBox5.Controls.Add(RearBucketRoll);
+            groupBox5.Controls.Add(RearBucketCalibration);
+            groupBox5.Controls.Add(label94);
+            groupBox5.Controls.Add(label95);
+            groupBox5.Controls.Add(label96);
+            groupBox5.Controls.Add(label97);
+            groupBox5.Controls.Add(RearBucketYawRate);
+            groupBox5.Controls.Add(RearBucketHeading);
+            groupBox5.Controls.Add(label98);
+            groupBox5.Controls.Add(label99);
+            groupBox5.Location = new Point(6, 318);
+            groupBox5.Name = "groupBox5";
+            groupBox5.Size = new Size(849, 150);
+            groupBox5.TabIndex = 42;
+            groupBox5.TabStop = false;
+            groupBox5.Text = "Rear Bucket";
+            // 
+            // label89
+            // 
+            label89.AutoSize = true;
+            label89.Font = new Font("Segoe UI", 14F);
+            label89.Location = new Point(16, 34);
+            label89.Name = "label89";
+            label89.Size = new Size(58, 25);
+            label89.TabIndex = 24;
+            label89.Text = "Pitch:";
+            // 
+            // RearBucketPitch
+            // 
+            RearBucketPitch.Font = new Font("Segoe UI", 14F);
+            RearBucketPitch.Location = new Point(80, 31);
+            RearBucketPitch.Name = "RearBucketPitch";
+            RearBucketPitch.PlaceholderText = "179.123";
+            RearBucketPitch.ReadOnly = true;
+            RearBucketPitch.Size = new Size(91, 32);
+            RearBucketPitch.TabIndex = 25;
+            // 
+            // label91
+            // 
+            label91.AutoSize = true;
+            label91.Font = new Font("Segoe UI", 14F);
+            label91.Location = new Point(177, 34);
+            label91.Name = "label91";
+            label91.Size = new Size(44, 25);
+            label91.TabIndex = 26;
+            label91.Text = "deg";
+            // 
+            // label92
+            // 
+            label92.AutoSize = true;
+            label92.Font = new Font("Segoe UI", 14F);
+            label92.Location = new Point(27, 72);
+            label92.Name = "label92";
+            label92.Size = new Size(47, 25);
+            label92.TabIndex = 27;
+            label92.Text = "Roll:";
+            // 
+            // RearBucketRoll
+            // 
+            RearBucketRoll.Font = new Font("Segoe UI", 14F);
+            RearBucketRoll.Location = new Point(80, 69);
+            RearBucketRoll.Name = "RearBucketRoll";
+            RearBucketRoll.PlaceholderText = "179.123";
+            RearBucketRoll.ReadOnly = true;
+            RearBucketRoll.Size = new Size(91, 32);
+            RearBucketRoll.TabIndex = 28;
+            // 
+            // RearBucketCalibration
+            // 
+            RearBucketCalibration.Font = new Font("Segoe UI", 14F);
+            RearBucketCalibration.Location = new Point(533, 107);
+            RearBucketCalibration.Name = "RearBucketCalibration";
+            RearBucketCalibration.PlaceholderText = "Excellent";
+            RearBucketCalibration.ReadOnly = true;
+            RearBucketCalibration.Size = new Size(91, 32);
+            RearBucketCalibration.TabIndex = 37;
+            // 
+            // label94
+            // 
+            label94.AutoSize = true;
+            label94.Font = new Font("Segoe UI", 14F);
+            label94.Location = new Point(177, 72);
+            label94.Name = "label94";
+            label94.Size = new Size(44, 25);
+            label94.TabIndex = 29;
+            label94.Text = "deg";
+            // 
+            // label95
+            // 
+            label95.AutoSize = true;
+            label95.Font = new Font("Segoe UI", 14F);
+            label95.Location = new Point(428, 110);
+            label95.Name = "label95";
+            label95.Size = new Size(99, 25);
+            label95.TabIndex = 36;
+            label95.Text = "IMU Calib:";
+            // 
+            // label96
+            // 
+            label96.AutoSize = true;
+            label96.Font = new Font("Segoe UI", 14F);
+            label96.Location = new Point(436, 34);
+            label96.Name = "label96";
+            label96.Size = new Size(91, 25);
+            label96.TabIndex = 30;
+            label96.Text = "Yaw Rate:";
+            // 
+            // label97
+            // 
+            label97.AutoSize = true;
+            label97.Font = new Font("Segoe UI", 14F);
+            label97.Location = new Point(630, 72);
+            label97.Name = "label97";
+            label97.Size = new Size(97, 25);
+            label97.TabIndex = 35;
+            label97.Text = "deg (True)";
+            // 
+            // RearBucketYawRate
+            // 
+            RearBucketYawRate.Font = new Font("Segoe UI", 14F);
+            RearBucketYawRate.Location = new Point(533, 31);
+            RearBucketYawRate.Name = "RearBucketYawRate";
+            RearBucketYawRate.PlaceholderText = "179.123";
+            RearBucketYawRate.ReadOnly = true;
+            RearBucketYawRate.Size = new Size(91, 32);
+            RearBucketYawRate.TabIndex = 31;
+            // 
+            // RearBucketHeading
+            // 
+            RearBucketHeading.Font = new Font("Segoe UI", 14F);
+            RearBucketHeading.Location = new Point(533, 69);
+            RearBucketHeading.Name = "RearBucketHeading";
+            RearBucketHeading.PlaceholderText = "179.123";
+            RearBucketHeading.ReadOnly = true;
+            RearBucketHeading.Size = new Size(91, 32);
+            RearBucketHeading.TabIndex = 34;
+            // 
+            // label98
+            // 
+            label98.AutoSize = true;
+            label98.Font = new Font("Segoe UI", 14F);
+            label98.Location = new Point(630, 34);
+            label98.Name = "label98";
+            label98.Size = new Size(59, 25);
+            label98.TabIndex = 32;
+            label98.Text = "deg/s";
+            // 
+            // label99
+            // 
+            label99.AutoSize = true;
+            label99.Font = new Font("Segoe UI", 14F);
+            label99.Location = new Point(400, 72);
+            label99.Name = "label99";
+            label99.Size = new Size(127, 25);
+            label99.TabIndex = 33;
+            label99.Text = "IMU Heading:";
+            // 
+            // groupBox4
+            // 
+            groupBox4.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox4.Controls.Add(label78);
+            groupBox4.Controls.Add(FrontBucketPitch);
+            groupBox4.Controls.Add(label80);
+            groupBox4.Controls.Add(label81);
+            groupBox4.Controls.Add(FrontBucketRoll);
+            groupBox4.Controls.Add(FrontBucketCalibration);
+            groupBox4.Controls.Add(label83);
+            groupBox4.Controls.Add(label84);
+            groupBox4.Controls.Add(label85);
+            groupBox4.Controls.Add(label86);
+            groupBox4.Controls.Add(FrontBucketYawRate);
+            groupBox4.Controls.Add(FrontBucketHeading);
+            groupBox4.Controls.Add(label87);
+            groupBox4.Controls.Add(label88);
+            groupBox4.Location = new Point(6, 162);
+            groupBox4.Name = "groupBox4";
+            groupBox4.Size = new Size(849, 150);
+            groupBox4.TabIndex = 41;
+            groupBox4.TabStop = false;
+            groupBox4.Text = "Front Bucket";
+            // 
+            // label78
+            // 
+            label78.AutoSize = true;
+            label78.Font = new Font("Segoe UI", 14F);
+            label78.Location = new Point(16, 34);
+            label78.Name = "label78";
+            label78.Size = new Size(58, 25);
+            label78.TabIndex = 24;
+            label78.Text = "Pitch:";
+            // 
+            // FrontBucketPitch
+            // 
+            FrontBucketPitch.Font = new Font("Segoe UI", 14F);
+            FrontBucketPitch.Location = new Point(80, 31);
+            FrontBucketPitch.Name = "FrontBucketPitch";
+            FrontBucketPitch.PlaceholderText = "179.123";
+            FrontBucketPitch.ReadOnly = true;
+            FrontBucketPitch.Size = new Size(91, 32);
+            FrontBucketPitch.TabIndex = 25;
+            // 
+            // label80
+            // 
+            label80.AutoSize = true;
+            label80.Font = new Font("Segoe UI", 14F);
+            label80.Location = new Point(177, 34);
+            label80.Name = "label80";
+            label80.Size = new Size(44, 25);
+            label80.TabIndex = 26;
+            label80.Text = "deg";
+            // 
+            // label81
+            // 
+            label81.AutoSize = true;
+            label81.Font = new Font("Segoe UI", 14F);
+            label81.Location = new Point(27, 72);
+            label81.Name = "label81";
+            label81.Size = new Size(47, 25);
+            label81.TabIndex = 27;
+            label81.Text = "Roll:";
+            // 
+            // FrontBucketRoll
+            // 
+            FrontBucketRoll.Font = new Font("Segoe UI", 14F);
+            FrontBucketRoll.Location = new Point(80, 69);
+            FrontBucketRoll.Name = "FrontBucketRoll";
+            FrontBucketRoll.PlaceholderText = "179.123";
+            FrontBucketRoll.ReadOnly = true;
+            FrontBucketRoll.Size = new Size(91, 32);
+            FrontBucketRoll.TabIndex = 28;
+            // 
+            // FrontBucketCalibration
+            // 
+            FrontBucketCalibration.Font = new Font("Segoe UI", 14F);
+            FrontBucketCalibration.Location = new Point(533, 107);
+            FrontBucketCalibration.Name = "FrontBucketCalibration";
+            FrontBucketCalibration.PlaceholderText = "Excellent";
+            FrontBucketCalibration.ReadOnly = true;
+            FrontBucketCalibration.Size = new Size(91, 32);
+            FrontBucketCalibration.TabIndex = 37;
+            // 
+            // label83
+            // 
+            label83.AutoSize = true;
+            label83.Font = new Font("Segoe UI", 14F);
+            label83.Location = new Point(177, 72);
+            label83.Name = "label83";
+            label83.Size = new Size(44, 25);
+            label83.TabIndex = 29;
+            label83.Text = "deg";
+            // 
+            // label84
+            // 
+            label84.AutoSize = true;
+            label84.Font = new Font("Segoe UI", 14F);
+            label84.Location = new Point(428, 110);
+            label84.Name = "label84";
+            label84.Size = new Size(99, 25);
+            label84.TabIndex = 36;
+            label84.Text = "IMU Calib:";
+            // 
+            // label85
+            // 
+            label85.AutoSize = true;
+            label85.Font = new Font("Segoe UI", 14F);
+            label85.Location = new Point(436, 34);
+            label85.Name = "label85";
+            label85.Size = new Size(91, 25);
+            label85.TabIndex = 30;
+            label85.Text = "Yaw Rate:";
+            // 
+            // label86
+            // 
+            label86.AutoSize = true;
+            label86.Font = new Font("Segoe UI", 14F);
+            label86.Location = new Point(630, 72);
+            label86.Name = "label86";
+            label86.Size = new Size(97, 25);
+            label86.TabIndex = 35;
+            label86.Text = "deg (True)";
+            // 
+            // FrontBucketYawRate
+            // 
+            FrontBucketYawRate.Font = new Font("Segoe UI", 14F);
+            FrontBucketYawRate.Location = new Point(533, 31);
+            FrontBucketYawRate.Name = "FrontBucketYawRate";
+            FrontBucketYawRate.PlaceholderText = "179.123";
+            FrontBucketYawRate.ReadOnly = true;
+            FrontBucketYawRate.Size = new Size(91, 32);
+            FrontBucketYawRate.TabIndex = 31;
+            // 
+            // FrontBucketHeading
+            // 
+            FrontBucketHeading.Font = new Font("Segoe UI", 14F);
+            FrontBucketHeading.Location = new Point(533, 69);
+            FrontBucketHeading.Name = "FrontBucketHeading";
+            FrontBucketHeading.PlaceholderText = "179.123";
+            FrontBucketHeading.ReadOnly = true;
+            FrontBucketHeading.Size = new Size(91, 32);
+            FrontBucketHeading.TabIndex = 34;
+            // 
+            // label87
+            // 
+            label87.AutoSize = true;
+            label87.Font = new Font("Segoe UI", 14F);
+            label87.Location = new Point(630, 34);
+            label87.Name = "label87";
+            label87.Size = new Size(59, 25);
+            label87.TabIndex = 32;
+            label87.Text = "deg/s";
+            // 
+            // label88
+            // 
+            label88.AutoSize = true;
+            label88.Font = new Font("Segoe UI", 14F);
+            label88.Location = new Point(400, 72);
+            label88.Name = "label88";
+            label88.Size = new Size(127, 25);
+            label88.TabIndex = 33;
+            label88.Text = "IMU Heading:";
+            // 
+            // groupBox3
+            // 
+            groupBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox3.Controls.Add(label67);
+            groupBox3.Controls.Add(FrontApronPitch);
+            groupBox3.Controls.Add(label69);
+            groupBox3.Controls.Add(label70);
+            groupBox3.Controls.Add(FrontApronRoll);
+            groupBox3.Controls.Add(FrontApronCalibration);
+            groupBox3.Controls.Add(label72);
+            groupBox3.Controls.Add(label73);
+            groupBox3.Controls.Add(label74);
+            groupBox3.Controls.Add(label75);
+            groupBox3.Controls.Add(FrontApronYawRate);
+            groupBox3.Controls.Add(FrontApronHeading);
+            groupBox3.Controls.Add(label76);
+            groupBox3.Controls.Add(label77);
+            groupBox3.Location = new Point(6, 6);
+            groupBox3.Name = "groupBox3";
+            groupBox3.Size = new Size(849, 150);
+            groupBox3.TabIndex = 0;
+            groupBox3.TabStop = false;
+            groupBox3.Text = "Front Apron";
+            // 
+            // label67
+            // 
+            label67.AutoSize = true;
+            label67.Font = new Font("Segoe UI", 14F);
+            label67.Location = new Point(16, 34);
+            label67.Name = "label67";
+            label67.Size = new Size(58, 25);
+            label67.TabIndex = 24;
+            label67.Text = "Pitch:";
+            // 
+            // FrontApronPitch
+            // 
+            FrontApronPitch.Font = new Font("Segoe UI", 14F);
+            FrontApronPitch.Location = new Point(80, 31);
+            FrontApronPitch.Name = "FrontApronPitch";
+            FrontApronPitch.PlaceholderText = "179.123";
+            FrontApronPitch.ReadOnly = true;
+            FrontApronPitch.Size = new Size(91, 32);
+            FrontApronPitch.TabIndex = 25;
+            // 
+            // label69
+            // 
+            label69.AutoSize = true;
+            label69.Font = new Font("Segoe UI", 14F);
+            label69.Location = new Point(177, 34);
+            label69.Name = "label69";
+            label69.Size = new Size(44, 25);
+            label69.TabIndex = 26;
+            label69.Text = "deg";
+            // 
+            // label70
+            // 
+            label70.AutoSize = true;
+            label70.Font = new Font("Segoe UI", 14F);
+            label70.Location = new Point(27, 72);
+            label70.Name = "label70";
+            label70.Size = new Size(47, 25);
+            label70.TabIndex = 27;
+            label70.Text = "Roll:";
+            // 
+            // FrontApronRoll
+            // 
+            FrontApronRoll.Font = new Font("Segoe UI", 14F);
+            FrontApronRoll.Location = new Point(80, 69);
+            FrontApronRoll.Name = "FrontApronRoll";
+            FrontApronRoll.PlaceholderText = "179.123";
+            FrontApronRoll.ReadOnly = true;
+            FrontApronRoll.Size = new Size(91, 32);
+            FrontApronRoll.TabIndex = 28;
+            // 
+            // FrontApronCalibration
+            // 
+            FrontApronCalibration.Font = new Font("Segoe UI", 14F);
+            FrontApronCalibration.Location = new Point(533, 107);
+            FrontApronCalibration.Name = "FrontApronCalibration";
+            FrontApronCalibration.PlaceholderText = "Excellent";
+            FrontApronCalibration.ReadOnly = true;
+            FrontApronCalibration.Size = new Size(91, 32);
+            FrontApronCalibration.TabIndex = 37;
+            // 
+            // label72
+            // 
+            label72.AutoSize = true;
+            label72.Font = new Font("Segoe UI", 14F);
+            label72.Location = new Point(177, 72);
+            label72.Name = "label72";
+            label72.Size = new Size(44, 25);
+            label72.TabIndex = 29;
+            label72.Text = "deg";
+            // 
+            // label73
+            // 
+            label73.AutoSize = true;
+            label73.Font = new Font("Segoe UI", 14F);
+            label73.Location = new Point(428, 110);
+            label73.Name = "label73";
+            label73.Size = new Size(99, 25);
+            label73.TabIndex = 36;
+            label73.Text = "IMU Calib:";
+            // 
+            // label74
+            // 
+            label74.AutoSize = true;
+            label74.Font = new Font("Segoe UI", 14F);
+            label74.Location = new Point(436, 34);
+            label74.Name = "label74";
+            label74.Size = new Size(91, 25);
+            label74.TabIndex = 30;
+            label74.Text = "Yaw Rate:";
+            // 
+            // label75
+            // 
+            label75.AutoSize = true;
+            label75.Font = new Font("Segoe UI", 14F);
+            label75.Location = new Point(630, 72);
+            label75.Name = "label75";
+            label75.Size = new Size(97, 25);
+            label75.TabIndex = 35;
+            label75.Text = "deg (True)";
+            // 
+            // FrontApronYawRate
+            // 
+            FrontApronYawRate.Font = new Font("Segoe UI", 14F);
+            FrontApronYawRate.Location = new Point(533, 31);
+            FrontApronYawRate.Name = "FrontApronYawRate";
+            FrontApronYawRate.PlaceholderText = "179.123";
+            FrontApronYawRate.ReadOnly = true;
+            FrontApronYawRate.Size = new Size(91, 32);
+            FrontApronYawRate.TabIndex = 31;
+            // 
+            // FrontApronHeading
+            // 
+            FrontApronHeading.Font = new Font("Segoe UI", 14F);
+            FrontApronHeading.Location = new Point(533, 69);
+            FrontApronHeading.Name = "FrontApronHeading";
+            FrontApronHeading.PlaceholderText = "179.123";
+            FrontApronHeading.ReadOnly = true;
+            FrontApronHeading.Size = new Size(91, 32);
+            FrontApronHeading.TabIndex = 34;
+            // 
+            // label76
+            // 
+            label76.AutoSize = true;
+            label76.Font = new Font("Segoe UI", 14F);
+            label76.Location = new Point(630, 34);
+            label76.Name = "label76";
+            label76.Size = new Size(59, 25);
+            label76.TabIndex = 32;
+            label76.Text = "deg/s";
+            // 
+            // label77
+            // 
+            label77.AutoSize = true;
+            label77.Font = new Font("Segoe UI", 14F);
+            label77.Location = new Point(400, 72);
+            label77.Name = "label77";
+            label77.Size = new Size(127, 25);
+            label77.TabIndex = 33;
+            label77.Text = "IMU Heading:";
+            // 
             // sectionTitle2
             // 
             sectionTitle2.Dock = DockStyle.Top;
@@ -1470,6 +2026,13 @@
             groupBox2.PerformLayout();
             Field.ResumeLayout(false);
             Field.PerformLayout();
+            IMUPage.ResumeLayout(false);
+            groupBox5.ResumeLayout(false);
+            groupBox5.PerformLayout();
+            groupBox4.ResumeLayout(false);
+            groupBox4.PerformLayout();
+            groupBox3.ResumeLayout(false);
+            groupBox3.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1594,5 +2157,51 @@
         private Label FieldProgressLabel;
         private ScottPlot.WinForms.FormsPlot ProgressChart;
         private Label Stats;
+        private TabPage IMUPage;
+        private GroupBox groupBox5;
+        private Label label89;
+        private TextBox RearBucketPitch;
+        private Label label91;
+        private Label label92;
+        private TextBox RearBucketRoll;
+        private TextBox RearBucketCalibration;
+        private Label label94;
+        private Label label95;
+        private Label label96;
+        private Label label97;
+        private TextBox RearBucketYawRate;
+        private TextBox RearBucketHeading;
+        private Label label98;
+        private Label label99;
+        private GroupBox groupBox4;
+        private Label label78;
+        private TextBox FrontBucketPitch;
+        private Label label80;
+        private Label label81;
+        private TextBox FrontBucketRoll;
+        private TextBox FrontBucketCalibration;
+        private Label label83;
+        private Label label84;
+        private Label label85;
+        private Label label86;
+        private TextBox FrontBucketYawRate;
+        private TextBox FrontBucketHeading;
+        private Label label87;
+        private Label label88;
+        private GroupBox groupBox3;
+        private Label label67;
+        private TextBox FrontApronPitch;
+        private Label label69;
+        private Label label70;
+        private TextBox FrontApronRoll;
+        private TextBox FrontApronCalibration;
+        private Label label72;
+        private Label label73;
+        private Label label74;
+        private Label label75;
+        private TextBox FrontApronYawRate;
+        private TextBox FrontApronHeading;
+        private Label label76;
+        private Label label77;
     }
 }

@@ -70,9 +70,17 @@
             label1 = new Label();
             LongitudeInput = new TextBox();
             LatitudeInput = new TextBox();
+            tabPage1 = new TabPage();
+            label5 = new Label();
+            FrontHydDownBtn = new Button();
+            FrontHydUpBtn = new Button();
+            label6 = new Label();
+            RearHydDownBtn = new Button();
+            RearHydUpBtn = new Button();
             tabControl1.SuspendLayout();
             MiscPage.SuspendLayout();
             GNSSPage.SuspendLayout();
+            tabPage1.SuspendLayout();
             SuspendLayout();
             // 
             // EStopBtn
@@ -159,6 +167,7 @@
             // 
             tabControl1.Controls.Add(MiscPage);
             tabControl1.Controls.Add(GNSSPage);
+            tabControl1.Controls.Add(tabPage1);
             tabControl1.Dock = DockStyle.Fill;
             tabControl1.Location = new Point(0, 0);
             tabControl1.Name = "tabControl1";
@@ -529,6 +538,84 @@
             LatitudeInput.Size = new Size(127, 23);
             LatitudeInput.TabIndex = 0;
             // 
+            // tabPage1
+            // 
+            tabPage1.Controls.Add(label6);
+            tabPage1.Controls.Add(RearHydDownBtn);
+            tabPage1.Controls.Add(RearHydUpBtn);
+            tabPage1.Controls.Add(label5);
+            tabPage1.Controls.Add(FrontHydDownBtn);
+            tabPage1.Controls.Add(FrontHydUpBtn);
+            tabPage1.Location = new Point(4, 24);
+            tabPage1.Name = "tabPage1";
+            tabPage1.Padding = new Padding(3);
+            tabPage1.Size = new Size(597, 422);
+            tabPage1.TabIndex = 2;
+            tabPage1.Text = "Hydraulics";
+            tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(36, 13);
+            label5.Name = "label5";
+            label5.Size = new Size(38, 15);
+            label5.TabIndex = 21;
+            label5.Text = "Front:";
+            // 
+            // FrontHydDownBtn
+            // 
+            FrontHydDownBtn.Image = Properties.Resources.down_48px;
+            FrontHydDownBtn.Location = new Point(26, 93);
+            FrontHydDownBtn.Name = "FrontHydDownBtn";
+            FrontHydDownBtn.Size = new Size(56, 56);
+            FrontHydDownBtn.TabIndex = 20;
+            FrontHydDownBtn.UseVisualStyleBackColor = true;
+            FrontHydDownBtn.MouseDown += FrontHydDownBtn_MouseDown;
+            FrontHydDownBtn.MouseUp += FrontHydDownBtn_MouseUp;
+            // 
+            // FrontHydUpBtn
+            // 
+            FrontHydUpBtn.Image = Properties.Resources.up_48px;
+            FrontHydUpBtn.Location = new Point(26, 31);
+            FrontHydUpBtn.Name = "FrontHydUpBtn";
+            FrontHydUpBtn.Size = new Size(56, 56);
+            FrontHydUpBtn.TabIndex = 19;
+            FrontHydUpBtn.UseVisualStyleBackColor = true;
+            FrontHydUpBtn.MouseDown += FrontHydUpBtn_MouseDown;
+            FrontHydUpBtn.MouseUp += FrontHydUpBtn_MouseUp;
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Location = new Point(140, 13);
+            label6.Name = "label6";
+            label6.Size = new Size(33, 15);
+            label6.TabIndex = 24;
+            label6.Text = "Rear:";
+            // 
+            // RearHydDownBtn
+            // 
+            RearHydDownBtn.Image = Properties.Resources.down_48px;
+            RearHydDownBtn.Location = new Point(128, 93);
+            RearHydDownBtn.Name = "RearHydDownBtn";
+            RearHydDownBtn.Size = new Size(56, 56);
+            RearHydDownBtn.TabIndex = 23;
+            RearHydDownBtn.UseVisualStyleBackColor = true;
+            RearHydDownBtn.MouseDown += RearHydDownBtn_MouseDown;
+            RearHydDownBtn.MouseUp += RearHydDownBtn_MouseUp;
+            // 
+            // RearHydUpBtn
+            // 
+            RearHydUpBtn.Image = Properties.Resources.up_48px;
+            RearHydUpBtn.Location = new Point(128, 31);
+            RearHydUpBtn.Name = "RearHydUpBtn";
+            RearHydUpBtn.Size = new Size(56, 56);
+            RearHydUpBtn.TabIndex = 22;
+            RearHydUpBtn.UseVisualStyleBackColor = true;
+            RearHydUpBtn.MouseDown += RearHydUpBtn_MouseDown;
+            RearHydUpBtn.MouseUp += RearHydUpBtn_MouseUp;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -541,6 +628,8 @@
             MiscPage.ResumeLayout(false);
             GNSSPage.ResumeLayout(false);
             GNSSPage.PerformLayout();
+            tabPage1.ResumeLayout(false);
+            tabPage1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -588,5 +677,12 @@
         private Button FrontBucketLostBtn;
         private Button FrontBucketFoundBtn;
         private Button FrontApronLostBtn;
+        private TabPage tabPage1;
+        private Label label6;
+        private Button RearHydDownBtn;
+        private Button RearHydUpBtn;
+        private Label label5;
+        private Button FrontHydDownBtn;
+        private Button FrontHydUpBtn;
     }
 }

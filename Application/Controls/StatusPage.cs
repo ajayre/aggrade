@@ -129,6 +129,27 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMU.CalibrationStatus != Status.RearPan.IMU.CalibrationStatus);
 
+            // update Front Apron IMU
+            UpdateTextBoxIfChanged(FrontApronPitch, FormatDouble(Status.FrontPan.ApronIMU.Pitch), PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.Pitch != Status.FrontPan.ApronIMU.Pitch);
+            UpdateTextBoxIfChanged(FrontApronRoll, FormatDouble(Status.FrontPan.ApronIMU.Roll), PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.Roll != Status.FrontPan.ApronIMU.Roll);
+            UpdateTextBoxIfChanged(FrontApronYawRate, FormatDouble(Status.FrontPan.ApronIMU.YawRate), PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.YawRate != Status.FrontPan.ApronIMU.YawRate);
+            UpdateTextBoxIfChanged(FrontApronHeading, FormatDouble(Status.FrontPan.ApronIMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.Heading != Status.FrontPan.ApronIMU.Heading);
+            UpdateIMUCalibrationTextBox(FrontApronCalibration, Status.FrontPan.ApronIMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.CalibrationStatus != Status.FrontPan.ApronIMU.CalibrationStatus);
+
+            // update Front Bucket IMU
+            UpdateTextBoxIfChanged(FrontBucketPitch, FormatDouble(Status.FrontPan.BucketIMU.Pitch), PreviousStatus == null || PreviousStatus.FrontPan.BucketIMU.Pitch != Status.FrontPan.BucketIMU.Pitch);
+            UpdateTextBoxIfChanged(FrontBucketRoll, FormatDouble(Status.FrontPan.BucketIMU.Roll), PreviousStatus == null || PreviousStatus.FrontPan.BucketIMU.Roll != Status.FrontPan.BucketIMU.Roll);
+            UpdateTextBoxIfChanged(FrontBucketYawRate, FormatDouble(Status.FrontPan.BucketIMU.YawRate), PreviousStatus == null || PreviousStatus.FrontPan.BucketIMU.YawRate != Status.FrontPan.BucketIMU.YawRate);
+            UpdateTextBoxIfChanged(FrontBucketHeading, FormatDouble(Status.FrontPan.BucketIMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.BucketIMU.Heading != Status.FrontPan.BucketIMU.Heading);
+            UpdateIMUCalibrationTextBox(FrontBucketCalibration, Status.FrontPan.BucketIMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.FrontPan.BucketIMU.CalibrationStatus != Status.FrontPan.BucketIMU.CalibrationStatus);
+
+            // update Rear Bucket IMU
+            UpdateTextBoxIfChanged(RearBucketPitch, FormatDouble(Status.RearPan.BucketIMU.Pitch), PreviousStatus == null || PreviousStatus.RearPan.BucketIMU.Pitch != Status.RearPan.BucketIMU.Pitch);
+            UpdateTextBoxIfChanged(RearBucketRoll, FormatDouble(Status.RearPan.BucketIMU.Roll), PreviousStatus == null || PreviousStatus.RearPan.BucketIMU.Roll != Status.RearPan.BucketIMU.Roll);
+            UpdateTextBoxIfChanged(RearBucketYawRate, FormatDouble(Status.RearPan.BucketIMU.YawRate), PreviousStatus == null || PreviousStatus.RearPan.BucketIMU.YawRate != Status.RearPan.BucketIMU.YawRate);
+            UpdateTextBoxIfChanged(RearBucketHeading, FormatDouble(Status.RearPan.BucketIMU.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.BucketIMU.Heading != Status.RearPan.BucketIMU.Heading);
+            UpdateIMUCalibrationTextBox(RearBucketCalibration, Status.RearPan.BucketIMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.BucketIMU.CalibrationStatus != Status.RearPan.BucketIMU.CalibrationStatus);
+
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus
             {
@@ -158,6 +179,22 @@ namespace AgGrade.Controls
                         YawRate = Status.FrontPan.IMU.YawRate,
                         CalibrationStatus = Status.FrontPan.IMU.CalibrationStatus
                     },
+                    BucketIMU = new IMUValue
+                    {
+                        Pitch = Status.FrontPan.BucketIMU.Pitch,
+                        Heading = Status.FrontPan.BucketIMU.Heading,
+                        Roll = Status.FrontPan.BucketIMU.Roll,
+                        YawRate = Status.FrontPan.BucketIMU.YawRate,
+                        CalibrationStatus = Status.FrontPan.BucketIMU.CalibrationStatus
+                    },
+                    ApronIMU = new IMUValue
+                    {
+                        Pitch = Status.FrontPan.ApronIMU.Pitch,
+                        Heading = Status.FrontPan.ApronIMU.Heading,
+                        Roll = Status.FrontPan.ApronIMU.Roll,
+                        YawRate = Status.FrontPan.ApronIMU.YawRate,
+                        CalibrationStatus = Status.FrontPan.ApronIMU.CalibrationStatus
+                    },
                     BladeHeight = Status.FrontPan.BladeHeight,
                     BladeOffset = Status.FrontPan.BladeOffset,
                     Mode = Status.FrontPan.Mode,
@@ -181,6 +218,14 @@ namespace AgGrade.Controls
                         Roll = Status.RearPan.IMU.Roll,
                         YawRate = Status.RearPan.IMU.YawRate,
                         CalibrationStatus = Status.RearPan.IMU.CalibrationStatus
+                    },
+                    BucketIMU = new IMUValue
+                    {
+                        Pitch = Status.RearPan.BucketIMU.Pitch,
+                        Heading = Status.RearPan.BucketIMU.Heading,
+                        Roll = Status.RearPan.BucketIMU.Roll,
+                        YawRate = Status.RearPan.BucketIMU.YawRate,
+                        CalibrationStatus = Status.RearPan.BucketIMU.CalibrationStatus
                     },
                     BladeHeight = Status.RearPan.BladeHeight,
                     BladeOffset = Status.RearPan.BladeOffset,
