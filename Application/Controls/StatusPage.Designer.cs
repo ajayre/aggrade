@@ -192,6 +192,17 @@
             label76 = new Label();
             label77 = new Label();
             sectionTitle2 = new SectionTitle();
+            groupBox6 = new GroupBox();
+            groupBox7 = new GroupBox();
+            FrontPanBucketAngle = new TextBox();
+            label68 = new Label();
+            label71 = new Label();
+            FrontPanApronAngle = new TextBox();
+            label79 = new Label();
+            label82 = new Label();
+            RearPanBucketAngle = new TextBox();
+            label90 = new Label();
+            label93 = new Label();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             FrontPage.SuspendLayout();
@@ -203,6 +214,8 @@
             groupBox5.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox3.SuspendLayout();
+            groupBox6.SuspendLayout();
+            groupBox7.SuspendLayout();
             SuspendLayout();
             // 
             // label50
@@ -1131,6 +1144,7 @@
             // FrontPage
             // 
             FrontPage.BackColor = SystemColors.Control;
+            FrontPage.Controls.Add(groupBox6);
             FrontPage.Controls.Add(groupBox1);
             FrontPage.Controls.Add(label52);
             FrontPage.Controls.Add(FrontPanLocation);
@@ -1168,7 +1182,7 @@
             // 
             // groupBox1
             // 
-            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox1.Controls.Add(FrontPanBladeDirection);
             groupBox1.Controls.Add(label63);
             groupBox1.Controls.Add(FrontPanBladeOffset);
@@ -1183,7 +1197,7 @@
             groupBox1.Controls.Add(label7);
             groupBox1.Location = new Point(6, 196);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(849, 276);
+            groupBox1.Size = new Size(849, 149);
             groupBox1.TabIndex = 33;
             groupBox1.TabStop = false;
             groupBox1.Text = "Blade";
@@ -1281,6 +1295,7 @@
             // RearPage
             // 
             RearPage.BackColor = SystemColors.Control;
+            RearPage.Controls.Add(groupBox7);
             RearPage.Controls.Add(groupBox2);
             RearPage.Controls.Add(label54);
             RearPage.Controls.Add(RearPanLocation);
@@ -1318,7 +1333,7 @@
             // 
             // groupBox2
             // 
-            groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             groupBox2.Controls.Add(RearPanBladeAuto);
             groupBox2.Controls.Add(label60);
             groupBox2.Controls.Add(RearPanBladeDirection);
@@ -1333,7 +1348,7 @@
             groupBox2.Controls.Add(label17);
             groupBox2.Location = new Point(6, 196);
             groupBox2.Name = "groupBox2";
-            groupBox2.Size = new Size(849, 276);
+            groupBox2.Size = new Size(849, 149);
             groupBox2.TabIndex = 36;
             groupBox2.TabStop = false;
             groupBox2.Text = "Blade";
@@ -2004,6 +2019,125 @@
             sectionTitle2.TabIndex = 24;
             sectionTitle2.TitleText = "Live Status";
             // 
+            // groupBox6
+            // 
+            groupBox6.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox6.Controls.Add(FrontPanApronAngle);
+            groupBox6.Controls.Add(label79);
+            groupBox6.Controls.Add(label82);
+            groupBox6.Controls.Add(FrontPanBucketAngle);
+            groupBox6.Controls.Add(label68);
+            groupBox6.Controls.Add(label71);
+            groupBox6.Location = new Point(6, 351);
+            groupBox6.Name = "groupBox6";
+            groupBox6.Size = new Size(849, 121);
+            groupBox6.TabIndex = 34;
+            groupBox6.TabStop = false;
+            groupBox6.Text = "Actuators";
+            // 
+            // groupBox7
+            // 
+            groupBox7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox7.Controls.Add(RearPanBucketAngle);
+            groupBox7.Controls.Add(label90);
+            groupBox7.Controls.Add(label93);
+            groupBox7.Location = new Point(6, 351);
+            groupBox7.Name = "groupBox7";
+            groupBox7.Size = new Size(849, 121);
+            groupBox7.TabIndex = 37;
+            groupBox7.TabStop = false;
+            groupBox7.Text = "Actuators";
+            // 
+            // FrontPanBucketAngle
+            // 
+            FrontPanBucketAngle.Font = new Font("Segoe UI", 14F);
+            FrontPanBucketAngle.Location = new Point(102, 31);
+            FrontPanBucketAngle.Name = "FrontPanBucketAngle";
+            FrontPanBucketAngle.PlaceholderText = "179.123";
+            FrontPanBucketAngle.ReadOnly = true;
+            FrontPanBucketAngle.Size = new Size(91, 32);
+            FrontPanBucketAngle.TabIndex = 23;
+            // 
+            // label68
+            // 
+            label68.AutoSize = true;
+            label68.Font = new Font("Segoe UI", 14F);
+            label68.Location = new Point(24, 34);
+            label68.Name = "label68";
+            label68.Size = new Size(72, 25);
+            label68.TabIndex = 22;
+            label68.Text = "Bucket:";
+            // 
+            // label71
+            // 
+            label71.AutoSize = true;
+            label71.Font = new Font("Segoe UI", 14F);
+            label71.Location = new Point(199, 34);
+            label71.Name = "label71";
+            label71.Size = new Size(44, 25);
+            label71.TabIndex = 24;
+            label71.Text = "deg";
+            // 
+            // FrontPanApronAngle
+            // 
+            FrontPanApronAngle.Font = new Font("Segoe UI", 14F);
+            FrontPanApronAngle.Location = new Point(555, 27);
+            FrontPanApronAngle.Name = "FrontPanApronAngle";
+            FrontPanApronAngle.PlaceholderText = "179.123";
+            FrontPanApronAngle.ReadOnly = true;
+            FrontPanApronAngle.Size = new Size(91, 32);
+            FrontPanApronAngle.TabIndex = 26;
+            // 
+            // label79
+            // 
+            label79.AutoSize = true;
+            label79.Font = new Font("Segoe UI", 14F);
+            label79.Location = new Point(481, 30);
+            label79.Name = "label79";
+            label79.Size = new Size(68, 25);
+            label79.TabIndex = 25;
+            label79.Text = "Apron:";
+            // 
+            // label82
+            // 
+            label82.AutoSize = true;
+            label82.Font = new Font("Segoe UI", 14F);
+            label82.Location = new Point(652, 30);
+            label82.Name = "label82";
+            label82.Size = new Size(44, 25);
+            label82.TabIndex = 27;
+            label82.Text = "deg";
+            // 
+            // RearPanBucketAngle
+            // 
+            RearPanBucketAngle.Font = new Font("Segoe UI", 14F);
+            RearPanBucketAngle.Location = new Point(102, 31);
+            RearPanBucketAngle.Name = "RearPanBucketAngle";
+            RearPanBucketAngle.PlaceholderText = "179.123";
+            RearPanBucketAngle.ReadOnly = true;
+            RearPanBucketAngle.Size = new Size(91, 32);
+            RearPanBucketAngle.TabIndex = 26;
+            // 
+            // label90
+            // 
+            label90.AutoSize = true;
+            label90.Font = new Font("Segoe UI", 14F);
+            label90.Location = new Point(24, 34);
+            label90.Name = "label90";
+            label90.Size = new Size(72, 25);
+            label90.TabIndex = 25;
+            label90.Text = "Bucket:";
+            // 
+            // label93
+            // 
+            label93.AutoSize = true;
+            label93.Font = new Font("Segoe UI", 14F);
+            label93.Location = new Point(199, 34);
+            label93.Name = "label93";
+            label93.Size = new Size(44, 25);
+            label93.TabIndex = 27;
+            label93.Text = "deg";
+            // 
             // StatusPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -2033,6 +2167,10 @@
             groupBox4.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
+            groupBox6.ResumeLayout(false);
+            groupBox6.PerformLayout();
+            groupBox7.ResumeLayout(false);
+            groupBox7.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -2203,5 +2341,16 @@
         private TextBox FrontApronHeading;
         private Label label76;
         private Label label77;
+        private GroupBox groupBox6;
+        private TextBox FrontPanApronAngle;
+        private Label label79;
+        private Label label82;
+        private TextBox FrontPanBucketAngle;
+        private Label label68;
+        private Label label71;
+        private GroupBox groupBox7;
+        private TextBox RearPanBucketAngle;
+        private Label label90;
+        private Label label93;
     }
 }

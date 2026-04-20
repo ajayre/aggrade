@@ -78,6 +78,11 @@ namespace AgGrade.Controller
         public event BladeHeightChanged OnFrontBladeHeightChanged = null;
         public event BladeHeightChanged OnRearBladeHeightChanged = null;
 
+        public delegate void AngleChanged(double Angle);
+        public event AngleChanged OnFrontApronAngleChanged = null;
+        public event AngleChanged OnFrontBucketAngleChanged = null;
+        public event AngleChanged OnRearBucketAngleChanged = null;
+
         public delegate void BladeCommandSent(uint Value);
         public event BladeCommandSent OnFrontBladeCommandSent = null;
         public event BladeCommandSent OnRearBladeCommandSent = null;
@@ -249,6 +254,36 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
+        /// Sets the current front apron angle to zero
+        /// </summary>
+        public void FrontApronAtZero
+            (
+            )
+        {
+            SendControllerCommand(new PGNPacket(PGNValues.PGN_FRONT_ZERO_APRON_ANGLE));
+        }
+
+        /// <summary>
+        /// Sets the current front bucket angle to zero
+        /// </summary>
+        public void FrontBucketAtZero
+            (
+            )
+        {
+            SendControllerCommand(new PGNPacket(PGNValues.PGN_FRONT_ZERO_BUCKET_ANGLE));
+        }
+
+        /// <summary>
+        /// Sets the current rear bucket angle to zero
+        /// </summary>
+        public void RearBucketAtZero
+            (
+            )
+        {
+            SendControllerCommand(new PGNPacket(PGNValues.PGN_REAR_ZERO_BUCKET_ANGLE));
+        }
+
+        /// <summary>
         /// Request the current front blade height
         /// </summary>
         public void RequestFrontBladeHeight
@@ -387,6 +422,18 @@ namespace AgGrade.Controller
 
                         case PGNValues.PGN_REAR_BLADE_HEIGHT:
                             OnRearBladeHeightChanged?.Invoke(Stat.GetUInt32());
+                            break;
+
+                        case PGNValues.PGN_FRONT_APRON_ANGLE:
+                            OnFrontApronAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
+                            break;
+
+                        case PGNValues.PGN_FRONT_BUCKET_ANGLE:
+                            OnFrontBucketAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
+                            break;
+
+                        case PGNValues.PGN_REAR_BUCKET_ANGLE:
+                            OnRearBucketAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
                             break;
 
                         // IMU

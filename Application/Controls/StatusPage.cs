@@ -111,6 +111,8 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(FrontPanGNSSHeading, FormatDouble(Status.FrontPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Vector.TrackMagneticDeg != Status.FrontPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(FrontPanAltitude, FormatDouble(Status.FrontPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.FrontPan.Fix.Altitude != Status.FrontPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(FrontPanIMUCalibrationStatus, Status.FrontPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.FrontPan.IMU.CalibrationStatus != Status.FrontPan.IMU.CalibrationStatus);
+            UpdateTextBoxIfChanged(FrontPanBucketAngle, FormatDouble(Status.FrontPan.BucketAngle), PreviousStatus == null || PreviousStatus.FrontPan.BucketAngle != Status.FrontPan.BucketAngle);
+            UpdateTextBoxIfChanged(FrontPanApronAngle, FormatDouble(Status.FrontPan.ApronAngle), PreviousStatus == null || PreviousStatus.FrontPan.ApronAngle != Status.FrontPan.ApronAngle);
 
             // Update Rear Pan fields
             UpdateLocationTextBox(RearPanLocation, Status.RearPan.Fix.Latitude, Status.RearPan.Fix.Longitude, PreviousStatus == null || PreviousStatus.RearPan.Fix.Latitude != Status.RearPan.Fix.Latitude || PreviousStatus.RearPan.Fix.Longitude != Status.RearPan.Fix.Longitude);
@@ -128,6 +130,7 @@ namespace AgGrade.Controls
             UpdateTextBoxIfChanged(RearPanGNSSHeading, FormatDouble(Status.RearPan.Fix.Vector.GetTrueHeading(Settings.MagneticDeclinationDegrees, Settings.MagneticDeclinationMinutes)), PreviousStatus == null || PreviousStatus.RearPan.Fix.Vector.TrackMagneticDeg != Status.RearPan.Fix.Vector.TrackMagneticDeg);
             UpdateTextBoxIfChanged(RearPanAltitude, FormatDouble(Status.RearPan.Fix.Altitude), PreviousStatus == null || PreviousStatus.RearPan.Fix.Altitude != Status.RearPan.Fix.Altitude);
             UpdateIMUCalibrationTextBox(RearPanIMUCalibrationStatus, Status.RearPan.IMU.CalibrationStatus, PreviousStatus == null || PreviousStatus.RearPan.IMU.CalibrationStatus != Status.RearPan.IMU.CalibrationStatus);
+            UpdateTextBoxIfChanged(RearPanBucketAngle, FormatDouble(Status.RearPan.BucketAngle), PreviousStatus == null || PreviousStatus.RearPan.BucketAngle != Status.RearPan.BucketAngle);
 
             // update Front Apron IMU
             UpdateTextBoxIfChanged(FrontApronPitch, FormatDouble(Status.FrontPan.ApronIMU.Pitch), PreviousStatus == null || PreviousStatus.FrontPan.ApronIMU.Pitch != Status.FrontPan.ApronIMU.Pitch);
@@ -200,6 +203,8 @@ namespace AgGrade.Controls
                     Mode = Status.FrontPan.Mode,
                     BladePWM = Status.FrontPan.BladePWM,
                     Direction = Status.FrontPan.Direction,
+                    BucketAngle = Status.FrontPan.BucketAngle,
+                    ApronAngle = Status.FrontPan.ApronAngle,
                     Fix = new GNSSFix
                     {
                         Latitude = Status.FrontPan.Fix.Latitude,
@@ -232,6 +237,7 @@ namespace AgGrade.Controls
                     Mode = Status.RearPan.Mode,
                     BladePWM = Status.RearPan.BladePWM,
                     Direction = Status.RearPan.Direction,
+                    BucketAngle = Status.RearPan.BucketAngle,
                     Fix = new GNSSFix
                     {
                         Latitude = Status.RearPan.Fix.Latitude,

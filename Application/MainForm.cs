@@ -1244,12 +1244,15 @@ namespace AgGrade
             Controller.OnFrontBladePWMChanged += Controller_OnFrontBladePWMChanged;
             Controller.OnFrontBladeHeightChanged += Controller_OnFrontBladeHeightChanged;
             Controller.OnFrontSlaveOffsetChanged += Controller_OnFrontSlaveOffsetChanged;
+            Controller.OnFrontApronAngleChanged += Controller_OnFrontApronAngleChanged;
+            Controller.OnFrontBucketAngleChanged += Controller_OnFrontBucketAngleChanged;
 
             Controller.OnRearBladeCuttingChanged += Controller_OnRearBladeCuttingChanged;
             Controller.OnRearBladeDirectionChanged += Controller_OnRearBladeDirectionChanged;
             Controller.OnRearBladePWMChanged += Controller_OnRearBladePWMChanged;
             Controller.OnRearBladeHeightChanged += Controller_OnRearBladeHeightChanged;
             Controller.OnRearSlaveOffsetChanged += Controller_OnRearSlaveOffsetChanged;
+            Controller.OnRearBucketAngleChanged += Controller_OnRearBucketAngleChanged;
 
             Controller.OnFrontDumpingChanged += Controller_OnFrontDumpingChanged;
             Controller.OnRearDumpingChanged += Controller_OnRearDumpingChanged;
@@ -1301,6 +1304,39 @@ namespace AgGrade
             // get previous loads in case the application crashed during cutting or filling
             CurrentEquipmentStatus.FrontPan.LoadLCY = Properties.Settings.Default.FrontLoadLCY;
             CurrentEquipmentStatus.RearPan.LoadLCY = Properties.Settings.Default.RearLoadLCY;
+        }
+
+        /// <summary>
+        /// Called when the angle of the rear bucket has changed
+        /// </summary>
+        /// <param name="Angle">New angle in degrees</param>
+        private void Controller_OnRearBucketAngleChanged(double Angle)
+        {
+            CurrentEquipmentStatus.RearPan.BucketAngle = Angle;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+        }
+
+        /// <summary>
+        /// Called when the angle of the front bucket has changed
+        /// </summary>
+        /// <param name="Angle">New angle in degrees</param>
+        private void Controller_OnFrontBucketAngleChanged(double Angle)
+        {
+            CurrentEquipmentStatus.FrontPan.BucketAngle = Angle;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+        }
+
+        /// <summary>
+        /// Called when the angle of the front apron has changed
+        /// </summary>
+        /// <param name="Angle">New angle in degrees</param>
+        private void Controller_OnFrontApronAngleChanged(double Angle)
+        {
+            CurrentEquipmentStatus.FrontPan.ApronAngle = Angle;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>

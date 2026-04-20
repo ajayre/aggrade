@@ -264,7 +264,7 @@ namespace AgGrade.Controls
             HideOptions();
             ShowWizard();
             Wizard!.Name = "Rear Bucket Angle";
-            Wizard!.Content = new CalibrateBucketAngleWizard(CalibrateBucketAngleWizard.Blades.Rear, FrontPanColor);
+            Wizard!.Content = new CalibrateBucketAngleWizard(CalibrateBucketAngleWizard.Blades.Rear, RearPanColor);
         }
 
         /// <summary>

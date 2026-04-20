@@ -37,6 +37,8 @@ namespace AgGrade.Data
         public BladeDirection Direction;
         public bool CapacityWarningOccurred;
         public double LoadLCY;
+        public double ApronAngle;
+        public double BucketAngle;
 
         public PanStatus
             (
@@ -50,6 +52,8 @@ namespace AgGrade.Data
             CapacityWarningOccurred = false;
             Mode = BladeMode.Manual;
             LoadLCY = 0;
+            ApronAngle = 0;
+            BucketAngle = 0;
         }
     }
 

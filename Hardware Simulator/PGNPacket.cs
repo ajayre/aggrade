@@ -16,7 +16,7 @@ namespace HardwareSim
         PGN_CLEAR_ESTOP = 0x0004,
         PGN_YOU_ARE_SECONDARY = 0x0005,
 
-        // blade control
+        // control
         PGN_FRONT_CUT_VALVE = 0x1000,   // CUTVALVE_MIN -> CUTVALVE_MAX
         PGN_REAR_CUT_VALVE = 0x1001,   // CUTVALVE_MIN -> CUTVALVE_MAX
         PGN_FRONT_ZERO_BLADE_HEIGHT = 0x1002,
@@ -25,6 +25,9 @@ namespace HardwareSim
         PGN_FRONT_BLADE_JOG_DOWN = 0x1005,
         PGN_REAR_BLADE_JOG_UP = 0x1006,
         PGN_REAR_BLADE_JOG_DOWN = 0x1007,
+        PGN_FRONT_ZERO_APRON_ANGLE = 0x1008,
+        PGN_FRONT_ZERO_BUCKET_ANGLE = 0x1009,
+        PGN_REAR_ZERO_BUCKET_ANGLE = 0x100A,
 
         // blade configuration
         PGN_FRONT_PWM_GAIN_UP = 0x2002,
@@ -73,6 +76,9 @@ namespace HardwareSim
         PGN_REAR_BLADE_HEIGHT = 0x5009,
         PGN_FRONT_DUMPING = 0x500A,
         PGN_REAR_DUMPING = 0x500B,
+        PGN_FRONT_APRON_ANGLE = 0x500C,
+        PGN_FRONT_BUCKET_ANGLE = 0x500D,
+        PGN_REAR_BUCKET_ANGLE = 0x500E,
 
         // sensors
         PGN_TRACTOR_IMU = 0x6000,

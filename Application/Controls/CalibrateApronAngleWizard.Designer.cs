@@ -31,15 +31,10 @@
             components = new System.ComponentModel.Container();
             Pages = new TabControl();
             tabPage1 = new TabPage();
-            Height1 = new TextBox();
+            Angle1 = new TextBox();
             textBox2 = new TextBox();
             CaptureZeroBtn = new Button();
             textBox1 = new TextBox();
-            tabPage2 = new TabPage();
-            Height2 = new TextBox();
-            CaptureMaxBtn = new Button();
-            textBox8 = new TextBox();
-            PageTwoInstructions = new TextBox();
             tabPage4 = new TabPage();
             ReturnBtn = new Button();
             ResultMsg = new TextBox();
@@ -48,7 +43,6 @@
             RefreshTimer = new System.Windows.Forms.Timer(components);
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
-            tabPage2.SuspendLayout();
             tabPage4.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -56,7 +50,6 @@
             // Pages
             // 
             Pages.Controls.Add(tabPage1);
-            Pages.Controls.Add(tabPage2);
             Pages.Controls.Add(tabPage4);
             Pages.Dock = DockStyle.Fill;
             Pages.Location = new Point(0, 0);
@@ -68,7 +61,7 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(Height1);
+            tabPage1.Controls.Add(Angle1);
             tabPage1.Controls.Add(textBox2);
             tabPage1.Controls.Add(CaptureZeroBtn);
             tabPage1.Controls.Add(textBox1);
@@ -79,18 +72,18 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
             // 
-            // Height1
+            // Angle1
             // 
-            Height1.BackColor = SystemColors.Control;
-            Height1.BorderStyle = BorderStyle.None;
-            Height1.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            Height1.Location = new Point(260, 93);
-            Height1.Name = "Height1";
-            Height1.ReadOnly = true;
-            Height1.Size = new Size(83, 29);
-            Height1.TabIndex = 27;
-            Height1.TabStop = false;
-            Height1.Text = "0 deg";
+            Angle1.BackColor = SystemColors.Control;
+            Angle1.BorderStyle = BorderStyle.None;
+            Angle1.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            Angle1.Location = new Point(260, 93);
+            Angle1.Name = "Angle1";
+            Angle1.ReadOnly = true;
+            Angle1.Size = new Size(147, 29);
+            Angle1.TabIndex = 27;
+            Angle1.TabStop = false;
+            Angle1.Text = "0 deg";
             // 
             // textBox2
             // 
@@ -134,75 +127,6 @@
             textBox1.TabIndex = 1;
             textBox1.TabStop = false;
             textBox1.Text = "1. Fully lower the apron\r\n2. Tap on button below";
-            // 
-            // tabPage2
-            // 
-            tabPage2.Controls.Add(Height2);
-            tabPage2.Controls.Add(CaptureMaxBtn);
-            tabPage2.Controls.Add(textBox8);
-            tabPage2.Controls.Add(PageTwoInstructions);
-            tabPage2.Location = new Point(4, 24);
-            tabPage2.Name = "tabPage2";
-            tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(792, 434);
-            tabPage2.TabIndex = 1;
-            tabPage2.Text = "tabPage2";
-            // 
-            // Height2
-            // 
-            Height2.BackColor = SystemColors.Control;
-            Height2.BorderStyle = BorderStyle.None;
-            Height2.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            Height2.Location = new Point(258, 97);
-            Height2.Name = "Height2";
-            Height2.ReadOnly = true;
-            Height2.Size = new Size(83, 29);
-            Height2.TabIndex = 27;
-            Height2.TabStop = false;
-            Height2.Text = "0 deg";
-            // 
-            // CaptureMaxBtn
-            // 
-            CaptureMaxBtn.Font = new Font("Segoe UI", 18F);
-            CaptureMaxBtn.Image = Properties.Resources.angle_48px;
-            CaptureMaxBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            CaptureMaxBtn.Location = new Point(33, 81);
-            CaptureMaxBtn.Name = "CaptureMaxBtn";
-            CaptureMaxBtn.Size = new Size(219, 60);
-            CaptureMaxBtn.TabIndex = 22;
-            CaptureMaxBtn.Text = "Capture Angle";
-            CaptureMaxBtn.TextAlign = ContentAlignment.MiddleRight;
-            CaptureMaxBtn.UseVisualStyleBackColor = true;
-            CaptureMaxBtn.Click += CaptureMinBtn_Click;
-            // 
-            // textBox8
-            // 
-            textBox8.BackColor = SystemColors.Control;
-            textBox8.BorderStyle = BorderStyle.None;
-            textBox8.Font = new Font("Segoe UI", 16F);
-            textBox8.Location = new Point(6, 150);
-            textBox8.Multiline = true;
-            textBox8.Name = "textBox8";
-            textBox8.ReadOnly = true;
-            textBox8.Size = new Size(385, 35);
-            textBox8.TabIndex = 20;
-            textBox8.TabStop = false;
-            textBox8.Text = "3. Tap on Next";
-            // 
-            // PageTwoInstructions
-            // 
-            PageTwoInstructions.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            PageTwoInstructions.BackColor = SystemColors.Control;
-            PageTwoInstructions.BorderStyle = BorderStyle.None;
-            PageTwoInstructions.Font = new Font("Segoe UI", 16F);
-            PageTwoInstructions.Location = new Point(6, 7);
-            PageTwoInstructions.Multiline = true;
-            PageTwoInstructions.Name = "PageTwoInstructions";
-            PageTwoInstructions.ReadOnly = true;
-            PageTwoInstructions.Size = new Size(437, 68);
-            PageTwoInstructions.TabIndex = 18;
-            PageTwoInstructions.TabStop = false;
-            PageTwoInstructions.Text = "1. Raise the apron but not the bucket\r\n2. Tap on button below\r\n";
             // 
             // tabPage4
             // 
@@ -284,8 +208,6 @@
             Pages.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
-            tabPage2.ResumeLayout(false);
-            tabPage2.PerformLayout();
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
             panel1.ResumeLayout(false);
@@ -297,20 +219,15 @@
 
         private TabControl Pages;
         private TabPage tabPage1;
-        private TabPage tabPage2;
         private TextBox textBox1;
         private TextBox textBox2;
         private Button CaptureZeroBtn;
-        private TextBox PageTwoInstructions;
-        private TextBox textBox8;
         private Panel panel1;
         private Label ErrorMessage;
-        private Button CaptureMaxBtn;
         private TabPage tabPage4;
         private Button ReturnBtn;
         private TextBox ResultMsg;
-        private TextBox Height1;
-        private TextBox Height2;
+        private TextBox Angle1;
         private System.Windows.Forms.Timer RefreshTimer;
     }
 }

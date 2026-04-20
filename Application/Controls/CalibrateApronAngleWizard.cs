@@ -36,6 +36,8 @@ namespace AgGrade.Controls
             this.PanColor = PanColor;
 
             InitializeComponent();
+
+            ResultMsg.Text = "Not run";
         }
 
         /// <summary>
@@ -51,26 +53,6 @@ namespace AgGrade.Controls
                 case 1:
                     ValidateStatusAndSettings();
                     break;
-
-                // completed second page, perform calculation
-                case 2:
-                    if (ZeroPositionValid)
-                    {
-                        if (CurrentEquipmentSettings != null)
-                        {
-                            //CurrentEquipmentSettings.TractorAntennaForwardOffsetMm = (int)Offset.Y;
-                        }
-                        else
-                        {
-                            ErrorMessage.Text = ResultMsg.Text = "Failed to store result";
-                            ErrorMessage.Visible = true;
-                        }
-                    }
-                    else
-                    {
-                        ResultMsg.Text = "Failed to perform measurements";
-                    }
-                    break;
             }
         }
 
@@ -85,18 +67,19 @@ namespace AgGrade.Controls
             {
                 ZeroPositionValid = true;
 
-                // fixme - to do
                 if (Blade == Blades.Front)
                 {
-                    //Controller.FrontBladeAtZero();
+                    Controller.FrontApronAtZero();
                 }
                 else
                 {
-                    //Controller.RearBladeAtZero();
+                    //Controller.FrontApronAtZero();
                 }
 
                 CaptureZeroBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
                 CaptureZeroBtn.ForeColor = Color.White;
+
+                ResultMsg.Text = "Calibration completed";
             }
         }
 
@@ -128,13 +111,8 @@ namespace AgGrade.Controls
                 ErrorMessage.Text = ResultMsg.Text = "No equipment settings found";
                 ErrorMessage.Visible = true;
             }
-            else
-            {
-                ResultMsg.Text = "Not run";
-            }
 
             CaptureZeroBtn.Enabled = CanExecute;
-            CaptureMaxBtn.Enabled = CanExecute;
         }
 
         /// <summary>
@@ -146,8 +124,7 @@ namespace AgGrade.Controls
         {
             ValidateStatusAndSettings();
 
-            Height1.ForeColor = PanColor;
-            Height2.ForeColor = PanColor;
+            Angle1.ForeColor = PanColor;
         }
 
         /// <summary>
@@ -169,54 +146,6 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
-        /// Called when user taps on the button to set the minimum height 
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CaptureMinBtn_Click(object sender, EventArgs e)
-        {
-            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentSettings != null))
-            {
-                // fixme - to do
-                if (Blade == Blades.Front)
-                {
-                    //CurrentEquipmentSettings.FrontPan.MinHeightMm = CurrentEquipmentStatus.FrontPan.BladeHeight;
-                }
-                else
-                {
-                    //CurrentEquipmentSettings.RearPan.MinHeightMm = CurrentEquipmentStatus.RearPan.BladeHeight;
-                }
-
-                CaptureMaxBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-                CaptureMaxBtn.ForeColor = Color.White;
-            }
-        }
-
-        /// <summary>
-        /// Called when user taps on the button to set the maximum height
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CaptureMaxBtn_Click(object sender, EventArgs e)
-        {
-            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentSettings != null))
-            {
-                // fixme - to do
-                if (Blade == Blades.Front)
-                {
-                    //CurrentEquipmentSettings.FrontPan.MaxHeightMm = (uint)CurrentEquipmentStatus.FrontPan.BladeHeight;
-                }
-                else
-                {
-                    //CurrentEquipmentSettings.RearPan.MaxHeightMm = (uint)CurrentEquipmentStatus.RearPan.BladeHeight;
-                }
-
-                CaptureMaxBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-                CaptureMaxBtn.ForeColor = Color.White;
-            }
-        }
-
-        /// <summary>
         /// Called periodically to update the height displays
         /// </summary>
         /// <param name="sender"></param>
@@ -225,14 +154,13 @@ namespace AgGrade.Controls
         {
             if (CurrentEquipmentStatus != null)
             {
-                // fixme - to do
                 if (Blade == Blades.Front)
                 {
-                    //Height1.Text = Height2.Text = CurrentEquipmentStatus.FrontPan.BladeHeight.ToString() + " deg";
+                    Angle1.Text = CurrentEquipmentStatus.FrontPan.ApronAngle.ToString("F2") + " deg";
                 }
                 else
                 {
-                    //Height1.Text = Height2.Text = CurrentEquipmentStatus.RearPan.BladeHeight.ToString() + " deg";
+                    //Angle1.Text = CurrentEquipmentStatus.RearPan.ApronAngle.ToString("F2") + " deg";
                 }
             }
         }

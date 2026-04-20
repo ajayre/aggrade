@@ -77,6 +77,12 @@ namespace HardwareSim
         private double AutoDriveCenterLatitude;
         private double AutoDriveCenterLongitude;
         private readonly double AutoDriveSquareHalfSideM = Math.Sqrt(AUTO_DRIVE_AREA_ACRES * 4046.8564224) / 2.0;
+        private double FrontBucketAngle = 0;
+        private double FrontApronAngle = 0;
+        private double RearBucketAngle = 0;
+        private double FrontBucketZeroAngle = 0;
+        private double FrontApronZeroAngle = 0;
+        private double RearBucketZeroAngle = 0;
 
         public MainForm()
         {
@@ -189,7 +195,10 @@ namespace HardwareSim
                 RearBucketIMU.Pitch = Math.Max(0.0, RearBucketIMU.Pitch - REAR_BUCKET_PITCH_JOG_STEP_DEG);
             }
 
+            RearBucketAngle = RearBucketIMU.Pitch - RearBucketZeroAngle;
+
             SendRearBucketIMUStatus();
+            SendRearBucketAngle();
         }
 
         private void SendFrontApronIMUStatus()
@@ -213,6 +222,30 @@ namespace HardwareSim
             Packet.SetUInt32(8, (UInt32)(FrontBucketIMU.Heading * 100));
             Packet.SetUInt32(12, (UInt32)(FrontBucketIMU.YawRate * 100));
             Packet.Data[16] = (byte)FrontBucketIMU.CalibrationStatus;
+            SendStatus(Packet);
+        }
+
+        private void SendFrontApronAngle()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_FRONT_APRON_ANGLE;
+            Packet.SetUInt32(0, (UInt32)(FrontApronAngle * 100));
+            SendStatus(Packet);
+        }
+
+        private void SendFrontBucketAngle()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_FRONT_BUCKET_ANGLE;
+            Packet.SetUInt32(0, (UInt32)(FrontBucketAngle * 100));
+            SendStatus(Packet);
+        }
+
+        private void SendRearBucketAngle()
+        {
+            PGNPacket Packet = new PGNPacket();
+            Packet.PGN = PGNValues.PGN_REAR_BUCKET_ANGLE;
+            Packet.SetUInt32(0, (UInt32)(RearBucketAngle * 100));
             SendStatus(Packet);
         }
 
@@ -244,6 +277,12 @@ namespace HardwareSim
                     FrontApronIMU.Pitch = Math.Max(0.0, FrontApronIMU.Pitch - FRONT_HYD_PITCH_JOG_STEP_DEG);
                 }
             }
+
+            FrontApronAngle = FrontApronIMU.Pitch - FrontApronZeroAngle;
+            FrontBucketAngle = FrontBucketIMU.Pitch - FrontBucketZeroAngle;
+
+            SendFrontApronAngle();
+            SendFrontBucketAngle();
 
             SendFrontApronIMUStatus();
             SendFrontBucketIMUStatus();
@@ -339,6 +378,14 @@ namespace HardwareSim
                     SendStatus(new PGNPacket(PGNValues.PGN_FRONT_HEIGHT_FOUND));
                     SendStatus(new PGNPacket(PGNValues.PGN_REAR_HEIGHT_FOUND));
 
+                    SendFrontApronAngle();
+                    SendFrontBucketAngle();
+                    SendRearBucketAngle();
+
+                    SendFrontApronIMUStatus();
+                    SendFrontBucketIMUStatus();
+                    SendRearBucketIMUStatus();
+
                     /*SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_HEIGHT, 5));
                     SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE, 6));
                     SendStatus(new PGNPacket(PGNValues.PGN_FRONT_BLADE_PWMVALUE, 127));
@@ -378,6 +425,24 @@ namespace HardwareSim
                 case PGNValues.PGN_REAR_ZERO_BLADE_HEIGHT:
                     RearBladeHeight = BLADE_HEIGHT_GROUND_LEVEL;
                     SendStatus(new PGNPacket(PGNValues.PGN_REAR_BLADE_HEIGHT, RearBladeHeight));
+                    break;
+
+                case PGNValues.PGN_FRONT_ZERO_APRON_ANGLE:
+                    FrontApronZeroAngle = FrontApronIMU.Pitch;
+                    FrontApronAngle = FrontApronIMU.Pitch - FrontApronZeroAngle;
+                    SendFrontApronAngle();
+                    break;
+
+                case PGNValues.PGN_FRONT_ZERO_BUCKET_ANGLE:
+                    FrontBucketZeroAngle = FrontBucketIMU.Pitch;
+                    FrontBucketAngle = FrontBucketIMU.Pitch - FrontBucketZeroAngle;
+                    SendFrontBucketAngle();
+                    break;
+
+                case PGNValues.PGN_REAR_ZERO_BUCKET_ANGLE:
+                    RearBucketZeroAngle = RearBucketIMU.Pitch;
+                    RearBucketAngle = RearBucketIMU.Pitch - RearBucketZeroAngle;
+                    SendRearBucketAngle();
                     break;
             }
         }
