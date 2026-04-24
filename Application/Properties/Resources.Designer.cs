@@ -223,6 +223,16 @@ namespace AgGrade.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap dirtpan_150px {
+            get {
+                object obj = ResourceManager.GetObject("dirtpan_150px", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap download_48px {
             get {
                 object obj = ResourceManager.GetObject("download_48px", resourceCulture);
