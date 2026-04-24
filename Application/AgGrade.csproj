@@ -37,6 +37,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Update="Controls\CalibrateIMUWizard.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Update="Controls\CalibrateApronAngleWizard.cs" />
     <Compile Update="Controls\CalibrateBucketAngleWizard.cs">
       <SubType>UserControl</SubType>
