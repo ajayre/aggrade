@@ -8,6 +8,7 @@ using System.Data;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -74,6 +75,10 @@ namespace AgGrade.Controls
 
             AddButton("Calibrate Tractor Antenna Location", Properties.Resources.tractor_48px, odd, CalibrateTractorAntenna);
             odd = !odd;
+
+            AddButton("Calibrate Tractor IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Tractor);
+            odd = !odd;
+
             if (CurrentEquipmentSettings.RearPan.Equipped)
             {
                 // create spacer
@@ -85,6 +90,8 @@ namespace AgGrade.Controls
                 AddButton("Calibrate Rear Bucket Angle", Properties.Resources.lever_48px, odd, CalibrateRearBucketAngle);
                 odd = !odd;
                 AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
+                odd = !odd;
+                AddButton("Calibrate Rear IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Rear);
                 odd = !odd;
             }
             if (CurrentEquipmentSettings.FrontPan.Equipped)
@@ -100,6 +107,8 @@ namespace AgGrade.Controls
                 AddButton("Calibrate Front Apron Angle", Properties.Resources.lever_48px, odd, CalibrateFrontApronAngle);
                 odd = !odd;
                 AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
+                odd = !odd;
+                AddButton("Calibrate Front IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Front);
                 odd = !odd;
             }
             if ((CurrentField != null) && (CurrentField.Benchmarks.Count > 0))
@@ -206,6 +215,38 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
+        /// Calibrates an IMU
+        /// </summary>
+        private void CalibrateIMU
+            (
+            object Sender
+            )
+        {
+            CalibrateIMUWizard.IMUs IMU = (CalibrateIMUWizard.IMUs)(Sender as ButtonPanel)!.Tag!;
+
+            HideOptions();
+            ShowWizard();
+
+            switch (IMU)
+            {
+                case CalibrateIMUWizard.IMUs.Tractor:
+                    Wizard!.Name = "Tractor IMU";
+                    break;
+
+                case CalibrateIMUWizard.IMUs.Front:
+                    Wizard!.Name = "Front Pan IMU";
+                    break;
+
+                case CalibrateIMUWizard.IMUs.Rear:
+                    Wizard!.Name = "Rear Pan IMU";
+                    break;
+            }
+
+            Wizard!.Content = new CalibrateIMUWizard(IMU);
+            OnEnableBladeLimits?.Invoke();
+        }
+
+        /// <summary>
         /// Called when the user taps on the button to calibrate the front blade height
         /// </summary>
         /// <param name="Sender"></param>
@@ -289,12 +330,14 @@ namespace AgGrade.Controls
         /// <param name="Icon">Icon to show</param>
         /// <param name="Odd">true to use secondary color</param>
         /// <param name="OnClicked">Handler when button is clicked/tapped</param>
+        /// <param name="Parameter">Optional parameter to pass to handler</param>
         private void AddButton
             (
             string Text,
             Image? Icon,
             bool Odd,
-            Action<object> OnClicked
+            Action<object> OnClicked,
+            object? Parameter = null
             )
         {
             var panel = new ButtonPanel();
@@ -303,6 +346,7 @@ namespace AgGrade.Controls
             panel.CaptionText = Text;
             panel.DisplayIcon = Icon;
             panel.Dock = DockStyle.Top;
+            panel.Tag = Parameter;
             OptionsTable?.Controls.Add(panel);
         }
 

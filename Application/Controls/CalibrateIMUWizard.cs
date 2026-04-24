@@ -16,28 +16,31 @@ namespace AgGrade.Controls
         private bool ZeroPositionValid = false;
         private bool MaxPositionValid = false;
 
-        public enum Blades
+        public enum IMUs
         {
+            Tractor,
             Front,
-            Rear
+            Rear,
+            FrontApron,
+            FrontBucket,
+            RearBucket
         }
 
-        public Blades Blade = Blades.Front;
-
-        public Color PanColor = Color.Black;
+        public IMUs IMU = IMUs.Tractor;
 
         public CalibrateIMUWizard
             (
-            Blades Blade,
-            Color PanColor
+            IMUs IMU
             )
         {
-            this.Blade = Blade;
-            this.PanColor = PanColor;
+            this.IMU = IMU;
 
             InitializeComponent();
 
             ResultMsg.Text = "Not run";
+
+            OrientationSelector.SelectedIndex = 0;
+            OrientationImage.BackgroundImage = Properties.Resources.IMU_Horizontal;
         }
 
         /// <summary>
@@ -67,13 +70,23 @@ namespace AgGrade.Controls
             {
                 ZeroPositionValid = true;
 
-                if (Blade == Blades.Front)
+                switch (IMU)
                 {
-                    Controller.FrontApronAtZero();
-                }
-                else
-                {
-                    //Controller.FrontApronAtZero();
+                    case IMUs.Tractor:
+                        //Controller.FrontApronAtZero();
+                        break;
+
+                    case IMUs.Front:
+                        break;
+
+                    case IMUs.FrontApron:
+                        break;
+
+                    case IMUs.FrontBucket:
+                        break;
+
+                    case IMUs.Rear:
+                        break;
                 }
 
                 CaptureZeroBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
@@ -123,8 +136,6 @@ namespace AgGrade.Controls
             )
         {
             ValidateStatusAndSettings();
-
-            Angle1.ForeColor = PanColor;
         }
 
         /// <summary>
@@ -154,14 +165,23 @@ namespace AgGrade.Controls
         {
             if (CurrentEquipmentStatus != null)
             {
-                if (Blade == Blades.Front)
-                {
-                    Angle1.Text = CurrentEquipmentStatus.FrontPan.ApronAngle.ToString("F2") + " deg";
-                }
-                else
-                {
-                    //Angle1.Text = CurrentEquipmentStatus.RearPan.ApronAngle.ToString("F2") + " deg";
-                }
+            }
+        }
+
+        /// <summary>
+        /// Called when the user chooses an IMU orientation
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OrientationSelector_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (OrientationSelector.SelectedIndex == 0)
+            {
+                OrientationImage.BackgroundImage = Properties.Resources.IMU_Horizontal;
+            }
+            else
+            {
+                OrientationImage.BackgroundImage = Properties.Resources.IMU_Vertical;
             }
         }
     }

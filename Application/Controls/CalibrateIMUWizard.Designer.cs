@@ -31,27 +31,30 @@
             components = new System.ComponentModel.Container();
             Pages = new TabControl();
             tabPage1 = new TabPage();
-            Angle1 = new TextBox();
+            OrientationSelector = new ComboBox();
+            OrientationImage = new PictureBox();
             textBox2 = new TextBox();
-            CaptureZeroBtn = new Button();
             textBox1 = new TextBox();
+            tabPage2 = new TabPage();
+            CaptureZeroBtn = new Button();
             tabPage4 = new TabPage();
             ReturnBtn = new Button();
             ResultMsg = new TextBox();
             panel1 = new Panel();
             ErrorMessage = new Label();
             RefreshTimer = new System.Windows.Forms.Timer(components);
-            pictureBox1 = new PictureBox();
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)OrientationImage).BeginInit();
+            tabPage2.SuspendLayout();
             tabPage4.SuspendLayout();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // Pages
             // 
             Pages.Controls.Add(tabPage1);
+            Pages.Controls.Add(tabPage2);
             Pages.Controls.Add(tabPage4);
             Pages.Dock = DockStyle.Fill;
             Pages.Location = new Point(0, 0);
@@ -63,10 +66,9 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(pictureBox1);
-            tabPage1.Controls.Add(Angle1);
+            tabPage1.Controls.Add(OrientationSelector);
+            tabPage1.Controls.Add(OrientationImage);
             tabPage1.Controls.Add(textBox2);
-            tabPage1.Controls.Add(CaptureZeroBtn);
             tabPage1.Controls.Add(textBox1);
             tabPage1.Location = new Point(4, 24);
             tabPage1.Name = "tabPage1";
@@ -75,46 +77,42 @@
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
             // 
-            // Angle1
+            // OrientationSelector
             // 
-            Angle1.BackColor = SystemColors.Control;
-            Angle1.BorderStyle = BorderStyle.None;
-            Angle1.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
-            Angle1.Location = new Point(260, 93);
-            Angle1.Name = "Angle1";
-            Angle1.ReadOnly = true;
-            Angle1.Size = new Size(147, 29);
-            Angle1.TabIndex = 27;
-            Angle1.TabStop = false;
-            Angle1.Text = "0 deg";
+            OrientationSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+            OrientationSelector.Font = new Font("Segoe UI", 16F);
+            OrientationSelector.FormattingEnabled = true;
+            OrientationSelector.Items.AddRange(new object[] { "Horizontal", "Vertical" });
+            OrientationSelector.Location = new Point(33, 81);
+            OrientationSelector.Name = "OrientationSelector";
+            OrientationSelector.Size = new Size(279, 38);
+            OrientationSelector.TabIndex = 29;
+            OrientationSelector.SelectedIndexChanged += OrientationSelector_SelectedIndexChanged;
+            // 
+            // OrientationImage
+            // 
+            OrientationImage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            OrientationImage.BackgroundImage = Properties.Resources.IMU_Vertical;
+            OrientationImage.BackgroundImageLayout = ImageLayout.Center;
+            OrientationImage.Location = new Point(476, 6);
+            OrientationImage.Name = "OrientationImage";
+            OrientationImage.Size = new Size(310, 310);
+            OrientationImage.TabIndex = 28;
+            OrientationImage.TabStop = false;
             // 
             // textBox2
             // 
             textBox2.BackColor = SystemColors.Control;
             textBox2.BorderStyle = BorderStyle.None;
             textBox2.Font = new Font("Segoe UI", 16F);
-            textBox2.Location = new Point(6, 143);
+            textBox2.Location = new Point(6, 128);
             textBox2.Multiline = true;
             textBox2.Name = "textBox2";
             textBox2.ReadOnly = true;
             textBox2.Size = new Size(385, 35);
             textBox2.TabIndex = 13;
             textBox2.TabStop = false;
-            textBox2.Text = "4. Tap on Next";
-            // 
-            // CaptureZeroBtn
-            // 
-            CaptureZeroBtn.Font = new Font("Segoe UI", 18F);
-            CaptureZeroBtn.Image = Properties.Resources.angle_48px;
-            CaptureZeroBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            CaptureZeroBtn.Location = new Point(35, 77);
-            CaptureZeroBtn.Name = "CaptureZeroBtn";
-            CaptureZeroBtn.Size = new Size(219, 60);
-            CaptureZeroBtn.TabIndex = 12;
-            CaptureZeroBtn.Text = "Capture Angle";
-            CaptureZeroBtn.TextAlign = ContentAlignment.MiddleRight;
-            CaptureZeroBtn.UseVisualStyleBackColor = true;
-            CaptureZeroBtn.Click += CaptureZeroBtn_Click;
+            textBox2.Text = "3. Tap on Next";
             // 
             // textBox1
             // 
@@ -129,7 +127,31 @@
             textBox1.Size = new Size(457, 159);
             textBox1.TabIndex = 1;
             textBox1.TabStop = false;
-            textBox1.Text = "1. Fully lower the apron\r\n2. Tap on button below";
+            textBox1.Text = "1. Drive to a level location\r\n2. Choose IMU orientation";
+            // 
+            // tabPage2
+            // 
+            tabPage2.BackColor = SystemColors.Control;
+            tabPage2.Controls.Add(CaptureZeroBtn);
+            tabPage2.Location = new Point(4, 24);
+            tabPage2.Name = "tabPage2";
+            tabPage2.Padding = new Padding(3);
+            tabPage2.Size = new Size(792, 434);
+            tabPage2.TabIndex = 4;
+            tabPage2.Text = "tabPage2";
+            // 
+            // CaptureZeroBtn
+            // 
+            CaptureZeroBtn.Font = new Font("Segoe UI", 18F);
+            CaptureZeroBtn.Image = Properties.Resources.angle_48px;
+            CaptureZeroBtn.ImageAlign = ContentAlignment.MiddleLeft;
+            CaptureZeroBtn.Location = new Point(287, 187);
+            CaptureZeroBtn.Name = "CaptureZeroBtn";
+            CaptureZeroBtn.Size = new Size(219, 60);
+            CaptureZeroBtn.TabIndex = 13;
+            CaptureZeroBtn.Text = "Capture Angle";
+            CaptureZeroBtn.TextAlign = ContentAlignment.MiddleRight;
+            CaptureZeroBtn.UseVisualStyleBackColor = true;
             // 
             // tabPage4
             // 
@@ -199,16 +221,6 @@
             RefreshTimer.Interval = 250;
             RefreshTimer.Tick += RefreshTimer_Tick;
             // 
-            // pictureBox1
-            // 
-            pictureBox1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            pictureBox1.Image = Properties.Resources.IMU_Vertical;
-            pictureBox1.Location = new Point(426, 6);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(360, 290);
-            pictureBox1.TabIndex = 28;
-            pictureBox1.TabStop = false;
-            // 
             // CalibrateIMUWizard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -221,11 +233,12 @@
             Pages.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)OrientationImage).EndInit();
+            tabPage2.ResumeLayout(false);
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
             panel1.ResumeLayout(false);
             panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
@@ -235,14 +248,15 @@
         private TabPage tabPage1;
         private TextBox textBox1;
         private TextBox textBox2;
-        private Button CaptureZeroBtn;
         private Panel panel1;
         private Label ErrorMessage;
         private TabPage tabPage4;
         private Button ReturnBtn;
         private TextBox ResultMsg;
-        private TextBox Angle1;
         private System.Windows.Forms.Timer RefreshTimer;
-        private PictureBox pictureBox1;
+        private PictureBox OrientationImage;
+        private ComboBox OrientationSelector;
+        private TabPage tabPage2;
+        private Button CaptureZeroBtn;
     }
 }
