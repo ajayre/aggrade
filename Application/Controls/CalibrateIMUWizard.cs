@@ -8,39 +8,37 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using AgGrade.Controller;
 
 namespace AgGrade.Controls
 {
     internal partial class CalibrateIMUWizard : WizardControl
     {
-        private bool ZeroPositionValid = false;
-        private bool MaxPositionValid = false;
-
-        public enum IMUs
-        {
-            Tractor,
-            Front,
-            Rear,
-            FrontApron,
-            FrontBucket,
-            RearBucket
-        }
+        private Controller.IMUOrientations Orientation;
 
         public IMUs IMU = IMUs.Tractor;
+        public Color PanColor = Color.Black;
 
         public CalibrateIMUWizard
             (
-            IMUs IMU
+            IMUs IMU,
+            Color PanColor
             )
         {
             this.IMU = IMU;
+            this.PanColor = PanColor;
 
             InitializeComponent();
 
             ResultMsg.Text = "Not run";
 
+            OrientationSelector.Items.Clear();
+            OrientationSelector.Items.Add("Horizontal A");
+            OrientationSelector.Items.Add("Vertical A");
+
             OrientationSelector.SelectedIndex = 0;
             OrientationImage.BackgroundImage = Properties.Resources.IMU_Horizontal;
+            Orientation = AgGrade.Controller.IMUOrientations.HorizontalA;
         }
 
         /// <summary>
@@ -55,44 +53,11 @@ namespace AgGrade.Controls
                 // completed first page, validate inputs
                 case 1:
                     ValidateStatusAndSettings();
+                    if (Controller != null)
+                    {
+                        Controller.SetIMUOrientation(IMU, Orientation);
+                    }
                     break;
-            }
-        }
-
-        /// <summary>
-        /// Called when user taps to capture zero position
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CaptureZeroBtn_Click(object sender, EventArgs e)
-        {
-            if (Controller != null)
-            {
-                ZeroPositionValid = true;
-
-                switch (IMU)
-                {
-                    case IMUs.Tractor:
-                        //Controller.FrontApronAtZero();
-                        break;
-
-                    case IMUs.Front:
-                        break;
-
-                    case IMUs.FrontApron:
-                        break;
-
-                    case IMUs.FrontBucket:
-                        break;
-
-                    case IMUs.Rear:
-                        break;
-                }
-
-                CaptureZeroBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-                CaptureZeroBtn.ForeColor = Color.White;
-
-                ResultMsg.Text = "Calibration completed";
             }
         }
 
@@ -125,7 +90,7 @@ namespace AgGrade.Controls
                 ErrorMessage.Visible = true;
             }
 
-            CaptureZeroBtn.Enabled = CanExecute;
+            CapturePositionBtn.Enabled = CanExecute;
         }
 
         /// <summary>
@@ -136,6 +101,8 @@ namespace AgGrade.Controls
             )
         {
             ValidateStatusAndSettings();
+
+            IMUData.ForeColor = PanColor;
         }
 
         /// <summary>
@@ -165,6 +132,37 @@ namespace AgGrade.Controls
         {
             if (CurrentEquipmentStatus != null)
             {
+                IMUValue Value;
+
+                switch (IMU)
+                {
+                    default:
+                    case IMUs.Tractor:
+                        Value = CurrentEquipmentStatus.TractorIMU;
+                        break;
+
+                    case IMUs.Front:
+                        Value = CurrentEquipmentStatus.FrontPan.IMU;
+                        break;
+
+                    case IMUs.Rear:
+                        Value = CurrentEquipmentStatus.RearPan.IMU;
+                        break;
+
+                    case IMUs.FrontApron:
+                        Value = CurrentEquipmentStatus.FrontPan.ApronIMU;
+                        break;
+
+                    case IMUs.FrontBucket:
+                        Value = CurrentEquipmentStatus.FrontPan.BucketIMU;
+                        break;
+
+                    case IMUs.RearBucket:
+                        Value = CurrentEquipmentStatus.RearPan.BucketIMU;
+                        break;
+                }
+
+                IMUData.Text = string.Format("Pitch {0:0.00} deg, Roll {1:0.00} deg", Value.Pitch, Value.Roll);
             }
         }
 
@@ -178,10 +176,30 @@ namespace AgGrade.Controls
             if (OrientationSelector.SelectedIndex == 0)
             {
                 OrientationImage.BackgroundImage = Properties.Resources.IMU_Horizontal;
+                Orientation = AgGrade.Controller.IMUOrientations.HorizontalA;
             }
             else
             {
                 OrientationImage.BackgroundImage = Properties.Resources.IMU_Vertical;
+                Orientation = AgGrade.Controller.IMUOrientations.VerticalA;
+            }
+        }
+
+        /// <summary>
+        /// Called when user taps on the button to capture the IMU postion
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CapturePositionBtn_Click(object sender, EventArgs e)
+        {
+            if (Controller != null)
+            {
+                Controller.SetIMULevel(IMU);
+
+                CapturePositionBtn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+                CapturePositionBtn.ForeColor = Color.White;
+
+                ResultMsg.Text = "Calibration completed";
             }
         }
     }

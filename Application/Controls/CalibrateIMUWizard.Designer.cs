@@ -36,13 +36,16 @@
             textBox2 = new TextBox();
             textBox1 = new TextBox();
             tabPage2 = new TabPage();
-            CaptureZeroBtn = new Button();
+            textBox4 = new TextBox();
+            textBox3 = new TextBox();
+            CapturePositionBtn = new Button();
             tabPage4 = new TabPage();
             ReturnBtn = new Button();
             ResultMsg = new TextBox();
             panel1 = new Panel();
             ErrorMessage = new Label();
             RefreshTimer = new System.Windows.Forms.Timer(components);
+            IMUData = new TextBox();
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)OrientationImage).BeginInit();
@@ -94,9 +97,9 @@
             OrientationImage.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             OrientationImage.BackgroundImage = Properties.Resources.IMU_Vertical;
             OrientationImage.BackgroundImageLayout = ImageLayout.Center;
-            OrientationImage.Location = new Point(476, 6);
+            OrientationImage.Location = new Point(426, 6);
             OrientationImage.Name = "OrientationImage";
-            OrientationImage.Size = new Size(310, 310);
+            OrientationImage.Size = new Size(360, 360);
             OrientationImage.TabIndex = 28;
             OrientationImage.TabStop = false;
             // 
@@ -124,7 +127,7 @@
             textBox1.Multiline = true;
             textBox1.Name = "textBox1";
             textBox1.ReadOnly = true;
-            textBox1.Size = new Size(457, 159);
+            textBox1.Size = new Size(414, 159);
             textBox1.TabIndex = 1;
             textBox1.TabStop = false;
             textBox1.Text = "1. Drive to a level location\r\n2. Choose IMU orientation";
@@ -132,7 +135,10 @@
             // tabPage2
             // 
             tabPage2.BackColor = SystemColors.Control;
-            tabPage2.Controls.Add(CaptureZeroBtn);
+            tabPage2.Controls.Add(IMUData);
+            tabPage2.Controls.Add(textBox4);
+            tabPage2.Controls.Add(textBox3);
+            tabPage2.Controls.Add(CapturePositionBtn);
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
@@ -140,18 +146,48 @@
             tabPage2.TabIndex = 4;
             tabPage2.Text = "tabPage2";
             // 
-            // CaptureZeroBtn
+            // textBox4
             // 
-            CaptureZeroBtn.Font = new Font("Segoe UI", 18F);
-            CaptureZeroBtn.Image = Properties.Resources.angle_48px;
-            CaptureZeroBtn.ImageAlign = ContentAlignment.MiddleLeft;
-            CaptureZeroBtn.Location = new Point(287, 187);
-            CaptureZeroBtn.Name = "CaptureZeroBtn";
-            CaptureZeroBtn.Size = new Size(219, 60);
-            CaptureZeroBtn.TabIndex = 13;
-            CaptureZeroBtn.Text = "Capture Angle";
-            CaptureZeroBtn.TextAlign = ContentAlignment.MiddleRight;
-            CaptureZeroBtn.UseVisualStyleBackColor = true;
+            textBox4.BackColor = SystemColors.Control;
+            textBox4.BorderStyle = BorderStyle.None;
+            textBox4.Font = new Font("Segoe UI", 16F);
+            textBox4.Location = new Point(6, 119);
+            textBox4.Multiline = true;
+            textBox4.Name = "textBox4";
+            textBox4.ReadOnly = true;
+            textBox4.Size = new Size(385, 35);
+            textBox4.TabIndex = 15;
+            textBox4.TabStop = false;
+            textBox4.Text = "2. Tap on Next";
+            // 
+            // textBox3
+            // 
+            textBox3.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            textBox3.BackColor = SystemColors.Control;
+            textBox3.BorderStyle = BorderStyle.None;
+            textBox3.Font = new Font("Segoe UI", 16F);
+            textBox3.Location = new Point(6, 6);
+            textBox3.Multiline = true;
+            textBox3.Name = "textBox3";
+            textBox3.ReadOnly = true;
+            textBox3.Size = new Size(457, 41);
+            textBox3.TabIndex = 14;
+            textBox3.TabStop = false;
+            textBox3.Text = "1. Tap on the button to set the IMU position";
+            // 
+            // CapturePositionBtn
+            // 
+            CapturePositionBtn.Font = new Font("Segoe UI", 18F);
+            CapturePositionBtn.Image = Properties.Resources.imu_48px;
+            CapturePositionBtn.ImageAlign = ContentAlignment.MiddleLeft;
+            CapturePositionBtn.Location = new Point(37, 49);
+            CapturePositionBtn.Name = "CapturePositionBtn";
+            CapturePositionBtn.Size = new Size(313, 60);
+            CapturePositionBtn.TabIndex = 13;
+            CapturePositionBtn.Text = "Set IMU Level Position";
+            CapturePositionBtn.TextAlign = ContentAlignment.MiddleRight;
+            CapturePositionBtn.UseVisualStyleBackColor = true;
+            CapturePositionBtn.Click += CapturePositionBtn_Click;
             // 
             // tabPage4
             // 
@@ -221,6 +257,20 @@
             RefreshTimer.Interval = 250;
             RefreshTimer.Tick += RefreshTimer_Tick;
             // 
+            // IMUData
+            // 
+            IMUData.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            IMUData.BackColor = SystemColors.Control;
+            IMUData.BorderStyle = BorderStyle.None;
+            IMUData.Font = new Font("Segoe UI", 16F, FontStyle.Bold);
+            IMUData.Location = new Point(356, 65);
+            IMUData.Name = "IMUData";
+            IMUData.ReadOnly = true;
+            IMUData.Size = new Size(430, 29);
+            IMUData.TabIndex = 28;
+            IMUData.TabStop = false;
+            IMUData.Text = "Pitch 0 deg, Roll 0 deg";
+            // 
             // CalibrateIMUWizard
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -235,6 +285,7 @@
             tabPage1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)OrientationImage).EndInit();
             tabPage2.ResumeLayout(false);
+            tabPage2.PerformLayout();
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
             panel1.ResumeLayout(false);
@@ -257,6 +308,9 @@
         private PictureBox OrientationImage;
         private ComboBox OrientationSelector;
         private TabPage tabPage2;
-        private Button CaptureZeroBtn;
+        private Button CapturePositionBtn;
+        private TextBox textBox3;
+        private TextBox textBox4;
+        private TextBox IMUData;
     }
 }

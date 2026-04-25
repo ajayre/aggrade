@@ -2184,7 +2184,7 @@ namespace AgGrade
                     StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Error);
                 }
 
-                if (FrontApronIMUFound)
+                /*if (FrontApronIMUFound)
                 {
                     if ((CurrentEquipmentStatus.FrontPan.ApronIMU.CalibrationStatus == IMUValue.Calibration.Good) ||
                         (CurrentEquipmentStatus.FrontPan.ApronIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
@@ -2199,7 +2199,7 @@ namespace AgGrade
                 else
                 {
                     StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Error);
-                }
+                }*/
 
                 if (FrontBucketIMUFound)
                 {
@@ -2221,7 +2221,7 @@ namespace AgGrade
             else
             {
                 StatusBar.SetLedState(StatusBar.Leds.FrontIMU, StatusBar.LedState.Disabled);
-                StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Disabled);
+                //StatusBar.SetLedState(StatusBar.Leds.FrontApronIMU, StatusBar.LedState.Disabled);
                 StatusBar.SetLedState(StatusBar.Leds.FrontBucketIMU, StatusBar.LedState.Disabled);
             }
 

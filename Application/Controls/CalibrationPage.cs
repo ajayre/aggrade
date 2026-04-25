@@ -76,7 +76,7 @@ namespace AgGrade.Controls
             AddButton("Calibrate Tractor Antenna Location", Properties.Resources.tractor_48px, odd, CalibrateTractorAntenna);
             odd = !odd;
 
-            AddButton("Calibrate Tractor IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Tractor);
+            AddButton("Calibrate Tractor IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, IMUs.Tractor);
             odd = !odd;
 
             if (CurrentEquipmentSettings.RearPan.Equipped)
@@ -91,7 +91,7 @@ namespace AgGrade.Controls
                 odd = !odd;
                 AddButton("Calibrate Rear Blade Height", Properties.Resources.blade_48px, odd, CalibrateRearBladeHeight);
                 odd = !odd;
-                AddButton("Calibrate Rear IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Rear);
+                AddButton("Calibrate Rear IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, IMUs.Rear);
                 odd = !odd;
             }
             if (CurrentEquipmentSettings.FrontPan.Equipped)
@@ -104,11 +104,11 @@ namespace AgGrade.Controls
 
                 AddButton("Calibrate Front Bucket Angle", Properties.Resources.lever_48px, odd, CalibrateFrontBucketAngle);
                 odd = !odd;
-                AddButton("Calibrate Front Apron Angle", Properties.Resources.lever_48px, odd, CalibrateFrontApronAngle);
-                odd = !odd;
+                //AddButton("Calibrate Front Apron Angle", Properties.Resources.lever_48px, odd, CalibrateFrontApronAngle);
+                //odd = !odd;
                 AddButton("Calibrate Front Blade Height", Properties.Resources.blade_48px, odd, CalibrateFrontBladeHeight);
                 odd = !odd;
-                AddButton("Calibrate Front IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, CalibrateIMUWizard.IMUs.Front);
+                AddButton("Calibrate Front IMU", Properties.Resources.imu_48px, odd, CalibrateIMU, IMUs.Front);
                 odd = !odd;
             }
             if ((CurrentField != null) && (CurrentField.Benchmarks.Count > 0))
@@ -222,27 +222,32 @@ namespace AgGrade.Controls
             object Sender
             )
         {
-            CalibrateIMUWizard.IMUs IMU = (CalibrateIMUWizard.IMUs)(Sender as ButtonPanel)!.Tag!;
+            IMUs IMU = (IMUs)(Sender as ButtonPanel)!.Tag!;
 
             HideOptions();
             ShowWizard();
 
+            System.Drawing.Color TextColor = System.Drawing.Color.Black;
+
             switch (IMU)
             {
-                case CalibrateIMUWizard.IMUs.Tractor:
+                case IMUs.Tractor:
                     Wizard!.Name = "Tractor IMU";
+                    TextColor = System.Drawing.Color.Black;
                     break;
 
-                case CalibrateIMUWizard.IMUs.Front:
+                case IMUs.Front:
                     Wizard!.Name = "Front Pan IMU";
+                    TextColor = FrontPanColor;
                     break;
 
-                case CalibrateIMUWizard.IMUs.Rear:
+                case IMUs.Rear:
                     Wizard!.Name = "Rear Pan IMU";
+                    TextColor = RearPanColor;
                     break;
             }
 
-            Wizard!.Content = new CalibrateIMUWizard(IMU);
+            Wizard!.Content = new CalibrateIMUWizard(IMU, TextColor);
             OnEnableBladeLimits?.Invoke();
         }
 

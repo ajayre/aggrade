@@ -31,7 +31,6 @@
             components = new System.ComponentModel.Container();
             Pages = new TabControl();
             tabPage1 = new TabPage();
-            pictureBox1 = new PictureBox();
             Angle1 = new TextBox();
             textBox2 = new TextBox();
             CaptureZeroBtn = new Button();
@@ -44,7 +43,6 @@
             RefreshTimer = new System.Windows.Forms.Timer(components);
             Pages.SuspendLayout();
             tabPage1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             tabPage4.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -63,7 +61,6 @@
             // 
             // tabPage1
             // 
-            tabPage1.Controls.Add(pictureBox1);
             tabPage1.Controls.Add(Angle1);
             tabPage1.Controls.Add(textBox2);
             tabPage1.Controls.Add(CaptureZeroBtn);
@@ -74,16 +71,6 @@
             tabPage1.Size = new Size(792, 434);
             tabPage1.TabIndex = 0;
             tabPage1.Text = "tabPage1";
-            // 
-            // pictureBox1
-            // 
-            pictureBox1.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-            pictureBox1.Image = Properties.Resources.dirtpan_150px;
-            pictureBox1.Location = new Point(509, 6);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(277, 122);
-            pictureBox1.TabIndex = 28;
-            pictureBox1.TabStop = false;
             // 
             // Angle1
             // 
@@ -221,7 +208,6 @@
             Pages.ResumeLayout(false);
             tabPage1.ResumeLayout(false);
             tabPage1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             tabPage4.ResumeLayout(false);
             tabPage4.PerformLayout();
             panel1.ResumeLayout(false);
@@ -243,6 +229,5 @@
         private TextBox ResultMsg;
         private TextBox Angle1;
         private System.Windows.Forms.Timer RefreshTimer;
-        private PictureBox pictureBox1;
     }
 }

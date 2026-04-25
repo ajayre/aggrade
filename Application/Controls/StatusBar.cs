@@ -34,7 +34,7 @@ namespace AgGrade.Controls
             RearRTK,
             TractorIMU,
             FrontIMU,
-            FrontApronIMU,
+            //FrontApronIMU,
             FrontBucketIMU,
             RearIMU,
             RearBucketIMU,
@@ -117,7 +117,7 @@ namespace AgGrade.Controls
         private Led RearRTK;
         private Led TractorIMU;
         private Led FrontIMU;
-        private Led FrontApronIMU;
+        //private Led FrontApronIMU;
         private Led FrontBucketIMU;
         private Led RearBucketIMU;
         private Led RearIMU;
@@ -151,7 +151,7 @@ namespace AgGrade.Controls
             RearRTK = new Led(Leds.RearRTK, RearRTKLed, LedState.Disabled);
             TractorIMU = new Led(Leds.TractorIMU, TractorIMULed, LedState.Disabled);
             FrontIMU = new Led(Leds.FrontIMU, FrontIMULed, LedState.Disabled);
-            FrontApronIMU = new Led(Leds.FrontApronIMU, FrontApronLed, LedState.Disabled);
+            //FrontApronIMU = new Led(Leds.FrontApronIMU, FrontApronLed, LedState.Disabled);
             FrontBucketIMU = new Led(Leds.FrontBucketIMU, FrontBucketLed, LedState.Disabled);
             RearIMU = new Led(Leds.RearIMU, RearIMULed, LedState.Disabled);
             RearBucketIMU = new Led(Leds.RearBucketIMU, RearBucketLed, LedState.Disabled);
@@ -165,7 +165,7 @@ namespace AgGrade.Controls
             SupportedLeds.Add(RearRTK);
             SupportedLeds.Add(TractorIMU);
             SupportedLeds.Add(FrontIMU);
-            SupportedLeds.Add(FrontApronIMU);
+            //SupportedLeds.Add(FrontApronIMU);
             SupportedLeds.Add (FrontBucketIMU);
             SupportedLeds.Add(RearIMU);
             SupportedLeds.Add(RearBucketIMU);

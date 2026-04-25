@@ -17,6 +17,22 @@ namespace AgGrade.Controller
         RearBucket
     }
 
+    public enum IMUs
+    {
+        Tractor,
+        Front,
+        Rear,
+        FrontApron,
+        FrontBucket,
+        RearBucket
+    }
+
+    public enum IMUOrientations
+    {
+        HorizontalA,
+        VerticalA
+    }
+
     public class OGController
     {
         public const uint CUTVALVE_MIN = 0;
@@ -816,6 +832,32 @@ namespace AgGrade.Controller
             )
         {
             SendControllerCommand(new PGNPacket(PGNValues.PGN_RESET));
+        }
+
+        /// <summary>
+        /// Sets the orientation of an IMU
+        /// </summary>
+        /// <param name="IMU">IMU to set</param>
+        /// <param name="Orientation">New orientation</param>
+        public void SetIMUOrientation
+            (
+            IMUs IMU,
+            IMUOrientations Orientation
+            )
+        {
+
+        }
+
+        /// <summary>
+        /// Sets an IMU as level
+        /// </summary>
+        /// <param name="IMU">IMU to set as level</param>
+        public void SetIMULevel
+            (
+            IMUs IMU
+            )
+        {
+
         }
 
         private void SendControllerCommand
