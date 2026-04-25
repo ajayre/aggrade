@@ -845,7 +845,52 @@ namespace AgGrade.Controller
             IMUOrientations Orientation
             )
         {
+            PGNValues PGN;
 
+            switch (IMU)
+            {
+                default:
+                case IMUs.Tractor:
+                    PGN = PGNValues.PGN_TRACTOR_IMU_ORIENT;
+                    break;
+
+                case IMUs.Front:
+                    PGN = PGNValues.PGN_FRONT_IMU_ORIENT;
+                    break;
+
+                case IMUs.Rear:
+                    PGN = PGNValues.PGN_FRONT_IMU_ORIENT;
+                    break;
+
+                case IMUs.FrontApron:
+                    PGN = PGNValues.PGN_FRONT_APRON_IMU_ORIENT;
+                    break;
+
+                case IMUs.FrontBucket:
+                    PGN = PGNValues.PGN_FRONT_BUCKET_IMU_ORIENT;
+                    break;
+
+                case IMUs.RearBucket:
+                    PGN = PGNValues.PGN_REAR_BUCKET_IMU_ORIENT;
+                    break;
+            }
+
+            UInt32 Orient;
+
+            switch (Orientation)
+            {
+                default:
+                case IMUOrientations.HorizontalA:
+                    Orient = 0;
+                    break;
+
+                case IMUOrientations.VerticalA:
+                    Orient = 1;
+                    break;
+            }
+
+            PGNPacket TxCmd = new PGNPacket(PGN, Orient);
+            SendControllerCommand(TxCmd);
         }
 
         /// <summary>
@@ -857,7 +902,38 @@ namespace AgGrade.Controller
             IMUs IMU
             )
         {
+            PGNValues PGN;
 
+            switch (IMU)
+            {
+                default:
+                case IMUs.Tractor:
+                    PGN = PGNValues.PGN_TRACTOR_IMU_LEVEL;
+                    break;
+
+                case IMUs.Front:
+                    PGN = PGNValues.PGN_FRONT_IMU_LEVEL;
+                    break;
+
+                case IMUs.Rear:
+                    PGN = PGNValues.PGN_FRONT_IMU_LEVEL;
+                    break;
+
+                case IMUs.FrontApron:
+                    PGN = PGNValues.PGN_FRONT_APRON_IMU_LEVEL;
+                    break;
+
+                case IMUs.FrontBucket:
+                    PGN = PGNValues.PGN_FRONT_BUCKET_IMU_LEVEL;
+                    break;
+
+                case IMUs.RearBucket:
+                    PGN = PGNValues.PGN_REAR_BUCKET_IMU_LEVEL;
+                    break;
+            }
+
+            PGNPacket TxCmd = new PGNPacket(PGN);
+            SendControllerCommand(TxCmd);
         }
 
         private void SendControllerCommand
