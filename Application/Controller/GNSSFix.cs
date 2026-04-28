@@ -46,6 +46,8 @@ namespace AgGrade.Controller
                 if (LastFixTime == null) return false;
                 // stale
                 if (DateTime.Now > LastFixTime.Value.AddMilliseconds(FIX_STALE_TIME_MS)) return false;
+                // invalid
+                if ((Latitude > -1) && (Latitude < 1) && (Longitude > -1) && (Longitude < 1)) return false;
 
                 return true;
             }

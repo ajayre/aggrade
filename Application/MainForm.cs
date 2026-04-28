@@ -1771,9 +1771,9 @@ namespace AgGrade
         /// <param name="Value"></param>
         private void Controller_OnRearIMUChanged(IMUValue Value)
         {
-            CurrentEquipmentStatus.FrontPan.IMU = Value;
+            CurrentEquipmentStatus.RearPan.IMU = Value;
 
-            FrontIMUFound = true;
+            RearIMUFound = true;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
@@ -1819,9 +1819,9 @@ namespace AgGrade
         /// <param name="Value"></param>
         private void Controller_OnFrontIMUChanged(IMUValue Value)
         {
-            CurrentEquipmentStatus.RearPan.IMU = Value;
+            CurrentEquipmentStatus.FrontPan.IMU = Value;
 
-            RearIMUFound = true;
+            FrontIMUFound = true;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
