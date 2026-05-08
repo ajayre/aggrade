@@ -519,12 +519,12 @@ namespace AgGrade.Controller
                             break;
 
                         // blade auto flags
-                        case PGNValues.PGN_FRONT_AUTO:
+                        case PGNValues.PGN_FRONT_CUTTING_REQUEST:
                             bool Cutting = Stat.GetByte() == 1 ? true : false;
                             OnFrontBladeCuttingChanged?.Invoke(Cutting);
                             break;
 
-                        case PGNValues.PGN_REAR_AUTO:
+                        case PGNValues.PGN_REAR_CUTTING_REQUEST:
                             Cutting = Stat.GetByte() == 1 ? true : false;
                             OnRearBladeCuttingChanged?.Invoke(Cutting);
                             break;
@@ -704,7 +704,7 @@ namespace AgGrade.Controller
 
             if (Mode == PanStatus.BladeMode.Manual) State = 0;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_AUTO, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_STATE, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 
@@ -721,7 +721,7 @@ namespace AgGrade.Controller
 
             if (Mode == PanStatus.BladeMode.Manual) State = 1;
 
-            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_AUTO, new byte[] { State });
+            PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_STATE, new byte[] { State });
             SendControllerCommand(TxCmd);
         }
 

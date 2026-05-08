@@ -522,14 +522,17 @@ namespace AgGrade.Controls
             (
             )
         {
-            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.FrontPan.Fix.Latitude, _CurrentEquipmentStatus.FrontPan.Fix.Longitude);
-            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            if (CurrentField != null)
             {
-                HaulPath = CurrentField.GetHaulPath(CurrentBin);
-            }
-            else
-            {
-                HaulPath = new List<Coordinate>();
+                Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.FrontPan.Fix.Latitude, _CurrentEquipmentStatus.FrontPan.Fix.Longitude);
+                if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+                {
+                    HaulPath = CurrentField.GetHaulPath(CurrentBin);
+                }
+                else
+                {
+                    HaulPath = new List<Coordinate>();
+                }
             }
         }
 
@@ -540,14 +543,17 @@ namespace AgGrade.Controls
             (
             )
         {
-            Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.RearPan.Fix.Latitude, _CurrentEquipmentStatus.RearPan.Fix.Longitude);
-            if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+            if (CurrentField != null)
             {
-                HaulPath = CurrentField.GetHaulPath(CurrentBin);
-            }
-            else
-            {
-                HaulPath = new List<Coordinate>();
+                Bin? CurrentBin = CurrentField.LatLonToBin(_CurrentEquipmentStatus.RearPan.Fix.Latitude, _CurrentEquipmentStatus.RearPan.Fix.Longitude);
+                if ((CurrentBin != null) && (CurrentBin.HaulPath != 0))
+                {
+                    HaulPath = CurrentField.GetHaulPath(CurrentBin);
+                }
+                else
+                {
+                    HaulPath = new List<Coordinate>();
+                }
             }
         }
 
