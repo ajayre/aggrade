@@ -17,13 +17,17 @@ namespace AgGrade.Data
             Down
         }
 
+        /// <summary>
+        /// These values are not arbitrary. If they are changed, then change the controller
+        /// firmware to match!
+        /// </summary>
         public enum BladeMode
         {
-            Raised,
-            Manual,
-            AutoCutting,
-            AutoFilling,
-            Floating
+            Raised      = 0,
+            Manual      = 1,
+            AutoCutting = 2,
+            AutoFilling = 3,
+            Floating    = 4
         }
 
         public IMUValue IMU;

@@ -278,6 +278,10 @@ namespace AgGrade
             // this will result in Controller.OnFrontBladeHeightChanged and Controller OnRearBladeHeightChanged being raised
             Controller.RequestFrontBladeHeight();
             Controller.RequestRearBladeHeight();
+
+            // make sure the controller knows the curent blade modes
+            Controller.SetFrontBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
+            Controller.SetRearBladeMode(CurrentEquipmentStatus.FrontPan.Mode);
         }
 
         private void Controller_OnControllerLost()
@@ -1052,7 +1056,7 @@ namespace AgGrade
 
             Controller?.SetFrontBladeConfiguration(CurrentEquipmentSettings.FrontBlade);
             Controller?.SetRearBladeConfiguration(CurrentEquipmentSettings.RearBlade);
-            
+
             Controller?.SetTractorAntennaLocation(CurrentEquipmentSettings.TractorAntennaHeightMm, CurrentEquipmentSettings.TractorAntennaLeftOffsetMm, CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
             Controller?.SetFrontAntennaHeight(CurrentEquipmentSettings.FrontPan.AntennaHeightMm);
             Controller?.SetRearAntennaHeight(CurrentEquipmentSettings.RearPan.AntennaHeightMm);
@@ -2003,12 +2007,12 @@ namespace AgGrade
 
             switch (Equip)
             {
-                case EquipType.Tractor:     TractorIMUFound     = false; break;
-                case EquipType.Front:       FrontIMUFound       = false; break;
-                case EquipType.FrontApron:  FrontApronIMUFound  = false; break;
+                case EquipType.Tractor: TractorIMUFound = false; break;
+                case EquipType.Front: FrontIMUFound = false; break;
+                case EquipType.FrontApron: FrontApronIMUFound = false; break;
                 case EquipType.FrontBucket: FrontBucketIMUFound = false; break;
-                case EquipType.Rear:        RearIMUFound        = false; break;
-                case EquipType.RearBucket:  RearBucketIMUFound  = false; break;
+                case EquipType.Rear: RearIMUFound = false; break;
+                case EquipType.RearBucket: RearBucketIMUFound = false; break;
             }
 
             UpdateIMULeds();
@@ -2028,12 +2032,12 @@ namespace AgGrade
 
             switch (Equip)
             {
-                case EquipType.Tractor:     TractorIMUFound     = true; break;
-                case EquipType.Front:       FrontIMUFound       = true; break;
-                case EquipType.FrontApron:  FrontApronIMUFound  = true; break;
+                case EquipType.Tractor: TractorIMUFound = true; break;
+                case EquipType.Front: FrontIMUFound = true; break;
+                case EquipType.FrontApron: FrontApronIMUFound = true; break;
                 case EquipType.FrontBucket: FrontBucketIMUFound = true; break;
-                case EquipType.Rear:        RearIMUFound        = true; break;
-                case EquipType.RearBucket:  RearBucketIMUFound  = true; break;
+                case EquipType.Rear: RearIMUFound = true; break;
+                case EquipType.RearBucket: RearBucketIMUFound = true; break;
             }
 
             UpdateIMULeds();

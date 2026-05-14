@@ -700,9 +700,7 @@ namespace AgGrade.Controller
             PanStatus.BladeMode Mode
             )
         {
-            byte State = 1;
-
-            if (Mode == PanStatus.BladeMode.Manual) State = 0;
+            byte State = (byte)Mode;
 
             PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_FRONT_STATE, new byte[] { State });
             SendControllerCommand(TxCmd);
@@ -717,9 +715,7 @@ namespace AgGrade.Controller
             PanStatus.BladeMode Mode
             )
         {
-            byte State = 1;
-
-            if (Mode == PanStatus.BladeMode.Manual) State = 1;
+            byte State = (byte)Mode;
 
             PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_REAR_STATE, new byte[] { State });
             SendControllerCommand(TxCmd);
