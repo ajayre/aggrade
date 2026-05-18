@@ -356,6 +356,8 @@ namespace AgGrade
             Controller.SetRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
             UpdateRearBladeMode(CurrentEquipmentStatus.RearPan.Mode);
 
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
+
             SoundControllerAlarm();
         }
 
@@ -1369,6 +1371,8 @@ namespace AgGrade
             {
                 BladeCtrl.SetRearBladeHeight(CurrentEquipmentStatus.RearPan.BladeHeight - 1, EnableBladeLimits);
             }
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>
@@ -1397,6 +1401,8 @@ namespace AgGrade
             {
                 BladeCtrl.SetFrontBladeHeight(CurrentEquipmentStatus.FrontPan.BladeHeight - 1, EnableBladeLimits);
             }
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>
@@ -1483,17 +1489,23 @@ namespace AgGrade
         private void Controller_OnRearSlaveOffsetChanged(int Offset)
         {
             CurrentEquipmentStatus.RearPan.BladeOffset = Offset;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         private void Controller_OnRearBladeHeightChanged(uint Height)
         {
             // convert to signed millimeters
             CurrentEquipmentStatus.RearPan.BladeHeight = (int)Height - BladeController.BLADE_HEIGHT_GROUND_LEVEL;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         private void Controller_OnRearBladePWMChanged(byte PWMValue)
         {
             CurrentEquipmentStatus.RearPan.BladePWM = PWMValue;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         private void Controller_OnRearBladeDirectionChanged(bool IsMovingUp)
@@ -1506,6 +1518,8 @@ namespace AgGrade
             {
                 CurrentEquipmentStatus.RearPan.Direction = PanStatus.BladeDirection.Down;
             }
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>
@@ -1622,16 +1636,22 @@ namespace AgGrade
         {
             // convert to signed millimeters
             CurrentEquipmentStatus.FrontPan.BladeHeight = (int)Height - BladeController.BLADE_HEIGHT_GROUND_LEVEL;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         private void Controller_OnFrontSlaveOffsetChanged(int Offset)
         {
             CurrentEquipmentStatus.FrontPan.BladeOffset = Offset;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         private void Controller_OnFrontBladePWMChanged(byte PWMValue)
         {
             CurrentEquipmentStatus.FrontPan.BladePWM = PWMValue;
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>
@@ -1740,6 +1760,8 @@ namespace AgGrade
             {
                 CurrentEquipmentStatus.FrontPan.Direction = PanStatus.BladeDirection.Down;
             }
+
+            GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
         }
 
         /// <summary>

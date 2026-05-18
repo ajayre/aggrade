@@ -15,6 +15,7 @@ namespace AgGrade.Controller
         PGN_PING = 0x0003,
         PGN_CLEAR_ESTOP = 0x0004,
         PGN_YOU_ARE_SECONDARY = 0x0005,
+        PGN_ONBOARD_TRACTOR_IMU = 0x0006,
 
         //
         // control

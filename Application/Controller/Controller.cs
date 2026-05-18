@@ -424,11 +424,11 @@ namespace AgGrade.Controller
 
                         // slave offsets
                         case PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE:
-                            OnFrontSlaveOffsetChanged?.Invoke((int)Stat.GetUInt32());
+                            OnFrontSlaveOffsetChanged?.Invoke((Int16)Stat.GetUInt32());
                             break;
 
                         case PGNValues.PGN_REAR_BLADE_OFFSET_SLAVE:
-                            OnRearSlaveOffsetChanged?.Invoke((int)Stat.GetUInt32());
+                            OnRearSlaveOffsetChanged?.Invoke((Int16)Stat.GetUInt32());
                             break;
 
                         // blade heights
@@ -601,6 +601,12 @@ namespace AgGrade.Controller
                         case PGNValues.PGN_YOU_ARE_SECONDARY:
                             {
                                 OnEnableSecondaryTabletMode?.Invoke();
+                            }
+                            break;
+
+                        case PGNValues.PGN_ONBOARD_TRACTOR_IMU:
+                            {
+                                // fixme - to do
                             }
                             break;
                     }
