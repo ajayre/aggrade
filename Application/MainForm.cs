@@ -1672,10 +1672,14 @@ namespace AgGrade
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
                 FrontPanIndicator.Visible = true;
+
+                FrontBladeControlBtn.Visible = true;
             }
             else
             {
                 FrontPanIndicator.Visible = false;
+
+                FrontBladeControlBtn.Visible = false;
             }
 
             if (State.HasValue)
@@ -1720,10 +1724,12 @@ namespace AgGrade
             if (CurrentEquipmentSettings.RearPan.Equipped)
             {
                 RearPanIndicator.Visible = true;
+                RearBladeControlBtn.Visible = true;
             }
             else
             {
                 RearPanIndicator.Visible = false;
+                RearBladeControlBtn.Visible = false;
             }
 
             if (State.HasValue)
