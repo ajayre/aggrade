@@ -334,9 +334,13 @@ namespace AgGrade.Controller
                     SendControllerCommand(new PGNPacket(PGNValues.PGN_PING));
                 }
 
-                // message waiting from controller
-                if (ControllerChannel.Available() > 0)
+                bool receivedMessage = false;
+
+                // drain all packets currently available before yielding
+                while (ControllerChannel.Available() > 0)
                 {
+                    receivedMessage = true;
+
                     PGNPacket Stat = GetControllerStatus();
                     switch (Stat.PGN)
                     {
@@ -620,7 +624,10 @@ namespace AgGrade.Controller
                     OnControllerLost?.Invoke();
                 }
 
-                Thread.Sleep(1);
+                if (!receivedMessage)
+                {
+                    Thread.Sleep(1);
+                }
             }
         }
 

@@ -192,42 +192,10 @@ namespace AgGrade.Controller
 
             try
             {
-                // Check if we have buffered data to process
-                if (_receiveBufferIndex < _receiveBufferLength)
+                while (true)
                 {
-                    valid = true;
-                    recChar = _receiveBuffer[_receiveBufferIndex++];
-                    BytesRead = Packet.Parse(recChar, valid);
-                    Status = Packet.Status;
-
-                    if (Status != (int)PacketStatus.Continue)
-                    {
-                        if (Status < 0)
-                            Reset();
-                        return BytesRead;
-                    }
-                }
-                else
-                {
-                // Try to receive new UDP packet (non-blocking check)
-                if (_udpClient.Client.Available > 0)
-                {
-                    IPEndPoint remoteEP = null;
-                    byte[] receivedData = _udpClient.Receive(ref remoteEP);
-                    
-                    // Update remote endpoint if it changed
-                    if (remoteEP != null)
-                    {
-                        _remoteEndPoint = remoteEP;
-                    }
-                    
-                    // Copy received data to buffer for byte-by-byte processing
-                    Array.Copy(receivedData, 0, _receiveBuffer, 0, receivedData.Length);
-                    _receiveBufferLength = receivedData.Length;
-                    _receiveBufferIndex = 0;
-                    
-                    // Process first byte
-                    if (_receiveBufferLength > 0)
+                    // Process bytes already in the receive buffer
+                    while (_receiveBufferIndex < _receiveBufferLength)
                     {
                         valid = true;
                         recChar = _receiveBuffer[_receiveBufferIndex++];
@@ -241,34 +209,31 @@ namespace AgGrade.Controller
                             return BytesRead;
                         }
                     }
-                }
-                    else
+
+                    // Buffer exhausted — pull datagrams from the socket while available
+                    if (_udpClient.Client.Available <= 0)
                     {
-                        // No data available, call parse with invalid flag
                         BytesRead = Packet.Parse(recChar, valid);
                         Status = Packet.Status;
 
                         if (Status < 0)
                             Reset();
+
+                        return BytesRead;
                     }
-                }
 
-                // Continue processing remaining buffered bytes
-                while (_receiveBufferIndex < _receiveBufferLength)
-                {
-                    recChar = _receiveBuffer[_receiveBufferIndex++];
-                    BytesRead = Packet.Parse(recChar, valid);
-                    Status = Packet.Status;
+                    IPEndPoint remoteEP = null;
+                    byte[] receivedData = _udpClient.Receive(ref remoteEP);
 
-                    if (Status != (int)PacketStatus.Continue)
+                    if (remoteEP != null)
                     {
-                        if (Status < 0)
-                            Reset();
-                        break;
+                        _remoteEndPoint = remoteEP;
                     }
-                }
 
-                return BytesRead;
+                    Array.Copy(receivedData, 0, _receiveBuffer, 0, receivedData.Length);
+                    _receiveBufferLength = receivedData.Length;
+                    _receiveBufferIndex = 0;
+                }
             }
             catch (SocketException ex)
             {
