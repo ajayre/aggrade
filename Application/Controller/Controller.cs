@@ -172,7 +172,6 @@ namespace AgGrade.Controller
         private int MagneticDeclinationDegrees;
         private uint MagneticDeclinationMinutes;
         private EquipmentSettings CurrentEquipmentSettings = new EquipmentSettings();
-        private NmeaFileLogger? NmeaLogger;
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -200,9 +199,6 @@ namespace AgGrade.Controller
             
             ControllerChannel = new UDPTransfer();
             ControllerChannel.Begin(Address, RemotePort, SubnetMask, LocalPort);
-
-            NmeaLogger?.Dispose();
-            NmeaLogger = new NmeaFileLogger();
 
             // tell controller we are now running
             SendControllerCommand(new PGNPacket(PGNValues.PGN_AGGRADE_STARTED));
@@ -259,9 +255,6 @@ namespace AgGrade.Controller
                 ControllerChannel.Close();
                 ControllerChannel = null;
             }
-
-            NmeaLogger?.Dispose();
-            NmeaLogger = null;
         }
 
         /// <summary>
@@ -928,8 +921,6 @@ namespace AgGrade.Controller
             int AntennaForwardOffsetMm
             )
         {
-            NmeaLogger?.Log(Sentence);
-
             if (Sentence.StartsWith("$GPGGA") || Sentence.StartsWith("$GNGGA"))
             {
                 try
