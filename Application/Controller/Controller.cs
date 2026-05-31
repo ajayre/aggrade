@@ -1,5 +1,6 @@
 ﻿using AgGrade.Data;
 using OpenCvSharp;
+using System.Collections.Concurrent;
 using System.Diagnostics.Eventing.Reader;
 using System.Net;
 using System.Text;
@@ -122,8 +123,44 @@ namespace AgGrade.Controller
         private IMUValue RearScraperBucketIMU = new IMUValue();
 
         private DateTime LastRxPingTime;
+        private Thread ReceiveThread = null;
         private Thread WorkThread = null;
         private volatile bool WorkThreadCancellationRequested = false;
+        private readonly AutoResetEvent WorkSignal = new AutoResetEvent(false);
+        private readonly ConcurrentQueue<PGNPacket> UrgentPackets = new ConcurrentQueue<PGNPacket>();
+        private readonly object StateLock = new object();
+        private bool PendingControllerFound;
+        private bool TractorImuDirty;
+        private bool FrontImuDirty;
+        private bool FrontApronImuDirty;
+        private bool FrontBucketImuDirty;
+        private bool RearImuDirty;
+        private bool RearBucketImuDirty;
+        private bool TractorLocationDirty;
+        private bool FrontLocationDirty;
+        private bool RearLocationDirty;
+        private bool FrontBladeHeightDirty;
+        private bool RearBladeHeightDirty;
+        private bool FrontApronAngleDirty;
+        private bool FrontBucketAngleDirty;
+        private bool RearBucketAngleDirty;
+        private bool FrontSlaveOffsetDirty;
+        private bool RearSlaveOffsetDirty;
+        private bool FrontBladeDirectionDirty;
+        private bool RearBladeDirectionDirty;
+        private bool FrontBladePwmDirty;
+        private bool RearBladePwmDirty;
+        private uint PendingFrontBladeHeight;
+        private uint PendingRearBladeHeight;
+        private double PendingFrontApronAngle;
+        private double PendingFrontBucketAngle;
+        private double PendingRearBucketAngle;
+        private int PendingFrontSlaveOffset;
+        private int PendingRearSlaveOffset;
+        private bool PendingFrontBladeDirectionUp;
+        private bool PendingRearBladeDirectionUp;
+        private byte PendingFrontBladePwm;
+        private byte PendingRearBladePwm;
         private DateTime PingTime;
         private GNSSVector? TractorVector = null;
         private GNSSFix? TractorFix = null;
@@ -133,6 +170,7 @@ namespace AgGrade.Controller
         private GNSSFix? RearFix = null;
         private SensorFusor Fusor = new SensorFusor();
         private EquipmentSettings CurrentEquipmentSettings = new EquipmentSettings();
+        private NmeaFileLogger? NmeaLogger;
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
@@ -161,6 +199,9 @@ namespace AgGrade.Controller
             ControllerChannel = new UDPTransfer();
             ControllerChannel.Begin(Address, RemotePort, SubnetMask, LocalPort);
 
+            NmeaLogger?.Dispose();
+            NmeaLogger = new NmeaFileLogger();
+
             // tell controller we are now running
             SendControllerCommand(new PGNPacket(PGNValues.PGN_AGGRADE_STARTED));
 
@@ -170,7 +211,18 @@ namespace AgGrade.Controller
             _IsControllerFound = false;
 
             WorkThreadCancellationRequested = false;
-            WorkThread = new Thread(WorkThread_DoWork);
+            ReceiveThread = new Thread(ReceiveThread_DoWork)
+            {
+                Name = "UDP Receive",
+                IsBackground = true,
+                Priority = ThreadPriority.AboveNormal
+            };
+            WorkThread = new Thread(WorkThread_DoWork)
+            {
+                Name = "Controller Work",
+                IsBackground = true
+            };
+            ReceiveThread.Start();
             WorkThread.Start();
         }
 
@@ -179,6 +231,16 @@ namespace AgGrade.Controller
             )
         {
             WorkThreadCancellationRequested = true;
+            WorkSignal.Set();
+
+            if (ReceiveThread != null)
+            {
+                if (ReceiveThread.IsAlive)
+                {
+                    ReceiveThread.Join(1000);
+                }
+                ReceiveThread = null;
+            }
 
             if (WorkThread != null)
             {
@@ -195,6 +257,9 @@ namespace AgGrade.Controller
                 ControllerChannel.Close();
                 ControllerChannel = null;
             }
+
+            NmeaLogger?.Dispose();
+            NmeaLogger = null;
         }
 
         /// <summary>
@@ -320,314 +385,521 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
-        /// Communicates with the controller
+        /// Drains the UDP socket and applies high-rate updates without raising events
+        /// </summary>
+        private void ReceiveThread_DoWork()
+        {
+            while (!WorkThreadCancellationRequested)
+            {
+                bool receivedData = false;
+
+                while (ControllerChannel.Available() > 0)
+                {
+                    receivedData = true;
+                    PGNPacket stat = GetControllerStatus();
+
+                    lock (StateLock)
+                    {
+                        ApplyIncomingPacket(stat, out bool urgent);
+                        if (urgent)
+                        {
+                            UrgentPackets.Enqueue(CopyPacket(stat));
+                        }
+                    }
+                }
+
+                if (receivedData)
+                {
+                    WorkSignal.Set();
+                }
+                else if (!ControllerChannel.HasPendingInput)
+                {
+                    Thread.Sleep(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sends pings, dispatches coalesced sensor updates, and handles urgent packets
         /// </summary>
         private void WorkThread_DoWork()
         {
             while (!WorkThreadCancellationRequested)
             {
-                // send ping to controller to tell it we are alive
                 if (PingTime < DateTime.Now)
                 {
                     PingTime = DateTime.Now.AddMilliseconds(PING_PERIOD_MS);
-
                     SendControllerCommand(new PGNPacket(PGNValues.PGN_PING));
                 }
 
-                bool receivedMessage = false;
+                WorkSignal.WaitOne(1);
 
-                // drain all packets currently available before yielding
-                while (ControllerChannel.Available() > 0)
+                while (UrgentPackets.TryDequeue(out PGNPacket urgentPacket))
                 {
-                    receivedMessage = true;
-
-                    PGNPacket Stat = GetControllerStatus();
-                    switch (Stat.PGN)
+                    lock (StateLock)
                     {
-                        // misc
-                        case PGNValues.PGN_ESTOP:
-                            OnEmergencyStop?.Invoke();
-                            break;
-
-                        case PGNValues.PGN_CLEAR_ESTOP:
-                            OnEmergencyStopCleared?.Invoke();
-                            break;
-
-                        case PGNValues.PGN_PING:
-                            LastRxPingTime = DateTime.Now;
-                            if (!_IsControllerFound)
-                            {
-                                _IsControllerFound = true;
-                                OnControllerFound?.Invoke();
-                            }
-                            break;
-
-                        case PGNValues.PGN_TRACTOR_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.Tractor);
-                            break;
-
-                        case PGNValues.PGN_TRACTOR_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.Tractor);
-                            break;
-
-                        case PGNValues.PGN_FRONT_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.Front);
-                            break;
-
-                        case PGNValues.PGN_FRONT_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.Front);
-                            break;
-
-                        case PGNValues.PGN_FRONT_APRON_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.FrontApron);
-                            break;
-
-                        case PGNValues.PGN_FRONT_APRON_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.FrontApron);
-                            break;
-
-                        case PGNValues.PGN_FRONT_BUCKET_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.FrontBucket);
-                            break;
-
-                        case PGNValues.PGN_FRONT_BUCKET_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.FrontBucket);
-                            break;
-
-                        case PGNValues.PGN_REAR_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.Rear);
-                            break;
-
-                        case PGNValues.PGN_REAR_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.Rear);
-                            break;
-
-                        case PGNValues.PGN_REAR_BUCKET_IMU_FOUND:
-                            OnIMUFound?.Invoke(EquipType.RearBucket);
-                            break;
-
-                        case PGNValues.PGN_REAR_BUCKET_IMU_LOST:
-                            OnIMULost?.Invoke(EquipType.RearBucket);
-                            break;
-
-                        case PGNValues.PGN_FRONT_HEIGHT_FOUND:
-                            OnHeightFound?.Invoke(EquipType.Front);
-                            break;
-
-                        case PGNValues.PGN_FRONT_HEIGHT_LOST:
-                            OnHeightLost?.Invoke(EquipType.Front);
-                            break;
-
-                        case PGNValues.PGN_REAR_HEIGHT_FOUND:
-                            OnHeightFound?.Invoke(EquipType.Rear);
-                            break;
-
-                        case PGNValues.PGN_REAR_HEIGHT_LOST:
-                            OnHeightLost?.Invoke(EquipType.Rear);
-                            break;
-
-                        // slave offsets
-                        case PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE:
-                            OnFrontSlaveOffsetChanged?.Invoke((Int16)Stat.GetUInt32());
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_OFFSET_SLAVE:
-                            OnRearSlaveOffsetChanged?.Invoke((Int16)Stat.GetUInt32());
-                            break;
-
-                        // blade heights
-                        case PGNValues.PGN_FRONT_BLADE_HEIGHT:
-                            OnFrontBladeHeightChanged?.Invoke(Stat.GetUInt32());
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_HEIGHT:
-                            OnRearBladeHeightChanged?.Invoke(Stat.GetUInt32());
-                            break;
-
-                        case PGNValues.PGN_FRONT_APRON_ANGLE:
-                            OnFrontApronAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
-                            break;
-
-                        case PGNValues.PGN_FRONT_BUCKET_ANGLE:
-                            OnFrontBucketAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
-                            break;
-
-                        case PGNValues.PGN_REAR_BUCKET_ANGLE:
-                            OnRearBucketAngleChanged?.Invoke((Int32)Stat.GetUInt32() / 100.0);
-                            break;
-
-                        // IMU
-                        case PGNValues.PGN_TRACTOR_IMU:
-                            TractorIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            TractorIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            TractorIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            TractorIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            TractorIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnTractorIMUChanged?.Invoke(TractorIMU);
-                            break;
-
-                        case PGNValues.PGN_FRONT_IMU:
-                            FrontScraperIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            FrontScraperIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            FrontScraperIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            FrontScraperIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            FrontScraperIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnFrontIMUChanged?.Invoke(FrontScraperIMU);
-                            break;
-
-                        case PGNValues.PGN_FRONT_APRON_IMU:
-                            FrontScraperApronIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            FrontScraperApronIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            FrontScraperApronIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            FrontScraperApronIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            FrontScraperApronIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnFrontApronIMUChanged?.Invoke(FrontScraperApronIMU);
-                            break;
-
-                        case PGNValues.PGN_FRONT_BUCKET_IMU:
-                            FrontScraperBucketIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            FrontScraperBucketIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            FrontScraperBucketIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            FrontScraperBucketIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            FrontScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnFrontBucketIMUChanged?.Invoke(FrontScraperBucketIMU);
-                            break;
-
-                        case PGNValues.PGN_REAR_IMU:
-                            RearScraperIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            RearScraperIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            RearScraperIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            RearScraperIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            RearScraperIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnRearIMUChanged?.Invoke(RearScraperIMU);
-                            break;
-
-                        case PGNValues.PGN_REAR_BUCKET_IMU:
-                            RearScraperBucketIMU.Pitch = ((Int32)Stat.GetUInt32(0)) / 100.0;
-                            RearScraperBucketIMU.Roll = ((Int32)Stat.GetUInt32(4)) / 100.0;
-                            RearScraperBucketIMU.Heading = ((Int32)Stat.GetUInt32(8)) / 100.0;
-                            RearScraperBucketIMU.YawRate = ((Int32)Stat.GetUInt32(12)) / 100.0;
-                            RearScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)Stat.GetByte(16);
-                            OnRearBucketIMUChanged?.Invoke(RearScraperBucketIMU);
-                            break;
-                            
-                        // scraper dumping flags
-                        case PGNValues.PGN_FRONT_DUMPING:
-                            bool Dumping = Stat.GetByte() == 1 ? true : false;
-                            OnFrontDumpingChanged?.Invoke(Dumping);
-                            break;
-
-                        case PGNValues.PGN_REAR_DUMPING:
-                            Dumping = Stat.GetByte() == 1 ? true : false;
-                            OnRearDumpingChanged?.Invoke(Dumping);
-                            break;
-
-                        // blade auto flags
-                        case PGNValues.PGN_FRONT_CUTTING_REQUEST:
-                            bool Cutting = Stat.GetByte() == 1 ? true : false;
-                            OnFrontBladeCuttingChanged?.Invoke(Cutting);
-                            break;
-
-                        case PGNValues.PGN_REAR_CUTTING_REQUEST:
-                            Cutting = Stat.GetByte() == 1 ? true : false;
-                            OnRearBladeCuttingChanged?.Invoke(Cutting);
-                            break;
-
-                        // blade direction
-                        case PGNValues.PGN_FRONT_BLADE_DIRECTION:
-                            bool Up = Stat.GetByte() == 1 ? true : false;
-                            OnFrontBladeDirectionChanged?.Invoke(Up);
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_DIRECTION:
-                            Up = Stat.GetByte() == 1 ? true : false;
-                            OnRearBladeDirectionChanged?.Invoke(Up);
-                            break;
-
-                        case PGNValues.PGN_FRONT_BLADE_PWMVALUE:
-                            OnFrontBladePWMChanged?.Invoke(Stat.Data[0]);
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_PWMVALUE:
-                            OnRearBladePWMChanged?.Invoke(Stat.Data[0]);
-                            break;
-
-                        // location
-                        case PGNValues.PGN_TRACTOR_NMEA:
-                            {
-                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref TractorFix, ref TractorVector, OnTractorLocationChanged,
-                                    TractorIMU, CurrentEquipmentSettings.TractorAntennaHeightMm, CurrentEquipmentSettings.TractorAntennaLeftOffsetMm,
-                                    CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
-                            }
-                            break;
-
-                        case PGNValues.PGN_FRONT_NMEA:
-                            {
-                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref FrontFix, ref FrontVector, OnFrontLocationChanged,
-                                    FrontScraperIMU, CurrentEquipmentSettings.FrontPan.AntennaHeightMm, 0, 0);
-                            }
-                            break;
-                        
-                        case PGNValues.PGN_REAR_NMEA:
-                            {
-                                string Sentence = Encoding.ASCII.GetString(Stat.Data);
-                                ProcessNMEA(Sentence, ref RearFix, ref RearVector, OnRearLocationChanged,
-                                    RearScraperIMU, CurrentEquipmentSettings.RearPan.AntennaHeightMm, 0, 0);
-                            }
-                            break;
-
-                        case PGNValues.PGN_FRONT_BLADE_JOG_UP:
-                            {
-                                OnFrontBladeJogged?.Invoke(true);
-                            }
-                            break;
-
-                        case PGNValues.PGN_FRONT_BLADE_JOG_DOWN:
-                            {
-                                OnFrontBladeJogged?.Invoke(false);
-                            }
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_JOG_UP:
-                            {
-                                OnRearBladeJogged?.Invoke(true);
-                            }
-                            break;
-
-                        case PGNValues.PGN_REAR_BLADE_JOG_DOWN:
-                            {
-                                OnRearBladeJogged?.Invoke(false);
-                            }
-                            break;
-
-                        case PGNValues.PGN_YOU_ARE_SECONDARY:
-                            {
-                                OnEnableSecondaryTabletMode?.Invoke();
-                            }
-                            break;
-
-                        case PGNValues.PGN_ONBOARD_TRACTOR_IMU:
-                            {
-                                // fixme - to do
-                            }
-                            break;
+                        ProcessUrgentPacket(urgentPacket);
                     }
                 }
 
-                // controller has disappeared (check after processing messages to avoid race condition)
+                lock (StateLock)
+                {
+                    DispatchCoalescedUpdates();
+                }
+
                 if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && _IsControllerFound)
                 {
                     _IsControllerFound = false;
-
                     OnControllerLost?.Invoke();
                 }
+            }
+        }
 
-                if (!receivedMessage)
-                {
-                    Thread.Sleep(1);
-                }
+        private static PGNPacket CopyPacket(PGNPacket source)
+        {
+            byte[] data = new byte[PGNPacket.MAX_LEN];
+            Array.Copy(source.Data, data, PGNPacket.MAX_LEN);
+            return new PGNPacket(source.PGN, data);
+        }
+
+        private void ApplyIncomingPacket(PGNPacket stat, out bool urgent)
+        {
+            urgent = false;
+
+            switch (stat.PGN)
+            {
+                case PGNValues.PGN_PING:
+                    LastRxPingTime = DateTime.Now;
+                    if (!_IsControllerFound)
+                    {
+                        PendingControllerFound = true;
+                    }
+                    break;
+
+                case PGNValues.PGN_ESTOP:
+                case PGNValues.PGN_CLEAR_ESTOP:
+                case PGNValues.PGN_TRACTOR_IMU_FOUND:
+                case PGNValues.PGN_TRACTOR_IMU_LOST:
+                case PGNValues.PGN_FRONT_IMU_FOUND:
+                case PGNValues.PGN_FRONT_IMU_LOST:
+                case PGNValues.PGN_FRONT_APRON_IMU_FOUND:
+                case PGNValues.PGN_FRONT_APRON_IMU_LOST:
+                case PGNValues.PGN_FRONT_BUCKET_IMU_FOUND:
+                case PGNValues.PGN_FRONT_BUCKET_IMU_LOST:
+                case PGNValues.PGN_REAR_IMU_FOUND:
+                case PGNValues.PGN_REAR_IMU_LOST:
+                case PGNValues.PGN_REAR_BUCKET_IMU_FOUND:
+                case PGNValues.PGN_REAR_BUCKET_IMU_LOST:
+                case PGNValues.PGN_FRONT_HEIGHT_FOUND:
+                case PGNValues.PGN_FRONT_HEIGHT_LOST:
+                case PGNValues.PGN_REAR_HEIGHT_FOUND:
+                case PGNValues.PGN_REAR_HEIGHT_LOST:
+                case PGNValues.PGN_FRONT_DUMPING:
+                case PGNValues.PGN_REAR_DUMPING:
+                case PGNValues.PGN_FRONT_CUTTING_REQUEST:
+                case PGNValues.PGN_REAR_CUTTING_REQUEST:
+                case PGNValues.PGN_FRONT_BLADE_JOG_UP:
+                case PGNValues.PGN_FRONT_BLADE_JOG_DOWN:
+                case PGNValues.PGN_REAR_BLADE_JOG_UP:
+                case PGNValues.PGN_REAR_BLADE_JOG_DOWN:
+                case PGNValues.PGN_YOU_ARE_SECONDARY:
+                    urgent = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_OFFSET_SLAVE:
+                    PendingFrontSlaveOffset = (Int16)stat.GetUInt32();
+                    FrontSlaveOffsetDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_OFFSET_SLAVE:
+                    PendingRearSlaveOffset = (Int16)stat.GetUInt32();
+                    RearSlaveOffsetDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_HEIGHT:
+                    PendingFrontBladeHeight = stat.GetUInt32();
+                    FrontBladeHeightDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_HEIGHT:
+                    PendingRearBladeHeight = stat.GetUInt32();
+                    RearBladeHeightDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_APRON_ANGLE:
+                    PendingFrontApronAngle = (Int32)stat.GetUInt32() / 100.0;
+                    FrontApronAngleDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BUCKET_ANGLE:
+                    PendingFrontBucketAngle = (Int32)stat.GetUInt32() / 100.0;
+                    FrontBucketAngleDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BUCKET_ANGLE:
+                    PendingRearBucketAngle = (Int32)stat.GetUInt32() / 100.0;
+                    RearBucketAngleDirty = true;
+                    break;
+
+                case PGNValues.PGN_TRACTOR_IMU:
+                    TractorIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    TractorIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    TractorIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    TractorIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    TractorIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    TractorImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_IMU:
+                    FrontScraperIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    FrontScraperIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    FrontScraperIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    FrontScraperIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    FrontScraperIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    FrontImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_APRON_IMU:
+                    FrontScraperApronIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    FrontScraperApronIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    FrontScraperApronIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    FrontScraperApronIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    FrontScraperApronIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    FrontApronImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BUCKET_IMU:
+                    FrontScraperBucketIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    FrontScraperBucketIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    FrontScraperBucketIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    FrontScraperBucketIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    FrontScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    FrontBucketImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_IMU:
+                    RearScraperIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    RearScraperIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    RearScraperIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    RearScraperIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    RearScraperIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    RearImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BUCKET_IMU:
+                    RearScraperBucketIMU.Pitch = ((Int32)stat.GetUInt32(0)) / 100.0;
+                    RearScraperBucketIMU.Roll = ((Int32)stat.GetUInt32(4)) / 100.0;
+                    RearScraperBucketIMU.Heading = ((Int32)stat.GetUInt32(8)) / 100.0;
+                    RearScraperBucketIMU.YawRate = ((Int32)stat.GetUInt32(12)) / 100.0;
+                    RearScraperBucketIMU.CalibrationStatus = (IMUValue.Calibration)stat.GetByte(16);
+                    RearBucketImuDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_DIRECTION:
+                    PendingFrontBladeDirectionUp = stat.GetByte() == 1;
+                    FrontBladeDirectionDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_DIRECTION:
+                    PendingRearBladeDirectionUp = stat.GetByte() == 1;
+                    RearBladeDirectionDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_PWMVALUE:
+                    PendingFrontBladePwm = stat.Data[0];
+                    FrontBladePwmDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_PWMVALUE:
+                    PendingRearBladePwm = stat.Data[0];
+                    RearBladePwmDirty = true;
+                    break;
+
+                case PGNValues.PGN_TRACTOR_NMEA:
+                    ProcessNMEA(
+                        Encoding.ASCII.GetString(stat.Data),
+                        ref TractorFix,
+                        ref TractorVector,
+                        null,
+                        TractorIMU,
+                        CurrentEquipmentSettings.TractorAntennaHeightMm,
+                        CurrentEquipmentSettings.TractorAntennaLeftOffsetMm,
+                        CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
+                    TractorLocationDirty = true;
+                    break;
+
+                case PGNValues.PGN_FRONT_NMEA:
+                    ProcessNMEA(
+                        Encoding.ASCII.GetString(stat.Data),
+                        ref FrontFix,
+                        ref FrontVector,
+                        null,
+                        FrontScraperIMU,
+                        CurrentEquipmentSettings.FrontPan.AntennaHeightMm,
+                        0,
+                        0);
+                    FrontLocationDirty = true;
+                    break;
+
+                case PGNValues.PGN_REAR_NMEA:
+                    ProcessNMEA(
+                        Encoding.ASCII.GetString(stat.Data),
+                        ref RearFix,
+                        ref RearVector,
+                        null,
+                        RearScraperIMU,
+                        CurrentEquipmentSettings.RearPan.AntennaHeightMm,
+                        0,
+                        0);
+                    RearLocationDirty = true;
+                    break;
+
+                case PGNValues.PGN_ONBOARD_TRACTOR_IMU:
+                    break;
+            }
+        }
+
+        private void ProcessUrgentPacket(PGNPacket stat)
+        {
+            switch (stat.PGN)
+            {
+                case PGNValues.PGN_ESTOP:
+                    OnEmergencyStop?.Invoke();
+                    break;
+
+                case PGNValues.PGN_CLEAR_ESTOP:
+                    OnEmergencyStopCleared?.Invoke();
+                    break;
+
+                case PGNValues.PGN_TRACTOR_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.Tractor);
+                    break;
+
+                case PGNValues.PGN_TRACTOR_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.Tractor);
+                    break;
+
+                case PGNValues.PGN_FRONT_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.Front);
+                    break;
+
+                case PGNValues.PGN_FRONT_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.Front);
+                    break;
+
+                case PGNValues.PGN_FRONT_APRON_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.FrontApron);
+                    break;
+
+                case PGNValues.PGN_FRONT_APRON_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.FrontApron);
+                    break;
+
+                case PGNValues.PGN_FRONT_BUCKET_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.FrontBucket);
+                    break;
+
+                case PGNValues.PGN_FRONT_BUCKET_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.FrontBucket);
+                    break;
+
+                case PGNValues.PGN_REAR_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.Rear);
+                    break;
+
+                case PGNValues.PGN_REAR_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.Rear);
+                    break;
+
+                case PGNValues.PGN_REAR_BUCKET_IMU_FOUND:
+                    OnIMUFound?.Invoke(EquipType.RearBucket);
+                    break;
+
+                case PGNValues.PGN_REAR_BUCKET_IMU_LOST:
+                    OnIMULost?.Invoke(EquipType.RearBucket);
+                    break;
+
+                case PGNValues.PGN_FRONT_HEIGHT_FOUND:
+                    OnHeightFound?.Invoke(EquipType.Front);
+                    break;
+
+                case PGNValues.PGN_FRONT_HEIGHT_LOST:
+                    OnHeightLost?.Invoke(EquipType.Front);
+                    break;
+
+                case PGNValues.PGN_REAR_HEIGHT_FOUND:
+                    OnHeightFound?.Invoke(EquipType.Rear);
+                    break;
+
+                case PGNValues.PGN_REAR_HEIGHT_LOST:
+                    OnHeightLost?.Invoke(EquipType.Rear);
+                    break;
+
+                case PGNValues.PGN_FRONT_DUMPING:
+                    OnFrontDumpingChanged?.Invoke(stat.GetByte() == 1);
+                    break;
+
+                case PGNValues.PGN_REAR_DUMPING:
+                    OnRearDumpingChanged?.Invoke(stat.GetByte() == 1);
+                    break;
+
+                case PGNValues.PGN_FRONT_CUTTING_REQUEST:
+                    OnFrontBladeCuttingChanged?.Invoke(stat.GetByte() == 1);
+                    break;
+
+                case PGNValues.PGN_REAR_CUTTING_REQUEST:
+                    OnRearBladeCuttingChanged?.Invoke(stat.GetByte() == 1);
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_JOG_UP:
+                    OnFrontBladeJogged?.Invoke(true);
+                    break;
+
+                case PGNValues.PGN_FRONT_BLADE_JOG_DOWN:
+                    OnFrontBladeJogged?.Invoke(false);
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_JOG_UP:
+                    OnRearBladeJogged?.Invoke(true);
+                    break;
+
+                case PGNValues.PGN_REAR_BLADE_JOG_DOWN:
+                    OnRearBladeJogged?.Invoke(false);
+                    break;
+
+                case PGNValues.PGN_YOU_ARE_SECONDARY:
+                    OnEnableSecondaryTabletMode?.Invoke();
+                    break;
+            }
+        }
+
+        private void DispatchCoalescedUpdates()
+        {
+            if (PendingControllerFound)
+            {
+                PendingControllerFound = false;
+                _IsControllerFound = true;
+                OnControllerFound?.Invoke();
+            }
+
+            if (FrontSlaveOffsetDirty)
+            {
+                FrontSlaveOffsetDirty = false;
+                OnFrontSlaveOffsetChanged?.Invoke(PendingFrontSlaveOffset);
+            }
+
+            if (RearSlaveOffsetDirty)
+            {
+                RearSlaveOffsetDirty = false;
+                OnRearSlaveOffsetChanged?.Invoke(PendingRearSlaveOffset);
+            }
+
+            if (FrontBladeHeightDirty)
+            {
+                FrontBladeHeightDirty = false;
+                OnFrontBladeHeightChanged?.Invoke(PendingFrontBladeHeight);
+            }
+
+            if (RearBladeHeightDirty)
+            {
+                RearBladeHeightDirty = false;
+                OnRearBladeHeightChanged?.Invoke(PendingRearBladeHeight);
+            }
+
+            if (FrontApronAngleDirty)
+            {
+                FrontApronAngleDirty = false;
+                OnFrontApronAngleChanged?.Invoke(PendingFrontApronAngle);
+            }
+
+            if (FrontBucketAngleDirty)
+            {
+                FrontBucketAngleDirty = false;
+                OnFrontBucketAngleChanged?.Invoke(PendingFrontBucketAngle);
+            }
+
+            if (RearBucketAngleDirty)
+            {
+                RearBucketAngleDirty = false;
+                OnRearBucketAngleChanged?.Invoke(PendingRearBucketAngle);
+            }
+
+            if (TractorImuDirty)
+            {
+                TractorImuDirty = false;
+                OnTractorIMUChanged?.Invoke(TractorIMU);
+            }
+
+            if (FrontImuDirty)
+            {
+                FrontImuDirty = false;
+                OnFrontIMUChanged?.Invoke(FrontScraperIMU);
+            }
+
+            if (FrontApronImuDirty)
+            {
+                FrontApronImuDirty = false;
+                OnFrontApronIMUChanged?.Invoke(FrontScraperApronIMU);
+            }
+
+            if (FrontBucketImuDirty)
+            {
+                FrontBucketImuDirty = false;
+                OnFrontBucketIMUChanged?.Invoke(FrontScraperBucketIMU);
+            }
+
+            if (RearImuDirty)
+            {
+                RearImuDirty = false;
+                OnRearIMUChanged?.Invoke(RearScraperIMU);
+            }
+
+            if (RearBucketImuDirty)
+            {
+                RearBucketImuDirty = false;
+                OnRearBucketIMUChanged?.Invoke(RearScraperBucketIMU);
+            }
+
+            if (FrontBladeDirectionDirty)
+            {
+                FrontBladeDirectionDirty = false;
+                OnFrontBladeDirectionChanged?.Invoke(PendingFrontBladeDirectionUp);
+            }
+
+            if (RearBladeDirectionDirty)
+            {
+                RearBladeDirectionDirty = false;
+                OnRearBladeDirectionChanged?.Invoke(PendingRearBladeDirectionUp);
+            }
+
+            if (FrontBladePwmDirty)
+            {
+                FrontBladePwmDirty = false;
+                OnFrontBladePWMChanged?.Invoke(PendingFrontBladePwm);
+            }
+
+            if (RearBladePwmDirty)
+            {
+                RearBladePwmDirty = false;
+                OnRearBladePWMChanged?.Invoke(PendingRearBladePwm);
+            }
+
+            if (TractorLocationDirty && TractorFix != null)
+            {
+                TractorLocationDirty = false;
+                OnTractorLocationChanged?.Invoke(TractorFix);
+            }
+
+            if (FrontLocationDirty && FrontFix != null)
+            {
+                FrontLocationDirty = false;
+                OnFrontLocationChanged?.Invoke(FrontFix);
+            }
+
+            if (RearLocationDirty && RearFix != null)
+            {
+                RearLocationDirty = false;
+                OnRearLocationChanged?.Invoke(RearFix);
             }
         }
 
@@ -654,6 +926,8 @@ namespace AgGrade.Controller
             int AntennaForwardOffsetMm
             )
         {
+            NmeaLogger?.Log(Sentence);
+
             if (Sentence.StartsWith("$GPGGA") || Sentence.StartsWith("$GNGGA"))
             {
                 try

@@ -24,8 +24,11 @@ namespace AgGrade.Controller
         
         // Buffer for received UDP data
         private byte[] _receiveBuffer = new byte[65507]; // Max UDP packet size
+        private byte[] _datagramBuffer = new byte[65507];
         private int _receiveBufferIndex = 0;
         private int _receiveBufferLength = 0;
+
+        private const int ReceiveBufferSize = 1024 * 1024;
 
         /// <summary>
         /// Advanced initializer for the UDPTransfer Class
@@ -63,6 +66,7 @@ namespace AgGrade.Controller
             
             // Now bind to the local endpoint
             _udpClient.Client.Bind(_localEndPoint);
+            _udpClient.Client.ReceiveBufferSize = ReceiveBufferSize;
             
             _udpClient.Client.ReceiveTimeout = (int)configs.Timeout;
             _udpClient.Client.SendTimeout = (int)configs.Timeout;
@@ -118,6 +122,7 @@ namespace AgGrade.Controller
             
             // Now bind to the local endpoint
             _udpClient.Client.Bind(_localEndPoint);
+            _udpClient.Client.ReceiveBufferSize = ReceiveBufferSize;
             
             _timeout = timeout ?? 50; // Default 50ms timeout
             
@@ -222,16 +227,21 @@ namespace AgGrade.Controller
                         return BytesRead;
                     }
 
-                    IPEndPoint remoteEP = null;
-                    byte[] receivedData = _udpClient.Receive(ref remoteEP);
+                    EndPoint remoteEP = _remoteEndPoint;
+                    int received = _udpClient.Client.ReceiveFrom(_datagramBuffer, 0, _datagramBuffer.Length, SocketFlags.None, ref remoteEP);
 
-                    if (remoteEP != null)
+                    if (remoteEP is IPEndPoint ipEndPoint)
                     {
-                        _remoteEndPoint = remoteEP;
+                        _remoteEndPoint = ipEndPoint;
                     }
 
-                    Array.Copy(receivedData, 0, _receiveBuffer, 0, receivedData.Length);
-                    _receiveBufferLength = receivedData.Length;
+                    if (received <= 0)
+                    {
+                        continue;
+                    }
+
+                    Array.Copy(_datagramBuffer, 0, _receiveBuffer, 0, received);
+                    _receiveBufferLength = received;
                     _receiveBufferIndex = 0;
                 }
             }
@@ -315,6 +325,14 @@ namespace AgGrade.Controller
         /// </summary>
         /// <returns>ID of the last parsed packet</returns>
         public byte CurrentPacketId() => Packet.CurrentPacketId();
+
+        /// <summary>
+        /// Whether the OS socket queue or internal parse buffer has unread data
+        /// </summary>
+        public bool HasPendingInput =>
+            _isOpen &&
+            _udpClient != null &&
+            (_receiveBufferIndex < _receiveBufferLength || _udpClient.Client.Available > 0);
 
         /// <summary>
         /// Clear buffers and reset the parser state
