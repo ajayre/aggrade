@@ -169,6 +169,8 @@ namespace AgGrade.Controller
         private GNSSVector? RearVector = null;
         private GNSSFix? RearFix = null;
         private SensorFusor Fusor = new SensorFusor();
+        private int MagneticDeclinationDegrees;
+        private uint MagneticDeclinationMinutes;
         private EquipmentSettings CurrentEquipmentSettings = new EquipmentSettings();
         private NmeaFileLogger? NmeaLogger;
 
@@ -942,7 +944,7 @@ namespace AgGrade.Controller
                     //// fuse with IMU
                     //if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
                     //{
-                    //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                    //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm, MagneticDeclinationDegrees, MagneticDeclinationMinutes);
                     //}
 
                     LocChangedEvent?.Invoke(Fix);
@@ -965,7 +967,7 @@ namespace AgGrade.Controller
                         //// fuse with IMU
                         //if ((TractorIMU.CalibrationStatus == IMUValue.Calibration.Good) || (TractorIMU.CalibrationStatus == IMUValue.Calibration.Excellent))
                         //{
-                        //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm);
+                        //    Fix = Fusor.Fuse(Fix, IMU, AntennaHeightMm, AntennaLeftOffsetMm, AntennaForwardOffsetMm, MagneticDeclinationDegrees, MagneticDeclinationMinutes);
                         //}
 
                         LocChangedEvent?.Invoke(Fix);
@@ -1057,6 +1059,9 @@ namespace AgGrade.Controller
             uint Minutes
             )
         {
+            MagneticDeclinationDegrees = Degrees;
+            MagneticDeclinationMinutes = Minutes;
+
             UInt32 Decl = (UInt32)((Degrees + (double)Minutes / 60.0) * 100);
 
             PGNPacket TxCmd = new PGNPacket(PGNValues.PGN_MAGNETIC_DECLINATION, Decl);

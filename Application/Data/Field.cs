@@ -1221,21 +1221,21 @@ namespace AgGrade.Data
                 Fix.Latitude != LastTractorLat ||
                 Fix.Longitude != LastTractorLon ||
                 Fix.Vector.Speedkph != LastTractorSpeedKph ||
-                Fix.Vector.TrackMagneticDeg != LastTractorHeadingDeg;
+                Fix.Vector.TrackTrueDeg != LastTractorHeadingDeg;
             if (!hasChanged) return;
 
             // store in database
             Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLat, Fix.Latitude));
             Db.AddEvent(new Database.Event(Database.Event.EventTypes.TractorLon, Fix.Longitude));
             Db.AddEvent(new Database.Event(Database.Event.EventTypes.Speedkph, Fix.Vector.Speedkph));
-            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackMagneticDeg));
+            Db.AddEvent(new Database.Event(Database.Event.EventTypes.Heading, Fix.Vector.TrackTrueDeg));
 
             HasTractorFixBeenStored = true;
             LastTractorFixWriteTimestampMs = nowMs;
             LastTractorLat = Fix.Latitude;
             LastTractorLon = Fix.Longitude;
             LastTractorSpeedKph = Fix.Vector.Speedkph;
-            LastTractorHeadingDeg = Fix.Vector.TrackMagneticDeg;
+            LastTractorHeadingDeg = Fix.Vector.TrackTrueDeg;
         }
 
         /// <summary>

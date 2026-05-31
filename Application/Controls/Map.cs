@@ -188,7 +188,7 @@ namespace AgGrade.Controls
             (
             )
         {
-            return TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+            return TractorFix.Vector.TrackTrueDeg;
         }
 
         /// <summary>
@@ -478,7 +478,7 @@ namespace AgGrade.Controls
                 RearLoadLabel.Text = _CurrentEquipmentStatus.RearPan.LoadLCY.ToString("F1") + " LCY";
             }
 
-            double TrueHeading = TractorFix.Vector.GetTrueHeading(_CurrentAppSettings.MagneticDeclinationDegrees, _CurrentAppSettings.MagneticDeclinationMinutes);
+            double TrueHeading = TractorFix.Vector.TrackTrueDeg;
             if (TrueHeading >= 359.5) TrueHeading = 0;
 
             HeadingLabel.Text = TrueHeading.ToString("F1") + DegreeSymbol;

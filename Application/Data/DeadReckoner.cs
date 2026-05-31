@@ -174,7 +174,7 @@ namespace AgGrade.Data
         {
             if (TractorFix != null)
             {
-                return TractorFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                return TractorFix.Vector.TrackTrueDeg;
             }
 
             return 0;
@@ -190,7 +190,7 @@ namespace AgGrade.Data
         {
             if (FrontScraperFix != null)
             {
-                return FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                return FrontScraperFix.Vector.TrackTrueDeg;
             }
 
             return 0;
@@ -206,7 +206,7 @@ namespace AgGrade.Data
         {
             if (RearScraperFix != null)
             {
-                return RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                return RearScraperFix.Vector.TrackTrueDeg;
             }
 
             return 0;

@@ -161,7 +161,7 @@ namespace AgGrade.Data
             if (isBoundary)
             {
                 double halfTractorWidthM = (CurrentEquipmentSettings.TractorWidthMm / 1000.0) / 2.0;
-                double tractorHeadingDeg = CurrentEquipmentStatus.TractorFix.Vector.TrackMagneticDeg;
+                double tractorHeadingDeg = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;
                 double boundaryHeadingDeg = tractorHeadingDeg + (BoundaryMode == BoundaryModes.Left ? -90.0 : 90.0);
                 Haversine.MoveDistanceBearing(ref pointLat, ref pointLon, boundaryHeadingDeg, halfTractorWidthM);
             }

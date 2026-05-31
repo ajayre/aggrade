@@ -31,6 +31,8 @@ namespace AgGrade.Controller
         /// <param name="AntennaHeight">Height of antenna in millimeters</param>
         /// <param name="AntennaLeft">Distance antenna is left of target point (e.g. vehicle center) in millimeters</param>
         /// <param name="AntennaForward">Distance antenna is foward of target point (e.g. axle) in millimeters</param>
+        /// <param name="MagneticDeclinationDeg">Degrees of magnetic declination (east positive)</param>
+        /// <param name="MagneticDeclinationMin">Minutes of magnetic declination</param>
         /// <returns>Corrected GNSS location and height</returns>
         public GNSSFix Fuse
             (
@@ -38,7 +40,9 @@ namespace AgGrade.Controller
             IMUValue IMUReading,
             uint AntennaHeightMm,
             int AntennaLeftMm,
-            int AntennaForwardMm
+            int AntennaForwardMm,
+            int MagneticDeclinationDeg,
+            uint MagneticDeclinationMin
             )
         {
             double AntennaHeight = AntennaHeightMm / 1000.0;
@@ -53,8 +57,8 @@ namespace AgGrade.Controller
             // assume started pointing straight north
             double IMUGyroOffset = -401;
 
-            // get heading from IMU
-            double IMUHeading = IMUReading.Heading;
+            // IMU reports magnetic heading; GNSS VTG and position-derived bearings use true north
+            double IMUHeading = IMUReading.GetTrueHeading(MagneticDeclinationDeg, MagneticDeclinationMin);
 
             double Latitude = Fix.Latitude;
             double Longitude = Fix.Longitude;
@@ -67,7 +71,7 @@ namespace AgGrade.Controller
                 // we are going fast enough to use GNSS heading
                 if ((Fix.Vector.Speedkph > SPEED_THRESHOLD) && Fix.HasRTK)
                 {
-                    Heading = Fix.Vector.TrackMagneticDeg;
+                    Heading = Fix.Vector.TrackTrueDeg;
                 }
                 // assume going forward, but it's still slow, so we need to go at least some distance
                 else
@@ -105,7 +109,7 @@ namespace AgGrade.Controller
                 // we'll use mostly gps heading with some gyro heading (adjust?)
                 if (Fix.HasRTK && Fix.Vector.Speedkph > SPEED_THRESHOLD && IMUYawRate < YAW_RATE_THRESHOLD)
                 {
-                    Heading = Fix.Vector.TrackMagneticDeg * 0.6 + GyroHeading * 0.4;
+                    Heading = Fix.Vector.TrackTrueDeg * 0.6 + GyroHeading * 0.4;
 
                     // recompute offset
                     IMUGyroOffset = Heading - IMUHeading;
@@ -176,7 +180,7 @@ namespace AgGrade.Controller
                 CorrectedFix.Altitude = Altitude;
 
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.TrackTrueDeg = Fix.Vector.TrackTrueDeg;
                 CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
 
                 LastLatitude = Latitude;
@@ -218,7 +222,7 @@ namespace AgGrade.Controller
 
                 CorrectedFix.Altitude = Altitude;
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.TrackTrueDeg = Fix.Vector.TrackTrueDeg;
                 CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
                 CorrectedFix.LastFixTime = Fix.LastFixTime;
 
@@ -236,7 +240,7 @@ namespace AgGrade.Controller
 
                 CorrectedFix.Altitude = Altitude;
                 CorrectedFix.RTK = Fix.RTK;
-                CorrectedFix.Vector.TrackMagneticDeg = Fix.Vector.TrackMagneticDeg;
+                CorrectedFix.Vector.TrackTrueDeg = Fix.Vector.TrackTrueDeg;
                 CorrectedFix.Vector.Speedkph = Fix.Vector.Speedkph;
                 CorrectedFix.LastFixTime = Fix.LastFixTime;
 

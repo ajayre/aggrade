@@ -414,10 +414,7 @@ namespace AgGrade.Data
             _tractorXpx = TractorXpx;
             _tractorYpx = TractorYpx;
 
-            _tractorHeading = QuantizeHeading(
-                TractorFix.Vector.GetTrueHeading(
-                    CurrentAppSettings.MagneticDeclinationDegrees,
-                    CurrentAppSettings.MagneticDeclinationMinutes));
+            _tractorHeading = QuantizeHeading(TractorFix.Vector.TrackTrueDeg);
 
             // if tile cache is empty then set up
             if (Cache.Tiles.Count == 0)
@@ -1117,7 +1114,7 @@ namespace AgGrade.Data
                     if (CurrentEquipmentSettings.FrontPan.Equipped)
                     {
                         // draw front scraper
-                        double PerpAngle = (FrontScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                        double PerpAngle = (FrontScraperFix.Vector.TrackTrueDeg + 90) % 360;
                         double BladeEndALat = FrontScraperFix.Latitude;
                         double BladeEndALon = FrontScraperFix.Longitude;
                         Haversine.MoveDistanceBearing(ref BladeEndALat, ref BladeEndALon, PerpAngle, CurrentEquipmentSettings.FrontPan.WidthMm / 1000.0 / 2.0);
@@ -1132,7 +1129,7 @@ namespace AgGrade.Data
                         if (CurrentEquipmentSettings.RearPan.Equipped)
                         {
                             // draw rear scraper
-                            double RearPerpAngle = (RearScraperFix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes) + 90) % 360;
+                            double RearPerpAngle = (RearScraperFix.Vector.TrackTrueDeg + 90) % 360;
                             double RearBladeEndALat = RearScraperFix.Latitude;
                             double RearBladeEndALon = RearScraperFix.Longitude;
                             Haversine.MoveDistanceBearing(ref RearBladeEndALat, ref RearBladeEndALon, RearPerpAngle, CurrentEquipmentSettings.RearPan.WidthMm / 1000.0 / 2.0);

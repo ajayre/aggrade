@@ -10,7 +10,7 @@ namespace AgGrade.Controller
     {
         private const double KPH_TO_MPH = 0.621371;
 
-        public double TrackMagneticDeg;  // deg (track made good relative to magnetic north)
+        public double TrackTrueDeg;      // deg (track made good relative to true north)
         public double Speedkph;          // kph (speed over ground)
 
         public double SpeedMph
@@ -27,36 +27,12 @@ namespace AgGrade.Controller
 
         public GNSSVector
             (
-            double TrackMagneticDeg,
+            double TrackTrueDeg,
             double Speedkph
             )
         {
-            this.TrackMagneticDeg = TrackMagneticDeg;
+            this.TrackTrueDeg = TrackTrueDeg;
             this.Speedkph = Speedkph;
-        }
-
-        /// <summary>
-        /// Gets the true heading
-        /// </summary>
-        /// <param name="MagneticDeclinationDeg">Degrees of magnetic declination</param>
-        /// <param name="MagneticDeclinationMin">Minutes of magnetic declination</param>
-        /// <returns></returns>
-        public double GetTrueHeading
-            (
-            int MagneticDeclinationDeg,
-            uint MagneticDeclinationMin
-            )
-        {
-            int Min = (int)MagneticDeclinationMin;
-            if (MagneticDeclinationDeg < 0) Min = -Min;
-
-            double DecDegrees = MagneticDeclinationDeg + (Min / 60.0);
-            double TrueHeading = TrackMagneticDeg + DecDegrees;
-
-            if (TrueHeading < 0) TrueHeading += 360.0;
-            if (TrueHeading >= 360) TrueHeading -= 360.0;
-
-            return TrueHeading;
         }
 
         /// <summary>
@@ -67,7 +43,7 @@ namespace AgGrade.Controller
             (
             )
         {
-            return new GNSSVector(this.TrackMagneticDeg, this.Speedkph);
+            return new GNSSVector(this.TrackTrueDeg, this.Speedkph);
         }
 
         /// <summary>
@@ -165,25 +141,6 @@ namespace AgGrade.Controller
                 }
             }
 
-            // Parse track made good (degrees magnetic) - field 3
-            double trackMagneticDeg = 0.0;
-            if (!string.IsNullOrEmpty(fields[3]))
-            {
-                if (!double.TryParse(fields[3], out trackMagneticDeg))
-                {
-                    throw new NMEAParseException($"Failed to parse track made good (magnetic) from field '{fields[3]}' (field 3)");
-                }
-            }
-
-            // Validate M indicator - field 4 (should be 'M' if track magnetic is present)
-            if (!string.IsNullOrEmpty(fields[3]) && !string.IsNullOrEmpty(fields[4]))
-            {
-                if (fields[4].ToUpper() != "M")
-                {
-                    throw new NMEAParseException($"Invalid track magnetic indicator '{fields[4]}' (field 4). Expected 'M'");
-                }
-            }
-
             // Parse speed over ground in kilometers/hour (kph) - field 7
             double speedKph = 0.0;
             if (!string.IsNullOrEmpty(fields[7]))
@@ -203,8 +160,7 @@ namespace AgGrade.Controller
                 }
             }
 
-            return new GNSSVector(trackMagneticDeg, speedKph);
+            return new GNSSVector(trackTrueDeg, speedKph);
         }
     }
 }
-

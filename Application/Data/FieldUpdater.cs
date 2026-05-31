@@ -165,7 +165,7 @@ namespace AgGrade.Data
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
-                    BladeHeading = CurrentEquipmentStatus.FrontPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    BladeHeading = CurrentEquipmentStatus.FrontPan.Fix.Vector.TrackTrueDeg;
                     double BladePerp = BladeHeading + 90;
                     if (BladePerp > 360) BladePerp -= 360;
                     if (BladePerp < 0) BladePerp += 360;
@@ -240,7 +240,7 @@ namespace AgGrade.Data
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
-                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.TrackTrueDeg;
                     double BladePerp = BladeHeading + 90;
                     if (BladePerp > 360) BladePerp -= 360;
                     if (BladePerp < 0) BladePerp += 360;
@@ -315,7 +315,7 @@ namespace AgGrade.Data
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
-                    BladeHeading = CurrentEquipmentStatus.FrontPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    BladeHeading = CurrentEquipmentStatus.FrontPan.Fix.Vector.TrackTrueDeg;
                     double BladePerp = BladeHeading + 90;
                     if (BladePerp > 360) BladePerp -= 360;
                     if (BladePerp < 0) BladePerp += 360;
@@ -390,7 +390,7 @@ namespace AgGrade.Data
                 {
                     // get angle perpendicular to heading
                     double BladeHeading;
-                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.GetTrueHeading(CurrentAppSettings.MagneticDeclinationDegrees, CurrentAppSettings.MagneticDeclinationMinutes);
+                    BladeHeading = CurrentEquipmentStatus.RearPan.Fix.Vector.TrackTrueDeg;
                     double BladePerp = BladeHeading + 90;
                     if (BladePerp > 360) BladePerp -= 360;
                     if (BladePerp < 0) BladePerp += 360;
