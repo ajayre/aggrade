@@ -195,6 +195,8 @@ namespace AgGrade.Data
                 ExistingElevation = Survey.ToMultiplaneRelativeElevationM(CurrentEquipmentStatus.TractorFix.Altitude)
             });
 
+            SurveyPointAnomalyFilter.PruneAfterAppend(targetPoints);
+
             Survey.Save();
         }
     }
