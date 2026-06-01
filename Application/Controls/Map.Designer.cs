@@ -167,11 +167,12 @@
             // 
             FieldNameLabel.AutoSize = true;
             FieldNameLabel.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            FieldNameLabel.ImageAlign = ContentAlignment.MiddleLeft;
             FieldNameLabel.Location = new Point(11, 10);
             FieldNameLabel.Name = "FieldNameLabel";
-            FieldNameLabel.Size = new Size(111, 25);
+            FieldNameLabel.Size = new Size(106, 25);
             FieldNameLabel.TabIndex = 0;
-            FieldNameLabel.Text = "Field Name";
+            FieldNameLabel.Text = "FieldName";
             // 
             // panel2
             // 

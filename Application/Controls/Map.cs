@@ -259,10 +259,21 @@ namespace AgGrade.Controls
             if (IsRecording)
             {
                 StartStopSurveyBtn.Image = Properties.Resources.stop_48px;
+                if (CurrentSurvey != null)
+                {
+                    FieldNameLabel.Text = "     " + CurrentSurvey!.Name.Substring(0, CurrentSurvey.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : CurrentSurvey.Name.Length);
+                    ;
+                    FieldNameLabel.Image = Properties.Resources.led_red_24px;
+                }
             }
             else
             {
                 StartStopSurveyBtn.Image = Properties.Resources.record_48px;
+                if (CurrentSurvey != null)
+                {
+                    FieldNameLabel.Text = CurrentSurvey!.Name.Substring(0, CurrentSurvey.Name.Length > MAX_NAME_LENGTH ? MAX_NAME_LENGTH : CurrentSurvey.Name.Length);
+                    FieldNameLabel.Image = null;
+                }
             }
         }
 
