@@ -17,6 +17,7 @@ namespace AgGrade.Controls
     public partial class DownloadBasemapPage : UserControl
     {
         public event Action<double, double> OnDownloadBasemap = null;
+        public event Func<Tuple<double, double>> OnGetCurrentLocation = null;
 
         /// <summary>
         /// Sets the download progress bar (0 hides the bar; 1–100 shows progress).
@@ -40,11 +41,11 @@ namespace AgGrade.Controls
             InitializeComponent();
 
             ErrorMessage.Visible = false;
-            miniMap1.MapMarker = Resources.location_red_shadow_48px;
-            miniMap1.MarkerLocationChosen += MiniMap1_MarkerLocationChosen;
+            miniMap.MapMarker = Resources.location_red_shadow_48px;
+            miniMap.MarkerLocationChosen += MiniMap_MarkerLocationChosen;
         }
 
-        private void MiniMap1_MarkerLocationChosen(double latitude, double longitude)
+        private void MiniMap_MarkerLocationChosen(double latitude, double longitude)
         {
             LatitudeInput.Text = latitude.ToString("F6", CultureInfo.InvariantCulture);
             LongitudeInput.Text = longitude.ToString("F6", CultureInfo.InvariantCulture);
@@ -138,6 +139,26 @@ namespace AgGrade.Controls
             {
                 ErrorMessage.Text = $"Download failed: {ex.Message}";
                 ErrorMessage.Visible = true;
+            }
+        }
+
+        /// <summary>
+        /// Called when user taps on the location button
+        /// Gets the current tractor location and inserts it into the fields
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GetCurrentLocationBtn_Click(object sender, EventArgs e)
+        {
+            Tuple<double, double>? Location = OnGetCurrentLocation?.Invoke();
+
+            if (Location != null)
+            {
+                LatitudeInput.Text  = Location.Item1.ToString();
+                LongitudeInput.Text = Location.Item2.ToString();
+
+                miniMap.SetMarkerLocationAndFitDownloadArea(Location.Item1, Location.Item2);
+                ErrorMessage.Visible = false;
             }
         }
     }

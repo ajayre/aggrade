@@ -67,6 +67,19 @@ namespace AgGrade.Controls
         private double _markerLat;
         private double _markerLon;
 
+        public bool hasMarker
+        {
+            set
+            {
+                _hasMarker = value;
+                Invalidate();
+            }
+            get
+            {
+                return _hasMarker;
+            }
+        }
+
         /// <summary>Fired when the user clicks (without dragging) to place the location marker.</summary>
         public event Action<double, double>? MarkerLocationChosen;
 
@@ -308,13 +321,71 @@ namespace AgGrade.Controls
             WorldPixelToLatLon(wx, wy, _zoom, out lon, out lat);
         }
 
+        /// <summary>Places the location marker and download-area overlay at the given coordinates.</summary>
+        public void SetMarkerLocation(double latitude, double longitude)
+        {
+            _markerLat = ClampLat(latitude);
+            _markerLon = WrapLon(longitude);
+            _hasMarker = true;
+            Invalidate();
+        }
+
+        /// <summary>
+        /// Places the marker, centers the map on it, and zooms so the download-area bounds fit the control.
+        /// </summary>
+        public void SetMarkerLocationAndFitDownloadArea(double latitude, double longitude)
+        {
+            _markerLat = ClampLat(latitude);
+            _markerLon = WrapLon(longitude);
+            _hasMarker = true;
+            _centerLat = _markerLat;
+            _centerLon = _markerLon;
+
+            int w = ClientSize.Width;
+            int h = ClientSize.Height;
+            if (w > 0 && h > 0)
+            {
+                (double minLat, double minLon, double maxLat, double maxLon) =
+                    BasemapDownloader.GetCentroidDownloadTileCoverageBounds(_markerLat, _markerLon);
+                _zoom = ComputeZoomToFitBounds(minLat, minLon, maxLat, maxLon, w, h);
+            }
+
+            ClearZoomTransitionSnapshot();
+            ClearTileImages();
+            Invalidate();
+        }
+
+        private static int ComputeZoomToFitBounds(
+            double minLat,
+            double minLon,
+            double maxLat,
+            double maxLon,
+            int clientW,
+            int clientH)
+        {
+            const double edgePaddingFraction = 0.04;
+            double maxBoxW = clientW * (1.0 - edgePaddingFraction);
+            double maxBoxH = clientH * (1.0 - edgePaddingFraction);
+
+            for (int z = MaxZoom; z >= MinZoom; z--)
+            {
+                LatLonToWorldPixel(minLon, maxLat, z, out double wxNw, out double wyNw);
+                LatLonToWorldPixel(maxLon, minLat, z, out double wxSe, out double wySe);
+                double boxW = wxSe - wxNw;
+                double boxH = wySe - wyNw;
+                if (boxW <= maxBoxW && boxH <= maxBoxH)
+                {
+                    return z;
+                }
+            }
+
+            return MinZoom;
+        }
+
         private void PlaceMarkerFromClick(int sx, int sy)
         {
             ScreenClientToLatLon(sx, sy, out double lon, out double lat);
-            _markerLat = ClampLat(lat);
-            _markerLon = WrapLon(lon);
-            _hasMarker = true;
-            Invalidate();
+            SetMarkerLocation(lat, lon);
             MarkerLocationChosen?.Invoke(_markerLat, _markerLon);
         }
 

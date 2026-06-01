@@ -37,7 +37,8 @@
             ErrorMessage = new Label();
             LongitudeInput = new TextBox();
             label2 = new Label();
-            miniMap1 = new MiniMap();
+            miniMap = new MiniMap();
+            GetCurrentLocationBtn = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -66,7 +67,7 @@
             LatitudeInput.Font = new Font("Segoe UI", 16F);
             LatitudeInput.Location = new Point(138, 54);
             LatitudeInput.Name = "LatitudeInput";
-            LatitudeInput.Size = new Size(775, 36);
+            LatitudeInput.Size = new Size(709, 36);
             LatitudeInput.TabIndex = 2;
             // 
             // DownloadBtn
@@ -120,7 +121,7 @@
             LongitudeInput.Font = new Font("Segoe UI", 16F);
             LongitudeInput.Location = new Point(138, 96);
             LongitudeInput.Name = "LongitudeInput";
-            LongitudeInput.Size = new Size(775, 36);
+            LongitudeInput.Size = new Size(709, 36);
             LongitudeInput.TabIndex = 15;
             // 
             // label2
@@ -133,24 +134,39 @@
             label2.TabIndex = 16;
             label2.Text = "Longitude:";
             // 
-            // miniMap1
+            // miniMap
             // 
-            miniMap1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            miniMap1.BackColor = Color.FromArgb(32, 32, 36);
-            miniMap1.CenterLatitude = 39.8283D;
-            miniMap1.CenterLongitude = -98.5795D;
-            miniMap1.Location = new Point(3, 138);
-            miniMap1.MapMarker = null;
-            miniMap1.Name = "miniMap1";
-            miniMap1.Size = new Size(910, 231);
-            miniMap1.TabIndex = 17;
-            miniMap1.Zoom = 4;
+            miniMap.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            miniMap.BackColor = Color.FromArgb(32, 32, 36);
+            miniMap.CenterLatitude = 39.8283D;
+            miniMap.CenterLongitude = -98.5795D;
+            miniMap.DownloadAreaColor = Color.PaleGoldenrod;
+            miniMap.Location = new Point(3, 138);
+            miniMap.MapMarker = null;
+            miniMap.Name = "miniMap";
+            miniMap.Size = new Size(910, 231);
+            miniMap.TabIndex = 17;
+            miniMap.Zoom = 4;
+            // 
+            // GetCurrentLocationBtn
+            // 
+            GetCurrentLocationBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            GetCurrentLocationBtn.Font = new Font("Segoe UI", 18F);
+            GetCurrentLocationBtn.Image = Properties.Resources.location_48px;
+            GetCurrentLocationBtn.Location = new Point(853, 64);
+            GetCurrentLocationBtn.Name = "GetCurrentLocationBtn";
+            GetCurrentLocationBtn.Size = new Size(60, 60);
+            GetCurrentLocationBtn.TabIndex = 18;
+            GetCurrentLocationBtn.TextAlign = ContentAlignment.MiddleRight;
+            GetCurrentLocationBtn.UseVisualStyleBackColor = true;
+            GetCurrentLocationBtn.Click += GetCurrentLocationBtn_Click;
             // 
             // DownloadBasemapPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(miniMap1);
+            Controls.Add(GetCurrentLocationBtn);
+            Controls.Add(miniMap);
             Controls.Add(label2);
             Controls.Add(LongitudeInput);
             Controls.Add(panel1);
@@ -177,6 +193,7 @@
         private TextBox LongitudeInput;
         private Label label2;
         private ProgressBar ProgressBar;
-        private MiniMap miniMap1;
+        private MiniMap miniMap;
+        private Button GetCurrentLocationBtn;
     }
 }

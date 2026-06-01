@@ -570,6 +570,7 @@ namespace AgGrade
 
             DownloadBasemapPage downloadBasemapPage = new DownloadBasemapPage();
             downloadBasemapPage.OnDownloadBasemap += (lat, lon) => { DownloadBasemap(lat, lon); };
+            downloadBasemapPage.OnGetCurrentLocation += () => { return new Tuple<double, double>(CurrentEquipmentStatus.TractorFix.Latitude, CurrentEquipmentStatus.TractorFix.Longitude); };
             downloadBasemapPage.Parent = ContentPanel;
             downloadBasemapPage.Dock = DockStyle.Fill;
             downloadBasemapPage.Show();
