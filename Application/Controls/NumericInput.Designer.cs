@@ -32,6 +32,7 @@
             ValueInput = new TextBox();
             UpBtn = new Button();
             DownBtn = new Button();
+            ClearBtn = new Button();
             SuspendLayout();
             // 
             // ValueInput
@@ -41,7 +42,7 @@
             ValueInput.Location = new Point(3, 4);
             ValueInput.Name = "ValueInput";
             ValueInput.PlaceholderText = "0";
-            ValueInput.Size = new Size(146, 32);
+            ValueInput.Size = new Size(116, 32);
             ValueInput.TabIndex = 0;
             ValueInput.TextAlign = HorizontalAlignment.Right;
             ValueInput.TextChanged += ValueInput_TextChanged;
@@ -50,7 +51,7 @@
             // 
             UpBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             UpBtn.Image = (Image)resources.GetObject("UpBtn.Image");
-            UpBtn.Location = new Point(155, 1);
+            UpBtn.Location = new Point(125, 1);
             UpBtn.Name = "UpBtn";
             UpBtn.Size = new Size(41, 39);
             UpBtn.TabIndex = 1;
@@ -61,21 +62,33 @@
             // 
             DownBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             DownBtn.Image = (Image)resources.GetObject("DownBtn.Image");
-            DownBtn.Location = new Point(198, 1);
+            DownBtn.Location = new Point(168, 1);
             DownBtn.Name = "DownBtn";
             DownBtn.Size = new Size(41, 39);
             DownBtn.TabIndex = 2;
             DownBtn.UseVisualStyleBackColor = true;
             DownBtn.Click += DownBtn_Click;
             // 
+            // ClearBtn
+            // 
+            ClearBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ClearBtn.Image = Properties.Resources.clear_32px;
+            ClearBtn.Location = new Point(211, 1);
+            ClearBtn.Name = "ClearBtn";
+            ClearBtn.Size = new Size(41, 39);
+            ClearBtn.TabIndex = 3;
+            ClearBtn.UseVisualStyleBackColor = true;
+            ClearBtn.Click += ClearBtn_Click;
+            // 
             // NumericInput
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
+            Controls.Add(ClearBtn);
             Controls.Add(ValueInput);
             Controls.Add(DownBtn);
             Controls.Add(UpBtn);
             Name = "NumericInput";
-            Size = new Size(240, 41);
+            Size = new Size(253, 41);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -85,5 +98,6 @@
         private TextBox ValueInput;
         private Button UpBtn;
         private Button DownBtn;
+        private Button ClearBtn;
     }
 }

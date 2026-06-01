@@ -28,10 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NumericInput));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(NumericInputF));
             ValueInput = new TextBox();
             UpBtn = new Button();
             DownBtn = new Button();
+            ClearBtn = new Button();
             SuspendLayout();
             // 
             // ValueInput
@@ -68,14 +69,26 @@
             DownBtn.UseVisualStyleBackColor = true;
             DownBtn.Click += DownBtn_Click;
             // 
-            // NumericInput
+            // ClearBtn
+            // 
+            ClearBtn.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            ClearBtn.Image = Properties.Resources.clear_32px;
+            ClearBtn.Location = new Point(241, 1);
+            ClearBtn.Name = "ClearBtn";
+            ClearBtn.Size = new Size(41, 39);
+            ClearBtn.TabIndex = 3;
+            ClearBtn.UseVisualStyleBackColor = true;
+            ClearBtn.Click += ClearBtn_Click;
+            // 
+            // NumericInputF
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
+            Controls.Add(ClearBtn);
             Controls.Add(ValueInput);
             Controls.Add(DownBtn);
             Controls.Add(UpBtn);
-            Name = "NumericInput";
-            Size = new Size(240, 41);
+            Name = "NumericInputF";
+            Size = new Size(284, 41);
             ResumeLayout(false);
             PerformLayout();
         }
@@ -85,5 +98,6 @@
         private TextBox ValueInput;
         private Button UpBtn;
         private Button DownBtn;
+        private Button ClearBtn;
     }
 }

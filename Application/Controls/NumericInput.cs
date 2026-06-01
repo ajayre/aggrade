@@ -139,5 +139,16 @@ namespace AgGrade.Controls
                 ValueInput.BackColor = Color.Pink;
             }
         }
+
+        /// <summary>
+        /// Called when user taps on the clear button
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearBtn_Click(object sender, EventArgs e)
+        {
+            ValueInput.Focus();
+            ValueInput.Text = string.Empty;
+        }
     }
 }

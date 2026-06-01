@@ -110,7 +110,7 @@
             textBox6.BackColor = SystemColors.Control;
             textBox6.BorderStyle = BorderStyle.None;
             textBox6.Font = new Font("Segoe UI", 16F);
-            textBox6.Location = new Point(233, 191);
+            textBox6.Location = new Point(290, 191);
             textBox6.Name = "textBox6";
             textBox6.ReadOnly = true;
             textBox6.Size = new Size(46, 29);
@@ -122,7 +122,7 @@
             textBox5.BackColor = SystemColors.Control;
             textBox5.BorderStyle = BorderStyle.None;
             textBox5.Font = new Font("Segoe UI", 16F);
-            textBox5.Location = new Point(233, 143);
+            textBox5.Location = new Point(290, 143);
             textBox5.Name = "textBox5";
             textBox5.ReadOnly = true;
             textBox5.Size = new Size(46, 29);
@@ -159,7 +159,7 @@
             // 
             DInput.Location = new Point(62, 186);
             DInput.Name = "DInput";
-            DInput.Size = new Size(165, 41);
+            DInput.Size = new Size(217, 41);
             DInput.TabIndex = 15;
             DInput.Unsigned = false;
             DInput.Value = 0;
@@ -168,7 +168,7 @@
             // 
             TInput.Location = new Point(62, 139);
             TInput.Name = "TInput";
-            TInput.Size = new Size(165, 41);
+            TInput.Size = new Size(217, 41);
             TInput.TabIndex = 14;
             TInput.Unsigned = false;
             TInput.Value = 0;

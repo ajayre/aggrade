@@ -77,7 +77,7 @@
             CreateFieldBtn.Text = "Create";
             CreateFieldBtn.TextAlign = ContentAlignment.MiddleRight;
             CreateFieldBtn.UseVisualStyleBackColor = true;
-            CreateFieldBtn.Click += this.CreateFieldBtn_Click;
+            CreateFieldBtn.Click += CreateFieldBtn_Click;
             // 
             // panel1
             // 
@@ -135,7 +135,7 @@
             // 
             MainSlopeDirectionUnitsLabel.AutoSize = true;
             MainSlopeDirectionUnitsLabel.Font = new Font("Segoe UI", 14F);
-            MainSlopeDirectionUnitsLabel.Location = new Point(400, 101);
+            MainSlopeDirectionUnitsLabel.Location = new Point(441, 101);
             MainSlopeDirectionUnitsLabel.Name = "MainSlopeDirectionUnitsLabel";
             MainSlopeDirectionUnitsLabel.Size = new Size(79, 25);
             MainSlopeDirectionUnitsLabel.TabIndex = 19;
@@ -155,7 +155,7 @@
             // 
             MainSlopeUnitsLabel.AutoSize = true;
             MainSlopeUnitsLabel.Font = new Font("Segoe UI", 14F);
-            MainSlopeUnitsLabel.Location = new Point(400, 148);
+            MainSlopeUnitsLabel.Location = new Point(441, 148);
             MainSlopeUnitsLabel.Name = "MainSlopeUnitsLabel";
             MainSlopeUnitsLabel.Size = new Size(28, 25);
             MainSlopeUnitsLabel.TabIndex = 22;
@@ -165,7 +165,7 @@
             // 
             CrossSlopeLabel.AutoSize = true;
             CrossSlopeLabel.Font = new Font("Segoe UI", 14F);
-            CrossSlopeLabel.Location = new Point(501, 147);
+            CrossSlopeLabel.Location = new Point(552, 147);
             CrossSlopeLabel.Name = "CrossSlopeLabel";
             CrossSlopeLabel.Size = new Size(112, 25);
             CrossSlopeLabel.TabIndex = 23;
@@ -175,7 +175,7 @@
             // 
             CrossSlopeUnitsLabel.AutoSize = true;
             CrossSlopeUnitsLabel.Font = new Font("Segoe UI", 14F);
-            CrossSlopeUnitsLabel.Location = new Point(792, 147);
+            CrossSlopeUnitsLabel.Location = new Point(869, 147);
             CrossSlopeUnitsLabel.Name = "CrossSlopeUnitsLabel";
             CrossSlopeUnitsLabel.Size = new Size(28, 25);
             CrossSlopeUnitsLabel.TabIndex = 25;
@@ -205,7 +205,7 @@
             // 
             ImportToFieldUnitsLabel.AutoSize = true;
             ImportToFieldUnitsLabel.Font = new Font("Segoe UI", 14F);
-            ImportToFieldUnitsLabel.Location = new Point(402, 242);
+            ImportToFieldUnitsLabel.Location = new Point(443, 242);
             ImportToFieldUnitsLabel.Name = "ImportToFieldUnitsLabel";
             ImportToFieldUnitsLabel.Size = new Size(35, 25);
             ImportToFieldUnitsLabel.TabIndex = 31;
@@ -215,7 +215,7 @@
             // 
             ExportFromFieldLabel.AutoSize = true;
             ExportFromFieldLabel.Font = new Font("Segoe UI", 14F);
-            ExportFromFieldLabel.Location = new Point(456, 242);
+            ExportFromFieldLabel.Location = new Point(507, 242);
             ExportFromFieldLabel.Name = "ExportFromFieldLabel";
             ExportFromFieldLabel.Size = new Size(157, 25);
             ExportFromFieldLabel.TabIndex = 32;
@@ -225,7 +225,7 @@
             // 
             ExportFromFieldUnitsLabel.AutoSize = true;
             ExportFromFieldUnitsLabel.Font = new Font("Segoe UI", 14F);
-            ExportFromFieldUnitsLabel.Location = new Point(792, 242);
+            ExportFromFieldUnitsLabel.Location = new Point(869, 242);
             ExportFromFieldUnitsLabel.Name = "ExportFromFieldUnitsLabel";
             ExportFromFieldUnitsLabel.Size = new Size(35, 25);
             ExportFromFieldUnitsLabel.TabIndex = 34;
@@ -235,7 +235,7 @@
             // 
             MainSlopeDirection.Location = new Point(227, 93);
             MainSlopeDirection.Name = "MainSlopeDirection";
-            MainSlopeDirection.Size = new Size(167, 41);
+            MainSlopeDirection.Size = new Size(208, 41);
             MainSlopeDirection.TabIndex = 35;
             MainSlopeDirection.Unsigned = false;
             MainSlopeDirection.Value = 0;
@@ -244,16 +244,16 @@
             // 
             ImportToField.Location = new Point(229, 234);
             ImportToField.Name = "ImportToField";
-            ImportToField.Size = new Size(167, 41);
+            ImportToField.Size = new Size(206, 41);
             ImportToField.TabIndex = 36;
             ImportToField.Unsigned = false;
             ImportToField.Value = 0;
             // 
             // ExportFromField
             // 
-            ExportFromField.Location = new Point(619, 234);
+            ExportFromField.Location = new Point(670, 234);
             ExportFromField.Name = "ExportFromField";
-            ExportFromField.Size = new Size(167, 41);
+            ExportFromField.Size = new Size(193, 41);
             ExportFromField.TabIndex = 37;
             ExportFromField.Unsigned = false;
             ExportFromField.Value = 0;
@@ -266,7 +266,7 @@
             MainSlope.Maximum = 20D;
             MainSlope.Minimum = 0D;
             MainSlope.Name = "MainSlope";
-            MainSlope.Size = new Size(167, 41);
+            MainSlope.Size = new Size(208, 41);
             MainSlope.TabIndex = 38;
             MainSlope.Value = 0D;
             // 
@@ -274,11 +274,11 @@
             // 
             CrossSlope.ButtonChangeAmount = 0.1D;
             CrossSlope.DecimalPlaces = 1U;
-            CrossSlope.Location = new Point(619, 140);
+            CrossSlope.Location = new Point(670, 140);
             CrossSlope.Maximum = 20D;
             CrossSlope.Minimum = 0D;
             CrossSlope.Name = "CrossSlope";
-            CrossSlope.Size = new Size(167, 41);
+            CrossSlope.Size = new Size(193, 41);
             CrossSlope.TabIndex = 39;
             CrossSlope.Value = 0D;
             // 
@@ -290,7 +290,7 @@
             CutFillRatio.Maximum = 2D;
             CutFillRatio.Minimum = 0.5D;
             CutFillRatio.Name = "CutFillRatio";
-            CutFillRatio.Size = new Size(167, 41);
+            CutFillRatio.Size = new Size(206, 41);
             CutFillRatio.TabIndex = 40;
             CutFillRatio.Value = 0.5D;
             // 
