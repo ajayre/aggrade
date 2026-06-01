@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Timer = System.Timers.Timer;
 
@@ -37,6 +38,7 @@ namespace AgGrade.Data
         private EquipmentStatus? CurrentEquipmentStatus;
         private EquipmentSettings? CurrentEquipmentSettings;
         private BoundaryModes BoundaryMode;
+        private readonly SynchronizationContext? UiContext;
 
         /// <summary>
         /// Creates the updater and configures the periodic timer (not started until <see cref="Start"/>).
@@ -45,6 +47,8 @@ namespace AgGrade.Data
             (
             )
         {
+            UiContext = SynchronizationContext.Current;
+
             UpdateTimer = new Timer();
             UpdateTimer.Interval = UPDATE_PERIOD_MS;
             UpdateTimer.Elapsed += UpdateTimer_Elapsed;
@@ -152,6 +156,21 @@ namespace AgGrade.Data
         /// <param name="sender">Timer source.</param>
         /// <param name="e">Elapsed event arguments.</param>
         private void UpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            if (UiContext != null)
+            {
+                UiContext.Post(_ => RecordSurveyPointIfNeeded(), null);
+                return;
+            }
+
+            RecordSurveyPointIfNeeded();
+        }
+
+        /// <summary>
+        /// Appends a survey point when spacing criteria are met. Runs on the UI thread when
+        /// <see cref="SynchronizationContext.Current"/> was captured at construction.
+        /// </summary>
+        private void RecordSurveyPointIfNeeded()
         {
             if ((Survey == null) || (CurrentEquipmentStatus == null) || (CurrentEquipmentSettings == null)) return;
 

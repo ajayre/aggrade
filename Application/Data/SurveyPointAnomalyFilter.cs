@@ -80,13 +80,15 @@ namespace AgGrade.Data
                 throw new ArgumentNullException(nameof(points));
 
             int removed = 0;
-            int index = 0;
-            while (index < points.Count)
+            List<TopologyPoint> replay = new List<TopologyPoint>(points.Count);
+            foreach (TopologyPoint point in points)
             {
-                index++;
-                removed += PruneAfterAppend(points);
+                replay.Add(point);
+                removed += PruneAfterAppend(replay);
             }
 
+            points.Clear();
+            points.AddRange(replay);
             return removed;
         }
 

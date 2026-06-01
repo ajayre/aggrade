@@ -808,8 +808,8 @@ namespace AgGrade.Data
             }
 
             List<Benchmark> Benchmarks = new List<Benchmark>();
-            if (CurrentField != null) Benchmarks = CurrentField.Benchmarks;
-            else if (CurrentSurvey != null) Benchmarks = CurrentSurvey.Benchmarks;
+            if (CurrentField != null) Benchmarks = CurrentField.Benchmarks.ToList();
+            else if (CurrentSurvey != null) Benchmarks = CurrentSurvey.Benchmarks.ToList();
 
             Decorate(bitmap, Benchmarks, TractorLocationHistory, CurrentEquipmentSettings, HaulPath);
 
@@ -921,7 +921,13 @@ namespace AgGrade.Data
                 // draw survey points
                 if (CurrentSurvey != null)
                 {
-                    bool hasSurveyElevationRange = TryGetSurveyElevationRange(CurrentSurvey, out double minSurveyElevation, out double maxSurveyElevation);
+                    List<TopologyPoint> interiorSurveyPoints = CurrentSurvey.InteriorPoints.ToList();
+                    List<TopologyPoint> boundarySurveyPoints = CurrentSurvey.BoundaryPoints.ToList();
+                    bool hasSurveyElevationRange = TryGetSurveyElevationRange(
+                        interiorSurveyPoints,
+                        boundarySurveyPoints,
+                        out double minSurveyElevation,
+                        out double maxSurveyElevation);
                     int defaultSurveyColorIndex = CutFillBandColors.Length / 2;
                     SolidBrush[] surveyPointBrushes = new SolidBrush[CutFillBandColors.Length];
                     Pen BoundaryPen = new Pen(Color.Gray, 1);
@@ -935,7 +941,7 @@ namespace AgGrade.Data
 
                     try
                     {
-                        foreach (TopologyPoint tp in CurrentSurvey.InteriorPoints)
+                        foreach (TopologyPoint tp in interiorSurveyPoints)
                         {
                             int colorIndex = hasSurveyElevationRange
                                 ? GetCutFillBandIndexForSurveyElevation(tp.ExistingElevation, minSurveyElevation, maxSurveyElevation)
@@ -952,7 +958,7 @@ namespace AgGrade.Data
                             g.FillEllipse(pointBrush, pt.X - (PointWidthpx / 2), pt.Y - (PointWidthpx / 2), PointWidthpx, PointWidthpx);
                         }
 
-                        foreach (TopologyPoint tp in CurrentSurvey.BoundaryPoints)
+                        foreach (TopologyPoint tp in boundarySurveyPoints)
                         {
                             int colorIndex = hasSurveyElevationRange
                                 ? GetCutFillBandIndexForSurveyElevation(tp.ExistingElevation, minSurveyElevation, maxSurveyElevation)
@@ -2651,7 +2657,8 @@ namespace AgGrade.Data
 
         private static bool TryGetSurveyElevationRange
             (
-            Survey survey,
+            IList<TopologyPoint> interiorPoints,
+            IList<TopologyPoint> boundaryPoints,
             out double minElevation,
             out double maxElevation
             )
@@ -2661,7 +2668,7 @@ namespace AgGrade.Data
             bool found = false;
 
             // Treat interior and boundary points as a single dataset.
-            foreach (TopologyPoint point in survey.InteriorPoints)
+            foreach (TopologyPoint point in interiorPoints)
             {
                 double elevation = point.ExistingElevation;
                 if (double.IsNaN(elevation) || double.IsInfinity(elevation))
@@ -2674,7 +2681,7 @@ namespace AgGrade.Data
                 found = true;
             }
 
-            foreach (TopologyPoint point in survey.BoundaryPoints)
+            foreach (TopologyPoint point in boundaryPoints)
             {
                 double elevation = point.ExistingElevation;
                 if (double.IsNaN(elevation) || double.IsInfinity(elevation))
