@@ -51,31 +51,27 @@ namespace AgGrade.Data
             Rotation2D(-heading1Deg, out double r1_00, out double r1_01, out double r1_10, out double r1_11);
             Rotation2D(-heading2Deg, out double r2_00, out double r2_01, out double r2_10, out double r2_11);
 
-            double hAx = -Tmm / 2.0;
+            // Pole-side hub offsets in tractor frame (X = right positive).
+            // At pose 1 the pole is to the right of the right hub (+T/2).
+            // After the 180° turn (pose 2) the same world side is the tractor's
+            // left, so the pole reference sits at -(T/2) in the new tractor frame.
+            // When D is known, the pole is D beyond the hub in each case.
+            double hAx = Tmm / 2.0;
             double hAy = 0.0;
-            double hBx = Tmm / 2.0;
+            double hBx = -Tmm / 2.0;
             double hBy = 0.0;
+
+            if (Dmm.HasValue)
+            {
+                double D = Dmm.Value;
+                hAx = Tmm / 2.0 + D;
+                hBx = -(Tmm / 2.0 + D);
+            }
 
             double t1x = -(r1_00 * hAx + r1_01 * hAy);
             double t1y = -(r1_10 * hAx + r1_11 * hAy);
             double t2x = -(r2_00 * hBx + r2_01 * hBy);
             double t2y = -(r2_10 * hBx + r2_11 * hBy);
-
-            if (Dmm.HasValue)
-            {
-                double D = Dmm.Value;
-                double thRad = heading1Deg * Math.PI / 180.0;
-                double Gx = D * Math.Cos(thRad);
-                double Gy = -D * Math.Sin(thRad);
-
-                heading2Deg = heading1Deg + 180.0;
-                Rotation2D(-heading2Deg, out r2_00, out r2_01, out r2_10, out r2_11);
-
-                t1x = Gx - (r1_00 * hAx + r1_01 * hAy);
-                t1y = Gy - (r1_10 * hAx + r1_11 * hAy);
-                t2x = Gx - (r2_00 * hBx + r2_01 * hBy);
-                t2y = Gy - (r2_10 * hBx + r2_11 * hBy);
-            }
 
             double diffPx = P1x - P2x;
             double diffPy = P1y - P2y;
