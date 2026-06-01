@@ -51,8 +51,8 @@ namespace AgGrade.Controls
             string Ext = string.Empty;
             switch (FileTypeChooser.SelectedIndex)
             {
-                case 0: Ext = ".txt"; break;
-                case 1: Ext = ".ags"; break;
+                case 0: Ext = ".ags"; break;
+                case 1: Ext = ".txt"; break;
             }
 
             string FileName = SurveyDataFolder + Name + Ext;

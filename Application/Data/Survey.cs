@@ -25,12 +25,33 @@ namespace AgGrade.Data
 
     public class Survey
     {
+        /// <summary>
+        /// Master benchmark elevation used in Trimble multiplane files: 30.48 m (100 ft).
+        /// All stored survey elevations are relative to this value once the MB GPS anchor is set.
+        /// </summary>
+        private const double MultiplaneMasterElevationM = 30.48;
+
+        /// <summary>
+        /// When loading legacy multiplane files, point elevations more than this many meters
+        /// above <see cref="MultiplaneMasterElevationM"/> are treated as mistakenly written
+        /// absolute GPS values rather than multiplane-relative elevations.
+        /// </summary>
+        private const double MaxPlausibleMultiplaneRelativeOffsetM = 150.0;
+
         private string FileName;
 
         /// <summary>
         /// Format of the file this survey was loaded from (or set by <see cref="LoadFromMultiplane"/> / <see cref="LoadFromAgs"/>).
         /// </summary>
         public SurveyFileFormats LoadedFileFormat { get; private set; }
+
+        /// <summary>
+        /// Absolute GPS elevation in meters at the master benchmark (MB), captured when MB is first
+        /// placed during live surveying. Persisted in multiplane header column 6 so a survey can be
+        /// reloaded after a crash and new GPS samples converted into the same relative elevation frame.
+        /// Null until MB is set from GPS or loaded from a multiplane file that includes the anchor.
+        /// </summary>
+        public double? MasterAbsoluteElevationM { get; private set; }
 
         /// <summary>
         /// Only Latitude, Longitude and ExistingElevation are used
@@ -53,26 +74,31 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Adds a new benchmark to the survey.
-        /// If this is the first benchmark it is named MB; otherwise it is named
-        /// BMx where x is the next available sequence number starting at 1.
+        /// Adds a new benchmark to the survey from an absolute GPS elevation reading.
+        /// If this is the first benchmark it is named MB, records <see cref="MasterAbsoluteElevationM"/>,
+        /// and stores MB at <see cref="MultiplaneMasterElevationM"/> (100 ft). Additional benchmarks are
+        /// named BMx and stored as multiplane-relative elevations using the same GPS anchor.
         /// </summary>
         /// <param name="Location">Benchmark location as latitude/longitude.</param>
-        /// <param name="ElevationM">Benchmark elevation in meters.</param>
+        /// <param name="AbsoluteGpsElevationM">Absolute GPS elevation in meters from the receiver.</param>
         /// <returns>The newly created benchmark instance.</returns>
         public Benchmark AddBenchmark
             (
             Coordinate Location,
-            double ElevationM
+            double AbsoluteGpsElevationM
             )
         {
             if (Location == null)
                 throw new ArgumentNullException(nameof(Location));
 
             string name;
+            double storedElevationM;
+
             if (Benchmarks.Count == 0)
             {
                 name = "MB";
+                MasterAbsoluteElevationM = AbsoluteGpsElevationM;
+                storedElevationM = MultiplaneMasterElevationM;
             }
             else
             {
@@ -91,11 +117,35 @@ namespace AgGrade.Data
                 }
 
                 name = $"BM{maxSequence + 1}";
+                storedElevationM = ToMultiplaneRelativeElevationM(AbsoluteGpsElevationM);
             }
 
-            Benchmark benchmark = new Benchmark(Location, name, ElevationM);
+            Benchmark benchmark = new Benchmark(Location, name, storedElevationM);
             Benchmarks.Add(benchmark);
             return benchmark;
+        }
+
+        /// <summary>
+        /// Converts an absolute GPS elevation in meters into the multiplane-relative elevation
+        /// stored internally and written to .txt survey files (MB datum = 100 ft / 30.48 m).
+        /// </summary>
+        /// <param name="AbsoluteGpsElevationM">Absolute GPS elevation in meters from the receiver.</param>
+        /// <returns>Elevation in meters relative to the multiplane MB datum.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="MasterAbsoluteElevationM"/> has not been set (MB benchmark missing).
+        /// </exception>
+        public double ToMultiplaneRelativeElevationM
+            (
+            double AbsoluteGpsElevationM
+            )
+        {
+            if (!MasterAbsoluteElevationM.HasValue)
+            {
+                throw new InvalidOperationException(
+                    "Cannot convert GPS elevation to multiplane-relative storage: master benchmark absolute elevation is not set. Add the MB benchmark first.");
+            }
+
+            return AbsoluteGpsElevationM - MasterAbsoluteElevationM.Value + MultiplaneMasterElevationM;
         }
 
         /// <summary>
@@ -173,6 +223,7 @@ namespace AgGrade.Data
             InteriorPoints.Clear();
             BoundaryPoints.Clear();
             Benchmarks.Clear();
+            MasterAbsoluteElevationM = null;
 
             // Support an empty/blank file as a valid new survey.
             if (Lines.Length == 0 || Lines.All(string.IsNullOrWhiteSpace))
@@ -192,11 +243,13 @@ namespace AgGrade.Data
                 Meters ? BaseOffsetXFt : FeetToMeters(BaseOffsetXFt),
                 Meters ? BaseOffsetYFt : FeetToMeters(BaseOffsetYFt));
 
-            // Multiplane elevation values are interpreted directly as feet relative
-            // to the file's internal datum, then converted to meters for storage.
+            // Multiplane elevation values in the file are relative to the MB datum (100 ft / 30.48 m).
             double masterElevationMeters = Meters ? BaseHeightFt : FeetToMeters(BaseHeightFt);
 
             Benchmarks.Add(new Benchmark(MasterLocation, "MB", masterElevationMeters));
+
+            // Column 6 stores the absolute GPS elevation (meters) at MB for crash recovery.
+            MasterAbsoluteElevationM = TryReadMultiplaneHeaderAnchorM(HeaderParts);
 
             for (int li = 1; li < Lines.Length; li++)
             {
@@ -234,45 +287,187 @@ namespace AgGrade.Data
                 else
                     InteriorPoints.Add(point);
             }
+
+            // Older AgGrade builds wrote absolute GPS feet for survey points while MB was normalized to 100 ft.
+            TryRepairLegacyAbsoluteMultiplaneElevations();
         }
 
         /// <summary>
-        /// Normalizes survey elevations for multiplane export by forcing the
-        /// master benchmark to 30.48 m (100 ft) and applying the same offset
-        /// to every other stored elevation so relative differences are preserved.
+        /// Reads the absolute MB GPS anchor from multiplane header column 6 (meters).
+        /// Column 6 is optional; zero or missing means the anchor was not persisted (legacy file).
         /// </summary>
-        public void NormalizeElevationsForMultiplane
+        /// <param name="HeaderParts">Tab-separated columns from the first line of a multiplane file.</param>
+        /// <returns>Absolute GPS elevation in meters at MB, or null when not stored in the file.</returns>
+        private static double? TryReadMultiplaneHeaderAnchorM
+            (
+            string[] HeaderParts
+            )
+        {
+            if (HeaderParts == null || HeaderParts.Length < 6)
+                return null;
+
+            string anchorText = HeaderParts[5]?.Trim();
+            if (string.IsNullOrWhiteSpace(anchorText))
+                return null;
+
+            if (!double.TryParse(anchorText, NumberStyles.Float, CultureInfo.InvariantCulture, out double anchorM))
+                return null;
+
+            // Zero is reserved to mean "not set" for backward compatibility with files that used 0.000.
+            if (Math.Abs(anchorM) < 1e-9)
+                return null;
+
+            return anchorM;
+        }
+
+        /// <summary>
+        /// Repairs multiplane surveys saved by older AgGrade builds that normalized MB to 100 ft in the
+        /// header but wrote absolute GPS elevations (in feet) for boundary and interior points. Detects
+        /// that condition when no header anchor is present and stored point elevations are implausibly
+        /// high relative to MB, then infers <see cref="MasterAbsoluteElevationM"/> and rewrites all
+        /// stored elevations into the correct multiplane-relative frame.
+        /// </summary>
+        private void TryRepairLegacyAbsoluteMultiplaneElevations
             (
             )
         {
-            const double MultiplaneMasterElevationM = 30.48;
+            if (MasterAbsoluteElevationM.HasValue)
+                return;
 
-            Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
-                b != null &&
-                !string.IsNullOrWhiteSpace(b.Name) &&
-                string.Equals(b.Name.Trim(), "MB", StringComparison.OrdinalIgnoreCase))
-                ?? throw new Exception("Cannot normalize elevations: no master benchmark (MB) exists.");
+            if (!HasImplausiblyHighMultiplaneRelativeElevations())
+                return;
 
-            double deltaM = MultiplaneMasterElevationM - masterBenchmark.Elevation;
-            if (deltaM == 0) return;
+            double inferredAnchorM = InferLegacyAbsoluteElevationAnchorM();
+            MasterAbsoluteElevationM = inferredAnchorM;
 
             foreach (Benchmark benchmark in Benchmarks)
             {
                 if (benchmark == null) continue;
-                benchmark.Elevation += deltaM;
+                if (string.Equals(benchmark.Name?.Trim(), "MB", StringComparison.OrdinalIgnoreCase))
+                {
+                    benchmark.Elevation = MultiplaneMasterElevationM;
+                    continue;
+                }
+
+                benchmark.Elevation = ToMultiplaneRelativeElevationM(benchmark.Elevation);
             }
 
             foreach (TopologyPoint point in BoundaryPoints)
             {
                 if (point == null) continue;
-                point.ExistingElevation += deltaM;
+                point.ExistingElevation = ToMultiplaneRelativeElevationM(point.ExistingElevation);
             }
 
             foreach (TopologyPoint point in InteriorPoints)
             {
                 if (point == null) continue;
-                point.ExistingElevation += deltaM;
+                point.ExistingElevation = ToMultiplaneRelativeElevationM(point.ExistingElevation);
             }
+        }
+
+        /// <summary>
+        /// Returns true when any stored benchmark (other than MB) or topology point elevation is far
+        /// above the multiplane MB datum, indicating absolute GPS values were stored instead of relative.
+        /// </summary>
+        /// <returns>True when legacy absolute-elevation corruption is suspected.</returns>
+        private bool HasImplausiblyHighMultiplaneRelativeElevations
+            (
+            )
+        {
+            double thresholdM = MultiplaneMasterElevationM + MaxPlausibleMultiplaneRelativeOffsetM;
+
+            foreach (Benchmark benchmark in Benchmarks)
+            {
+                if (benchmark == null) continue;
+                if (string.Equals(benchmark.Name?.Trim(), "MB", StringComparison.OrdinalIgnoreCase)) continue;
+                if (benchmark.Elevation > thresholdM)
+                    return true;
+            }
+
+            foreach (TopologyPoint point in BoundaryPoints)
+            {
+                if (point == null) continue;
+                if (point.ExistingElevation > thresholdM)
+                    return true;
+            }
+
+            foreach (TopologyPoint point in InteriorPoints)
+            {
+                if (point == null) continue;
+                if (point.ExistingElevation > thresholdM)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Estimates the absolute GPS elevation at MB for a legacy file by using the first available
+        /// survey point. Those files mistakenly stored absolute GPS as point elevations, so the first
+        /// boundary (or interior) point is typically near the MB absolute elevation at survey start.
+        /// </summary>
+        /// <returns>Inferred absolute GPS elevation in meters for the master benchmark anchor.</returns>
+        private double InferLegacyAbsoluteElevationAnchorM
+            (
+            )
+        {
+            if (BoundaryPoints.Count > 0 && BoundaryPoints[0] != null)
+                return BoundaryPoints[0].ExistingElevation;
+
+            if (InteriorPoints.Count > 0 && InteriorPoints[0] != null)
+                return InteriorPoints[0].ExistingElevation;
+
+            foreach (Benchmark benchmark in Benchmarks)
+            {
+                if (benchmark == null) continue;
+                if (string.Equals(benchmark.Name?.Trim(), "MB", StringComparison.OrdinalIgnoreCase)) continue;
+                return benchmark.Elevation;
+            }
+
+            throw new Exception(
+                "Cannot repair legacy multiplane elevations: no survey points were found to infer the master GPS anchor.");
+        }
+
+        /// <summary>
+        /// Returns the master benchmark (MB) or throws when it is missing.
+        /// </summary>
+        /// <returns>The master benchmark instance.</returns>
+        private Benchmark GetMasterBenchmark
+            (
+            )
+        {
+            return Benchmarks.FirstOrDefault(b =>
+                b != null &&
+                !string.IsNullOrWhiteSpace(b.Name) &&
+                string.Equals(b.Name.Trim(), "MB", StringComparison.OrdinalIgnoreCase))
+                ?? throw new Exception("No master benchmark (MB) exists.");
+        }
+
+        /// <summary>
+        /// Ensures the stored MB elevation is exactly <see cref="MultiplaneMasterElevationM"/> when
+        /// a GPS anchor is known. Does not modify boundary or interior points; those are expected to
+        /// already be stored as multiplane-relative elevations.
+        /// </summary>
+        private void EnsureMultiplaneMasterBenchmarkElevation
+            (
+            )
+        {
+            if (!MasterAbsoluteElevationM.HasValue)
+                return;
+
+            GetMasterBenchmark().Elevation = MultiplaneMasterElevationM;
+        }
+
+        /// <summary>
+        /// Ensures the master benchmark is stored at the multiplane datum (30.48 m / 100 ft).
+        /// Boundary and interior points are not modified; use <see cref="ToMultiplaneRelativeElevationM"/>
+        /// when recording GPS samples so all elevations share the same relative frame.
+        /// </summary>
+        public void NormalizeElevationsForMultiplane
+            (
+            )
+        {
+            EnsureMultiplaneMasterBenchmarkElevation();
         }
 
         /// <summary>
@@ -288,8 +483,10 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Saves the survey to a trimble multiplane file
-        /// If the file exists then it is overwritten without warning
+        /// Saves the survey to a trimble multiplane file.
+        /// Elevations are written as multiplane-relative values (MB = 100 ft) without mutating stored
+        /// data. Header column 6 persists <see cref="MasterAbsoluteElevationM"/> for crash recovery.
+        /// If the file exists then it is overwritten without warning.
         /// </summary>
         /// <param name="FileName">Path and name of the file to save to</param>
         public void SaveToMultiplane
@@ -304,26 +501,27 @@ namespace AgGrade.Data
             bool Meters = false;
             if (Path.GetFileNameWithoutExtension(FileName).ToLower().Contains("_m")) Meters = true;
 
-            NormalizeElevationsForMultiplane();
+            EnsureMultiplaneMasterBenchmarkElevation();
 
-            Benchmark masterBenchmark = Benchmarks.FirstOrDefault(b =>
-                b != null &&
-                !string.IsNullOrWhiteSpace(b.Name) &&
-                string.Equals(b.Name.Trim(), "MB", StringComparison.OrdinalIgnoreCase))
-                ?? throw new Exception("Cannot save multiplane file: no master benchmark (MB) exists.");
+            Benchmark masterBenchmark = GetMasterBenchmark();
 
             Coordinate masterLocation = masterBenchmark.Location
                 ?? throw new Exception("Cannot save multiplane file: master benchmark location is null.");
 
             double masterHeightFt = Meters ? masterBenchmark.Elevation : MetersToFeet(masterBenchmark.Elevation);
 
+            // Column 6 always stores the GPS anchor in meters regardless of file unit suffix.
+            double headerAnchorM = MasterAbsoluteElevationM ?? 0.0;
+            string headerAnchorText = headerAnchorM.ToString("G17", CultureInfo.InvariantCulture);
+
             List<string> lines = new List<string>();
             lines.Add(string.Format(
                 CultureInfo.InvariantCulture,
-                "0001\t0.000\t0.000\t{0:0.000}\tMB {1} / {2}\t0.000",
+                "0001\t0.000\t0.000\t{0:0.000}\tMB {1} / {2}\t{3}",
                 masterHeightFt,
                 FormatLatitude(masterLocation.Latitude),
-                FormatLongitude(masterLocation.Longitude)));
+                FormatLongitude(masterLocation.Longitude),
+                headerAnchorText));
 
             UTM.UTMCoordinate masterUtm = UTM.FromLatLon(masterLocation.Latitude, masterLocation.Longitude);
             int nextId = 2;
@@ -375,6 +573,7 @@ namespace AgGrade.Data
             InteriorPoints.Clear();
             BoundaryPoints.Clear();
             Benchmarks.Clear();
+            MasterAbsoluteElevationM = null;
 
             if (lines.Length == 0 || lines.All(string.IsNullOrWhiteSpace))
                 return;

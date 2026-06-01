@@ -9,14 +9,20 @@ using Timer = System.Timers.Timer;
 
 namespace AgGrade.Data
 {
+    /// <summary>
+    /// Records live GPS survey points into a <see cref="Survey"/> while the operator drives the field.
+    /// Converts absolute GPS altitudes into multiplane-relative elevations so incremental file saves
+    /// remain correct and surveys can be resumed after a crash.
+    /// </summary>
     public class SurveyUpdater
     {
-        // how often we perform the updates in milliseconds
+        /// <summary>How often survey point updates are evaluated, in milliseconds.</summary>
         private const int UPDATE_PERIOD_MS = 250;
 
-        // spacing of points
+        /// <summary>Minimum spacing between recorded points, in feet.</summary>
         private const double MIN_POINT_SPACING_FT = 10.0;
 
+        /// <summary>Which edge of the tractor path is being surveyed as the field boundary.</summary>
         public enum BoundaryModes
         {
             None,
@@ -24,6 +30,7 @@ namespace AgGrade.Data
             Right
         }
 
+        /// <summary>Survey being updated, or null when not recording.</summary>
         public Survey? Survey;
 
         private Timer UpdateTimer;
@@ -31,6 +38,9 @@ namespace AgGrade.Data
         private EquipmentSettings? CurrentEquipmentSettings;
         private BoundaryModes BoundaryMode;
 
+        /// <summary>
+        /// Creates the updater and configures the periodic timer (not started until <see cref="Start"/>).
+        /// </summary>
         public SurveyUpdater
             (
             )
@@ -43,9 +53,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Sets the survey to work on or null for no survey
+        /// Sets the survey to work on, or null to detach from any survey.
         /// </summary>
-        /// <param name="NewSurvey">Survey to work on</param>
+        /// <param name="NewSurvey">Survey to record into, or null.</param>
         public void SetSurvey
             (
             Survey? NewSurvey
@@ -55,9 +65,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Sets the equipment status
+        /// Supplies the latest equipment/GPS status used when adding benchmarks and survey points.
         /// </summary>
-        /// <param name="Status">New status</param>
+        /// <param name="Status">Current equipment status from the controller layer.</param>
         public void SetEquipmentStatus
             (
             EquipmentStatus Status
@@ -67,9 +77,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Sets the equipment settings
+        /// Supplies equipment dimensions and settings used for boundary offset calculations.
         /// </summary>
-        /// <param name="Settings">New settings</param>
+        /// <param name="Settings">Current equipment settings.</param>
         public void SetEquipmentSettings
             (
             EquipmentSettings Settings
@@ -79,9 +89,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Call to change the boundary mode when already started
+        /// Changes boundary recording mode while surveying is active.
         /// </summary>
-        /// <param name="Mode">New boundary mode</param>
+        /// <param name="Mode">New boundary mode (left edge, right edge, or interior only).</param>
         public void BoundaryChanged
             (
             BoundaryModes Mode
@@ -91,9 +101,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Call to start recording survey points
+        /// Starts periodic survey point recording.
         /// </summary>
-        /// <param name="Mode">Boundary mode</param>
+        /// <param name="Mode">Initial boundary mode.</param>
         public void Start
             (
             BoundaryModes Mode
@@ -105,7 +115,7 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Call to stop recording survey points
+        /// Stops periodic survey point recording.
         /// </summary>
         public void Stop
             (
@@ -115,7 +125,9 @@ namespace AgGrade.Data
         }
 
         /// <summary>
-        /// Adds a new benchmark to the survey
+        /// Adds a benchmark at the current tractor GPS fix. The first benchmark becomes MB and
+        /// establishes the absolute GPS anchor; subsequent benchmarks are stored as multiplane-relative
+        /// elevations. The survey file is saved immediately after each benchmark is added.
         /// </summary>
         public void AddBenchmark
             (
@@ -123,16 +135,22 @@ namespace AgGrade.Data
         {
             if ((Survey != null) && (CurrentEquipmentStatus != null))
             {
-                Survey.AddBenchmark(new Coordinate(CurrentEquipmentStatus.TractorFix.Latitude, CurrentEquipmentStatus.TractorFix.Longitude), CurrentEquipmentStatus.TractorFix.Altitude);
+                Survey.AddBenchmark(
+                    new Coordinate(
+                        CurrentEquipmentStatus.TractorFix.Latitude,
+                        CurrentEquipmentStatus.TractorFix.Longitude),
+                    CurrentEquipmentStatus.TractorFix.Altitude);
                 Survey.Save();
             }
         }
 
         /// <summary>
-        /// Perform the survey updates
+        /// Timer callback that appends a boundary or interior point when the tractor has moved far
+        /// enough from the last recorded point. GPS altitude is converted to multiplane-relative
+        /// storage before the survey file is saved.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
+        /// <param name="sender">Timer source.</param>
+        /// <param name="e">Elapsed event arguments.</param>
         private void UpdateTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             if ((Survey == null) || (CurrentEquipmentStatus == null) || (CurrentEquipmentSettings == null)) return;
@@ -155,6 +173,10 @@ namespace AgGrade.Data
                 if (distanceFromLastM <= MIN_POINT_SPACING_M) return;
             }
 
+            // MB must be set first so Survey knows the absolute GPS anchor for relative conversion.
+            if (!Survey.MasterAbsoluteElevationM.HasValue)
+                return;
+
             double pointLat = CurrentEquipmentStatus.TractorFix.Latitude;
             double pointLon = CurrentEquipmentStatus.TractorFix.Longitude;
 
@@ -170,7 +192,7 @@ namespace AgGrade.Data
             {
                 Latitude = pointLat,
                 Longitude = pointLon,
-                ExistingElevation = CurrentEquipmentStatus.TractorFix.Altitude
+                ExistingElevation = Survey.ToMultiplaneRelativeElevationM(CurrentEquipmentStatus.TractorFix.Altitude)
             });
 
             Survey.Save();
