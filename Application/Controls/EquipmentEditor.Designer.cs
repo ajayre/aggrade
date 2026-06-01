@@ -523,7 +523,6 @@ namespace AgGrade.Controls
             FrontPanMaxFillDepthUnitsLabel.Size = new Size(44, 25);
             FrontPanMaxFillDepthUnitsLabel.TabIndex = 98;
             FrontPanMaxFillDepthUnitsLabel.Text = "mm";
-            FrontPanMaxFillDepthUnitsLabel.Click += FrontPanMaxFillDepthUnitsLabel_Click;
             // 
             // FrontPanMaxFillDepth
             // 
@@ -908,7 +907,6 @@ namespace AgGrade.Controls
             FrontPanWidthLabel.Size = new Size(67, 25);
             FrontPanWidthLabel.TabIndex = 60;
             FrontPanWidthLabel.Text = "Width:";
-            FrontPanWidthLabel.Click += FrontPanWidthLabel_Click;
             // 
             // FrontPanAntennaHeightUnitsLabel
             // 
@@ -986,7 +984,6 @@ namespace AgGrade.Controls
             tabPage1.Size = new Size(1051, 939);
             tabPage1.TabIndex = 2;
             tabPage1.Text = "Rear Pan";
-            tabPage1.Click += tabPage1_Click;
             // 
             // RearPanBanner
             // 
@@ -1336,7 +1333,6 @@ namespace AgGrade.Controls
             RearBladePWMMinUpLabel.Size = new Size(49, 25);
             RearBladePWMMinUpLabel.TabIndex = 81;
             RearBladePWMMinUpLabel.Text = "Min:";
-            RearBladePWMMinUpLabel.Click += RearBladePWMMinUpLabel_Click;
             // 
             // RearBladePWMMinUp
             // 

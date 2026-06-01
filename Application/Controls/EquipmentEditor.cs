@@ -390,25 +390,5 @@ namespace AgGrade.Controls
         {
             OnApplySettings?.Invoke();
         }
-
-        private void FrontPanMaxFillDepthUnitsLabel_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void tabPage1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void RearBladePWMMinUpLabel_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void FrontPanWidthLabel_Click(object sender, EventArgs e)
-        {
-
-        }
     }
 }
