@@ -20,6 +20,7 @@ namespace AgGrade.Controls
     {
         public enum LedState
         {
+            OKFlash,
             OK,
             Error,
             Disabled,
@@ -83,6 +84,17 @@ namespace AgGrade.Controls
                         if (On)
                         {
                             newImage = Resources.led_red_24px;
+                        }
+                        else
+                        {
+                            newImage = Resources.led_off_24px;
+                        }
+                        break;
+
+                    case LedState.OKFlash:
+                        if (On)
+                        {
+                            newImage = Resources.led_green_24px;
                         }
                         else
                         {
@@ -230,7 +242,7 @@ namespace AgGrade.Controls
         }
 
         /// <summary>
-        /// Flash error LEDs
+        /// Flash LEDs
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -246,6 +258,15 @@ namespace AgGrade.Controls
             foreach (Led l in SupportedLeds)
             {
                 if (l.State == LedState.Error)
+                {
+                    if (l.On)
+                        l.On = false;
+                    else
+                        l.On = true;
+
+                    l.Update();
+                }
+                else if (l.State == LedState.OKFlash)
                 {
                     if (l.On)
                         l.On = false;

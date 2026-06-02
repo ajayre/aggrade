@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace AgGrade.Controller
 {
     /// <summary>
-    /// High-level GNSS quality state for a single receiver stream (e.g. parked precision capture).
+    /// High-level GNSS quality state for a single receiver stream.
     /// </summary>
     public enum GnssQualityState
     {
@@ -17,10 +17,18 @@ namespace AgGrade.Controller
         /// <summary>Fix is valid but not RTK fixed.</summary>
         NoRtk,
 
-        /// <summary>RTK fixed but dwell, speed, or horizontal jitter requirements are not met.</summary>
+        /// <summary>RTK fixed but continuous RTK dwell has not yet reached <see cref="GnssQualityThresholds.MinRtkFixedSeconds"/>.</summary>
         Unstable,
 
-        /// <summary>All quality criteria satisfied; safe to capture a position sample.</summary>
+        /// <summary>
+        /// RTK has been fixed long enough for normal operations (surveying, leveling, field work).
+        /// Does not require low horizontal jitter or being parked.
+        /// </summary>
+        Stable,
+
+        /// <summary>
+        /// Parked with low horizontal jitter for long enough; safe for benchmarks and calibration capture.
+        /// </summary>
         HighQuality,
     }
 
@@ -29,14 +37,15 @@ namespace AgGrade.Controller
     /// </summary>
     public sealed class GnssQualityThresholds
     {
-        /// <summary>Minimum continuous RTK-fixed time before high quality can be reached (seconds).</summary>
+        /// <summary>Minimum continuous RTK-fixed time before <see cref="GnssQualityState.Stable"/> can be reached (seconds).</summary>
         public double MinRtkFixedSeconds { get; set; } = 45.0;
 
-        /// <summary>Minimum time speed must remain at or below <see cref="MaxSpeedMph"/> (seconds).</summary>
+        /// <summary>Minimum time speed must remain at or below <see cref="MaxSpeedMph"/> before <see cref="GnssQualityState.HighQuality"/> (seconds).</summary>
         public double MinParkedSeconds { get; set; } = 5.0;
 
         /// <summary>
-        /// Minimum time horizontal jitter must remain at or below <see cref="MaxHorizontalJitterMm"/> (seconds).
+        /// Minimum time horizontal jitter must remain at or below <see cref="MaxHorizontalJitterMm"/>
+        /// before <see cref="GnssQualityState.HighQuality"/> (seconds).
         /// </summary>
         public double MinStableSeconds { get; set; } = 15.0;
 
@@ -57,7 +66,9 @@ namespace AgGrade.Controller
     }
 
     /// <summary>
-    /// Tracks RTK-fixed dwell, parked speed, and horizontal position stability for one GNSS receiver.
+    /// Tracks RTK convergence, operational stability, and parked precision quality for one GNSS receiver.
+    /// <see cref="GnssQualityState.Stable"/> is sufficient for surveying and leveling;
+    /// <see cref="GnssQualityState.HighQuality"/> is required for benchmarks and calibration.
     /// Create one instance per receiver (tractor, front pan, rear pan). Does not use GNSS heading.
     /// </summary>
     public sealed class GnssQualityMonitor
@@ -113,8 +124,20 @@ namespace AgGrade.Controller
         /// <summary>Current quality state from the most recent <see cref="Update"/>.</summary>
         public GnssQualityState State { get; private set; } = GnssQualityState.NoData;
 
+        /// <summary>
+        /// Raised when <see cref="State"/> changes. Arguments are (previousState, newState).
+        /// </summary>
+        public event Action<GnssQualityState, GnssQualityState>? StateChanged;
+
         /// <summary>True when <see cref="State"/> is <see cref="GnssQualityState.HighQuality"/>.</summary>
         public bool IsReadyToCapture => State == GnssQualityState.HighQuality;
+
+        /// <summary>
+        /// True when <see cref="State"/> is <see cref="GnssQualityState.Stable"/> or
+        /// <see cref="GnssQualityState.HighQuality"/> (RTK converged for field operations).
+        /// </summary>
+        public bool IsStableForOperations =>
+            State == GnssQualityState.Stable || State == GnssQualityState.HighQuality;
 
         /// <summary>Ground speed from the last update (mph); not derived from heading.</summary>
         public double CurrentSpeedMph { get; private set; }
@@ -131,7 +154,7 @@ namespace AgGrade.Controller
         /// <summary>Seconds speed has been at or below <see cref="GnssQualityThresholds.MaxSpeedMph"/>.</summary>
         public double ParkedDwellSeconds { get; private set; }
 
-        /// <summary>Seconds horizontal jitter has been at or below the jitter threshold.</summary>
+        /// <summary>Seconds horizontal jitter has been at or below the jitter threshold (counts toward <see cref="GnssQualityState.HighQuality"/>).</summary>
         public double StableDwellSeconds { get; private set; }
 
         /// <summary>Number of RTK-fixed position samples in the rolling window.</summary>
@@ -155,7 +178,7 @@ namespace AgGrade.Controller
             ParkedDwellSeconds = 0.0;
             StableDwellSeconds = 0.0;
             RtkSampleCount = 0;
-            State = GnssQualityState.NoData;
+            SetState(GnssQualityState.NoData);
         }
 
         /// <summary>
@@ -179,7 +202,7 @@ namespace AgGrade.Controller
                 _samples.Clear();
                 RecomputeJitter();
                 UpdateDwellSeconds(now);
-                State = GnssQualityState.NoFix;
+                SetState(GnssQualityState.NoFix);
                 return;
             }
 
@@ -197,7 +220,7 @@ namespace AgGrade.Controller
                 PruneSamples(now);
                 RecomputeJitter();
                 UpdateDwellSeconds(now);
-                State = GnssQualityState.NoRtk;
+                SetState(GnssQualityState.NoRtk);
                 return;
             }
 
@@ -217,7 +240,21 @@ namespace AgGrade.Controller
             UpdateStableDwell(now);
             UpdateDwellSeconds(now);
 
-            State = EvaluateState();
+            SetState(EvaluateState());
+        }
+
+        /// <summary>
+        /// Assigns <see cref="State"/> and raises <see cref="StateChanged"/> when the value changes.
+        /// </summary>
+        /// <param name="newState">New quality state.</param>
+        private void SetState(GnssQualityState newState)
+        {
+            if (State == newState)
+                return;
+
+            GnssQualityState previousState = State;
+            State = newState;
+            StateChanged?.Invoke(previousState, newState);
         }
 
         /// <summary>
@@ -377,7 +414,8 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
-        /// Starts or clears the stable jitter dwell anchor from <see cref="HorizontalJitterMm"/>.
+        /// Starts or clears the low-jitter dwell anchor from <see cref="HorizontalJitterMm"/>
+        /// (required for <see cref="GnssQualityState.HighQuality"/>, not for <see cref="GnssQualityState.Stable"/>).
         /// </summary>
         /// <param name="now">Current local time.</param>
         private void UpdateStableDwell(DateTime now)
@@ -417,14 +455,16 @@ namespace AgGrade.Controller
             if (_rtkFixedSince == null)
                 return GnssQualityState.NoRtk;
 
-            bool rtkLongEnough = RtkFixedDwellSeconds >= _thresholds.MinRtkFixedSeconds;
-            bool parkedLongEnough = ParkedDwellSeconds >= _thresholds.MinParkedSeconds;
-            bool stableLongEnough = StableDwellSeconds >= _thresholds.MinStableSeconds;
+            if (RtkFixedDwellSeconds < _thresholds.MinRtkFixedSeconds)
+                return GnssQualityState.Unstable;
 
-            if (rtkLongEnough && parkedLongEnough && stableLongEnough)
+            bool parkedLongEnough = ParkedDwellSeconds >= _thresholds.MinParkedSeconds;
+            bool lowJitterLongEnough = StableDwellSeconds >= _thresholds.MinStableSeconds;
+
+            if (parkedLongEnough && lowJitterLongEnough)
                 return GnssQualityState.HighQuality;
 
-            return GnssQualityState.Unstable;
+            return GnssQualityState.Stable;
         }
 
         /// <summary>

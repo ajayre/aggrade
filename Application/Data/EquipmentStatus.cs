@@ -67,6 +67,9 @@ namespace AgGrade.Data
         public GNSSFix TractorFix;
         public PanStatus FrontPan;
         public PanStatus RearPan;
+        public GnssQualityState TractorFixQuality;
+        public GnssQualityState FrontPanFixQuality;
+        public GnssQualityState RearPanFixQuality;
 
         public EquipmentStatus
             (
@@ -76,6 +79,10 @@ namespace AgGrade.Data
             TractorFix = new GNSSFix();
             FrontPan = new PanStatus();
             RearPan = new PanStatus();
+
+            TractorFixQuality = GnssQualityState.NoData;
+            FrontPanFixQuality = GnssQualityState.NoData;
+            RearPanFixQuality = GnssQualityState.NoData;
         }
     }
 }

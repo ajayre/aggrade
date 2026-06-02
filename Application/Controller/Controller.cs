@@ -108,6 +108,11 @@ namespace AgGrade.Controller
         public event BladeJogged OnFrontBladeJogged = null;
         public event BladeJogged OnRearBladeJogged = null;
 
+        public delegate void GnssStateChanged(GnssQualityState State);
+        public event GnssStateChanged OnTractorGnssStateChanged = null;
+        public event GnssStateChanged OnFrontGnssStateChanged = null;
+        public event GnssStateChanged OnRearGnssStateChanged = null;
+
         // time between transmit of pings in milliseconds
         private const int PING_PERIOD_MS = 1000;
 
@@ -172,9 +177,54 @@ namespace AgGrade.Controller
         private int MagneticDeclinationDegrees;
         private uint MagneticDeclinationMinutes;
         private EquipmentSettings CurrentEquipmentSettings = new EquipmentSettings();
+        private GnssQualityMonitor TractorQualityMonitor = new GnssQualityMonitor();
+        private GnssQualityMonitor FrontQualityMonitor = new GnssQualityMonitor();
+        private GnssQualityMonitor RearQualityMonitor = new GnssQualityMonitor();
 
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public OGController
+            (
+            )
+        {
+            TractorQualityMonitor.StateChanged += TractorQualityMonitor_StateChanged;
+            FrontQualityMonitor.StateChanged += FrontQualityMonitor_StateChanged;
+            RearQualityMonitor.StateChanged += RearQualityMonitor_StateChanged;
+        }
+
+        /// <summary>
+        /// Called when the quality of the rear GNSS fix changes
+        /// </summary>
+        /// <param name="PreviousState">The state before the change</param>
+        /// <param name="NewState">The state after the change</param>
+        private void RearQualityMonitor_StateChanged(GnssQualityState PreviousState, GnssQualityState NewState)
+        {
+            OnRearGnssStateChanged?.Invoke(NewState);
+        }
+
+        /// <summary>
+        /// Called when the quality of the front GNSS fix changes
+        /// </summary>
+        /// <param name="PreviousState">The state before the change</param>
+        /// <param name="NewState">The state after the change</param>
+        private void FrontQualityMonitor_StateChanged(GnssQualityState PreviousState, GnssQualityState NewState)
+        {
+            OnFrontGnssStateChanged?.Invoke(NewState);
+        }
+
+        /// <summary>
+        /// Called when the quality of the tractor GNSS fix changes
+        /// </summary>
+        /// <param name="PreviousState">The state before the change</param>
+        /// <param name="NewState">The state after the change</param>
+        private void TractorQualityMonitor_StateChanged(GnssQualityState PreviousState, GnssQualityState NewState)
+        {
+            OnTractorGnssStateChanged?.Invoke(NewState);
+        }
 
         /// <summary>
         /// Connect to controller
@@ -207,6 +257,10 @@ namespace AgGrade.Controller
 
             LastRxPingTime = DateTime.Now;
             _IsControllerFound = false;
+
+            TractorQualityMonitor.Reset();
+            FrontQualityMonitor.Reset();
+            RearQualityMonitor.Reset();
 
             WorkThreadCancellationRequested = false;
             ReceiveThread = new Thread(ReceiveThread_DoWork)
@@ -255,6 +309,10 @@ namespace AgGrade.Controller
                 ControllerChannel.Close();
                 ControllerChannel = null;
             }
+
+            TractorQualityMonitor.Reset();
+            FrontQualityMonitor.Reset();
+            RearQualityMonitor.Reset();
         }
 
         /// <summary>
@@ -621,6 +679,7 @@ namespace AgGrade.Controller
                         CurrentEquipmentSettings.TractorAntennaLeftOffsetMm,
                         CurrentEquipmentSettings.TractorAntennaForwardOffsetMm);
                     TractorLocationDirty = true;
+                    if (TractorFix != null) TractorQualityMonitor.Update(TractorFix);
                     break;
 
                 case PGNValues.PGN_FRONT_NMEA:
@@ -634,6 +693,7 @@ namespace AgGrade.Controller
                         0,
                         0);
                     FrontLocationDirty = true;
+                    if (FrontFix != null) FrontQualityMonitor.Update(FrontFix);
                     break;
 
                 case PGNValues.PGN_REAR_NMEA:
@@ -647,6 +707,7 @@ namespace AgGrade.Controller
                         0,
                         0);
                     RearLocationDirty = true;
+                    if (RearFix != null) RearQualityMonitor.Update(RearFix);
                     break;
 
                 case PGNValues.PGN_ONBOARD_TRACTOR_IMU:

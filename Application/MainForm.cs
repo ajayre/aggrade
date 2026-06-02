@@ -1239,6 +1239,10 @@ namespace AgGrade
             Controller.OnFrontLocationChanged += Controller_OnFrontLocationChanged;
             Controller.OnRearLocationChanged += Controller_OnRearLocationChanged;
 
+            Controller.OnTractorGnssStateChanged += Controller_OnTractorGnssStateChanged;
+            Controller.OnFrontGnssStateChanged += Controller_OnFrontGnssStateChanged;
+            Controller.OnRearGnssStateChanged += Controller_OnRearGnssStateChanged;
+
             Controller.OnTractorIMUChanged += Controller_OnTractorIMUChanged;
             Controller.OnFrontIMUChanged += Controller_OnFrontIMUChanged;
             Controller.OnFrontApronIMUChanged += Controller_OnFrontApronIMUChanged;
@@ -1311,6 +1315,33 @@ namespace AgGrade
             // get previous loads in case the application crashed during cutting or filling
             CurrentEquipmentStatus.FrontPan.LoadLCY = Properties.Settings.Default.FrontLoadLCY;
             CurrentEquipmentStatus.RearPan.LoadLCY = Properties.Settings.Default.RearLoadLCY;
+        }
+
+        /// <summary>
+        /// Called when the GNSS quality changed for the tractor
+        /// </summary>
+        /// <param name="State">New fix quality</param>
+        private void Controller_OnTractorGnssStateChanged(GnssQualityState State)
+        {
+            CurrentEquipmentStatus.TractorFixQuality = State;
+        }
+
+        /// <summary>
+        /// Called when the GNSS quality changed for the rear scraper
+        /// </summary>
+        /// <param name="State">New fix quality</param>
+        private void Controller_OnRearGnssStateChanged(GnssQualityState State)
+        {
+            CurrentEquipmentStatus.RearPanFixQuality = State;
+        }
+
+        /// <summary>
+        /// Called when the GNSS quality changed for the front scraper
+        /// </summary>
+        /// <param name="State">New fix quality</param>
+        private void Controller_OnFrontGnssStateChanged(GnssQualityState State)
+        {
+            CurrentEquipmentStatus.FrontPanFixQuality = State;
         }
 
         /// <summary>
@@ -2154,39 +2185,52 @@ namespace AgGrade
         }
 
         /// <summary>
+        /// Updates a single RTK LED
+        /// </summary>
+        /// <param name="QualityState">Quality of GNSS fix</param>
+        /// <param name="Led">LED to update</param>
+        private void UpdateRTKLed
+            (
+            GnssQualityState QualityState,
+            StatusBar.Leds Led
+            )
+        {
+            switch (QualityState)
+            {
+                case GnssQualityState.NoData:
+                    StatusBar.SetLedState(Led, StatusBar.LedState.Error);
+                    break;
+
+                case GnssQualityState.NoRtk:
+                    StatusBar.SetLedState(Led, StatusBar.LedState.Error);
+                    break;
+
+                case GnssQualityState.Unstable:
+                    StatusBar.SetLedState(Led, StatusBar.LedState.Warning);
+                    break;
+
+                case GnssQualityState.Stable:
+                    StatusBar.SetLedState(Led, StatusBar.LedState.OKFlash);
+                    break;
+
+                case GnssQualityState.HighQuality:
+                    StatusBar.SetLedState(Led, StatusBar.LedState.OK);
+                    break;
+            }
+        }
+
+        /// <summary>
         /// Updates the RTK LEDs based on if they have been found or not
         /// </summary>
         private void UpdateRTKLeds
             (
             )
         {
-            if (CurrentEquipmentStatus.TractorFix.RTK == RTKStatus.Fix)
-            {
-                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.OK);
-            }
-            else if (CurrentEquipmentStatus.TractorFix.RTK == RTKStatus.Float)
-            {
-                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Warning);
-            }
-            else
-            {
-                StatusBar.SetLedState(StatusBar.Leds.TractorRTK, StatusBar.LedState.Error);
-            }
+            UpdateRTKLed(CurrentEquipmentStatus.TractorFixQuality, StatusBar.Leds.TractorRTK);
 
             if (CurrentEquipmentSettings.FrontPan.Equipped)
             {
-                if (CurrentEquipmentStatus.FrontPan.Fix.RTK == RTKStatus.Fix)
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.OK);
-                }
-                else if (CurrentEquipmentStatus.FrontPan.Fix.RTK == RTKStatus.Float)
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Warning);
-                }
-                else
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.FrontRTK, StatusBar.LedState.Error);
-                }
+                UpdateRTKLed(CurrentEquipmentStatus.FrontPanFixQuality, StatusBar.Leds.FrontRTK);
             }
             else
             {
@@ -2195,18 +2239,7 @@ namespace AgGrade
 
             if (CurrentEquipmentSettings.RearPan.Equipped)
             {
-                if (CurrentEquipmentStatus.RearPan.Fix.RTK == RTKStatus.Fix)
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.OK);
-                }
-                else if (CurrentEquipmentStatus.RearPan.Fix.RTK == RTKStatus.Float)
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Warning);
-                }
-                else
-                {
-                    StatusBar.SetLedState(StatusBar.Leds.RearRTK, StatusBar.LedState.Error);
-                }
+                UpdateRTKLed(CurrentEquipmentStatus.RearPanFixQuality, StatusBar.Leds.RearRTK);
             }
             else
             {
