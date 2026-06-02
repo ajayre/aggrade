@@ -184,6 +184,26 @@ namespace AgGrade.Controller
         private bool _IsControllerFound;
         public bool IsControllerFound { get { return _IsControllerFound; } }
 
+        /// <summary>Latest GNSS quality state for the tractor receiver.</summary>
+        public GnssQualityState TractorGnssQualityState => TractorQualityMonitor.State;
+
+        /// <summary>Latest GNSS quality state for the front pan receiver.</summary>
+        public GnssQualityState FrontGnssQualityState => FrontQualityMonitor.State;
+
+        /// <summary>Latest GNSS quality state for the rear pan receiver.</summary>
+        public GnssQualityState RearGnssQualityState => RearQualityMonitor.State;
+
+        /// <summary>
+        /// Median tractor position from the quality monitor when state is <see cref="GnssQualityState.HighQuality"/>.
+        /// </summary>
+        /// <param name="latitude">Median latitude when the method returns true.</param>
+        /// <param name="longitude">Median longitude when the method returns true.</param>
+        /// <returns>True when a high-quality capture position is available.</returns>
+        public bool TryGetTractorHighQualityPosition(out double latitude, out double longitude)
+        {
+            return TractorQualityMonitor.TryGetHighQualityPosition(out latitude, out longitude);
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -258,9 +278,7 @@ namespace AgGrade.Controller
             LastRxPingTime = DateTime.Now;
             _IsControllerFound = false;
 
-            TractorQualityMonitor.Reset();
-            FrontQualityMonitor.Reset();
-            RearQualityMonitor.Reset();
+            ResetQualityMonitors();
 
             WorkThreadCancellationRequested = false;
             ReceiveThread = new Thread(ReceiveThread_DoWork)
@@ -310,6 +328,14 @@ namespace AgGrade.Controller
                 ControllerChannel = null;
             }
 
+            ResetQualityMonitors();
+        }
+
+        /// <summary>
+        /// Clears GNSS quality history so RTK must re-converge after connect or link loss.
+        /// </summary>
+        private void ResetQualityMonitors()
+        {
             TractorQualityMonitor.Reset();
             FrontQualityMonitor.Reset();
             RearQualityMonitor.Reset();
@@ -503,6 +529,7 @@ namespace AgGrade.Controller
                 if ((DateTime.Now >= LastRxPingTime.AddMilliseconds(PING_TIMEOUT_PERIOD_MS)) && _IsControllerFound)
                 {
                     _IsControllerFound = false;
+                    ResetQualityMonitors();
                     OnControllerLost?.Invoke();
                 }
             }

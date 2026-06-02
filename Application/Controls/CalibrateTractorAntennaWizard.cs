@@ -1,4 +1,5 @@
 ﻿using AgGrade.Data;
+using AgGrade.Controller;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -101,21 +102,12 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void CapturePose1Btn_Click(object sender, EventArgs e)
         {
-            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentStatus.TractorFix.IsValid == true))
-            {
-                if (!CurrentEquipmentStatus.TractorFix.HasRTK)
-                {
-                    MessageBox.Show("No RTK obtained", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
+            if (!TryCapturePose(out Pose1Latitude, out Pose1Longitude, out Pose1Heading))
+                return;
 
-                Pose1Latitude = CurrentEquipmentStatus.TractorFix.Latitude;
-                Pose1Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
-                Pose1Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;
-                Pose1Valid = true;
-
-                CapturePose1Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-                CapturePose2Btn.ForeColor = Color.White;
-            }
+            Pose1Valid = true;
+            CapturePose1Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+            CapturePose2Btn.ForeColor = Color.White;
         }
 
         /// <summary>
@@ -125,21 +117,58 @@ namespace AgGrade.Controls
         /// <param name="e"></param>
         private void CapturePose2Btn_Click(object sender, EventArgs e)
         {
-            if ((CurrentEquipmentStatus != null) && (CurrentEquipmentStatus.TractorFix.IsValid == true))
+            if (!TryCapturePose(out Pose2Latitude, out Pose2Longitude, out Pose2Heading))
+                return;
+
+            Pose2Valid = true;
+            CapturePose2Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
+            CapturePose2Btn.ForeColor = Color.White;
+        }
+
+        /// <summary>
+        /// Captures a calibration pose when GNSS is high quality and a settled position is available.
+        /// </summary>
+        /// <param name="latitude">Captured latitude.</param>
+        /// <param name="longitude">Captured longitude.</param>
+        /// <param name="heading">Captured heading in degrees.</param>
+        /// <returns>True when the pose was captured.</returns>
+        private bool TryCapturePose(out double latitude, out double longitude, out double heading)
+        {
+            latitude = 0.0;
+            longitude = 0.0;
+            heading = 0.0;
+
+            if (CurrentEquipmentStatus == null)
+                return false;
+
+            if (!CurrentEquipmentStatus.TractorFix.IsValid)
             {
-                if (!CurrentEquipmentStatus.TractorFix.HasRTK)
-                {
-                    MessageBox.Show("No RTK obtained", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
-
-                Pose2Latitude = CurrentEquipmentStatus.TractorFix.Latitude;
-                Pose2Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
-                Pose2Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;
-                Pose2Valid = true;
-
-                CapturePose2Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-                CapturePose2Btn.ForeColor = Color.White;
+                MessageBox.Show("No valid tractor location", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                return false;
             }
+
+            if (CurrentEquipmentStatus.TractorFixQuality != GnssQualityState.HighQuality)
+            {
+                MessageBox.Show(
+                    "GNSS is not settled yet. Wait until the tractor RTK LED is solid green before capturing a pose.",
+                    Application.ProductName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                return false;
+            }
+
+            if (Controller == null || !Controller.TryGetTractorHighQualityPosition(out latitude, out longitude))
+            {
+                MessageBox.Show(
+                    "Unable to obtain a settled GNSS position.",
+                    Application.ProductName,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Exclamation);
+                return false;
+            }
+
+            heading = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;
+            return true;
         }
 
         private void CalibrateTractorAntennaWizard_Load(object sender, EventArgs e)

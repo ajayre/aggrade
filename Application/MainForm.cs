@@ -305,6 +305,11 @@ namespace AgGrade
             CurrentEquipmentStatus.FrontPan.Fix.LastFixTime = DateTime.MinValue;
             CurrentEquipmentStatus.RearPan.Fix.LastFixTime = DateTime.MinValue;
 
+            // GNSS quality is unknown until RTK re-converges after reconnect
+            CurrentEquipmentStatus.TractorFixQuality = GnssQualityState.NoData;
+            CurrentEquipmentStatus.FrontPanFixQuality = GnssQualityState.NoData;
+            CurrentEquipmentStatus.RearPanFixQuality = GnssQualityState.NoData;
+
             // no longer have IMU
             CurrentEquipmentStatus.TractorIMU.CalibrationStatus = IMUValue.Calibration.None;
             CurrentEquipmentStatus.FrontPan.IMU.CalibrationStatus = IMUValue.Calibration.None;
@@ -1323,7 +1328,14 @@ namespace AgGrade
         /// <param name="State">New fix quality</param>
         private void Controller_OnTractorGnssStateChanged(GnssQualityState State)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnTractorGnssStateChanged, State);
+                return;
+            }
+
             CurrentEquipmentStatus.TractorFixQuality = State;
+            UpdateRTKLed(State, StatusBar.Leds.TractorRTK);
         }
 
         /// <summary>
@@ -1332,7 +1344,17 @@ namespace AgGrade
         /// <param name="State">New fix quality</param>
         private void Controller_OnRearGnssStateChanged(GnssQualityState State)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnRearGnssStateChanged, State);
+                return;
+            }
+
             CurrentEquipmentStatus.RearPanFixQuality = State;
+            if (CurrentEquipmentSettings.RearPan.Equipped)
+            {
+                UpdateRTKLed(State, StatusBar.Leds.RearRTK);
+            }
         }
 
         /// <summary>
@@ -1341,7 +1363,17 @@ namespace AgGrade
         /// <param name="State">New fix quality</param>
         private void Controller_OnFrontGnssStateChanged(GnssQualityState State)
         {
+            if (InvokeRequired)
+            {
+                BeginInvoke(Controller_OnFrontGnssStateChanged, State);
+                return;
+            }
+
             CurrentEquipmentStatus.FrontPanFixQuality = State;
+            if (CurrentEquipmentSettings.FrontPan.Equipped)
+            {
+                UpdateRTKLed(State, StatusBar.Leds.FrontRTK);
+            }
         }
 
         /// <summary>
@@ -1954,6 +1986,7 @@ namespace AgGrade
         private void Controller_OnTractorLocationChanged(GNSSFix Fix)
         {
             CurrentEquipmentStatus.TractorFix = Fix;
+            CurrentEquipmentStatus.TractorFixQuality = Controller.TractorGnssQualityState;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
@@ -1969,6 +2002,7 @@ namespace AgGrade
         private void Controller_OnRearLocationChanged(GNSSFix Fix)
         {
             CurrentEquipmentStatus.RearPan.Fix = Fix;
+            CurrentEquipmentStatus.RearPanFixQuality = Controller.RearGnssQualityState;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
@@ -1984,6 +2018,7 @@ namespace AgGrade
         private void Controller_OnFrontLocationChanged(GNSSFix Fix)
         {
             CurrentEquipmentStatus.FrontPan.Fix = Fix;
+            CurrentEquipmentStatus.FrontPanFixQuality = Controller.FrontGnssQualityState;
 
             GetStatusPage()?.ShowStatus(CurrentEquipmentStatus, CurrentAppSettings);
 
@@ -2198,9 +2233,7 @@ namespace AgGrade
             switch (QualityState)
             {
                 case GnssQualityState.NoData:
-                    StatusBar.SetLedState(Led, StatusBar.LedState.Error);
-                    break;
-
+                case GnssQualityState.NoFix:
                 case GnssQualityState.NoRtk:
                     StatusBar.SetLedState(Led, StatusBar.LedState.Error);
                     break;

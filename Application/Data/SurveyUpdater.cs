@@ -174,7 +174,9 @@ namespace AgGrade.Data
         {
             if ((Survey == null) || (CurrentEquipmentStatus == null) || (CurrentEquipmentSettings == null)) return;
 
-            if (!CurrentEquipmentStatus.TractorFix.HasRTK) return;
+            GnssQualityState quality = CurrentEquipmentStatus.TractorFixQuality;
+            if (quality != GnssQualityState.Stable && quality != GnssQualityState.HighQuality)
+                return;
 
             const double FEET_TO_METERS = 0.3048;
             const double MIN_POINT_SPACING_M = MIN_POINT_SPACING_FT * FEET_TO_METERS;
