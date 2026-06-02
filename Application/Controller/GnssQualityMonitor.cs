@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace AgGrade.Controller
 {
     /// <summary>
-    /// High-level readiness of a GNSS stream for precision capture (e.g. antenna calibration).
+    /// High-level GNSS quality state for a single receiver stream (e.g. parked precision capture).
     /// </summary>
-    public enum GnssSettleState
+    public enum GnssQualityState
     {
         /// <summary>No fix has been received yet.</summary>
         NoData,
@@ -20,16 +20,16 @@ namespace AgGrade.Controller
         /// <summary>RTK fixed but dwell, speed, or horizontal jitter requirements are not met.</summary>
         Unstable,
 
-        /// <summary>All settle criteria satisfied; safe to capture a position sample.</summary>
-        Settled,
+        /// <summary>All quality criteria satisfied; safe to capture a position sample.</summary>
+        HighQuality,
     }
 
     /// <summary>
-    /// Thresholds for <see cref="GnssSettleMonitor"/>. Tune per receiver or environment as needed.
+    /// Thresholds for <see cref="GnssQualityMonitor"/>. Tune per receiver or environment as needed.
     /// </summary>
-    public sealed class GnssSettleThresholds
+    public sealed class GnssQualityThresholds
     {
-        /// <summary>Minimum continuous RTK-fixed time before settle can complete (seconds).</summary>
+        /// <summary>Minimum continuous RTK-fixed time before high quality can be reached (seconds).</summary>
         public double MinRtkFixedSeconds { get; set; } = 45.0;
 
         /// <summary>Minimum time speed must remain at or below <see cref="MaxSpeedMph"/> (seconds).</summary>
@@ -60,9 +60,9 @@ namespace AgGrade.Controller
     /// Tracks RTK-fixed dwell, parked speed, and horizontal position stability for one GNSS receiver.
     /// Create one instance per receiver (tractor, front pan, rear pan). Does not use GNSS heading.
     /// </summary>
-    public sealed class GnssSettleMonitor
+    public sealed class GnssQualityMonitor
     {
-        private readonly GnssSettleThresholds _thresholds;
+        private readonly GnssQualityThresholds _thresholds;
         private readonly List<PositionSample> _samples = new List<PositionSample>();
 
         private DateTime? _lastValidFixTime;
@@ -76,30 +76,45 @@ namespace AgGrade.Controller
         private const double Wgs84F = 1.0 / 298.257223563;
         private static readonly double Wgs84E2 = 2 * Wgs84F - Wgs84F * Wgs84F;
 
+        /// <summary>
+        /// One RTK-fixed position observation stored for jitter and median capture.
+        /// </summary>
         private struct PositionSample
         {
+            /// <summary>Local time when the sample was recorded.</summary>
             public DateTime Time;
+
+            /// <summary>Latitude in decimal degrees (WGS-84).</summary>
             public double Latitude;
+
+            /// <summary>Longitude in decimal degrees (WGS-84).</summary>
             public double Longitude;
         }
 
-        public GnssSettleMonitor() : this(null)
+        /// <summary>
+        /// Creates a monitor with default <see cref="GnssQualityThresholds"/>.
+        /// </summary>
+        public GnssQualityMonitor() : this(null)
         {
         }
 
-        public GnssSettleMonitor(GnssSettleThresholds? thresholds)
+        /// <summary>
+        /// Creates a monitor with the given thresholds, or defaults when <paramref name="thresholds"/> is null.
+        /// </summary>
+        /// <param name="thresholds">Optional per-receiver or per-use-case thresholds.</param>
+        public GnssQualityMonitor(GnssQualityThresholds? thresholds)
         {
-            _thresholds = thresholds ?? new GnssSettleThresholds();
+            _thresholds = thresholds ?? new GnssQualityThresholds();
         }
 
         /// <summary>Configured thresholds (read-only reference).</summary>
-        public GnssSettleThresholds Thresholds => _thresholds;
+        public GnssQualityThresholds Thresholds => _thresholds;
 
-        /// <summary>Current settle state from the most recent <see cref="Update"/>.</summary>
-        public GnssSettleState State { get; private set; } = GnssSettleState.NoData;
+        /// <summary>Current quality state from the most recent <see cref="Update"/>.</summary>
+        public GnssQualityState State { get; private set; } = GnssQualityState.NoData;
 
-        /// <summary>True when <see cref="State"/> is <see cref="GnssSettleState.Settled"/>.</summary>
-        public bool IsReadyToCapture => State == GnssSettleState.Settled;
+        /// <summary>True when <see cref="State"/> is <see cref="GnssQualityState.HighQuality"/>.</summary>
+        public bool IsReadyToCapture => State == GnssQualityState.HighQuality;
 
         /// <summary>Ground speed from the last update (mph); not derived from heading.</summary>
         public double CurrentSpeedMph { get; private set; }
@@ -113,7 +128,7 @@ namespace AgGrade.Controller
         /// <summary>Seconds RTK has been continuously fixed with valid fixes arriving on time.</summary>
         public double RtkFixedDwellSeconds { get; private set; }
 
-        /// <summary>Seconds speed has been at or below <see cref="GnssSettleThresholds.MaxSpeedMph"/>.</summary>
+        /// <summary>Seconds speed has been at or below <see cref="GnssQualityThresholds.MaxSpeedMph"/>.</summary>
         public double ParkedDwellSeconds { get; private set; }
 
         /// <summary>Seconds horizontal jitter has been at or below the jitter threshold.</summary>
@@ -122,7 +137,9 @@ namespace AgGrade.Controller
         /// <summary>Number of RTK-fixed position samples in the rolling window.</summary>
         public int RtkSampleCount { get; private set; }
 
-        /// <summary>Clears history and dwell timers. State becomes <see cref="GnssSettleState.NoData"/>.</summary>
+        /// <summary>
+        /// Clears history and dwell timers. State becomes <see cref="GnssQualityState.NoData"/>.
+        /// </summary>
         public void Reset()
         {
             _samples.Clear();
@@ -138,12 +155,15 @@ namespace AgGrade.Controller
             ParkedDwellSeconds = 0.0;
             StableDwellSeconds = 0.0;
             RtkSampleCount = 0;
-            State = GnssSettleState.NoData;
+            State = GnssQualityState.NoData;
         }
 
         /// <summary>
         /// Ingests the latest fix. Call whenever a receiver publishes a new <see cref="GNSSFix"/>.
+        /// Updates <see cref="State"/>, dwell metrics, and the rolling sample buffer.
         /// </summary>
+        /// <param name="fix">Current fix from one GNSS receiver.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="fix"/> is null.</exception>
         public void Update(GNSSFix fix)
         {
             if (fix == null)
@@ -159,7 +179,7 @@ namespace AgGrade.Controller
                 _samples.Clear();
                 RecomputeJitter();
                 UpdateDwellSeconds(now);
-                State = GnssSettleState.NoFix;
+                State = GnssQualityState.NoFix;
                 return;
             }
 
@@ -177,7 +197,7 @@ namespace AgGrade.Controller
                 PruneSamples(now);
                 RecomputeJitter();
                 UpdateDwellSeconds(now);
-                State = GnssSettleState.NoRtk;
+                State = GnssQualityState.NoRtk;
                 return;
             }
 
@@ -197,14 +217,18 @@ namespace AgGrade.Controller
             UpdateStableDwell(now);
             UpdateDwellSeconds(now);
 
-            State = EvaluateState(now);
+            State = EvaluateState();
         }
 
         /// <summary>
         /// Median latitude/longitude of RTK-fixed samples in the rolling window.
-        /// Returns false unless <see cref="IsReadyToCapture"/> is true and at least one sample exists.
         /// </summary>
-        public bool TryGetSettledPosition(out double latitude, out double longitude)
+        /// <param name="latitude">Median latitude when the method returns true.</param>
+        /// <param name="longitude">Median longitude when the method returns true.</param>
+        /// <returns>
+        /// True when <see cref="IsReadyToCapture"/> is true and at least one sample exists; otherwise false.
+        /// </returns>
+        public bool TryGetHighQualityPosition(out double latitude, out double longitude)
         {
             latitude = 0.0;
             longitude = 0.0;
@@ -225,6 +249,11 @@ namespace AgGrade.Controller
             return true;
         }
 
+        /// <summary>
+        /// Returns true if the time since the last valid fix exceeds <see cref="GnssQualityThresholds.MaxFixGapMs"/>.
+        /// </summary>
+        /// <param name="now">Current local time.</param>
+        /// <returns>True when a fix-gap should reset continuity timers.</returns>
         private bool HasFixGap(DateTime now)
         {
             if (_lastValidFixTime == null)
@@ -233,6 +262,9 @@ namespace AgGrade.Controller
             return (now - _lastValidFixTime.Value).TotalMilliseconds > _thresholds.MaxFixGapMs;
         }
 
+        /// <summary>
+        /// Resets RTK, parked, and stable dwell anchors after invalid data or a fix gap.
+        /// </summary>
         private void ClearContinuityTimers()
         {
             _rtkFixedSince = null;
@@ -240,6 +272,10 @@ namespace AgGrade.Controller
             _stableSince = null;
         }
 
+        /// <summary>
+        /// Removes samples older than <see cref="GnssQualityThresholds.SampleWindowSeconds"/>.
+        /// </summary>
+        /// <param name="now">Current local time used as the window end.</param>
         private void PruneSamples(DateTime now)
         {
             double windowSeconds = _thresholds.SampleWindowSeconds;
@@ -265,6 +301,10 @@ namespace AgGrade.Controller
                 _samples.RemoveRange(writeIndex, _samples.Count - writeIndex);
         }
 
+        /// <summary>
+        /// Recomputes <see cref="HorizontalJitterMm"/> and <see cref="RtkSampleCount"/> from the rolling buffer.
+        /// Jitter is the maximum horizontal distance (mm) from the sample mean in a local East/North plane.
+        /// </summary>
         private void RecomputeJitter()
         {
             RtkSampleCount = _samples.Count;
@@ -319,6 +359,10 @@ namespace AgGrade.Controller
             HorizontalJitterMm = maxRadiusMm;
         }
 
+        /// <summary>
+        /// Starts or clears the parked dwell anchor from <see cref="CurrentSpeedMph"/>.
+        /// </summary>
+        /// <param name="now">Current local time.</param>
         private void UpdateParkedDwell(DateTime now)
         {
             if (CurrentSpeedMph <= _thresholds.MaxSpeedMph)
@@ -332,6 +376,10 @@ namespace AgGrade.Controller
             }
         }
 
+        /// <summary>
+        /// Starts or clears the stable jitter dwell anchor from <see cref="HorizontalJitterMm"/>.
+        /// </summary>
+        /// <param name="now">Current local time.</param>
         private void UpdateStableDwell(DateTime now)
         {
             bool jitterOk = RtkSampleCount >= 2 && HorizontalJitterMm <= _thresholds.MaxHorizontalJitterMm;
@@ -346,6 +394,10 @@ namespace AgGrade.Controller
             }
         }
 
+        /// <summary>
+        /// Refreshes public dwell-second properties from internal anchors and <paramref name="now"/>.
+        /// </summary>
+        /// <param name="now">Current local time.</param>
         private void UpdateDwellSeconds(DateTime now)
         {
             RtkFixedDwellSeconds = ElapsedSeconds(_rtkFixedSince, now);
@@ -353,24 +405,34 @@ namespace AgGrade.Controller
             StableDwellSeconds = ElapsedSeconds(_stableSince, now);
         }
 
-        private GnssSettleState EvaluateState(DateTime now)
+        /// <summary>
+        /// Maps current dwell metrics and anchors to <see cref="GnssQualityState"/>.
+        /// </summary>
+        /// <returns>The quality state after the latest <see cref="Update"/>.</returns>
+        private GnssQualityState EvaluateState()
         {
             if (!_hasReceivedFix)
-                return GnssSettleState.NoData;
+                return GnssQualityState.NoData;
 
             if (_rtkFixedSince == null)
-                return GnssSettleState.NoRtk;
+                return GnssQualityState.NoRtk;
 
             bool rtkLongEnough = RtkFixedDwellSeconds >= _thresholds.MinRtkFixedSeconds;
             bool parkedLongEnough = ParkedDwellSeconds >= _thresholds.MinParkedSeconds;
             bool stableLongEnough = StableDwellSeconds >= _thresholds.MinStableSeconds;
 
             if (rtkLongEnough && parkedLongEnough && stableLongEnough)
-                return GnssSettleState.Settled;
+                return GnssQualityState.HighQuality;
 
-            return GnssSettleState.Unstable;
+            return GnssQualityState.Unstable;
         }
 
+        /// <summary>
+        /// Elapsed seconds from <paramref name="since"/> to <paramref name="now"/>, or zero when <paramref name="since"/> is null.
+        /// </summary>
+        /// <param name="since">Start of an interval, or null if the interval is not active.</param>
+        /// <param name="now">End of the interval.</param>
+        /// <returns>Non-negative elapsed seconds.</returns>
         private static double ElapsedSeconds(DateTime? since, DateTime now)
         {
             if (since == null)
@@ -380,6 +442,11 @@ namespace AgGrade.Controller
             return seconds < 0.0 ? 0.0 : seconds;
         }
 
+        /// <summary>
+        /// Computes the median of a list of values (average of two middle values when count is even).
+        /// </summary>
+        /// <param name="values">Values to sort in place and summarize.</param>
+        /// <returns>Median value, or 0 when the list is empty.</returns>
         private static double Median(List<double> values)
         {
             values.Sort();
@@ -394,6 +461,16 @@ namespace AgGrade.Controller
             return (values[mid - 1] + values[mid]) / 2.0;
         }
 
+        /// <summary>
+        /// Converts WGS-84 lat/lon to local East/North offsets in millimeters about a reference point.
+        /// Uses the same ellipsoid model as <c>TractorAntennaFinder</c>.
+        /// </summary>
+        /// <param name="latDeg">Point latitude (degrees).</param>
+        /// <param name="lonDeg">Point longitude (degrees).</param>
+        /// <param name="lat0Deg">Reference latitude (degrees).</param>
+        /// <param name="lon0Deg">Reference longitude (degrees).</param>
+        /// <param name="eastMm">East offset from the reference (mm).</param>
+        /// <param name="northMm">North offset from the reference (mm).</param>
         private static void LatLonToLocalMm
             (
             double latDeg,
