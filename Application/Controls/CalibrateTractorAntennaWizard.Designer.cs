@@ -69,7 +69,7 @@
             Pages.Location = new Point(0, 0);
             Pages.Name = "Pages";
             Pages.SelectedIndex = 0;
-            Pages.Size = new Size(800, 462);
+            Pages.Size = new Size(955, 462);
             Pages.TabIndex = 0;
             Pages.SelectedIndexChanged += Pages_SelectedIndexChanged;
             // 
@@ -235,7 +235,7 @@
             tabPage2.Location = new Point(4, 24);
             tabPage2.Name = "tabPage2";
             tabPage2.Padding = new Padding(3);
-            tabPage2.Size = new Size(792, 434);
+            tabPage2.Size = new Size(947, 434);
             tabPage2.TabIndex = 1;
             tabPage2.Text = "tabPage2";
             // 
@@ -244,7 +244,7 @@
             textBox8.BackColor = SystemColors.Control;
             textBox8.BorderStyle = BorderStyle.None;
             textBox8.Font = new Font("Segoe UI", 16F);
-            textBox8.Location = new Point(6, 249);
+            textBox8.Location = new Point(6, 214);
             textBox8.Multiline = true;
             textBox8.Name = "textBox8";
             textBox8.ReadOnly = true;
@@ -258,7 +258,7 @@
             CapturePose2Btn.Font = new Font("Segoe UI", 18F);
             CapturePose2Btn.Image = Properties.Resources.location_48px;
             CapturePose2Btn.ImageAlign = ContentAlignment.MiddleLeft;
-            CapturePose2Btn.Location = new Point(33, 176);
+            CapturePose2Btn.Location = new Point(35, 144);
             CapturePose2Btn.Name = "CapturePose2Btn";
             CapturePose2Btn.Size = new Size(258, 60);
             CapturePose2Btn.TabIndex = 19;
@@ -277,7 +277,7 @@
             PageTwoInstructions.Multiline = true;
             PageTwoInstructions.Name = "PageTwoInstructions";
             PageTwoInstructions.ReadOnly = true;
-            PageTwoInstructions.Size = new Size(385, 159);
+            PageTwoInstructions.Size = new Size(540, 159);
             PageTwoInstructions.TabIndex = 18;
             PageTwoInstructions.TabStop = false;
             PageTwoInstructions.Text = "1. Drive tractor ahead, turn around and return to the pole\r\n2. Get D as close as possible to the value you measured\r\n3. Tap on button below\r\n";
@@ -286,7 +286,7 @@
             // 
             pictureBox2.Anchor = AnchorStyles.Top | AnchorStyles.Right;
             pictureBox2.Image = Properties.Resources.tractor_calib_down;
-            pictureBox2.Location = new Point(359, 6);
+            pictureBox2.Location = new Point(514, 6);
             pictureBox2.Name = "pictureBox2";
             pictureBox2.Size = new Size(427, 294);
             pictureBox2.TabIndex = 17;
@@ -340,7 +340,7 @@
             panel1.Dock = DockStyle.Bottom;
             panel1.Location = new Point(0, 462);
             panel1.Name = "panel1";
-            panel1.Size = new Size(800, 44);
+            panel1.Size = new Size(955, 44);
             panel1.TabIndex = 1;
             // 
             // ErrorMessage
@@ -362,7 +362,7 @@
             Controls.Add(Pages);
             Controls.Add(panel1);
             Name = "CalibrateTractorAntennaWizard";
-            Size = new Size(800, 506);
+            Size = new Size(955, 506);
             Load += CalibrateTractorAntennaWizard_Load;
             Pages.ResumeLayout(false);
             tabPage1.ResumeLayout(false);

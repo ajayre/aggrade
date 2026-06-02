@@ -28,11 +28,12 @@ namespace AgGrade.Controller
         public DateTime? LastFixTime;
 
         /// <summary>
-        /// Returns true if RTKType is Fix or Float, false otherwise.
+        /// Returns true if RTKType is Fix, false otherwise.
         /// </summary>
         public bool HasRTK
         {
-            get { return RTK == RTKStatus.Fix || RTK == RTKStatus.Float; }
+            //get { return RTK == RTKStatus.Fix || RTK == RTKStatus.Float; }
+            get { return RTK == RTKStatus.Fix; }
         }
 
         /// <summary>

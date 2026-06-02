@@ -103,6 +103,11 @@ namespace AgGrade.Controls
         {
             if ((CurrentEquipmentStatus != null) && (CurrentEquipmentStatus.TractorFix.IsValid == true))
             {
+                if (!CurrentEquipmentStatus.TractorFix.HasRTK)
+                {
+                    MessageBox.Show("No RTK obtained", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+
                 Pose1Latitude = CurrentEquipmentStatus.TractorFix.Latitude;
                 Pose1Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
                 Pose1Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;
@@ -122,6 +127,11 @@ namespace AgGrade.Controls
         {
             if ((CurrentEquipmentStatus != null) && (CurrentEquipmentStatus.TractorFix.IsValid == true))
             {
+                if (!CurrentEquipmentStatus.TractorFix.HasRTK)
+                {
+                    MessageBox.Show("No RTK obtained", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                }
+
                 Pose2Latitude = CurrentEquipmentStatus.TractorFix.Latitude;
                 Pose2Longitude = CurrentEquipmentStatus.TractorFix.Longitude;
                 Pose2Heading = CurrentEquipmentStatus.TractorFix.Vector.TrackTrueDeg;

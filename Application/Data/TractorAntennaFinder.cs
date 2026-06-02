@@ -52,20 +52,21 @@ namespace AgGrade.Data
             Rotation2D(-heading2Deg, out double r2_00, out double r2_01, out double r2_10, out double r2_11);
 
             // Pole-side hub offsets in tractor frame (X = right positive).
-            // At pose 1 the pole is to the right of the right hub (+T/2).
-            // After the 180° turn (pose 2) the same world side is the tractor's
-            // left, so the pole reference sits at -(T/2) in the new tractor frame.
-            // When D is known, the pole is D beyond the hub in each case.
-            double hAx = Tmm / 2.0;
+            // Pose 1 (rear view): the pole is to the driver's LEFT, so the reference
+            // point is at -(T/2) in the tractor frame.
+            // Pose 2 (front view, tractor reversed): the same world location is now to
+            // the driver's RIGHT, so the reference point is at +(T/2).
+            // When D is known, the pole is D beyond the respective hub in each case.
+            double hAx = -Tmm / 2.0;
             double hAy = 0.0;
-            double hBx = -Tmm / 2.0;
+            double hBx = Tmm / 2.0;
             double hBy = 0.0;
 
             if (Dmm.HasValue)
             {
                 double D = Dmm.Value;
-                hAx = Tmm / 2.0 + D;
-                hBx = -(Tmm / 2.0 + D);
+                hAx = -(Tmm / 2.0 + D);
+                hBx = Tmm / 2.0 + D;
             }
 
             double t1x = -(r1_00 * hAx + r1_01 * hAy);
