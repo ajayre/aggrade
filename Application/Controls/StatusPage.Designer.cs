@@ -118,6 +118,13 @@
             Pages = new TabControl();
             TractorPage = new TabPage();
             FrontPage = new TabPage();
+            groupBox6 = new GroupBox();
+            FrontPanApronAngle = new TextBox();
+            label79 = new Label();
+            label82 = new Label();
+            FrontPanBucketAngle = new TextBox();
+            label68 = new Label();
+            label71 = new Label();
             groupBox1 = new GroupBox();
             FrontPanBladeDirection = new TextBox();
             label63 = new Label();
@@ -129,6 +136,10 @@
             FrontPanBladePWM = new TextBox();
             label62 = new Label();
             RearPage = new TabPage();
+            groupBox7 = new GroupBox();
+            RearPanBucketAngle = new TextBox();
+            label90 = new Label();
+            label93 = new Label();
             groupBox2 = new GroupBox();
             RearPanBladeAuto = new TextBox();
             label60 = new Label();
@@ -192,30 +203,19 @@
             label76 = new Label();
             label77 = new Label();
             sectionTitle2 = new SectionTitle();
-            groupBox6 = new GroupBox();
-            groupBox7 = new GroupBox();
-            FrontPanBucketAngle = new TextBox();
-            label68 = new Label();
-            label71 = new Label();
-            FrontPanApronAngle = new TextBox();
-            label79 = new Label();
-            label82 = new Label();
-            RearPanBucketAngle = new TextBox();
-            label90 = new Label();
-            label93 = new Label();
             Pages.SuspendLayout();
             TractorPage.SuspendLayout();
             FrontPage.SuspendLayout();
+            groupBox6.SuspendLayout();
             groupBox1.SuspendLayout();
             RearPage.SuspendLayout();
+            groupBox7.SuspendLayout();
             groupBox2.SuspendLayout();
             Field.SuspendLayout();
             IMUPage.SuspendLayout();
             groupBox5.SuspendLayout();
             groupBox4.SuspendLayout();
             groupBox3.SuspendLayout();
-            groupBox6.SuspendLayout();
-            groupBox7.SuspendLayout();
             SuspendLayout();
             // 
             // label50
@@ -453,9 +453,9 @@
             TractorRTK.Font = new Font("Segoe UI", 14F);
             TractorRTK.Location = new Point(561, 6);
             TractorRTK.Name = "TractorRTK";
-            TractorRTK.PlaceholderText = "Float";
+            TractorRTK.PlaceholderText = "No Data";
             TractorRTK.ReadOnly = true;
-            TractorRTK.Size = new Size(91, 32);
+            TractorRTK.Size = new Size(125, 32);
             TractorRTK.TabIndex = 3;
             // 
             // label2
@@ -753,9 +753,9 @@
             FrontPanRTK.Font = new Font("Segoe UI", 14F);
             FrontPanRTK.Location = new Point(561, 6);
             FrontPanRTK.Name = "FrontPanRTK";
-            FrontPanRTK.PlaceholderText = "Float";
+            FrontPanRTK.PlaceholderText = "No Data";
             FrontPanRTK.ReadOnly = true;
-            FrontPanRTK.Size = new Size(91, 32);
+            FrontPanRTK.Size = new Size(125, 32);
             FrontPanRTK.TabIndex = 3;
             // 
             // label23
@@ -1053,9 +1053,9 @@
             RearPanRTK.Font = new Font("Segoe UI", 14F);
             RearPanRTK.Location = new Point(561, 6);
             RearPanRTK.Name = "RearPanRTK";
-            RearPanRTK.PlaceholderText = "Float";
+            RearPanRTK.PlaceholderText = "No Data";
             RearPanRTK.ReadOnly = true;
-            RearPanRTK.Size = new Size(91, 32);
+            RearPanRTK.Size = new Size(125, 32);
             RearPanRTK.TabIndex = 3;
             // 
             // label33
@@ -1179,6 +1179,82 @@
             FrontPage.Size = new Size(861, 478);
             FrontPage.TabIndex = 1;
             FrontPage.Text = "Front Pan";
+            // 
+            // groupBox6
+            // 
+            groupBox6.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox6.Controls.Add(FrontPanApronAngle);
+            groupBox6.Controls.Add(label79);
+            groupBox6.Controls.Add(label82);
+            groupBox6.Controls.Add(FrontPanBucketAngle);
+            groupBox6.Controls.Add(label68);
+            groupBox6.Controls.Add(label71);
+            groupBox6.Location = new Point(6, 351);
+            groupBox6.Name = "groupBox6";
+            groupBox6.Size = new Size(849, 121);
+            groupBox6.TabIndex = 34;
+            groupBox6.TabStop = false;
+            groupBox6.Text = "Actuators";
+            // 
+            // FrontPanApronAngle
+            // 
+            FrontPanApronAngle.Font = new Font("Segoe UI", 14F);
+            FrontPanApronAngle.Location = new Point(555, 27);
+            FrontPanApronAngle.Name = "FrontPanApronAngle";
+            FrontPanApronAngle.PlaceholderText = "179.123";
+            FrontPanApronAngle.ReadOnly = true;
+            FrontPanApronAngle.Size = new Size(91, 32);
+            FrontPanApronAngle.TabIndex = 26;
+            // 
+            // label79
+            // 
+            label79.AutoSize = true;
+            label79.Font = new Font("Segoe UI", 14F);
+            label79.Location = new Point(481, 30);
+            label79.Name = "label79";
+            label79.Size = new Size(68, 25);
+            label79.TabIndex = 25;
+            label79.Text = "Apron:";
+            // 
+            // label82
+            // 
+            label82.AutoSize = true;
+            label82.Font = new Font("Segoe UI", 14F);
+            label82.Location = new Point(652, 30);
+            label82.Name = "label82";
+            label82.Size = new Size(44, 25);
+            label82.TabIndex = 27;
+            label82.Text = "deg";
+            // 
+            // FrontPanBucketAngle
+            // 
+            FrontPanBucketAngle.Font = new Font("Segoe UI", 14F);
+            FrontPanBucketAngle.Location = new Point(102, 31);
+            FrontPanBucketAngle.Name = "FrontPanBucketAngle";
+            FrontPanBucketAngle.PlaceholderText = "179.123";
+            FrontPanBucketAngle.ReadOnly = true;
+            FrontPanBucketAngle.Size = new Size(91, 32);
+            FrontPanBucketAngle.TabIndex = 23;
+            // 
+            // label68
+            // 
+            label68.AutoSize = true;
+            label68.Font = new Font("Segoe UI", 14F);
+            label68.Location = new Point(24, 34);
+            label68.Name = "label68";
+            label68.Size = new Size(72, 25);
+            label68.TabIndex = 22;
+            label68.Text = "Bucket:";
+            // 
+            // label71
+            // 
+            label71.AutoSize = true;
+            label71.Font = new Font("Segoe UI", 14F);
+            label71.Location = new Point(199, 34);
+            label71.Name = "label71";
+            label71.Size = new Size(44, 25);
+            label71.TabIndex = 24;
+            label71.Text = "deg";
             // 
             // groupBox1
             // 
@@ -1330,6 +1406,49 @@
             RearPage.Size = new Size(861, 478);
             RearPage.TabIndex = 2;
             RearPage.Text = "Rear Pan";
+            // 
+            // groupBox7
+            // 
+            groupBox7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            groupBox7.Controls.Add(RearPanBucketAngle);
+            groupBox7.Controls.Add(label90);
+            groupBox7.Controls.Add(label93);
+            groupBox7.Location = new Point(6, 351);
+            groupBox7.Name = "groupBox7";
+            groupBox7.Size = new Size(849, 121);
+            groupBox7.TabIndex = 37;
+            groupBox7.TabStop = false;
+            groupBox7.Text = "Actuators";
+            // 
+            // RearPanBucketAngle
+            // 
+            RearPanBucketAngle.Font = new Font("Segoe UI", 14F);
+            RearPanBucketAngle.Location = new Point(102, 31);
+            RearPanBucketAngle.Name = "RearPanBucketAngle";
+            RearPanBucketAngle.PlaceholderText = "179.123";
+            RearPanBucketAngle.ReadOnly = true;
+            RearPanBucketAngle.Size = new Size(91, 32);
+            RearPanBucketAngle.TabIndex = 26;
+            // 
+            // label90
+            // 
+            label90.AutoSize = true;
+            label90.Font = new Font("Segoe UI", 14F);
+            label90.Location = new Point(24, 34);
+            label90.Name = "label90";
+            label90.Size = new Size(72, 25);
+            label90.TabIndex = 25;
+            label90.Text = "Bucket:";
+            // 
+            // label93
+            // 
+            label93.AutoSize = true;
+            label93.Font = new Font("Segoe UI", 14F);
+            label93.Location = new Point(199, 34);
+            label93.Name = "label93";
+            label93.Size = new Size(44, 25);
+            label93.TabIndex = 27;
+            label93.Text = "deg";
             // 
             // groupBox2
             // 
@@ -2019,125 +2138,6 @@
             sectionTitle2.TabIndex = 24;
             sectionTitle2.TitleText = "Live Status";
             // 
-            // groupBox6
-            // 
-            groupBox6.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox6.Controls.Add(FrontPanApronAngle);
-            groupBox6.Controls.Add(label79);
-            groupBox6.Controls.Add(label82);
-            groupBox6.Controls.Add(FrontPanBucketAngle);
-            groupBox6.Controls.Add(label68);
-            groupBox6.Controls.Add(label71);
-            groupBox6.Location = new Point(6, 351);
-            groupBox6.Name = "groupBox6";
-            groupBox6.Size = new Size(849, 121);
-            groupBox6.TabIndex = 34;
-            groupBox6.TabStop = false;
-            groupBox6.Text = "Actuators";
-            // 
-            // groupBox7
-            // 
-            groupBox7.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox7.Controls.Add(RearPanBucketAngle);
-            groupBox7.Controls.Add(label90);
-            groupBox7.Controls.Add(label93);
-            groupBox7.Location = new Point(6, 351);
-            groupBox7.Name = "groupBox7";
-            groupBox7.Size = new Size(849, 121);
-            groupBox7.TabIndex = 37;
-            groupBox7.TabStop = false;
-            groupBox7.Text = "Actuators";
-            // 
-            // FrontPanBucketAngle
-            // 
-            FrontPanBucketAngle.Font = new Font("Segoe UI", 14F);
-            FrontPanBucketAngle.Location = new Point(102, 31);
-            FrontPanBucketAngle.Name = "FrontPanBucketAngle";
-            FrontPanBucketAngle.PlaceholderText = "179.123";
-            FrontPanBucketAngle.ReadOnly = true;
-            FrontPanBucketAngle.Size = new Size(91, 32);
-            FrontPanBucketAngle.TabIndex = 23;
-            // 
-            // label68
-            // 
-            label68.AutoSize = true;
-            label68.Font = new Font("Segoe UI", 14F);
-            label68.Location = new Point(24, 34);
-            label68.Name = "label68";
-            label68.Size = new Size(72, 25);
-            label68.TabIndex = 22;
-            label68.Text = "Bucket:";
-            // 
-            // label71
-            // 
-            label71.AutoSize = true;
-            label71.Font = new Font("Segoe UI", 14F);
-            label71.Location = new Point(199, 34);
-            label71.Name = "label71";
-            label71.Size = new Size(44, 25);
-            label71.TabIndex = 24;
-            label71.Text = "deg";
-            // 
-            // FrontPanApronAngle
-            // 
-            FrontPanApronAngle.Font = new Font("Segoe UI", 14F);
-            FrontPanApronAngle.Location = new Point(555, 27);
-            FrontPanApronAngle.Name = "FrontPanApronAngle";
-            FrontPanApronAngle.PlaceholderText = "179.123";
-            FrontPanApronAngle.ReadOnly = true;
-            FrontPanApronAngle.Size = new Size(91, 32);
-            FrontPanApronAngle.TabIndex = 26;
-            // 
-            // label79
-            // 
-            label79.AutoSize = true;
-            label79.Font = new Font("Segoe UI", 14F);
-            label79.Location = new Point(481, 30);
-            label79.Name = "label79";
-            label79.Size = new Size(68, 25);
-            label79.TabIndex = 25;
-            label79.Text = "Apron:";
-            // 
-            // label82
-            // 
-            label82.AutoSize = true;
-            label82.Font = new Font("Segoe UI", 14F);
-            label82.Location = new Point(652, 30);
-            label82.Name = "label82";
-            label82.Size = new Size(44, 25);
-            label82.TabIndex = 27;
-            label82.Text = "deg";
-            // 
-            // RearPanBucketAngle
-            // 
-            RearPanBucketAngle.Font = new Font("Segoe UI", 14F);
-            RearPanBucketAngle.Location = new Point(102, 31);
-            RearPanBucketAngle.Name = "RearPanBucketAngle";
-            RearPanBucketAngle.PlaceholderText = "179.123";
-            RearPanBucketAngle.ReadOnly = true;
-            RearPanBucketAngle.Size = new Size(91, 32);
-            RearPanBucketAngle.TabIndex = 26;
-            // 
-            // label90
-            // 
-            label90.AutoSize = true;
-            label90.Font = new Font("Segoe UI", 14F);
-            label90.Location = new Point(24, 34);
-            label90.Name = "label90";
-            label90.Size = new Size(72, 25);
-            label90.TabIndex = 25;
-            label90.Text = "Bucket:";
-            // 
-            // label93
-            // 
-            label93.AutoSize = true;
-            label93.Font = new Font("Segoe UI", 14F);
-            label93.Location = new Point(199, 34);
-            label93.Name = "label93";
-            label93.Size = new Size(44, 25);
-            label93.TabIndex = 27;
-            label93.Text = "deg";
-            // 
             // StatusPage
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -2152,10 +2152,14 @@
             TractorPage.PerformLayout();
             FrontPage.ResumeLayout(false);
             FrontPage.PerformLayout();
+            groupBox6.ResumeLayout(false);
+            groupBox6.PerformLayout();
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             RearPage.ResumeLayout(false);
             RearPage.PerformLayout();
+            groupBox7.ResumeLayout(false);
+            groupBox7.PerformLayout();
             groupBox2.ResumeLayout(false);
             groupBox2.PerformLayout();
             Field.ResumeLayout(false);
@@ -2167,10 +2171,6 @@
             groupBox4.PerformLayout();
             groupBox3.ResumeLayout(false);
             groupBox3.PerformLayout();
-            groupBox6.ResumeLayout(false);
-            groupBox6.PerformLayout();
-            groupBox7.ResumeLayout(false);
-            groupBox7.PerformLayout();
             ResumeLayout(false);
         }
 

@@ -85,7 +85,7 @@ namespace AgGrade.Controls
 
             // Update Tractor fields
             UpdateLocationTextBox(TractorLocation, Status.TractorFix.Latitude, Status.TractorFix.Longitude, PreviousStatus == null || PreviousStatus.TractorFix.Latitude != Status.TractorFix.Latitude || PreviousStatus.TractorFix.Longitude != Status.TractorFix.Longitude);
-            UpdateRTKTextBox(TractorRTK, Status.TractorFix.RTK, PreviousStatus == null || PreviousStatus.TractorFix.RTK != Status.TractorFix.RTK);
+            UpdateRTKTextBox(TractorRTK, Status.TractorFixQuality, Status.TractorFix.RTK, PreviousStatus == null || PreviousStatus.TractorFixQuality != Status.TractorFixQuality || PreviousStatus.TractorFix.RTK != Status.TractorFix.RTK);
             UpdateTextBoxIfChanged(TractorPitch, FormatDouble(Status.TractorIMU.Pitch), PreviousStatus == null || PreviousStatus.TractorIMU.Pitch != Status.TractorIMU.Pitch);
             UpdateTextBoxIfChanged(TractorRoll, FormatDouble(Status.TractorIMU.Roll), PreviousStatus == null || PreviousStatus.TractorIMU.Roll != Status.TractorIMU.Roll);
             UpdateTextBoxIfChanged(TractorYawRate, FormatDouble(Status.TractorIMU.YawRate), PreviousStatus == null || PreviousStatus.TractorIMU.YawRate != Status.TractorIMU.YawRate);
@@ -97,7 +97,7 @@ namespace AgGrade.Controls
 
             // Update Front Pan fields
             UpdateLocationTextBox(FrontPanLocation, Status.FrontPan.Fix.Latitude, Status.FrontPan.Fix.Longitude, PreviousStatus == null || PreviousStatus.FrontPan.Fix.Latitude != Status.FrontPan.Fix.Latitude || PreviousStatus.FrontPan.Fix.Longitude != Status.FrontPan.Fix.Longitude);
-            UpdateRTKTextBox(FrontPanRTK, Status.FrontPan.Fix.RTK, PreviousStatus == null || PreviousStatus.FrontPan.Fix.RTK != Status.FrontPan.Fix.RTK);
+            UpdateRTKTextBox(FrontPanRTK, Status.FrontPanFixQuality, Status.FrontPan.Fix.RTK, PreviousStatus == null || PreviousStatus.FrontPanFixQuality != Status.FrontPanFixQuality || PreviousStatus.FrontPan.Fix.RTK != Status.FrontPan.Fix.RTK);
             UpdateTextBoxIfChanged(FrontPanPitch, FormatDouble(Status.FrontPan.IMU.Pitch), PreviousStatus == null || PreviousStatus.FrontPan.IMU.Pitch != Status.FrontPan.IMU.Pitch);
             UpdateTextBoxIfChanged(FrontPanRoll, FormatDouble(Status.FrontPan.IMU.Roll), PreviousStatus == null || PreviousStatus.FrontPan.IMU.Roll != Status.FrontPan.IMU.Roll);
             UpdateTextBoxIfChanged(FrontPanYawRate, FormatDouble(Status.FrontPan.IMU.YawRate), PreviousStatus == null || PreviousStatus.FrontPan.IMU.YawRate != Status.FrontPan.IMU.YawRate);
@@ -116,7 +116,7 @@ namespace AgGrade.Controls
 
             // Update Rear Pan fields
             UpdateLocationTextBox(RearPanLocation, Status.RearPan.Fix.Latitude, Status.RearPan.Fix.Longitude, PreviousStatus == null || PreviousStatus.RearPan.Fix.Latitude != Status.RearPan.Fix.Latitude || PreviousStatus.RearPan.Fix.Longitude != Status.RearPan.Fix.Longitude);
-            UpdateRTKTextBox(RearPanRTK, Status.RearPan.Fix.RTK, PreviousStatus == null || PreviousStatus.RearPan.Fix.RTK != Status.RearPan.Fix.RTK);
+            UpdateRTKTextBox(RearPanRTK, Status.RearPanFixQuality, Status.RearPan.Fix.RTK, PreviousStatus == null || PreviousStatus.RearPanFixQuality != Status.RearPanFixQuality || PreviousStatus.RearPan.Fix.RTK != Status.RearPan.Fix.RTK);
             UpdateTextBoxIfChanged(RearPanPitch, FormatDouble(Status.RearPan.IMU.Pitch), PreviousStatus == null || PreviousStatus.RearPan.IMU.Pitch != Status.RearPan.IMU.Pitch);
             UpdateTextBoxIfChanged(RearPanRoll, FormatDouble(Status.RearPan.IMU.Roll), PreviousStatus == null || PreviousStatus.RearPan.IMU.Roll != Status.RearPan.IMU.Roll);
             UpdateTextBoxIfChanged(RearPanYawRate, FormatDouble(Status.RearPan.IMU.YawRate), PreviousStatus == null || PreviousStatus.RearPan.IMU.YawRate != Status.RearPan.IMU.YawRate);
@@ -156,6 +156,9 @@ namespace AgGrade.Controls
             // Store current status for next comparison
             PreviousStatus = new EquipmentStatus
             {
+                TractorFixQuality = Status.TractorFixQuality,
+                FrontPanFixQuality = Status.FrontPanFixQuality,
+                RearPanFixQuality = Status.RearPanFixQuality,
                 TractorIMU = new IMUValue
                 {
                     Pitch = Status.TractorIMU.Pitch,
@@ -306,25 +309,53 @@ namespace AgGrade.Controls
         /// <summary>
         /// Updates RTK textbox with text and background color based on RTK status
         /// </summary>
-        private void UpdateRTKTextBox(TextBox textBox, RTKStatus rtkStatus, bool hasChanged)
+        private void UpdateRTKTextBox(TextBox textBox, GnssQualityState Quality, RTKStatus rtkStatus, bool hasChanged)
         {
             if (hasChanged)
             {
-                string rtkText = rtkStatus.ToString();
-                textBox.Text = rtkText;
-
-                // Set background color based on RTK status
-                switch (rtkStatus)
+                switch (Quality)
                 {
-                    case RTKStatus.None:
+                    case GnssQualityState.NoData:
+                        textBox.Text = "No Data";
                         textBox.BackColor = Color.Red;
                         textBox.ForeColor = Color.White;
                         break;
-                    case RTKStatus.Float:
+
+                    case GnssQualityState.NoFix:
+                        textBox.Text = "No Pos";
+                        textBox.BackColor = Color.Red;
+                        textBox.ForeColor = Color.White;
+                        break;
+
+                    case GnssQualityState.NoRtk:
+                        if (rtkStatus == RTKStatus.Float)
+                        {
+                            textBox.Text = "Float";
+                            textBox.BackColor = Color.Orange;
+                            textBox.ForeColor = Color.Black;
+                        }
+                        else
+                        {
+                            textBox.Text = "None";
+                            textBox.BackColor = Color.Red;
+                            textBox.ForeColor = Color.White;
+                        }
+                        break;
+
+                    case GnssQualityState.Unstable:
+                        textBox.Text = "Unstable";
                         textBox.BackColor = Color.Orange;
                         textBox.ForeColor = Color.Black;
                         break;
-                    case RTKStatus.Fix:
+
+                    case GnssQualityState.Stable:
+                        textBox.Text = "Stable";
+                        textBox.BackColor = Color.LightGreen;
+                        textBox.ForeColor = Color.Black;
+                        break;
+
+                    case GnssQualityState.HighQuality:
+                        textBox.Text = "High Quality";
                         textBox.BackColor = Color.Green;
                         textBox.ForeColor = Color.White;
                         break;
