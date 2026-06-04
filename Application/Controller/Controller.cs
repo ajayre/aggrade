@@ -1107,6 +1107,14 @@ namespace AgGrade.Controller
         }
 
         /// <summary>
+        /// Clears tractor GNSS quality history so positions must re-settle (e.g. after antenna offset change).
+        /// </summary>
+        public void ResetTractorGnssQualityMonitor()
+        {
+            TractorQualityMonitor.Reset();
+        }
+
+        /// <summary>
         /// Sends the tractor antenna location
         /// </summary>
         /// <param name="HeightMm">Height of antenna in mm</param>

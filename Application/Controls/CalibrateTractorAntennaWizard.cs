@@ -24,6 +24,9 @@ namespace AgGrade.Controls
         private double Pose2Heading;
         private int T;
         private int D;
+        private int SavedLeftOffsetMm;
+        private int SavedForwardOffsetMm;
+        private bool CalibrationCompleted;
 
         public CalibrateTractorAntennaWizard()
         {
@@ -80,6 +83,9 @@ namespace AgGrade.Controls
                             ResultMsg.Text = string.Format("Antenna offset is X = {0}mm, Y = {1}mm", (int)Offset.X, (int)Offset.Y);
                             CurrentEquipmentSettings.TractorAntennaLeftOffsetMm = (int)Offset.X;
                             CurrentEquipmentSettings.TractorAntennaForwardOffsetMm = (int)Offset.Y;
+                            CurrentEquipmentSettings.Save();
+                            CalibrationCompleted = true;
+                            SendTractorAntennaOffsetsToController((int)Offset.X, (int)Offset.Y);
                         }
                         else
                         {
@@ -107,7 +113,7 @@ namespace AgGrade.Controls
 
             Pose1Valid = true;
             CapturePose1Btn.BackColor = Color.FromArgb(0x36, 0x7C, 0x2B);
-            CapturePose2Btn.ForeColor = Color.White;
+            CapturePose1Btn.ForeColor = Color.White;
         }
 
         /// <summary>
@@ -150,7 +156,8 @@ namespace AgGrade.Controls
             if (CurrentEquipmentStatus.TractorFixQuality != GnssQualityState.HighQuality)
             {
                 MessageBox.Show(
-                    "GNSS is not settled yet. Wait until the tractor RTK LED is solid green before capturing a pose.",
+                    "GNSS is not settled yet. Wait until the tractor RTK LED is solid green before capturing a pose. " +
+                    "After opening this wizard the controller stops applying antenna offset, so GNSS must settle again.",
                     Application.ProductName,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Exclamation);
@@ -224,6 +231,37 @@ namespace AgGrade.Controls
 
             TInput.Value = (int)CurrentEquipmentSettings!.TractorWidthMm;
             DInput.Value = 100;
+
+            SavedLeftOffsetMm = CurrentEquipmentSettings.TractorAntennaLeftOffsetMm;
+            SavedForwardOffsetMm = CurrentEquipmentSettings.TractorAntennaForwardOffsetMm;
+            CalibrationCompleted = false;
+
+            // Controller firmware applies antenna offset to outgoing GGA; calibration needs raw antenna positions.
+            SendTractorAntennaOffsetsToController(0, 0);
+            Controller?.ResetTractorGnssQualityMonitor();
+        }
+
+        /// <summary>
+        /// Called when wizard stops being shown
+        /// </summary>
+        public override void Deactivated()
+        {
+            if (!CalibrationCompleted)
+                SendTractorAntennaOffsetsToController(SavedLeftOffsetMm, SavedForwardOffsetMm);
+        }
+
+        /// <summary>
+        /// Sends tractor antenna offsets to the controller firmware.
+        /// </summary>
+        private void SendTractorAntennaOffsetsToController(int leftOffsetMm, int forwardOffsetMm)
+        {
+            if (Controller == null || CurrentEquipmentSettings == null)
+                return;
+
+            Controller.SetTractorAntennaLocation(
+                CurrentEquipmentSettings.TractorAntennaHeightMm,
+                leftOffsetMm,
+                forwardOffsetMm);
         }
     }
 }

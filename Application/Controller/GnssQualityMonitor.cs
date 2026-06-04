@@ -75,6 +75,7 @@ namespace AgGrade.Controller
     {
         private readonly GnssQualityThresholds _thresholds;
         private readonly List<PositionSample> _samples = new List<PositionSample>();
+        private readonly object _samplesLock = new object();
 
         private DateTime? _lastValidFixTime;
         private DateTime? _rtkFixedSince;
@@ -165,7 +166,12 @@ namespace AgGrade.Controller
         /// </summary>
         public void Reset()
         {
-            _samples.Clear();
+            lock (_samplesLock)
+            {
+                _samples.Clear();
+                RecomputeJitter();
+            }
+
             _lastValidFixTime = null;
             _rtkFixedSince = null;
             _parkedSince = null;
@@ -177,7 +183,6 @@ namespace AgGrade.Controller
             RtkFixedDwellSeconds = 0.0;
             ParkedDwellSeconds = 0.0;
             StableDwellSeconds = 0.0;
-            RtkSampleCount = 0;
             SetState(GnssQualityState.NoData);
         }
 
@@ -199,8 +204,12 @@ namespace AgGrade.Controller
             if (!fix.IsValid)
             {
                 ClearContinuityTimers();
-                _samples.Clear();
-                RecomputeJitter();
+                lock (_samplesLock)
+                {
+                    _samples.Clear();
+                    RecomputeJitter();
+                }
+
                 UpdateDwellSeconds(now);
                 SetState(GnssQualityState.NoFix);
                 return;
@@ -217,8 +226,12 @@ namespace AgGrade.Controller
             {
                 _rtkFixedSince = null;
                 _stableSince = null;
-                PruneSamples(now);
-                RecomputeJitter();
+                lock (_samplesLock)
+                {
+                    PruneSamples(now);
+                    RecomputeJitter();
+                }
+
                 UpdateDwellSeconds(now);
                 SetState(GnssQualityState.NoRtk);
                 return;
@@ -227,15 +240,18 @@ namespace AgGrade.Controller
             if (_rtkFixedSince == null)
                 _rtkFixedSince = now;
 
-            _samples.Add(new PositionSample
+            lock (_samplesLock)
             {
-                Time = now,
-                Latitude = fix.Latitude,
-                Longitude = fix.Longitude,
-            });
+                _samples.Add(new PositionSample
+                {
+                    Time = now,
+                    Latitude = fix.Latitude,
+                    Longitude = fix.Longitude,
+                });
 
-            PruneSamples(now);
-            RecomputeJitter();
+                PruneSamples(now);
+                RecomputeJitter();
+            }
             UpdateParkedDwell(now);
             UpdateStableDwell(now);
             UpdateDwellSeconds(now);
@@ -273,12 +289,20 @@ namespace AgGrade.Controller
             if (!IsReadyToCapture || RtkSampleCount == 0)
                 return false;
 
-            List<double> lats = new List<double>(RtkSampleCount);
-            List<double> lons = new List<double>(RtkSampleCount);
-            foreach (PositionSample sample in _samples)
+            List<double> lats;
+            List<double> lons;
+            lock (_samplesLock)
             {
-                lats.Add(sample.Latitude);
-                lons.Add(sample.Longitude);
+                if (_samples.Count == 0)
+                    return false;
+
+                lats = new List<double>(_samples.Count);
+                lons = new List<double>(_samples.Count);
+                foreach (PositionSample sample in _samples)
+                {
+                    lats.Add(sample.Latitude);
+                    lons.Add(sample.Longitude);
+                }
             }
 
             latitude = Median(lats);
